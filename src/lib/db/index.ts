@@ -3,7 +3,8 @@ import { sql } from 'drizzle-orm';
 import * as schema from './schema';
 
 function getDbUrl() {
-  const dbUrl = process.env.DATABASE_URL!;
+  const dbUrl = process.env.DATABASE_URL ?? '';
+  if (!dbUrl) return dbUrl;
   const separator = dbUrl.includes('?') ? '&' : '?';
   return `${dbUrl}${separator}sslmode=no-verify`;
 }
@@ -13,15 +14,23 @@ const globalForDb = globalThis as unknown as {
   migrated: boolean;
 };
 
-if (!globalForDb.db) {
-  globalForDb.db = drizzle(getDbUrl(), { schema });
+function getDb() {
+  if (!globalForDb.db) {
+    globalForDb.db = drizzle(getDbUrl(), { schema });
+  }
+  return globalForDb.db;
 }
 
-export const db = globalForDb.db;
+export const db = new Proxy({} as ReturnType<typeof drizzle<typeof schema>>, {
+  get(_, prop) {
+    return (getDb() as any)[prop];
+  },
+});
 
 export async function runMigrations() {
   if (globalForDb.migrated) return;
-  await db.execute(sql`
+  const d = getDb();
+  await d.execute(sql`
     CREATE TABLE IF NOT EXISTS "assessments" (
       "id" text PRIMARY KEY NOT NULL,
       "client_name" text,
