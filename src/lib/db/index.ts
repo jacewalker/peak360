@@ -3,10 +3,7 @@ import { sql } from 'drizzle-orm';
 import * as schema from './schema';
 
 function getDbUrl() {
-  const dbUrl = process.env.DATABASE_URL ?? '';
-  if (!dbUrl) return dbUrl;
-  const separator = dbUrl.includes('?') ? '&' : '?';
-  return `${dbUrl}${separator}sslmode=no-verify`;
+  return process.env.DATABASE_URL ?? '';
 }
 
 const globalForDb = globalThis as unknown as {
