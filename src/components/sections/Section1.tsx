@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect } from 'react';
 import type { SectionProps } from '@/app/assessment/[id]/section/[num]/page';
 import SectionHeader from '@/components/ui/SectionHeader';
 import FormField from '@/components/forms/FormField';
@@ -16,6 +17,12 @@ export default function Section1({ data, onChange }: SectionProps) {
     if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
     onChange('clientAge', age);
   };
+
+  useEffect(() => {
+    if (data.clientDOB && !data.clientAge) {
+      calculateAge(data.clientDOB as string);
+    }
+  }, [data.clientDOB]);
 
   return (
     <div className="space-y-6">
