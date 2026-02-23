@@ -53,7 +53,7 @@ export default function Section6({ data, onChange, assessmentId }: SectionProps)
         onFileSelect={handleEvoltImport}
         isProcessing={isProcessing}
         status={uploadStatus}
-        accept=".csv,.xlsx,.xls,.pdf,.txt"
+        accept=".csv,.xlsx,.xls,.pdf,.txt,.png,.jpg,.jpeg"
       />
 
       <div className="bg-white rounded-xl border border-border p-6 space-y-6">
