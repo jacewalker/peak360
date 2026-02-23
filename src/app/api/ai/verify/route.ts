@@ -5,7 +5,9 @@ import { db } from '@/lib/db';
 import { uploadedFiles } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAI() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 export async function POST(request: Request) {
   try {
@@ -16,7 +18,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: 'No fields to verify' }, { status: 400 });
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         { role: 'system', content: VERIFICATION_SYSTEM_PROMPT },

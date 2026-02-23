@@ -5,7 +5,9 @@ import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { uploadedFiles } from '@/lib/db/schema';
 
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+function getOpenAI() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 export async function POST(request: Request) {
   try {
@@ -56,7 +58,7 @@ export async function POST(request: Request) {
       ];
     }
 
-    const response = await openai.chat.completions.create({
+    const response = await getOpenAI().chat.completions.create({
       model: 'gpt-4o',
       messages: [
         { role: 'system', content: EXTRACTION_SYSTEM_PROMPT },
