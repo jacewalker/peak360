@@ -1,20 +1,12 @@
-import { drizzle } from 'drizzle-orm/better-sqlite3';
-import Database from 'better-sqlite3';
+import { drizzle } from 'drizzle-orm/node-postgres';
 import * as schema from './schema';
 
 const globalForDb = globalThis as unknown as {
   db: ReturnType<typeof drizzle<typeof schema>> | undefined;
-  sqlite: Database.Database | undefined;
 };
 
-if (!globalForDb.sqlite) {
-  globalForDb.sqlite = new Database('peak360.db');
-  globalForDb.sqlite.pragma('journal_mode = WAL');
-  globalForDb.sqlite.pragma('foreign_keys = ON');
-}
-
 if (!globalForDb.db) {
-  globalForDb.db = drizzle(globalForDb.sqlite, { schema });
+  globalForDb.db = drizzle(process.env.DATABASE_URL!, { schema });
 }
 
 export const db = globalForDb.db;

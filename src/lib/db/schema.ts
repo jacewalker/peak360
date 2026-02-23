@@ -1,6 +1,6 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { pgTable, text, integer, serial, jsonb } from 'drizzle-orm/pg-core';
 
-export const assessments = sqliteTable('assessments', {
+export const assessments = pgTable('assessments', {
   id: text('id').primaryKey(),
   clientName: text('client_name'),
   clientEmail: text('client_email'),
@@ -13,16 +13,16 @@ export const assessments = sqliteTable('assessments', {
   updatedAt: text('updated_at').notNull(),
 });
 
-export const assessmentSections = sqliteTable('assessment_sections', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+export const assessmentSections = pgTable('assessment_sections', {
+  id: serial('id').primaryKey(),
   assessmentId: text('assessment_id').notNull().references(() => assessments.id, { onDelete: 'cascade' }),
   sectionNumber: integer('section_number').notNull(),
-  data: text('data', { mode: 'json' }),
+  data: jsonb('data'),
   completedAt: text('completed_at'),
 });
 
-export const signatures = sqliteTable('signatures', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+export const signatures = pgTable('signatures', {
+  id: serial('id').primaryKey(),
   assessmentId: text('assessment_id').notNull().references(() => assessments.id, { onDelete: 'cascade' }),
   type: text('type').notNull(), // client | coach
   signerName: text('signer_name'),
@@ -30,13 +30,13 @@ export const signatures = sqliteTable('signatures', {
   signedDate: text('signed_date'),
 });
 
-export const uploadedFiles = sqliteTable('uploaded_files', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
+export const uploadedFiles = pgTable('uploaded_files', {
+  id: serial('id').primaryKey(),
   assessmentId: text('assessment_id').notNull().references(() => assessments.id, { onDelete: 'cascade' }),
   sectionNumber: integer('section_number').notNull(),
   fileName: text('file_name'),
-  extractedData: text('extracted_data', { mode: 'json' }),
-  verificationResult: text('verification_result', { mode: 'json' }),
+  extractedData: jsonb('extracted_data'),
+  verificationResult: jsonb('verification_result'),
   status: text('status').default('pending'), // pending | extracting | verifying | completed | failed
   createdAt: text('created_at').notNull(),
 });
