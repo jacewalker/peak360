@@ -36,6 +36,21 @@ yarn-error.log*
 # vercel
 .vercel
 
+# SQLite database files
+*.db
+*.db-shm
+*.db-wal
+
+# Dev artifacts
+backup/
+.playwright-mcp/
+test_imports/
+*.png
+!public/**/*.png
+
+# Misc
+Latest Peak360 file.html
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

@@ -1,64 +1,130 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
+import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
+import Header from '@/components/layout/Header';
+import type { Assessment } from '@/types/assessment';
+
+export default function HomePage() {
+  const router = useRouter();
+  const [assessments, setAssessments] = useState<Assessment[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/assessments')
+      .then((r) => r.json())
+      .then((res) => {
+        setAssessments(res.data || []);
+        setLoading(false);
+      })
+      .catch(() => setLoading(false));
+  }, []);
+
+  const createAssessment = async () => {
+    const res = await fetch('/api/assessments', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    });
+    const { data } = await res.json();
+    router.push(`/assessment/${data.id}/section/1`);
+  };
+
+  const deleteAssessment = async (id: string) => {
+    await fetch(`/api/assessments/${id}`, { method: 'DELETE' });
+    setAssessments((prev) => prev.filter((a) => a.id !== id));
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <div className="min-h-screen">
+      <Header />
+
+      {/* Hero section */}
+      <div className="bg-gradient-to-b from-navy-dark to-navy py-10 sm:py-16 text-white">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+          <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-sm mb-6 backdrop-blur-sm">
+            <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
+            <span className="text-white/80">11-Section Comprehensive Evaluation</span>
+          </div>
+          <h2 className="text-3xl sm:text-4xl font-bold mb-4 tracking-tight">
+            Complete Longevity Assessment
+          </h2>
+          <p className="text-white/70 max-w-xl mx-auto text-base sm:text-lg leading-relaxed mb-8">
+            Body composition, cardiovascular fitness, strength, mobility, biomarkers &mdash; all in one place.
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+          <button
+            onClick={createAssessment}
+            className="px-8 py-3.5 bg-gold text-navy font-bold rounded-lg hover:bg-gold-light transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-base"
           >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            + New Assessment
+          </button>
         </div>
+      </div>
+
+      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+        {loading ? (
+          <div className="text-center text-muted py-12">
+            <div className="w-6 h-6 border-2 border-navy border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            Loading assessments...
+          </div>
+        ) : assessments.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="w-16 h-16 rounded-full bg-surface-alt flex items-center justify-center mx-auto mb-4">
+              <span className="text-2xl text-muted">&#9776;</span>
+            </div>
+            <p className="text-lg text-foreground mb-1">No assessments yet</p>
+            <p className="text-sm text-muted">Click &quot;New Assessment&quot; above to get started.</p>
+          </div>
+        ) : (
+          <div className="space-y-3">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-navy">Previous Assessments</h3>
+              <span className="text-sm text-muted">{assessments.length} total</span>
+            </div>
+            {assessments.map((a) => (
+              <div
+                key={a.id}
+                className="bg-white rounded-xl border border-border p-4 sm:p-5 flex items-center justify-between hover:shadow-md hover:border-gold/30 transition-all cursor-pointer group"
+                onClick={() =>
+                  router.push(`/assessment/${a.id}/section/${a.currentSection}`)
+                }
+              >
+                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                  <div className="w-10 h-10 rounded-full bg-navy/5 flex items-center justify-center text-navy font-bold text-sm group-hover:bg-gold/10 transition-colors shrink-0">
+                    {(a.clientName || 'U')[0].toUpperCase()}
+                  </div>
+                  <div className="min-w-0">
+                    <div className="font-medium text-navy group-hover:text-navy-light transition-colors truncate">
+                      {a.clientName || 'Unnamed Client'}
+                    </div>
+                    <div className="text-sm text-muted flex items-center gap-1 sm:gap-2 flex-wrap">
+                      <span>{a.assessmentDate || a.createdAt.split('T')[0]}</span>
+                      <span className="text-border">&bull;</span>
+                      <span>Section {a.currentSection}/11</span>
+                      <span className="text-border hidden sm:inline">&bull;</span>
+                      <span
+                        className={`hidden sm:inline ${
+                          a.status === 'completed' ? 'text-rating-elite' : 'text-gold'
+                        }`}
+                      >
+                        {a.status === 'completed' ? 'Completed' : 'In Progress'}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (confirm('Delete this assessment?')) deleteAssessment(a.id);
+                  }}
+                  className="px-3 py-1.5 text-sm text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                >
+                  Delete
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
       </main>
     </div>
   );
