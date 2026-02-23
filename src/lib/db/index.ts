@@ -6,7 +6,9 @@ const globalForDb = globalThis as unknown as {
 };
 
 if (!globalForDb.db) {
-  globalForDb.db = drizzle(process.env.DATABASE_URL!, { schema });
+  const url = new URL(process.env.DATABASE_URL!);
+  url.searchParams.set('sslmode', 'no-verify');
+  globalForDb.db = drizzle(url.toString(), { schema });
 }
 
 export const db = globalForDb.db;
