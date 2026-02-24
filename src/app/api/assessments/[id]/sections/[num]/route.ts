@@ -45,7 +45,10 @@ export async function PUT(
   if (existing) {
     await db
       .update(assessmentSections)
-      .set({ data: body.data, completedAt: body.completed ? now : existing.completedAt })
+      .set({
+        data: body.data,
+        completedAt: body.completed === true ? now : body.completed === false ? null : existing.completedAt,
+      })
       .where(eq(assessmentSections.id, existing.id));
   } else {
     await db.insert(assessmentSections).values({

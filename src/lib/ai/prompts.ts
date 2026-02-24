@@ -58,8 +58,68 @@ For body composition fields:
 - visceralFatRating: rating number
 - waistToHipRatio: ratio
 - bmr: kcal/day (Basal Metabolic Rate)
+- bwi: score out of 10 (Bio Wellness Index)
 
 Extract ONLY values that are clearly present in the document. Do not guess or infer missing values.
+
+Additionally, include these metadata fields in your JSON response:
+- "documentType": Classify the document — "blood_test" if it contains lab/blood biomarker results, "body_composition" if it contains body scan/composition data (e.g. Evolt 360, DEXA, InBody), "other" if it's a different medical document, "unknown" if unclear.
+- "quality": Assess the document quality — "good" if values are clearly readable, "poor" if the image is blurry, low-resolution, partially cut off, or values are hard to read, "unreadable" if you cannot read most values.
+- "qualityNotes": Optional string explaining quality issues (only needed if quality is "poor" or "unreadable").
+
+Full response structure:
+{
+  "fields": { ... },
+  "unmapped": [ ... ],
+  "documentType": "blood_test" | "body_composition" | "other" | "unknown",
+  "quality": "good" | "poor" | "unreadable",
+  "qualityNotes": "optional explanation"
+}
+
+Return valid JSON only, no markdown formatting.`;
+
+export const EVOLT_EXTRACTION_PROMPT = `You are extracting body composition data from an Evolt 360 body scan report.
+
+The Evolt 360 report displays numbered items. Extract ONLY values that are clearly visible. Map them to the following field IDs:
+
+- Item #1 "LEAN BODY MASS" → leanMass (kg) — this is total lean mass including organs, bones, water
+- Item #2 "SKELETAL MUSCLE MASS" → skeletalMuscleMass (kg) — this is muscle mass only
+- Item #6 "BODY FAT MASS" → fatMass (kg) — total fat mass in kg
+- Item #9 "VISCERAL FAT LEVEL" or "VISCERAL FAT RATING" → visceralFatRating (number, 1-59 scale)
+- Item #10 "TOTAL BODY FAT %" → bodyFatPercentage (%)
+- Item #17 "BWI" or "BIO WELLNESS INDEX" → bwi (score out of 10)
+- Item #20 "WAIST HIP RATIO" → waistToHipRatio (ratio, e.g. 0.88)
+- "BMR" or "BASAL METABOLIC RATE" → bmr (kcal/day)
+
+IMPORTANT distinctions:
+- "LEAN BODY MASS" (leanMass) is NOT the same as "SKELETAL MUSCLE MASS" (skeletalMuscleMass). Extract BOTH.
+- "BODY FAT MASS" in kg (fatMass) is NOT the same as "TOTAL BODY FAT %" (bodyFatPercentage). Extract BOTH.
+- "VISCERAL FAT LEVEL" is the rating number (visceralFatRating), not "VISCERAL FAT AREA" in cm².
+
+Return a JSON object with this structure:
+{
+  "fields": {
+    "fieldId": { "value": <number>, "unit": "<unit>", "rawText": "<original text from document>" }
+  },
+  "unmapped": ["<any values you found but couldn't map to a known field>"]
+}
+
+Extract ONLY values clearly present in the document. Do not guess or infer missing values.
+
+Additionally, include these metadata fields in your JSON response:
+- "documentType": Classify the document — "blood_test" if it contains lab/blood biomarker results, "body_composition" if it contains body scan/composition data (e.g. Evolt 360, DEXA, InBody), "other" if it's a different medical document, "unknown" if unclear.
+- "quality": Assess the document quality — "good" if values are clearly readable, "poor" if the image is blurry, low-resolution, partially cut off, or values are hard to read, "unreadable" if you cannot read most values.
+- "qualityNotes": Optional string explaining quality issues (only needed if quality is "poor" or "unreadable").
+
+Full response structure:
+{
+  "fields": { ... },
+  "unmapped": [ ... ],
+  "documentType": "blood_test" | "body_composition" | "other" | "unknown",
+  "quality": "good" | "poor" | "unreadable",
+  "qualityNotes": "optional explanation"
+}
+
 Return valid JSON only, no markdown formatting.`;
 
 export const VERIFICATION_SYSTEM_PROMPT = `You are a medical data verification assistant. Review extracted lab values for accuracy and plausibility.

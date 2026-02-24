@@ -7,15 +7,22 @@ import FormField from '@/components/forms/FormField';
 import FormRow from '@/components/forms/FormRow';
 import TestCategory from '@/components/ui/TestCategory';
 import FileUploadZone from '@/components/forms/FileUploadZone';
+import type { ProcessingStage } from '@/components/forms/FileUploadZone';
+import ExtractedValuesPanel from '@/components/forms/ExtractedValuesPanel';
+
+const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
 export default function Section5({ data, onChange, assessmentId }: SectionProps) {
-  const [uploadStatus, setUploadStatus] = useState('');
-  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingStage, setProcessingStage] = useState<ProcessingStage>(null);
+  const [doneMessage, setDoneMessage] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [warningMessage, setWarningMessage] = useState('');
   const [extractedFields, setExtractedFields] = useState<Record<string, { value: string | number; confidence: string }> | null>(null);
 
   const handleFileUpload = async (file: File) => {
-    setIsProcessing(true);
-    setUploadStatus('Uploading and extracting data...');
+    setProcessingStage('uploading');
+    setExtractedFields(null);
+    setWarningMessage('');
 
     try {
       const formData = new FormData();
@@ -23,11 +30,43 @@ export default function Section5({ data, onChange, assessmentId }: SectionProps)
       formData.append('assessmentId', assessmentId);
       formData.append('sectionNumber', '5');
 
-      const res = await fetch('/api/ai/extract', { method: 'POST', body: formData });
-      const { data: extraction } = await res.json();
+      // Start API call in background
+      const extractPromise = fetch('/api/ai/extract', { method: 'POST', body: formData })
+        .then(res => res.json());
 
-      if (extraction?.fields) {
-        setUploadStatus('Verifying extracted data...');
+      // Advance stages on timer while API works
+      await delay(1000);
+      setProcessingStage('reading');
+      await delay(1500);
+      setProcessingStage('interpreting');
+
+      // Wait for extraction result
+      const result = await extractPromise;
+      const extraction = result.data;
+      const warnings: { type: string; message: string }[] = result.warnings || [];
+
+      // Check for blocking warnings (unreadable / no data with no fields)
+      const unreadable = warnings.find(w => w.type === 'unreadable');
+      const noData = warnings.find(w => w.type === 'no_data');
+
+      if (unreadable) {
+        setErrorMessage(unreadable.message);
+        setProcessingStage('error');
+        await delay(4000);
+        setProcessingStage(null);
+        return;
+      }
+
+      if (noData) {
+        setErrorMessage(noData.message);
+        setProcessingStage('error');
+        await delay(4000);
+        setProcessingStage(null);
+        return;
+      }
+
+      if (extraction?.fields && Object.keys(extraction.fields).length > 0) {
+        // Verification step (still in 'interpreting' stage)
         const verifyRes = await fetch('/api/ai/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -42,22 +81,44 @@ export default function Section5({ data, onChange, assessmentId }: SectionProps)
           merged[key] = { value: v.value, confidence: conf };
         }
         setExtractedFields(merged);
-        setUploadStatus('Review extracted values below');
+
+        // Check for non-blocking warnings (wrong document, low quality)
+        const nonBlockingWarning = warnings.find(w => w.type === 'wrong_document' || w.type === 'low_quality');
+        if (nonBlockingWarning) {
+          setWarningMessage(nonBlockingWarning.message);
+          setProcessingStage('warning');
+          // Warning stays until user uploads a new file — no auto-dismiss
+          return;
+        }
+
+        const count = Object.keys(merged).length;
+        setDoneMessage(`${count} value${count !== 1 ? 's' : ''} extracted and verified`);
+        setProcessingStage('done');
+        await delay(10000);
+        setProcessingStage(null);
+      } else {
+        // Use the most descriptive warning message from the API if available
+        const bestMessage = warnings.length > 0
+          ? warnings.map((w: { message: string }) => w.message).join(' ')
+          : 'No values could be extracted from this document.';
+        setErrorMessage(bestMessage);
+        setProcessingStage('error');
+        await delay(4000);
+        setProcessingStage(null);
       }
     } catch {
-      setUploadStatus('Extraction failed. Please enter values manually.');
-    } finally {
-      setIsProcessing(false);
+      setErrorMessage('Extraction failed. Please enter values manually.');
+      setProcessingStage('error');
+      await delay(4000);
+      setProcessingStage(null);
     }
   };
 
-  const acceptAll = () => {
-    if (!extractedFields) return;
-    for (const [key, val] of Object.entries(extractedFields)) {
+  const acceptAll = (finalFields: Record<string, { value: string | number; confidence: string }>) => {
+    for (const [key, val] of Object.entries(finalFields)) {
       onChange(key, val.value);
     }
     setExtractedFields(null);
-    setUploadStatus('All values applied');
   };
 
   const n = (field: string) => (v: string) => onChange(field, v === '' ? null : Number(v));
@@ -73,30 +134,18 @@ export default function Section5({ data, onChange, assessmentId }: SectionProps)
       <FileUploadZone
         label="Import Lab Results"
         onFileSelect={handleFileUpload}
-        isProcessing={isProcessing}
-        status={uploadStatus}
+        processingStage={processingStage}
+        doneMessage={doneMessage}
+        errorMessage={errorMessage}
+        warningMessage={warningMessage}
       />
 
       {extractedFields && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-3">
-          <div className="flex items-center justify-between">
-            <h4 className="font-semibold text-navy">Extracted Values</h4>
-            <button onClick={acceptAll} className="px-4 py-1.5 bg-navy text-white text-sm rounded-lg hover:bg-navy-light transition-colors">
-              Accept All
-            </button>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 text-sm">
-            {Object.entries(extractedFields).map(([key, val]) => (
-              <div key={key} className="flex items-center justify-between bg-white rounded p-2 border">
-                <span className="text-muted">{key}</span>
-                <div className="flex items-center gap-2">
-                  <span className="font-medium">{val.value}</span>
-                  <span className={`w-2 h-2 rounded-full ${val.confidence === 'high' ? 'bg-green-500' : val.confidence === 'medium' ? 'bg-yellow-500' : 'bg-red-500'}`} />
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
+        <ExtractedValuesPanel
+          fields={extractedFields}
+          onAcceptAll={acceptAll}
+          onDismiss={() => setExtractedFields(null)}
+        />
       )}
 
       <div className="bg-white rounded-xl border border-border p-6 space-y-8">

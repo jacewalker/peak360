@@ -6,6 +6,7 @@ import ProgressBar from '@/components/layout/ProgressBar';
 import NavigationButtons from '@/components/layout/NavigationButtons';
 import { useAssessmentStore } from '@/lib/store/assessment-store';
 import { TOTAL_SECTIONS, type SectionNumber, type SectionData } from '@/types/assessment';
+import { isSectionComplete } from '@/lib/section-completion';
 import Section1 from '@/components/sections/Section1';
 import Section2 from '@/components/sections/Section2';
 import Section3 from '@/components/sections/Section3';
@@ -47,16 +48,21 @@ export default function SectionPage() {
   const [loaded, setLoaded] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Load section data from API
+  // Load section data from API + completed sections
   useEffect(() => {
     store.setAssessmentId(id);
     store.setCurrentSection(num);
 
-    fetch(`/api/assessments/${id}/sections/${num}`)
-      .then((r) => r.json())
-      .then(({ data }) => {
-        if (data) {
-          store.setSectionData(num, data as SectionData);
+    Promise.all([
+      fetch(`/api/assessments/${id}/sections/${num}`).then((r) => r.json()),
+      fetch(`/api/assessments/${id}`).then((r) => r.json()),
+    ])
+      .then(([sectionRes, assessmentRes]) => {
+        if (sectionRes.data) {
+          store.setSectionData(num, sectionRes.data as SectionData);
+        }
+        if (assessmentRes.completedSections) {
+          store.setCompletedSections(assessmentRes.completedSections as SectionNumber[]);
         }
         store.markClean();
         setLoaded(true);
@@ -66,16 +72,28 @@ export default function SectionPage() {
   }, [id, num]);
 
   // Save section data to API
-  const saveSection = useCallback(async () => {
+  const saveSection = useCallback(async (checkCompletion = false) => {
     const sectionData = store.sectionData[num];
     if (!sectionData) return;
+
+    const completed = checkCompletion
+      ? isSectionComplete(num, sectionData as unknown as Record<string, unknown>)
+      : undefined;
+
+    if (checkCompletion) {
+      if (completed) {
+        store.markSectionCompleted(num);
+      } else {
+        store.markSectionIncomplete(num);
+      }
+    }
 
     store.setIsSaving(true);
     try {
       await fetch(`/api/assessments/${id}/sections/${num}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ data: sectionData }),
+        body: JSON.stringify({ data: sectionData, completed }),
       });
       store.setLastSaved(new Date().toLocaleTimeString());
     } finally {
@@ -119,7 +137,8 @@ export default function SectionPage() {
 
   const navigate = useCallback(
     async (direction: 'prev' | 'next') => {
-      await saveSection();
+      // Check completion when navigating away from a section
+      await saveSection(true);
       const target = direction === 'next' ? num + 1 : num - 1;
       if (target >= 1 && target <= TOTAL_SECTIONS) {
         router.push(`/assessment/${id}/section/${target}`);
@@ -127,6 +146,18 @@ export default function SectionPage() {
     },
     [id, num, router, saveSection]
   );
+
+  const handleSaveExit = useCallback(async () => {
+    await saveSection();
+    router.push('/');
+  }, [router, saveSection]);
+
+  const handleCancel = useCallback(() => {
+    if (window.confirm('Discard all unsaved changes and return to home?')) {
+      store.markClean();
+      router.push('/');
+    }
+  }, [router, store]);
 
   if (!loaded) {
     return (
@@ -143,17 +174,23 @@ export default function SectionPage() {
   if (num === 11) {
     return (
       <>
-        <ProgressBar currentSection={num} />
+        <div className="no-print">
+          <ProgressBar currentSection={num} assessmentId={id} completedSections={store.completedSections} />
+        </div>
         <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
           <Section11 assessmentId={id} />
         </main>
-        <NavigationButtons
-          currentSection={num}
-          onPrev={() => navigate('prev')}
-          onNext={() => navigate('next')}
-          isSaving={store.isSaving}
-          lastSaved={store.lastSaved}
-        />
+        <div className="no-print">
+          <NavigationButtons
+            currentSection={num}
+            onPrev={() => navigate('prev')}
+            onNext={() => navigate('next')}
+            onSaveExit={handleSaveExit}
+            onCancel={handleCancel}
+            isSaving={store.isSaving}
+            lastSaved={store.lastSaved}
+          />
+        </div>
       </>
     );
   }
@@ -163,7 +200,7 @@ export default function SectionPage() {
 
   return (
     <>
-      <ProgressBar currentSection={num} />
+      <ProgressBar currentSection={num} assessmentId={id} completedSections={store.completedSections} />
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
         {SectionComponent && (
           <SectionComponent data={sectionData} onChange={handleChange} assessmentId={id} />
@@ -173,6 +210,8 @@ export default function SectionPage() {
         currentSection={num}
         onPrev={() => navigate('prev')}
         onNext={() => navigate('next')}
+        onSaveExit={handleSaveExit}
+        onCancel={handleCancel}
         isSaving={store.isSaving}
         lastSaved={store.lastSaved}
       />

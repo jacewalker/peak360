@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import type { Assessment } from '@/types/assessment';
@@ -9,6 +9,7 @@ export default function HomePage() {
   const router = useRouter();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState('');
 
   useEffect(() => {
     fetch('/api/assessments')
@@ -34,6 +35,17 @@ export default function HomePage() {
     await fetch(`/api/assessments/${id}`, { method: 'DELETE' });
     setAssessments((prev) => prev.filter((a) => a.id !== id));
   };
+
+  const completedCount = assessments.filter((a) => a.status === 'completed').length;
+  const inProgressCount = assessments.filter((a) => a.status !== 'completed').length;
+
+  const filtered = useMemo(() => {
+    if (!search.trim()) return assessments;
+    const q = search.toLowerCase();
+    return assessments.filter((a) =>
+      (a.clientName || '').toLowerCase().includes(q)
+    );
+  }, [assessments, search]);
 
   return (
     <div className="min-h-screen">
@@ -76,53 +88,95 @@ export default function HomePage() {
             <p className="text-sm text-muted">Click &quot;New Assessment&quot; above to get started.</p>
           </div>
         ) : (
-          <div className="space-y-3">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-navy">Previous Assessments</h3>
-              <span className="text-sm text-muted">{assessments.length} total</span>
-            </div>
-            {assessments.map((a) => (
-              <div
-                key={a.id}
-                className="bg-white rounded-xl border border-border p-4 sm:p-5 flex items-center justify-between hover:shadow-md hover:border-gold/30 transition-all cursor-pointer group"
-                onClick={() =>
-                  router.push(`/assessment/${a.id}/section/${a.currentSection}`)
-                }
-              >
-                <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                  <div className="w-10 h-10 rounded-full bg-navy/5 flex items-center justify-center text-navy font-bold text-sm group-hover:bg-gold/10 transition-colors shrink-0">
-                    {(a.clientName || 'U')[0].toUpperCase()}
-                  </div>
-                  <div className="min-w-0">
-                    <div className="font-medium text-navy group-hover:text-navy-light transition-colors truncate">
-                      {a.clientName || 'Unnamed Client'}
-                    </div>
-                    <div className="text-sm text-muted flex items-center gap-1 sm:gap-2 flex-wrap">
-                      <span>{a.assessmentDate || a.createdAt.split('T')[0]}</span>
-                      <span className="text-border">&bull;</span>
-                      <span>Section {a.currentSection}/11</span>
-                      <span className="text-border hidden sm:inline">&bull;</span>
-                      <span
-                        className={`hidden sm:inline ${
-                          a.status === 'completed' ? 'text-rating-elite' : 'text-gold'
-                        }`}
-                      >
-                        {a.status === 'completed' ? 'Completed' : 'In Progress'}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    if (confirm('Delete this assessment?')) deleteAssessment(a.id);
-                  }}
-                  className="px-3 py-1.5 text-sm text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 shrink-0"
-                >
-                  Delete
-                </button>
+          <div className="space-y-5">
+            {/* Metrics bar */}
+            <div className="grid grid-cols-3 gap-3">
+              <div className="bg-white rounded-xl border border-border p-4 text-center">
+                <p className="text-2xl font-bold text-navy">{assessments.length}</p>
+                <p className="text-xs text-muted font-medium mt-0.5">Total</p>
               </div>
-            ))}
+              <div className="bg-white rounded-xl border border-border p-4 text-center">
+                <p className="text-2xl font-bold text-emerald-600">{completedCount}</p>
+                <p className="text-xs text-muted font-medium mt-0.5">Completed</p>
+              </div>
+              <div className="bg-white rounded-xl border border-border p-4 text-center">
+                <p className="text-2xl font-bold text-gold">{inProgressCount}</p>
+                <p className="text-xs text-muted font-medium mt-0.5">In Progress</p>
+              </div>
+            </div>
+
+            {/* Search + header */}
+            <div className="flex items-center gap-3">
+              <div className="relative flex-1">
+                <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                </svg>
+                <input
+                  type="text"
+                  placeholder="Search by client name..."
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-border bg-white text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/10 transition-all"
+                />
+              </div>
+              <span className="text-sm text-muted whitespace-nowrap">
+                {filtered.length === assessments.length
+                  ? `${assessments.length} total`
+                  : `${filtered.length} of ${assessments.length}`}
+              </span>
+            </div>
+
+            {/* Assessment list */}
+            {filtered.length === 0 ? (
+              <div className="text-center py-10">
+                <p className="text-sm text-muted">No assessments match &quot;{search}&quot;</p>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {filtered.map((a) => (
+                  <div
+                    key={a.id}
+                    className="bg-white rounded-xl border border-border p-4 sm:p-5 flex items-center justify-between hover:shadow-md hover:border-gold/30 transition-all cursor-pointer group"
+                    onClick={() =>
+                      router.push(`/assessment/${a.id}/section/${a.currentSection}`)
+                    }
+                  >
+                    <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                      <div className="w-10 h-10 rounded-full bg-navy/5 flex items-center justify-center text-navy font-bold text-sm group-hover:bg-gold/10 transition-colors shrink-0">
+                        {(a.clientName || 'U')[0].toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="font-medium text-navy group-hover:text-navy-light transition-colors truncate">
+                          {a.clientName || 'Unnamed Client'}
+                        </div>
+                        <div className="text-sm text-muted flex items-center gap-1 sm:gap-2 flex-wrap">
+                          <span>{a.assessmentDate || a.createdAt.split('T')[0]}</span>
+                          <span className="text-border">&bull;</span>
+                          <span>Section {a.currentSection}/11</span>
+                          <span className="text-border hidden sm:inline">&bull;</span>
+                          <span
+                            className={`hidden sm:inline ${
+                              a.status === 'completed' ? 'text-rating-elite' : 'text-gold'
+                            }`}
+                          >
+                            {a.status === 'completed' ? 'Completed' : 'In Progress'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        if (confirm('Delete this assessment?')) deleteAssessment(a.id);
+                      }}
+                      className="px-3 py-1.5 text-sm text-muted hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                    >
+                      Delete
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </main>
