@@ -86,14 +86,83 @@ input[type="radio"], input[type="checkbox"] {
   .no-print {
     display: none !important;
   }
-  body {
-    background: white;
+
+  @page {
+    size: A4;
+    margin: 12mm 14mm 16mm 14mm;
   }
+
+  html, body {
+    background: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+    font-size: 11px;
+  }
+
   header, footer {
     display: none !important;
   }
+
+  /* ─── Report container ─── */
+  .report-container {
+    max-width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  /* ─── Report header ─── */
+  .report-header {
+    border-radius: 0 !important;
+    margin: -12mm -14mm 0 -14mm !important;
+    padding: 10mm 14mm !important;
+    width: calc(100% + 28mm) !important;
+    break-after: avoid;
+  }
+
+  /* ─── Section breaks ─── */
+  .report-section {
+    break-inside: avoid;
+  }
+
+  .report-category {
+    break-inside: avoid;
+  }
+
+  .report-marker-row {
+    break-inside: avoid;
+  }
+
+  .report-insight-card {
+    break-inside: avoid;
+  }
+
+  .report-insights {
+    break-before: auto;
+  }
+
+  .report-tier-card {
+    break-inside: avoid;
+  }
+
+  /* ─── Clean up visual noise ─── */
+  .report-container * {
+    box-shadow: none !important;
+  }
+
+  .report-tier-pill {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+
+  /* ─── Report footer ─── */
+  .report-footer {
+    position: relative;
+    break-inside: avoid;
+  }
+
+  /* Existing overrides */
   .bg-white {
     box-shadow: none !important;
-    border: 1px solid #e2e8f0 !important;
   }
 }

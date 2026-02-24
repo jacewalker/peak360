@@ -83,6 +83,16 @@ export const normativeData: NormativeData = {
       elite: { min: 21.0, max: 23.99 },
     },
 
+    bwi: {
+      unit: '/10',
+      note: 'Evolt 360 Bio Wellness Index — a composite body composition score.',
+      poor: { min: 0, max: 3.99 },
+      cautious: { min: 4.0, max: 5.99 },
+      normal: { min: 6.0, max: 7.49 },
+      great: { min: 7.5, max: 8.49 },
+      elite: { min: 8.5, max: 10 },
+    },
+
     body_fat_percent: {
       unit: '%',
       note: 'Age + sex bucketed. Lower isn\'t always better; interpret with health/performance goals.',

@@ -26,24 +26,24 @@ describe('Header', () => {
 
 describe('ProgressBar', () => {
   it('shows current section number', () => {
-    render(<ProgressBar currentSection={3} />);
+    render(<ProgressBar assessmentId="test-id" currentSection={3} />);
     expect(screen.getByText('Section 3 of 11')).toBeInTheDocument();
   });
 
   it('shows section title', () => {
-    render(<ProgressBar currentSection={1} />);
+    render(<ProgressBar assessmentId="test-id" currentSection={1} />);
     expect(screen.getByText('Client Information')).toBeInTheDocument();
   });
 
   it('renders all 11 step indicators', () => {
-    render(<ProgressBar currentSection={5} />);
+    render(<ProgressBar assessmentId="test-id" currentSection={5} />);
     for (let i = 1; i <= 11; i++) {
       expect(screen.getByText(String(i))).toBeInTheDocument();
     }
   });
 
   it('shows correct title for each section', () => {
-    render(<ProgressBar currentSection={7} />);
+    render(<ProgressBar assessmentId="test-id" currentSection={7} />);
     expect(screen.getByText('Section 7 of 11')).toBeInTheDocument();
     expect(screen.getByText('Cardiovascular Fitness')).toBeInTheDocument();
   });

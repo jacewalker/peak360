@@ -32,6 +32,7 @@ export interface NormativeData {
   blood_tests: Record<string, SimpleMarker>;
   body_comp: {
     bmi: SimpleMarker;
+    bwi: SimpleMarker;
     body_fat_percent: GenderedAgeMarker;
     waist_to_hip: GenderedMarker;
   };
@@ -51,11 +52,27 @@ export interface RatingResult {
 }
 
 export const TIER_COLORS: Record<RatingTier, string> = {
-  elite: 'text-rating-elite bg-emerald-50 border-emerald-200',
-  great: 'text-rating-great bg-blue-50 border-blue-200',
-  normal: 'text-rating-normal bg-gray-50 border-gray-200',
-  cautious: 'text-rating-cautious bg-amber-50 border-amber-200',
-  poor: 'text-rating-poor bg-red-50 border-red-200',
+  elite: 'text-emerald-700 bg-emerald-100 border-emerald-300',
+  great: 'text-blue-700 bg-blue-100 border-blue-300',
+  normal: 'text-gray-700 bg-gray-100 border-gray-300',
+  cautious: 'text-amber-700 bg-amber-100 border-amber-300',
+  poor: 'text-red-700 bg-red-100 border-red-300',
+};
+
+export const TIER_BG_STRONG: Record<RatingTier, string> = {
+  elite: 'bg-emerald-500 text-white',
+  great: 'bg-blue-500 text-white',
+  normal: 'bg-gray-400 text-white',
+  cautious: 'bg-amber-400 text-white',
+  poor: 'bg-red-500 text-white',
+};
+
+export const TIER_BORDER: Record<RatingTier, string> = {
+  elite: 'border-l-emerald-500',
+  great: 'border-l-blue-500',
+  normal: 'border-l-gray-400',
+  cautious: 'border-l-amber-400',
+  poor: 'border-l-red-500',
 };
 
 export const TIER_LABELS: Record<RatingTier, string> = {
