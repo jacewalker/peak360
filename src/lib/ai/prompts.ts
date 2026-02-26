@@ -1,5 +1,9 @@
 export const EXTRACTION_SYSTEM_PROMPT = `You are a medical lab result extraction assistant. Extract biomarker values from the provided document.
 
+IMPORTANT: This document may span multiple pages. Scan EVERY page thoroughly. Pathology reports often have results spread across many pages with different test panels (lipids, thyroid, full blood count, liver function, kidney function, iron studies, vitamins, hormones, etc.). Do NOT stop after the first page.
+
+Focus on extracting the NUMERIC RESULT VALUES. Ignore reference ranges, methodology notes, specimen details, and collection information. If a value appears on both a summary page and a detail page, use the detail page value.
+
 Return a JSON object with the following structure:
 {
   "fields": {
@@ -44,11 +48,35 @@ Known field IDs and their expected units:
 - rbc: million/mcL (Red Blood Cells)
 - wbc: cells/mcL (White Blood Cells)
 - platelet: cells/mcL (Platelets)
-- apoB: mg/dL (ApoB)
-- lpa: mg/dL (Lp(a))
-- uricAcid: mg/dL
-- magnesium: mg/dL
-- zinc: ug/dL
+- apoB: mg/dL (ApoB, Apolipoprotein B)
+- lpa: mg/dL (Lp(a), Lipoprotein(a))
+- uricAcid: mg/dL (Uric Acid, Urate)
+- magnesium: mg/dL (Magnesium, Mg)
+- zinc: ug/dL (Zinc, Zn)
+- ck: U/L (Creatine Kinase, CK, CPK)
+- tgab: IU/mL (Thyroglobulin Antibodies, TgAb)
+- tpo: IU/mL (Thyroid Peroxidase Antibodies, TPO, Anti-TPO)
+- fsh: mIU/mL (FSH, Follicle Stimulating Hormone)
+- lh: mIU/mL (LH, Luteinizing Hormone)
+- prolactin: ng/mL (Prolactin)
+- progesterone: ng/mL (Progesterone)
+- hematocrit: % (Haematocrit, HCT, Packed Cell Volume)
+- mcv: fL (MCV, Mean Cell Volume)
+- mch: pg (MCH, Mean Cell Haemoglobin)
+- sodium: mmol/L (Na)
+- potassium: mmol/L (K)
+- chloride: mmol/L (Cl)
+- bicarbonate: mmol/L (HCO3, CO2)
+- alp: U/L (ALP, Alkaline Phosphatase)
+- bilirubin: umol/L (Total Bilirubin)
+- albumin: g/L (Albumin)
+- totalProtein: g/L (Total Protein)
+- tibc: ug/dL (TIBC, Total Iron Binding Capacity)
+- transferrinSat: % (Transferrin Saturation)
+- lead: ug/dL (Lead, Pb)
+- mercury: ug/L (Mercury, Hg)
+- arsenic: ug/L (Arsenic, As)
+- cadmium: ug/L (Cadmium, Cd)
 
 For body composition fields:
 - bodyFatPercentage: % (Body Fat)

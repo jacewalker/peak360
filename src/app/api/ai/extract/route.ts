@@ -43,20 +43,32 @@ export async function POST(request: Request) {
     let content: OpenAI.ChatCompletionContentPart[];
 
     if (isImage || isPdf) {
-      // Use vision for images and PDFs
       const buffer = await file.arrayBuffer();
       const base64 = Buffer.from(buffer).toString('base64');
-      const mimeType = isImage
-        ? (file.type || 'image/png')
-        : 'application/pdf';
 
-      content = [
-        { type: 'text', text: userMessage },
-        {
-          type: 'image_url',
-          image_url: { url: `data:${mimeType};base64,${base64}` },
-        },
-      ];
+      if (isPdf) {
+        // PDFs must be sent as file content parts, not image_url
+        content = [
+          { type: 'text', text: userMessage },
+          {
+            type: 'file',
+            file: {
+              filename: file.name,
+              file_data: `data:application/pdf;base64,${base64}`,
+            },
+          } as unknown as OpenAI.ChatCompletionContentPart,
+        ];
+      } else {
+        // Images use image_url
+        const mimeType = file.type || 'image/png';
+        content = [
+          { type: 'text', text: userMessage },
+          {
+            type: 'image_url',
+            image_url: { url: `data:${mimeType};base64,${base64}` },
+          },
+        ];
+      }
     } else {
       // Text-based files (CSV, TXT, etc.)
       const text = await file.text();
