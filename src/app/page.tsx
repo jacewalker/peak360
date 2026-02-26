@@ -1,15 +1,25 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Header from '@/components/layout/Header';
 import type { Assessment } from '@/types/assessment';
+
+interface ImportResult {
+  imported: number;
+  assessments: { sourceId: string; newId: string; clientName: string }[];
+  errors: string[];
+  warnings: string[];
+}
 
 export default function HomePage() {
   const router = useRouter();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [importState, setImportState] = useState<'idle' | 'uploading' | 'done'>('idle');
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     fetch('/api/assessments')
@@ -34,6 +44,26 @@ export default function HomePage() {
   const deleteAssessment = async (id: string) => {
     await fetch(`/api/assessments/${id}`, { method: 'DELETE' });
     setAssessments((prev) => prev.filter((a) => a.id !== id));
+  };
+
+  const handleImport = async (file: File) => {
+    setImportState('uploading');
+    setImportResult(null);
+    const formData = new FormData();
+    formData.append('file', file);
+    try {
+      const res = await fetch('/api/assessments/import', { method: 'POST', body: formData });
+      const json = await res.json();
+      setImportResult(json.data);
+      setImportState('done');
+      // Refresh assessment list
+      const listRes = await fetch('/api/assessments');
+      const listJson = await listRes.json();
+      setAssessments(listJson.data || []);
+    } catch {
+      setImportResult({ imported: 0, assessments: [], errors: ['Upload failed'], warnings: [] });
+      setImportState('done');
+    }
   };
 
   const completedCount = assessments.filter((a) => a.status === 'completed').length;
@@ -104,6 +134,58 @@ export default function HomePage() {
                 <p className="text-xs text-muted font-medium mt-0.5">In Progress</p>
               </div>
             </div>
+
+            {/* Export / Import toolbar */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { window.location.href = '/api/assessments/export'; }}
+                className="px-4 py-2 text-sm font-medium rounded-lg border border-navy/20 text-navy bg-white hover:bg-navy/5 transition-colors"
+              >
+                Export CSV
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importState === 'uploading'}
+                className="px-4 py-2 text-sm font-medium rounded-lg border border-navy/20 text-navy bg-white hover:bg-navy/5 transition-colors disabled:opacity-50"
+              >
+                {importState === 'uploading' ? 'Importing...' : 'Import CSV'}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImport(file);
+                  e.target.value = '';
+                }}
+              />
+            </div>
+
+            {/* Import results */}
+            {importResult && (
+              <div className="bg-white rounded-xl border border-border p-4 text-sm space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-navy">
+                    Imported {importResult.imported} assessment{importResult.imported !== 1 ? 's' : ''}
+                  </span>
+                  <button onClick={() => { setImportResult(null); setImportState('idle'); }} className="text-muted hover:text-foreground text-xs">
+                    Dismiss
+                  </button>
+                </div>
+                {importResult.errors.length > 0 && (
+                  <div className="text-red-600">
+                    {importResult.errors.map((e, i) => <p key={i}>{e}</p>)}
+                  </div>
+                )}
+                {importResult.warnings.length > 0 && (
+                  <div className="text-gold">
+                    {importResult.warnings.map((w, i) => <p key={i}>{w}</p>)}
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Search + header */}
             <div className="flex items-center gap-3">
