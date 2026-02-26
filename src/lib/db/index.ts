@@ -9,8 +9,13 @@ function getDb() {
   if (!globalForDb.db) {
     if (isPostgres) {
       const { drizzle } = require('drizzle-orm/node-postgres');
+      const { Pool } = require('pg');
       const schema = require('./schema');
-      globalForDb.db = drizzle(process.env.DATABASE_URL!, { schema });
+      const pool = new Pool({
+        connectionString: process.env.DATABASE_URL!,
+        ssl: { rejectUnauthorized: false },
+      });
+      globalForDb.db = drizzle(pool, { schema });
     } else {
       const { drizzle } = require('drizzle-orm/better-sqlite3');
       const Database = require('better-sqlite3');
