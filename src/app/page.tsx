@@ -110,12 +110,66 @@ export default function HomePage() {
             Loading assessments...
           </div>
         ) : assessments.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-full bg-surface-alt flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl text-muted">&#9776;</span>
+          <div className="space-y-5">
+            {/* Export / Import toolbar */}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => { window.location.href = '/api/assessments/export'; }}
+                className="px-4 py-2 text-sm font-medium rounded-lg border border-navy/20 text-navy bg-white hover:bg-navy/5 transition-colors"
+              >
+                Export CSV
+              </button>
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={importState === 'uploading'}
+                className="px-4 py-2 text-sm font-medium rounded-lg border border-navy/20 text-navy bg-white hover:bg-navy/5 transition-colors disabled:opacity-50"
+              >
+                {importState === 'uploading' ? 'Importing...' : 'Import CSV'}
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept=".csv"
+                className="hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) handleImport(file);
+                  e.target.value = '';
+                }}
+              />
             </div>
-            <p className="text-lg text-foreground mb-1">No assessments yet</p>
-            <p className="text-sm text-muted">Click &quot;New Assessment&quot; above to get started.</p>
+
+            {/* Import results */}
+            {importResult && (
+              <div className="bg-white rounded-xl border border-border p-4 text-sm space-y-2">
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-navy">
+                    Imported {importResult.imported} assessment{importResult.imported !== 1 ? 's' : ''}
+                  </span>
+                  <button onClick={() => { setImportResult(null); setImportState('idle'); }} className="text-muted hover:text-foreground text-xs">
+                    Dismiss
+                  </button>
+                </div>
+                {importResult.errors.length > 0 && (
+                  <div className="text-red-600">
+                    {importResult.errors.map((e, i) => <p key={i}>{e}</p>)}
+                  </div>
+                )}
+                {importResult.warnings.length > 0 && (
+                  <div className="text-gold">
+                    {importResult.warnings.map((w, i) => <p key={i}>{w}</p>)}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="text-center py-16">
+              <div className="w-16 h-16 rounded-full bg-surface-alt flex items-center justify-center mx-auto mb-4">
+                <span className="text-2xl text-muted">&#9776;</span>
+              </div>
+              <p className="text-lg text-foreground mb-1">No assessments yet</p>
+              <p className="text-sm text-muted">Click &quot;New Assessment&quot; above to get started.</p>
+            </div>
           </div>
         ) : (
           <div className="space-y-5">
