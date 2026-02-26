@@ -16,7 +16,7 @@ jobs:
       - name: Build Docker image
         run: |
           SHORT_SHA="${GITHUB_SHA::7}"
-          docker build -t peak360:latest -t "peak360:${SHORT_SHA}" .
+          sudo docker build -t peak360:latest -t "peak360:${SHORT_SHA}" .
 
       - name: Deploy new container
         run: |
@@ -24,14 +24,14 @@ jobs:
           OLD_CONTAINER=""
 
           # Stop and rename existing container if running
-          if docker ps -a --format '{{.Names}}' | grep -q '^peak360$'; then
+          if sudo docker ps -a --format '{{.Names}}' | grep -q '^peak360$'; then
             OLD_CONTAINER="peak360-old-${SHORT_SHA}"
-            docker rename peak360 "${OLD_CONTAINER}"
-            docker stop "${OLD_CONTAINER}"
+            sudo docker rename peak360 "${OLD_CONTAINER}"
+            sudo docker stop "${OLD_CONTAINER}"
           fi
 
           # Start new container
-          docker run -d \
+          sudo docker run -d \
             --name peak360 \
             --env-file /opt/peak360/.env \
             --restart unless-stopped \
@@ -39,12 +39,12 @@ jobs:
             peak360:latest
 
           # Connect to second network
-          docker network connect strongbodies-net peak360
+          sudo docker network connect strongbodies-net peak360
 
           # Health check loop (30 attempts x 2s = 60s max)
           echo "Waiting for health check..."
           for i in $(seq 1 30); do
-            if docker exec peak360 wget --no-verbose --tries=1 --spider http://localhost:3000/api/health 2>/dev/null; then
+            if sudo docker exec peak360 wget --no-verbose --tries=1 --spider http://localhost:3000/api/health 2>/dev/null; then
               echo "Health check passed on attempt ${i}"
               HEALTHY=true
               break
@@ -57,12 +57,12 @@ jobs:
             echo "Health check failed — rolling back"
 
             # Rollback: stop new, restore old
-            docker stop peak360 || true
-            docker rm peak360 || true
+            sudo docker stop peak360 || true
+            sudo docker rm peak360 || true
 
             if [ -n "${OLD_CONTAINER}" ]; then
-              docker rename "${OLD_CONTAINER}" peak360
-              docker start peak360
+              sudo docker rename "${OLD_CONTAINER}" peak360
+              sudo docker start peak360
               echo "Rolled back to previous container"
             fi
 
@@ -71,10 +71,10 @@ jobs:
 
           # Success: clean up old container
           if [ -n "${OLD_CONTAINER}" ]; then
-            docker rm "${OLD_CONTAINER}" || true
+            sudo docker rm "${OLD_CONTAINER}" || true
             echo "Removed old container"
           fi
 
       - name: Prune dangling images
         if: always()
-        run: docker image prune -f
+        run: sudo docker image prune -f
