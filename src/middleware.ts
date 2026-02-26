@@ -7,7 +7,7 @@ function makeToken(password: string, date: string): string {
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (pathname === '/login' || pathname.startsWith('/api/auth')) {
+  if (pathname === '/login' || pathname.startsWith('/api/auth') || pathname === '/api/health') {
     return NextResponse.next();
   }
 
