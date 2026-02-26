@@ -11,10 +11,12 @@ function getDb() {
       const { drizzle } = require('drizzle-orm/node-postgres');
       const { Pool } = require('pg');
       const schema = require('./schema');
-      const connStr = process.env.DATABASE_URL!.replace(/[?&]sslmode=[^&]*/g, '');
+      const rawUrl = process.env.DATABASE_URL!;
+      const sslDisabled = /[?&]sslmode=disable/i.test(rawUrl);
+      const connStr = rawUrl.replace(/[?&]sslmode=[^&]*/g, '');
       const pool = new Pool({
         connectionString: connStr,
-        ssl: { rejectUnauthorized: false },
+        ssl: sslDisabled ? false : { rejectUnauthorized: false },
       });
       globalForDb.db = drizzle(pool, { schema });
     } else {
