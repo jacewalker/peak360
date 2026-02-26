@@ -11,8 +11,9 @@ function getDb() {
       const { drizzle } = require('drizzle-orm/node-postgres');
       const { Pool } = require('pg');
       const schema = require('./schema');
+      const connStr = process.env.DATABASE_URL!.replace(/[?&]sslmode=[^&]*/g, '');
       const pool = new Pool({
-        connectionString: process.env.DATABASE_URL!,
+        connectionString: connStr,
         ssl: { rejectUnauthorized: false },
       });
       globalForDb.db = drizzle(pool, { schema });
