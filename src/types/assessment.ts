@@ -210,3 +210,12 @@ export const SECTION_TITLES: Record<SectionNumber, string> = {
 };
 
 export const TOTAL_SECTIONS = 11;
+
+// Sections hidden from navigation (content moved elsewhere)
+export const HIDDEN_SECTIONS: Set<number> = new Set([10]);
+
+// Ordered section numbers shown in progress bar and navigation
+export const VISIBLE_SECTIONS: number[] = Array.from(
+  { length: TOTAL_SECTIONS },
+  (_, i) => i + 1
+).filter((n) => !HIDDEN_SECTIONS.has(n));

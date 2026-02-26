@@ -1,6 +1,6 @@
 'use client';
 
-import { TOTAL_SECTIONS } from '@/types/assessment';
+import { VISIBLE_SECTIONS } from '@/types/assessment';
 
 interface NavigationButtonsProps {
   currentSection: number;
@@ -28,7 +28,7 @@ export default function NavigationButtons({
         <div className="flex items-center gap-2">
           <button
             onClick={onPrev}
-            disabled={currentSection === 1}
+            disabled={currentSection === VISIBLE_SECTIONS[0]}
             className="px-4 sm:px-6 py-2.5 rounded-lg font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-surface-alt text-navy hover:bg-border hover:shadow-sm text-sm sm:text-base"
           >
             {'\u2190'} <span className="hidden sm:inline">Previous</span><span className="sm:hidden">Prev</span>
@@ -71,12 +71,12 @@ export default function NavigationButtons({
           <button
             onClick={onNext}
             className={`px-4 sm:px-6 py-2.5 rounded-lg font-medium transition-all hover:shadow-md hover:-translate-y-px text-sm sm:text-base ${
-              currentSection === TOTAL_SECTIONS
+              currentSection === VISIBLE_SECTIONS[VISIBLE_SECTIONS.length - 1]
                 ? 'bg-gold text-navy hover:bg-gold-light'
                 : 'bg-navy text-white hover:bg-navy-light'
             }`}
           >
-            {currentSection === TOTAL_SECTIONS ? 'Complete' : <>Next {'\u2192'}</>}
+            {currentSection === VISIBLE_SECTIONS[VISIBLE_SECTIONS.length - 1] ? 'Complete' : <>Next {'\u2192'}</>}
           </button>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import ProgressBar from '@/components/layout/ProgressBar';
 import NavigationButtons from '@/components/layout/NavigationButtons';
 import { useAssessmentStore } from '@/lib/store/assessment-store';
-import { TOTAL_SECTIONS, type SectionNumber, type SectionData } from '@/types/assessment';
+import { VISIBLE_SECTIONS, type SectionNumber, type SectionData } from '@/types/assessment';
 import { isSectionComplete } from '@/lib/section-completion';
 import Section1 from '@/components/sections/Section1';
 import Section2 from '@/components/sections/Section2';
@@ -16,7 +16,6 @@ import Section6 from '@/components/sections/Section6';
 import Section7 from '@/components/sections/Section7';
 import Section8 from '@/components/sections/Section8';
 import Section9 from '@/components/sections/Section9';
-import Section10 from '@/components/sections/Section10';
 import Section11 from '@/components/sections/Section11';
 
 const sectionComponents: Record<number, React.ComponentType<SectionProps>> = {
@@ -29,7 +28,6 @@ const sectionComponents: Record<number, React.ComponentType<SectionProps>> = {
   7: Section7,
   8: Section8,
   9: Section9,
-  10: Section10,
 };
 
 export interface SectionProps {
@@ -139,9 +137,10 @@ export default function SectionPage() {
     async (direction: 'prev' | 'next') => {
       // Check completion when navigating away from a section
       await saveSection(true);
-      const target = direction === 'next' ? num + 1 : num - 1;
-      if (target >= 1 && target <= TOTAL_SECTIONS) {
-        router.push(`/assessment/${id}/section/${target}`);
+      const currentIdx = VISIBLE_SECTIONS.indexOf(num);
+      const targetIdx = direction === 'next' ? currentIdx + 1 : currentIdx - 1;
+      if (targetIdx >= 0 && targetIdx < VISIBLE_SECTIONS.length) {
+        router.push(`/assessment/${id}/section/${VISIBLE_SECTIONS[targetIdx]}`);
       }
     },
     [id, num, router, saveSection]

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { SECTION_TITLES, TOTAL_SECTIONS, type SectionNumber } from '@/types/assessment';
+import { SECTION_TITLES, VISIBLE_SECTIONS, type SectionNumber } from '@/types/assessment';
 
 interface ProgressBarProps {
   currentSection: number;
@@ -10,15 +10,16 @@ interface ProgressBarProps {
 }
 
 export default function ProgressBar({ currentSection, assessmentId, completedSections = [] }: ProgressBarProps) {
-  const completedCount = completedSections.length;
-  const progress = (completedCount / (TOTAL_SECTIONS - 1)) * 100; // Section 11 is a report
+  const visibleCompleted = completedSections.filter((s) => VISIBLE_SECTIONS.includes(s));
+  const completedCount = visibleCompleted.length;
+  const progress = (completedCount / (VISIBLE_SECTIONS.length - 1)) * 100; // Section 11 is a report
 
   return (
     <div className="bg-white border-b border-border px-4 sm:px-6 py-3 shadow-sm">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-semibold text-navy">
-            Section {currentSection} of {TOTAL_SECTIONS}
+            Section {VISIBLE_SECTIONS.indexOf(currentSection) + 1} of {VISIBLE_SECTIONS.length}
           </span>
           <span className="text-sm font-medium text-muted hidden sm:block">
             {SECTION_TITLES[currentSection as SectionNumber]}
@@ -31,7 +32,8 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
           />
         </div>
         <div className="flex justify-between mt-2.5">
-          {Array.from({ length: TOTAL_SECTIONS }, (_, i) => i + 1).map((num) => {
+          {VISIBLE_SECTIONS.map((num, idx) => {
+            const displayNum = idx + 1;
             const isCurrent = num === currentSection;
             const isCompleted = completedSections.includes(num);
 
@@ -55,7 +57,7 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
                 ) : (
-                  <span>{num}</span>
+                  <span>{displayNum}</span>
                 )}
               </Link>
             );
