@@ -151,10 +151,11 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       // Collect forced page-break positions (in mm) from data-pdf-break elements
       const forcedBreaks: number[] = [];
-      const containerHeight = reportRef.current.scrollHeight;
+      const containerRect = reportRef.current.getBoundingClientRect();
       reportRef.current.querySelectorAll('[data-pdf-break]').forEach((el) => {
-        const top = (el as HTMLElement).offsetTop;
-        const mm = (top / containerHeight) * imgHeight;
+        const elRect = (el as HTMLElement).getBoundingClientRect();
+        const relativeTop = elRect.top - containerRect.top;
+        const mm = (relativeTop / containerRect.height) * imgHeight;
         forcedBreaks.push(mm);
       });
       forcedBreaks.sort((a, b) => a - b);
