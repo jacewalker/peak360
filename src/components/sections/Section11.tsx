@@ -149,18 +149,32 @@ export default function Section11({ assessmentId }: Section11Props) {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const pdf = new jsPDF('p', 'mm', 'a4');
 
-      let heightLeft = imgHeight;
-      let position = 0;
+      // Collect forced page-break positions (in mm) from data-pdf-break elements
+      const forcedBreaks: number[] = [];
+      const containerHeight = reportRef.current.scrollHeight;
+      reportRef.current.querySelectorAll('[data-pdf-break]').forEach((el) => {
+        const top = (el as HTMLElement).offsetTop;
+        const mm = (top / containerHeight) * imgHeight;
+        forcedBreaks.push(mm);
+      });
+      forcedBreaks.sort((a, b) => a - b);
 
-      pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position -= pageHeight;
-        pdf.addPage();
-        pdf.addImage(canvas.toDataURL('image/jpeg', 0.95), 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+      // Build page start positions respecting forced breaks
+      const pageStarts: number[] = [0];
+      let cursor = 0;
+      while (cursor < imgHeight) {
+        let nextEnd = cursor + pageHeight;
+        const breakInPage = forcedBreaks.find((bp) => bp > cursor && bp < nextEnd);
+        if (breakInPage) nextEnd = breakInPage;
+        cursor = nextEnd;
+        if (cursor < imgHeight) pageStarts.push(cursor);
       }
+
+      const imgData = canvas.toDataURL('image/jpeg', 0.95);
+      pageStarts.forEach((startY, i) => {
+        if (i > 0) pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, -startY, imgWidth, imgHeight);
+      });
 
       const clientName = ((clientInfo.clientName as string) || 'Client').replace(/\s+/g, '_');
       pdf.save(`Peak360_Report_${clientName}.pdf`);
@@ -351,7 +365,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           {categories.map((cat) => {
             const catMarkers = markers.filter((m) => m.category === cat);
             return (
-              <div key={cat} className="report-category">
+              <div key={cat} className="report-category" {...(cat === 'Strength Testing' ? { 'data-pdf-break': true } : {})}>
                 {/* Category header */}
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#1a365d]/70">{cat}</span>
