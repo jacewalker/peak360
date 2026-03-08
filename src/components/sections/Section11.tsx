@@ -135,13 +135,36 @@ export default function Section11({ assessmentId }: Section11Props) {
       // Hide action buttons during capture
       if (actionsRef.current) actionsRef.current.style.display = 'none';
 
-      const canvas = await html2canvas(reportRef.current, {
+      // Insert spacer divs before [data-pdf-break] elements to push them
+      // to the next A4 page boundary — this bakes breaks into the canvas.
+      const container = reportRef.current;
+      const containerWidth = container.getBoundingClientRect().width;
+      const pageHeightPx = (297 / 210) * containerWidth; // A4 aspect ratio in pixels
+      const spacers: HTMLElement[] = [];
+
+      container.querySelectorAll('[data-pdf-break]').forEach((el) => {
+        const elTop = (el as HTMLElement).getBoundingClientRect().top - container.getBoundingClientRect().top;
+        const currentPage = Math.floor(elTop / pageHeightPx);
+        const nextPageTop = (currentPage + 1) * pageHeightPx;
+        const gap = nextPageTop - elTop;
+        if (gap > 0 && gap < pageHeightPx) {
+          const spacer = document.createElement('div');
+          spacer.style.height = `${gap}px`;
+          spacer.dataset.pdfSpacer = 'true';
+          el.parentNode?.insertBefore(spacer, el);
+          spacers.push(spacer);
+        }
+      });
+
+      const canvas = await html2canvas(container, {
         scale: 2,
         useCORS: true,
         backgroundColor: '#ffffff',
         logging: false,
       });
 
+      // Remove spacers and restore buttons
+      spacers.forEach((s) => s.remove());
       if (actionsRef.current) actionsRef.current.style.display = '';
 
       const imgWidth = 210; // A4 width in mm
@@ -149,33 +172,19 @@ export default function Section11({ assessmentId }: Section11Props) {
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const pdf = new jsPDF('p', 'mm', 'a4');
 
-      // Collect forced page-break positions (in mm) from data-pdf-break elements
-      const forcedBreaks: number[] = [];
-      const containerRect = reportRef.current.getBoundingClientRect();
-      reportRef.current.querySelectorAll('[data-pdf-break]').forEach((el) => {
-        const elRect = (el as HTMLElement).getBoundingClientRect();
-        const relativeTop = elRect.top - containerRect.top;
-        const mm = (relativeTop / containerRect.height) * imgHeight;
-        forcedBreaks.push(mm);
-      });
-      forcedBreaks.sort((a, b) => a - b);
-
-      // Build page start positions respecting forced breaks
-      const pageStarts: number[] = [0];
-      let cursor = 0;
-      while (cursor < imgHeight) {
-        let nextEnd = cursor + pageHeight;
-        const breakInPage = forcedBreaks.find((bp) => bp > cursor && bp < nextEnd);
-        if (breakInPage) nextEnd = breakInPage;
-        cursor = nextEnd;
-        if (cursor < imgHeight) pageStarts.push(cursor);
-      }
-
+      let heightLeft = imgHeight;
+      let position = 0;
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
-      pageStarts.forEach((startY, i) => {
-        if (i > 0) pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, -startY, imgWidth, imgHeight);
-      });
+
+      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+      heightLeft -= pageHeight;
+
+      while (heightLeft > 0) {
+        position -= pageHeight;
+        pdf.addPage();
+        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
+        heightLeft -= pageHeight;
+      }
 
       const clientName = ((clientInfo.clientName as string) || 'Client').replace(/\s+/g, '_');
       pdf.save(`Peak360_Report_${clientName}.pdf`);
