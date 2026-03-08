@@ -42,6 +42,7 @@ export interface NormativeData {
     blood_pressure_systolic: SimpleMarker;
   };
   mobility: Record<string, SimpleMarker>;
+  strength: Record<string, SimpleMarker | GenderedMarker | GenderedAgeMarker>;
 }
 
 export interface RatingResult {

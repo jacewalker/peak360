@@ -76,6 +76,21 @@ const REPORT_MARKERS: { testKey: string; label: string; section: number; dataKey
   { testKey: 'vo2max', label: 'VO2 Max', section: 7, dataKey: 'vo2max', category: 'Cardiovascular Fitness' },
   { testKey: 'resting_hr', label: 'Resting Heart Rate', section: 7, dataKey: 'restingHR', category: 'Cardiovascular Fitness' },
   { testKey: 'blood_pressure_systolic', label: 'Blood Pressure (Systolic)', section: 7, dataKey: 'bpSystolic', category: 'Cardiovascular Fitness' },
+  // Strength
+  { testKey: 'grip_strength_left', label: 'Grip Strength (Left)', section: 8, dataKey: 'gripStrengthLeft', category: 'Strength Testing' },
+  { testKey: 'grip_strength_right', label: 'Grip Strength (Right)', section: 8, dataKey: 'gripStrengthRight', category: 'Strength Testing' },
+  { testKey: 'cmj_left', label: 'CMJ (Left)', section: 8, dataKey: 'cmjLeft', category: 'Strength Testing' },
+  { testKey: 'cmj_right', label: 'CMJ (Right)', section: 8, dataKey: 'cmjRight', category: 'Strength Testing' },
+  { testKey: 'imtp_max_force', label: 'IMTP Max Force', section: 8, dataKey: 'imtpMaxForce', category: 'Strength Testing' },
+  { testKey: 'single_leg_hop_left', label: 'Single Leg Hop (Left)', section: 8, dataKey: 'singleLegHopLeft', category: 'Strength Testing' },
+  { testKey: 'single_leg_hop_right', label: 'Single Leg Hop (Right)', section: 8, dataKey: 'singleLegHopRight', category: 'Strength Testing' },
+  { testKey: 'single_leg_balance_left', label: 'SL Balance (Left)', section: 8, dataKey: 'singleLegBalanceLeft', category: 'Strength Testing' },
+  { testKey: 'single_leg_balance_right', label: 'SL Balance (Right)', section: 8, dataKey: 'singleLegBalanceRight', category: 'Strength Testing' },
+  { testKey: 'shoulder_iso_y_left', label: 'Shoulder Iso-Y (Left)', section: 8, dataKey: 'shoulderIsoYLeft', category: 'Strength Testing' },
+  { testKey: 'shoulder_iso_y_right', label: 'Shoulder Iso-Y (Right)', section: 8, dataKey: 'shoulderIsoYRight', category: 'Strength Testing' },
+  { testKey: 'pushups_max', label: 'Push-Up Max', section: 8, dataKey: 'pushupsMax', category: 'Strength Testing' },
+  { testKey: 'dead_man_hang', label: 'Dead Man Hang', section: 8, dataKey: 'deadManHang', category: 'Strength Testing' },
+  { testKey: 'farmers_carry_distance', label: 'Farmers Carry', section: 8, dataKey: 'farmersCarryDistance', category: 'Strength Testing' },
   // Mobility
   { testKey: 'hip_mobility_left', label: 'Hip Mobility (Left)', section: 9, dataKey: 'hipMobilityLeft', category: 'Mobility & Flexibility' },
   { testKey: 'hip_mobility_right', label: 'Hip Mobility (Right)', section: 9, dataKey: 'hipMobilityRight', category: 'Mobility & Flexibility' },
@@ -159,7 +174,7 @@ export default function Section11({ assessmentId }: Section11Props) {
   useEffect(() => {
     const loadReport = async () => {
       const sections: Record<number, Record<string, unknown>> = {};
-      const fetches = [1, 5, 6, 7, 9].map(async (num) => {
+      const fetches = [1, 5, 6, 7, 8, 9].map(async (num) => {
         const res = await fetch(`/api/assessments/${assessmentId}/sections/${num}`);
         const { data } = await res.json();
         sections[num] = (data || {}) as Record<string, unknown>;

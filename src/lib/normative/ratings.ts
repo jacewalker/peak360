@@ -116,6 +116,23 @@ export function getStandards(testKey: string, age?: number | null, gender?: stri
     return { unit: test.unit || null, note: test.note || null, standards: test as unknown as TierRanges };
   }
 
+  // Strength
+  if (key in normativeData.strength) {
+    const test = normativeData.strength[key];
+
+    if ('male' in test && 'female' in test) {
+      const genderData = test[g === 'female' ? 'female' : 'male'];
+      if (typeof genderData === 'object' && isAgeBucketed(genderData as Record<string, unknown>)) {
+        const ageGroup = getBodyAgeGroup(numAge);
+        const standards = ageGroup ? (genderData as Record<string, TierRanges>)[ageGroup] : null;
+        return { unit: test.unit || null, note: test.note || null, standards: standards || null };
+      }
+      return { unit: test.unit || null, note: test.note || null, standards: genderData as unknown as TierRanges };
+    }
+
+    return { unit: test.unit || null, note: test.note || null, standards: test as unknown as TierRanges };
+  }
+
   // Mobility
   if (key in normativeData.mobility) {
     const test = normativeData.mobility[key];

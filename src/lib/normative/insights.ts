@@ -157,6 +157,108 @@ export function generatePeak360Insights({
         );
         break;
 
+      case 'grip_strength_left':
+      case 'grip_strength_right':
+        action(
+          'Grip strength needs improvement',
+          `${label} is rated **${tier}**. Grip strength is one of the strongest predictors of all-cause mortality and functional independence.`,
+          [
+            'Train grip 2-3x/week: dead hangs, farmer carries, heavy rows, and dedicated grip work.',
+            'Include both crush grip (squeezing) and support grip (hanging/carrying) exercises.',
+            'Aim for progressive overload — add time or load each week.',
+          ]
+        );
+        break;
+
+      case 'cmj_left':
+      case 'cmj_right':
+      case 'single_leg_hop_left':
+      case 'single_leg_hop_right':
+        action(
+          'Lower-body power below target',
+          `${label} is rated **${tier}**. Jump performance reflects explosive power, which declines faster than strength with age.`,
+          [
+            'Include plyometric training 1-2x/week (box jumps, depth jumps, bounding).',
+            'Prioritize heavy compound lifts (squats, deadlifts) to build the force base.',
+            'Address any notable L/R asymmetry with unilateral exercises.',
+          ]
+        );
+        break;
+
+      case 'imtp_max_force':
+        action(
+          'Peak force production flagged',
+          `${label} is rated **${tier}**. Isometric mid-thigh pull reflects maximal lower-body force — critical for injury resilience and performance.`,
+          [
+            'Focus on heavy compound pulls: deadlifts, trap bar deadlifts, hip thrusts.',
+            'Include isometric holds at mid-range (2-4 sets of 3-5 sec max effort).',
+            'Ensure adequate recovery between heavy sessions (48-72h).',
+          ]
+        );
+        break;
+
+      case 'single_leg_balance_left':
+      case 'single_leg_balance_right':
+        action(
+          'Balance and stability needs work',
+          `${label} is rated **${tier}**. Poor single-leg balance correlates with fall risk and may indicate proprioceptive or ankle/hip deficits.`,
+          [
+            'Practice single-leg stance daily: eyes open then eyes closed (30-60 sec).',
+            'Add single-leg exercises to training: split squats, step-ups, single-leg RDLs.',
+            'Consider barefoot training on varied surfaces to improve proprioception.',
+          ]
+        );
+        break;
+
+      case 'shoulder_iso_y_left':
+      case 'shoulder_iso_y_right':
+        action(
+          'Shoulder stability below target',
+          `${label} is rated **${tier}**. Shoulder Iso-Y strength reflects rotator cuff and scapular stability — important for overhead function and injury prevention.`,
+          [
+            'Include band or light dumbbell Y-raises 2-3x/week (2-3 sets of 12-15).',
+            'Strengthen lower traps and serratus anterior with wall slides and push-up plus.',
+            'Address any notable L/R asymmetry before progressing load on overhead movements.',
+          ]
+        );
+        break;
+
+      case 'pushups_max':
+        action(
+          'Push-up endurance below target',
+          `${label} is rated **${tier}**. Push-up capacity is linked to cardiovascular health and upper-body muscular endurance.`,
+          [
+            'Train push-ups 3-4x/week using a progression plan (grease the groove or pyramid sets).',
+            'Strengthen chest, triceps, and core with bench press, dips, and planks.',
+            'If below 10 reps, start with incline push-ups and progress to floor.',
+          ]
+        );
+        break;
+
+      case 'dead_man_hang':
+        action(
+          'Hang time needs improvement',
+          `${label} is rated **${tier}**. Dead man hang tests grip endurance and shoulder health — both critical for longevity.`,
+          [
+            'Practice dead hangs daily: accumulate 2-3 min total hang time.',
+            'Progress from passive hangs to active hangs (scapular engagement).',
+            'Combine with grip-specific work: plate pinches, towel hangs.',
+          ]
+        );
+        break;
+
+      case 'farmers_carry_distance':
+        action(
+          'Loaded carry capacity flagged',
+          `${label} is rated **${tier}**. Farmers carry performance reflects whole-body functional strength, grip endurance, and core stability.`,
+          [
+            'Include loaded carries 2x/week: farmer walks, suitcase carries, overhead carries.',
+            'Progress by increasing distance before increasing load.',
+            'Ensure upright posture and core bracing throughout the carry.',
+          ]
+        );
+        break;
+
       case 'alt':
       case 'ast':
       case 'ggt':
