@@ -104,4 +104,55 @@ describe('normativeData completeness', () => {
       expect(normativeData.mobility.hip_mobility_right).toBeDefined();
     });
   });
+
+  describe('gendered blood markers', () => {
+    const genderedMarkers = [
+      'hemoglobin', 'hematocrit', 'rbc', 'ferritin', 'serum_iron',
+      'total_testosterone', 'free_testosterone', 'creatinine', 'egfr',
+      'uric_acid', 'alt', 'ast', 'ggt', 'oestradiol', 'shbg',
+      'dheas', 'fsh', 'lh',
+    ];
+
+    it('all 18 gendered markers exist in blood_tests', () => {
+      for (const marker of genderedMarkers) {
+        expect(normativeData.blood_tests[marker], `Missing gendered marker: ${marker}`).toBeDefined();
+      }
+    });
+
+    it('each has male and female keys', () => {
+      for (const marker of genderedMarkers) {
+        const entry = normativeData.blood_tests[marker];
+        expect('male' in entry, `${marker} missing male key`).toBe(true);
+        expect('female' in entry, `${marker} missing female key`).toBe(true);
+      }
+    });
+
+    it('each male/female has all 5 tiers with min/max ranges', () => {
+      const tiers = ['poor', 'cautious', 'normal', 'great', 'elite'] as const;
+      for (const marker of genderedMarkers) {
+        const entry = normativeData.blood_tests[marker] as { male: Record<string, { min: number; max: number }>; female: Record<string, { min: number; max: number }> };
+        for (const gender of ['male', 'female'] as const) {
+          for (const tier of tiers) {
+            const range = entry[gender][tier];
+            expect(range, `Missing ${marker}.${gender}.${tier}`).toBeDefined();
+            expect(typeof range.min, `${marker}.${gender}.${tier}.min not number`).toBe('number');
+            expect(typeof range.max, `${marker}.${gender}.${tier}.max not number`).toBe('number');
+          }
+        }
+      }
+    });
+
+    it('no tier has min > max', () => {
+      const tiers = ['poor', 'cautious', 'normal', 'great', 'elite'] as const;
+      for (const marker of genderedMarkers) {
+        const entry = normativeData.blood_tests[marker] as { male: Record<string, { min: number; max: number }>; female: Record<string, { min: number; max: number }> };
+        for (const gender of ['male', 'female'] as const) {
+          for (const tier of tiers) {
+            const range = entry[gender][tier];
+            expect(range.min, `${marker}.${gender}.${tier}: min (${range.min}) > max (${range.max})`).toBeLessThanOrEqual(range.max);
+          }
+        }
+      }
+    });
+  });
 });
