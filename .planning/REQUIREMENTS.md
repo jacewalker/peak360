@@ -7,10 +7,10 @@
 
 ### Clinical Accuracy
 
-- [ ] **CLIN-01**: Rating engine accepts gender parameter and selects gender-specific thresholds for blood markers
-- [ ] **CLIN-02**: Gender-specific normative ranges added for ~15-20 blood markers where male/female ranges differ clinically (hemoglobin, ferritin, testosterone, iron, creatinine, etc.)
-- [ ] **CLIN-03**: Combined age-bucketed and gender-specific threshold lookups work together
-- [ ] **CLIN-04**: Gender propagated from Section 1 (clientGender) through to Section 11 rating calls
+- [x] **CLIN-01**: Rating engine accepts gender parameter and selects gender-specific thresholds for blood markers
+- [x] **CLIN-02**: Gender-specific normative ranges added for ~15-20 blood markers where male/female ranges differ clinically (hemoglobin, ferritin, testosterone, iron, creatinine, etc.)
+- [x] **CLIN-03**: Combined age-bucketed and gender-specific threshold lookups work together
+- [x] **CLIN-04**: Gender propagated from Section 1 (clientGender) through to Section 11 rating calls
 
 ### Report Visualization
 
@@ -79,10 +79,10 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLIN-01 | Phase 1 | Pending |
-| CLIN-02 | Phase 1 | Pending |
-| CLIN-03 | Phase 1 | Pending |
-| CLIN-04 | Phase 1 | Pending |
+| CLIN-01 | Phase 1 | Complete |
+| CLIN-02 | Phase 1 | Complete |
+| CLIN-03 | Phase 1 | Complete |
+| CLIN-04 | Phase 1 | Complete |
 | REPT-01 | Phase 1 | Pending |
 | REPT-02 | Phase 1 | Pending |
 | REPT-03 | Phase 1 | Pending |
