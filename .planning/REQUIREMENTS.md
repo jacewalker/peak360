@@ -79,35 +79,35 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLIN-01 | — | Pending |
-| CLIN-02 | — | Pending |
-| CLIN-03 | — | Pending |
-| CLIN-04 | — | Pending |
-| REPT-01 | — | Pending |
-| REPT-02 | — | Pending |
-| REPT-03 | — | Pending |
-| REPT-04 | — | Pending |
-| REPT-05 | — | Pending |
-| AUTH-01 | — | Pending |
-| AUTH-02 | — | Pending |
-| AUTH-03 | — | Pending |
-| AUTH-04 | — | Pending |
-| AUTH-05 | — | Pending |
-| ADMN-01 | — | Pending |
-| ADMN-02 | — | Pending |
-| ADMN-03 | — | Pending |
-| ADMN-04 | — | Pending |
-| ADMN-05 | — | Pending |
-| ADMN-06 | — | Pending |
-| SECU-01 | — | Pending |
-| SECU-02 | — | Pending |
-| SECU-03 | — | Pending |
+| CLIN-01 | Phase 1 | Pending |
+| CLIN-02 | Phase 1 | Pending |
+| CLIN-03 | Phase 1 | Pending |
+| CLIN-04 | Phase 1 | Pending |
+| REPT-01 | Phase 1 | Pending |
+| REPT-02 | Phase 1 | Pending |
+| REPT-03 | Phase 1 | Pending |
+| REPT-04 | Phase 1 | Pending |
+| REPT-05 | Phase 1 | Pending |
+| AUTH-01 | Phase 2 | Pending |
+| AUTH-02 | Phase 2 | Pending |
+| AUTH-03 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Pending |
+| AUTH-05 | Phase 2 | Pending |
+| ADMN-01 | Phase 3 | Pending |
+| ADMN-02 | Phase 3 | Pending |
+| ADMN-03 | Phase 3 | Pending |
+| ADMN-04 | Phase 3 | Pending |
+| ADMN-05 | Phase 3 | Pending |
+| ADMN-06 | Phase 3 | Pending |
+| SECU-01 | Phase 4 | Pending |
+| SECU-02 | Phase 4 | Pending |
+| SECU-03 | Phase 4 | Pending |
 
 **Coverage:**
 - v1 requirements: 23 total
-- Mapped to phases: 0
-- Unmapped: 23 ⚠️
+- Mapped to phases: 23
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-29*
-*Last updated: 2026-03-29 after initial definition*
+*Last updated: 2026-03-29 after roadmap creation*
