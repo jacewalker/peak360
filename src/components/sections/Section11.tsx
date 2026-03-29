@@ -60,6 +60,9 @@ const TIER_TEXT: Record<RatingTier, string> = {
 };
 
 import { REPORT_MARKERS, type MarkerDef } from '@/lib/report-markers';
+import { RangeBar } from '@/components/report/RangeBar';
+import { ReferralFlag } from '@/components/report/ReferralFlag';
+import { Disclaimer } from '@/components/report/Disclaimer';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -297,29 +300,46 @@ export default function Section11({ assessmentId }: Section11Props) {
 
   // ── Render Marker Row ───────────────────────────────────────────────────────
 
-  const renderMarkerRow = (m: ReportMarker, i: number) => (
-    <div
-      key={m.key}
-      className={`report-marker-row flex items-center justify-between py-2 px-4 border-l-[3px] ${
-        m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-gray-50/40 border-l-gray-200'
-      } ${i > 0 ? 'border-t border-gray-100' : ''}`}
-    >
-      <span className="text-[13px] font-medium text-[#1a202c]">{m.label}</span>
-      <div className="flex items-center gap-3">
-        {m.value !== null ? (
-          <>
-            <span className="text-[13px] font-semibold text-[#1a202c] tabular-nums tracking-tight">
-              {m.value}
-              <span className="text-[11px] font-normal text-[#64748b] ml-1">{m.unit}</span>
-            </span>
-            {m.tier && <TierPill tier={m.tier} />}
-          </>
-        ) : (
-          <span className="text-[11px] text-[#94a3b8] italic">Not recorded</span>
+  const renderMarkerRow = (m: ReportMarker, i: number) => {
+    const age = clientInfo.clientAge as number || null;
+    const gender = clientInfo.clientGender as string || null;
+
+    return (
+      <div
+        key={m.key}
+        className={`report-marker-row py-2 px-3 sm:px-4 border-l-[3px] ${
+          m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-gray-50/40 border-l-gray-200'
+        } ${i > 0 ? 'border-t border-gray-100' : ''}`}
+      >
+        {/* Label + value + tier pill row */}
+        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
+          <span className="text-[13px] font-medium text-[#1a202c]">{m.label}</span>
+          <div className="flex items-center gap-3">
+            {m.value !== null ? (
+              <>
+                <span className="text-[13px] font-semibold text-[#1a202c] tabular-nums tracking-tight">
+                  {m.value}
+                  <span className="text-[11px] font-normal text-[#64748b] ml-1">{m.unit}</span>
+                </span>
+                {m.tier && <TierPill tier={m.tier} />}
+              </>
+            ) : (
+              <span className="text-[11px] text-[#94a3b8] italic">Not recorded</span>
+            )}
+          </div>
+        </div>
+        {/* Range bar for markers with norms and a value */}
+        {m.hasNorms && m.value !== null && m.tier && (
+          <div className="w-full mt-1.5">
+            <RangeBar value={m.value} testKey={m.key} age={age} gender={gender} />
+          </div>
         )}
+        {/* Referral flags */}
+        {m.tier === 'poor' && <ReferralFlag level="urgent" />}
+        {m.tier === 'cautious' && <ReferralFlag level="monitor" />}
       </div>
-    </div>
-  );
+    );
+  };
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
@@ -360,7 +380,7 @@ export default function Section11({ assessmentId }: Section11Props) {
               <p className="text-sm font-semibold">{(clientInfo.clientAge as number) || '—'}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-white/50 mb-0.5">Gender</p>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-white/50 mb-0.5">Biological Sex</p>
               <p className="text-sm font-semibold capitalize">{(clientInfo.clientGender as string) || '—'}</p>
             </div>
           </div>
@@ -369,6 +389,16 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       {/* ─── REPORT BODY ─── */}
       <div className="px-6">
+
+      {/* ─── MEDICAL DISCLAIMER (TOP) ─── */}
+      <div className="mt-4">
+        <Disclaimer />
+      </div>
+      {!clientInfo.clientGender && (
+        <div className="mt-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-md text-[11px] text-amber-700">
+          Biological sex not specified — ranges shown are for male reference values. Provide biological sex in Section 1 for accurate normative ranges.
+        </div>
+      )}
 
       {/* ─── SECTION 2: DAILY READINESS ─── */}
       <div className="report-section mt-8 print:mt-6">
@@ -606,6 +636,11 @@ export default function Section11({ assessmentId }: Section11Props) {
           </div>
         </div>
       )}
+
+      {/* ─── MEDICAL DISCLAIMER (BOTTOM) ─── */}
+      <div className="mt-8 mb-4">
+        <Disclaimer />
+      </div>
 
       {/* ─── REPORT FOOTER ─── */}
       <div className="report-footer mt-10 pt-5 border-t border-gray-200 print:mt-6">
