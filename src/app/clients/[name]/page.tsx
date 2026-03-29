@@ -127,7 +127,7 @@ export default function ClientDetailPage() {
     <div className="min-h-screen">
       {/* Header */}
       <div className="bg-gradient-to-b from-navy-dark to-navy py-8 sm:py-10 text-white">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+        <div className="max-w-5xl mx-auto pl-14 pr-4 sm:px-6 lg:px-6">
           <Link href="/clients" className="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 text-sm mb-4 transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />

@@ -306,7 +306,7 @@ function AiAssessmentPanel({ clientName, timelines }: { clientName: string; time
   return (
     <div className="mb-8 space-y-4">
       {/* Score + Summary */}
-      <div className="bg-white rounded-xl border border-border p-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6">
         <div className="flex items-start gap-6">
           {/* Score circle */}
           <div className="shrink-0">

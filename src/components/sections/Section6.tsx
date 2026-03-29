@@ -148,7 +148,7 @@ export default function Section6({ data, onChange, assessmentId }: SectionProps)
         />
       )}
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <FormRow>
           <FormField id="bodyFatPercentage" label="Body Fat Percentage (%)" type="number" value={data.bodyFatPercentage as number} onChange={n('bodyFatPercentage')} step={0.1} min={3} max={60} />
           <FormField id="leanMass" label="Lean Mass (kg)" type="number" value={data.leanMass as number} onChange={n('leanMass')} step={0.1} min={20} max={200} />

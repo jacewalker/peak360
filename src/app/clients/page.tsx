@@ -64,7 +64,7 @@ export default function ClientsPage() {
     <div className="min-h-screen">
       {/* Header banner */}
       <div className="bg-gradient-to-b from-navy-dark to-navy py-10 sm:py-14 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6">
+        <div className="max-w-4xl mx-auto pl-14 pr-4 sm:px-6 lg:px-6">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Clients</h2>
           <p className="text-white/60 mt-2 text-base">
             All clients from your assessments
@@ -93,7 +93,7 @@ export default function ClientsPage() {
         ) : (
           <div className="space-y-5">
             {/* Stats */}
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div className="bg-white rounded-xl border border-border p-4 text-center">
                 <p className="text-2xl font-bold text-navy">{clients.length}</p>
                 <p className="text-xs text-muted font-medium mt-0.5">Total Clients</p>

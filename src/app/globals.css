@@ -57,6 +57,15 @@ input[type="range"]::-moz-range-thumb {
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
+/* Hide scrollbar utility */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;

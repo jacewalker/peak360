@@ -46,7 +46,7 @@ export default function FormField({
         max={max}
         step={step}
         disabled={disabled}
-        className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors disabled:bg-surface-alt disabled:text-muted"
+        className="w-full px-3 py-2.5 sm:py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors disabled:bg-surface-alt disabled:text-muted"
       />
     </div>
   );

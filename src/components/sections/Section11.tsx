@@ -147,7 +147,24 @@ export default function Section11({ assessmentId }: Section11Props) {
       if (actionsRef.current) actionsRef.current.style.display = 'none';
 
       const container = reportRef.current;
-      const containerWidth = container.getBoundingClientRect().width;
+
+      // Force a consistent desktop-width render so the PDF looks the same on all devices
+      const PDF_RENDER_WIDTH = 980;
+      const originalStyles = {
+        width: container.style.width,
+        minWidth: container.style.minWidth,
+        maxWidth: container.style.maxWidth,
+        overflow: container.style.overflow,
+      };
+      container.style.width = `${PDF_RENDER_WIDTH}px`;
+      container.style.minWidth = `${PDF_RENDER_WIDTH}px`;
+      container.style.maxWidth = `${PDF_RENDER_WIDTH}px`;
+      container.style.overflow = 'visible';
+
+      // Wait for reflow
+      await new Promise((r) => requestAnimationFrame(() => requestAnimationFrame(r)));
+
+      const containerWidth = PDF_RENDER_WIDTH;
       const pageHeightPx = (297 / 210) * containerWidth;
       const spacers: HTMLElement[] = [];
 
@@ -167,9 +184,14 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       const canvas = await html2canvas(container, {
         scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
+        width: PDF_RENDER_WIDTH,
       });
 
       spacers.forEach((s) => s.remove());
+      container.style.width = originalStyles.width;
+      container.style.minWidth = originalStyles.minWidth;
+      container.style.maxWidth = originalStyles.maxWidth;
+      container.style.overflow = originalStyles.overflow;
       if (actionsRef.current) actionsRef.current.style.display = '';
 
       const imgWidth = 210;
@@ -191,8 +213,8 @@ export default function Section11({ assessmentId }: Section11Props) {
         heightLeft -= pageHeight;
       }
 
-      const clientName = ((clientInfo.clientName as string) || 'Client').replace(/\s+/g, '_');
-      pdf.save(`Peak360_Report_${clientName}.pdf`);
+      const clientName = ((clientInfo.clientName as string) || 'Client').trim().replace(/\s+/g, '_').replace(/[^a-zA-Z0-9_-]/g, '');
+      pdf.save(`Peak360_Report_${clientName || 'Client'}.pdf`);
     } catch (err) {
       console.error('PDF export failed:', err);
     } finally {
@@ -300,7 +322,7 @@ export default function Section11({ assessmentId }: Section11Props) {
   const renderMarkerRow = (m: ReportMarker, i: number) => (
     <div
       key={m.key}
-      className={`report-marker-row flex items-center justify-between py-2 px-4 border-l-[3px] ${
+      className={`report-marker-row flex flex-wrap items-center justify-between gap-x-2 gap-y-1 py-2 px-3 sm:px-4 border-l-[3px] ${
         m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-gray-50/40 border-l-gray-200'
       } ${i > 0 ? 'border-t border-gray-100' : ''}`}
     >
@@ -324,7 +346,7 @@ export default function Section11({ assessmentId }: Section11Props) {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div ref={reportRef} className="report-container bg-white">
+    <div ref={reportRef} className="report-container bg-white p-4 sm:p-6">
       {/* ─── REPORT COVER / HEADER ─── */}
       <div className="report-header relative overflow-hidden rounded-2xl print:rounded-none bg-gradient-to-br from-[#0f2440] via-[#1a365d] to-[#2d5986] text-white p-8 sm:p-10">
         <div className="absolute top-0 right-0 w-72 h-72 opacity-[0.07]" style={{
@@ -346,7 +368,7 @@ export default function Section11({ assessmentId }: Section11Props) {
             Complete Longevity Analysis
           </h1>
           <div className="h-1 w-16 bg-[#F5A623] rounded-full mt-3 mb-6" />
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-4 sm:gap-x-8 gap-y-3">
             <div>
               <p className="text-[10px] uppercase tracking-[0.15em] text-white/50 mb-0.5">Client</p>
               <p className="text-sm font-semibold">{(clientInfo.clientName as string) || 'N/A'}</p>
@@ -368,19 +390,19 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── REPORT BODY ─── */}
-      <div className="px-6">
+      <div className="px-4 sm:px-8 py-2">
 
       {/* ─── SECTION 2: DAILY READINESS ─── */}
       <div className="report-section mt-8 print:mt-6">
         <SectionHeading>Assessment Day Readiness</SectionHeading>
         <div className="rounded-xl border border-gray-100 bg-[#f8fafc] overflow-hidden">
-          <div className="grid grid-cols-3 sm:grid-cols-6 divide-x divide-gray-100">
-            <div className="px-4"><ContextCell label="Sleep" value={readiness.sleepHours != null ? `${readiness.sleepHours} hrs` : null} /></div>
-            <div className="px-4"><ContextCell label="Stress" value={readiness.stressLevel != null ? `${readiness.stressLevel}/10` : null} /></div>
-            <div className="px-4"><ContextCell label="Energy" value={readiness.energyLevel != null ? `${readiness.energyLevel}/10` : null} /></div>
-            <div className="px-4"><ContextCell label="Soreness" value={readiness.sorenessLevel != null ? `${readiness.sorenessLevel}/10` : null} /></div>
-            <div className="px-4"><ContextCell label="Caffeine" value={CAFFEINE_LABELS[readiness.caffeineToday as string] || null} /></div>
-            <div className="px-4"><ContextCell label="Alcohol (48h)" value={ALCOHOL_LABELS[readiness.alcoholLast48 as string] || null} /></div>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 divide-x divide-gray-100">
+            <div className="px-3 sm:px-4"><ContextCell label="Sleep" value={readiness.sleepHours != null ? `${readiness.sleepHours} hrs` : null} /></div>
+            <div className="px-3 sm:px-4"><ContextCell label="Stress" value={readiness.stressLevel != null ? `${readiness.stressLevel}/10` : null} /></div>
+            <div className="px-3 sm:px-4"><ContextCell label="Energy" value={readiness.energyLevel != null ? `${readiness.energyLevel}/10` : null} /></div>
+            <div className="px-3 sm:px-4"><ContextCell label="Soreness" value={readiness.sorenessLevel != null ? `${readiness.sorenessLevel}/10` : null} /></div>
+            <div className="px-3 sm:px-4"><ContextCell label="Caffeine" value={CAFFEINE_LABELS[readiness.caffeineToday as string] || null} /></div>
+            <div className="px-3 sm:px-4"><ContextCell label="Alcohol (48h)" value={ALCOHOL_LABELS[readiness.alcoholLast48 as string] || null} /></div>
           </div>
         </div>
       </div>
@@ -398,7 +420,7 @@ export default function Section11({ assessmentId }: Section11Props) {
         </div>
         <div className="rounded-xl border border-gray-100 overflow-hidden">
           {/* Safety screening */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-2 px-4 py-3 bg-[#f8fafc]">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-x-4 gap-y-2 px-3 sm:px-4 py-3 bg-[#f8fafc]">
             {([
               { key: 'chestPain', label: 'Chest Pain' },
               { key: 'dizziness', label: 'Dizziness' },
@@ -454,18 +476,18 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       {/* ─── SECTION 4: CONSENT STATUS ─── */}
       <div className="report-section mt-6 print:mt-4">
-        <div className="flex items-center gap-4 px-4 py-3 bg-[#f8fafc] rounded-lg border border-gray-100 text-[12px]">
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 px-3 sm:px-4 py-3 bg-[#f8fafc] rounded-lg border border-gray-100 text-[12px]">
           <div className="flex items-center gap-1.5">
             <div className={`w-2.5 h-2.5 rounded-full ${consentSigned ? 'bg-emerald-500' : 'bg-gray-300'}`} />
             <span className="font-medium text-[#1a202c]">{consentSigned ? 'Consent Provided' : 'Consent Not Recorded'}</span>
           </div>
-          <div className="h-4 w-px bg-gray-200" />
+          <div className="hidden sm:block h-4 w-px bg-gray-200" />
           <span className="text-[#64748b]">
             Client: {consent.clientSignatureName ? `${consent.clientSignatureName}` : '—'}
             {consent.clientSignatureDate ? ` (${consent.clientSignatureDate})` : ''}
             {clientSigCaptured ? ' — Signed' : ''}
           </span>
-          <div className="h-4 w-px bg-gray-200" />
+          <div className="hidden sm:block h-4 w-px bg-gray-200" />
           <span className="text-[#64748b]">
             Coach: {consent.coachSignatureName ? `${consent.coachSignatureName}` : '—'}
             {consent.coachSignatureDate ? ` (${consent.coachSignatureDate})` : ''}
@@ -484,8 +506,33 @@ export default function Section11({ assessmentId }: Section11Props) {
           )}
         </div>
 
-        <div className="grid grid-cols-5 gap-2 sm:gap-3">
-          {(['elite', 'great', 'normal', 'cautious', 'poor'] as RatingTier[]).map((tier) => {
+        {/* Row 1: Elite, Great, Normal */}
+        <div className="grid grid-cols-3 gap-2 sm:gap-3">
+          {(['elite', 'great', 'normal'] as RatingTier[]).map((tier) => {
+            const pct = totalRated > 0 ? Math.round((tierCounts[tier] / totalRated) * 100) : 0;
+            return (
+              <div key={tier} className="report-tier-card relative overflow-hidden rounded-xl border border-gray-100 bg-white p-3 sm:p-4 text-center">
+                <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: TIER_DOT[tier] }} />
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] mt-1 mb-1" style={{ color: TIER_DOT[tier] }}>
+                  {TIER_LABELS[tier]}
+                </p>
+                <p className="text-3xl sm:text-4xl font-black text-[#1a365d] leading-none">
+                  {tierCounts[tier]}
+                </p>
+                <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-500"
+                    style={{ width: `${pct}%`, backgroundColor: TIER_DOT[tier] }}
+                  />
+                </div>
+                <p className="text-[10px] text-[#64748b] mt-1 font-medium">{pct}%</p>
+              </div>
+            );
+          })}
+        </div>
+        {/* Row 2: Cautious, Poor */}
+        <div className="grid grid-cols-2 gap-2 sm:gap-3 mt-2 sm:mt-3 max-w-[66%] mx-auto">
+          {(['cautious', 'poor'] as RatingTier[]).map((tier) => {
             const pct = totalRated > 0 ? Math.round((tierCounts[tier] / totalRated) * 100) : 0;
             return (
               <div key={tier} className="report-tier-card relative overflow-hidden rounded-xl border border-gray-100 bg-white p-3 sm:p-4 text-center">
@@ -510,7 +557,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── DETAILED RESULTS BY CATEGORY ─── */}
-      <div className="report-section mt-8 print:mt-6">
+      <div className="report-section mt-8 pt-8 print:mt-6" data-pdf-break>
         <div className="flex items-center gap-3 mb-5">
           <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
           <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Detailed Results</h2>
@@ -529,7 +576,7 @@ export default function Section11({ assessmentId }: Section11Props) {
               : [];
 
             return (
-              <div key={cat} className="report-category" {...(cat === 'Strength Testing' ? { 'data-pdf-break': true } : {})}>
+              <div key={cat} className={`report-category${cat === 'Strength Testing' ? ' pt-8' : ''}`} {...(cat === 'Strength Testing' ? { 'data-pdf-break': true } : {})}>
                 {/* Category header */}
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#1a365d]/70">{cat}</span>
@@ -566,7 +613,7 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       {/* ─── TIER LEGEND ─── */}
       <div className="report-section mt-6 print:mt-4">
-        <div className="flex items-center justify-center gap-5 py-3 px-4 bg-[#f8fafc] rounded-lg border border-gray-100">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-5 py-3 px-3 sm:px-4 bg-[#f8fafc] rounded-lg border border-gray-100">
           {(['elite', 'great', 'normal', 'cautious', 'poor'] as RatingTier[]).map((tier) => (
             <div key={tier} className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: TIER_DOT[tier] }} />

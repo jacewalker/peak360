@@ -11,7 +11,10 @@
     "db:push": "drizzle-kit push",
     "db:studio": "drizzle-kit studio",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "test:e2e": "playwright test",
+    "test:e2e:mobile": "playwright test --project=mobile",
+    "test:e2e:desktop": "playwright test --project=desktop"
   },
   "dependencies": {
     "better-sqlite3": "^12.6.2",
@@ -28,6 +31,7 @@
     "zustand": "^5.0.11"
   },
   "devDependencies": {
+    "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",

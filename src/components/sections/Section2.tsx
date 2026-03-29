@@ -16,7 +16,7 @@ export default function Section2({ data, onChange }: SectionProps) {
         description="Current physical and mental state to contextualize test results."
       />
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <FormField
           id="sleepHours"
           label="Hours of Sleep Last Night"

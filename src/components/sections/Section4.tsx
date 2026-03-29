@@ -15,7 +15,7 @@ export default function Section4({ data, onChange }: SectionProps) {
         description="Please read the consent agreement and provide signatures."
       />
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <div className="bg-surface-alt rounded-lg p-4 text-sm text-foreground space-y-3 max-h-64 overflow-y-auto">
           <h4 className="font-semibold">Consent Agreement</h4>
           <p>
@@ -58,7 +58,7 @@ export default function Section4({ data, onChange }: SectionProps) {
         </label>
       </div>
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <h3 className="text-lg font-semibold text-navy">Client Signature</h3>
         <FormRow>
           <FormField
@@ -85,7 +85,7 @@ export default function Section4({ data, onChange }: SectionProps) {
         />
       </div>
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <h3 className="text-lg font-semibold text-navy">Coach / Administrator Signature</h3>
         <FormRow>
           <FormField

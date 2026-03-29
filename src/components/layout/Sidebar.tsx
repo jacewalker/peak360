@@ -139,7 +139,7 @@ export default function Sidebar() {
       {/* Mobile hamburger */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-navy text-white/70 hover:text-white shadow-lg hover:shadow-xl transition-all"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2.5 rounded-lg bg-navy text-white/70 hover:text-white shadow-lg hover:shadow-xl transition-all"
         aria-label="Open menu"
       >
         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -159,7 +159,7 @@ export default function Sidebar() {
           onClick={() => setMobileOpen(false)}
         >
           <aside
-            className="w-64 h-full bg-navy-dark flex flex-col shadow-2xl"
+            className="w-[80vw] max-w-64 h-full bg-navy-dark flex flex-col shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           >
             <button

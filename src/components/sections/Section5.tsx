@@ -148,7 +148,7 @@ export default function Section5({ data, onChange, assessmentId }: SectionProps)
         />
       )}
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-8">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-8">
         <TestCategory title="Lipid Panel">
           <FormRow>
             <FormField id="cholesterolTotal" label="Total Cholesterol (mmol/L)" type="number" value={data.cholesterolTotal as number} onChange={n('cholesterolTotal')} step={0.1} />

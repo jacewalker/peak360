@@ -80,7 +80,7 @@ export default function HomePage() {
     <div className="min-h-screen">
       {/* Hero section */}
       <div className="bg-gradient-to-b from-navy-dark to-navy py-10 sm:py-16 text-white">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 text-center">
+        <div className="max-w-4xl mx-auto pl-14 pr-4 sm:px-6 lg:px-6 text-center">
           <div className="inline-flex items-center gap-2 bg-white/10 rounded-full px-4 py-1.5 text-sm mb-6 backdrop-blur-sm">
             <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
             <span className="text-white/80">11-Section Comprehensive Evaluation</span>

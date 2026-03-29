@@ -12,7 +12,7 @@ export default function Section10({ }: SectionProps) {
         description="Balance and power tests are now recorded in Section 8 — Strength Testing."
       />
 
-      <div className="bg-white rounded-xl border border-border p-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6">
         <p className="text-sm text-muted text-center">
           All balance and power tests have been moved to Section 8 (Strength Testing) to match the testing order.
         </p>

@@ -26,7 +26,7 @@ export default function Section3({ data, onChange }: SectionProps) {
         description="Important health screening questions before physical assessment."
       />
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <RadioGroup
           name="chestPain"
           label="Do you experience chest pain during exercise?"
@@ -84,7 +84,7 @@ export default function Section3({ data, onChange }: SectionProps) {
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <h3 className="text-lg font-semibold text-navy">Additional Medical Information</h3>
         <TextareaField
           id="currentMedications"

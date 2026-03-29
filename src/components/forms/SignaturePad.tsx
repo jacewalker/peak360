@@ -11,8 +11,24 @@ interface SignaturePadProps {
 
 export default function SignaturePad({ label, value, onChange, nameValue }: SignaturePadProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
   const [isDrawing, setIsDrawing] = useState(false);
   const [hasDrawn, setHasDrawn] = useState(false);
+
+  // Resize canvas to match container
+  useEffect(() => {
+    const resizeCanvas = () => {
+      const canvas = canvasRef.current;
+      const container = containerRef.current;
+      if (!canvas || !container) return;
+      const rect = container.getBoundingClientRect();
+      canvas.width = rect.width * 2; // 2x for retina
+      canvas.height = 200 * 2;
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    return () => window.removeEventListener('resize', resizeCanvas);
+  }, []);
 
   // Restore existing signature
   useEffect(() => {
@@ -91,7 +107,8 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
-    ctx.font = 'italic 28px Georgia, serif';
+    const scale = canvasRef.current.width / canvasRef.current.getBoundingClientRect().width;
+    ctx.font = `italic ${28 * scale}px Georgia, serif`;
     ctx.fillStyle = '#1a365d';
     ctx.textAlign = 'center';
     ctx.fillText(nameValue, canvasRef.current.width / 2, canvasRef.current.height / 2 + 10);
@@ -102,12 +119,10 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
   return (
     <div className="space-y-2">
       <label className="block text-sm font-medium text-navy">{label}</label>
-      <div className="border border-border rounded-lg overflow-hidden bg-white">
+      <div ref={containerRef} className="border border-border rounded-lg overflow-hidden bg-white">
         <canvas
           ref={canvasRef}
-          width={600}
-          height={200}
-          className="w-full h-[120px] cursor-crosshair touch-none"
+          className="w-full h-[150px] sm:h-[120px] cursor-crosshair touch-none"
           onMouseDown={startDraw}
           onMouseMove={draw}
           onMouseUp={endDraw}
@@ -121,7 +136,7 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
         <button
           type="button"
           onClick={clear}
-          className="px-3 py-1 text-xs text-muted hover:text-red-600 border border-border rounded transition-colors"
+          className="px-3 py-2 sm:py-1 text-xs text-muted hover:text-red-600 border border-border rounded transition-colors min-h-[44px] sm:min-h-0"
         >
           Clear
         </button>
@@ -129,7 +144,7 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
           <button
             type="button"
             onClick={autoSign}
-            className="px-3 py-1 text-xs text-navy hover:text-gold border border-border rounded transition-colors"
+            className="px-3 py-2 sm:py-1 text-xs text-navy hover:text-gold border border-border rounded transition-colors min-h-[44px] sm:min-h-0"
           >
             Auto-sign from name
           </button>

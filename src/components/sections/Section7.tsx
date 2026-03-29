@@ -17,7 +17,7 @@ export default function Section7({ data, onChange }: SectionProps) {
         description="Choose one cardiovascular test and record vitals."
       />
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <RadioGroup
           name="cardioTest"
           label="Choose ONE cardiovascular test"
@@ -56,7 +56,7 @@ export default function Section7({ data, onChange }: SectionProps) {
         )}
       </div>
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <h3 className="text-lg font-semibold text-navy">Vitals</h3>
         <FormRow columns={3}>
           <FormField id="restingHR" label="Resting Heart Rate (bpm)" type="number" value={data.restingHR as number} onChange={n('restingHR')} />

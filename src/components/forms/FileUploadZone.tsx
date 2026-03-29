@@ -238,7 +238,7 @@ export default function FileUploadZone({
         onDragLeave={!processingStage ? handleDragLeave : undefined}
         onDrop={!processingStage ? handleDrop : undefined}
         className={`
-          rounded-lg p-6 text-center transition-all duration-300
+          rounded-lg p-4 sm:p-6 text-center transition-all duration-300
           ${processingStage
             ? processingStage === 'done'
               ? 'border-2 border-emerald-200 bg-emerald-50/30'

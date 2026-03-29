@@ -16,7 +16,7 @@ export default function Section9({ data, onChange }: SectionProps) {
         description="Record bilateral measurements for each mobility test."
       />
 
-      <div className="bg-white rounded-xl border border-border p-6 space-y-6">
+      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
         <FormRow>
           <FormField id="overheadReachLeft" label="Overhead Reach - Left (cm from wall)" type="number" value={data.overheadReachLeft as number} onChange={n('overheadReachLeft')} step={0.1} />
           <FormField id="overheadReachRight" label="Overhead Reach - Right (cm from wall)" type="number" value={data.overheadReachRight as number} onChange={n('overheadReachRight')} step={0.1} />

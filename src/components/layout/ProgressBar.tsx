@@ -31,7 +31,7 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
             style={{ width: `${progress}%` }}
           />
         </div>
-        <div className="flex justify-between mt-2.5">
+        <div className="flex justify-between mt-2.5 overflow-x-auto scrollbar-hide gap-1 sm:gap-0">
           {VISIBLE_SECTIONS.map((num, idx) => {
             const displayNum = idx + 1;
             const isCurrent = num === currentSection;
@@ -42,7 +42,7 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
                 key={num}
                 href={`/assessment/${assessmentId}/section/${num}`}
                 className={`
-                  group relative w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center
+                  group relative w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shrink-0
                   text-[10px] sm:text-xs font-semibold transition-all duration-300 hover:scale-110
                   ${isCurrent
                     ? 'bg-gold text-navy shadow-[0_0_0_3px_rgba(245,166,35,0.2)] scale-110'
