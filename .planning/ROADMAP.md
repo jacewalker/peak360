@@ -27,10 +27,12 @@ This milestone transforms Peak360 from a single-user assessment tool into a mult
   3. Markers critically out of range show a visible referral flag recommending further medical investigation
   4. Markers in poor or cautious tiers display supplementation and lifestyle recommendations
   5. A medical advice disclaimer is clearly visible on every generated report
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 01-01: TBD
+- [ ] 01-01-PLAN.md — Gender-specific blood marker data layer (types, ranges, rating engine, report-markers)
+- [ ] 01-02-PLAN.md — Enhanced insights with specific supplement dosages and lifestyle recommendations
+- [ ] 01-03-PLAN.md — Report UI: range bars, referral flags, and medical disclaimer
 **UI hint**: yes
 
 ### Phase 2: Authentication & Ownership
@@ -85,7 +87,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Clinical Accuracy & Report Quality | 0/0 | Not started | - |
+| 1. Clinical Accuracy & Report Quality | 0/3 | Planning complete | - |
 | 2. Authentication & Ownership | 0/0 | Not started | - |
 | 3. Admin Panel & Normative Data Management | 0/0 | Not started | - |
 | 4. Security & Client Portal | 0/0 | Not started | - |
