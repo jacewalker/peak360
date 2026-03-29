@@ -234,7 +234,7 @@ describe('generatePeak360Insights', () => {
 
     it('kidney markers recommend hydration but not self-supplementation', () => {
       const insights = generatePeak360Insights({
-        markers: [{ testKey: 'creatinine', label: 'Creatinine', value: 200 }],
+        markers: [{ testKey: 'creatinine', label: 'Creatinine', value: 2.0 }],
       });
       const kidney = insights.find(i => i.title === 'Kidney markers flagged');
       expect(kidney).toBeDefined();
@@ -282,7 +282,7 @@ describe('generatePeak360Insights', () => {
         age: 40,
         gender: 'male',
         markers: [
-          { testKey: 'hemoglobin', label: 'Hemoglobin', value: 80 },
+          { testKey: 'hemoglobin', label: 'Hemoglobin', value: 10 },
           { testKey: 'ferritin', label: 'Ferritin', value: 5 },
         ],
       });
@@ -314,7 +314,7 @@ describe('generatePeak360Insights', () => {
   describe('new marker cases', () => {
     it('hemoglobin flagged generates a distinct insight', () => {
       const insights = generatePeak360Insights({
-        markers: [{ testKey: 'hemoglobin', label: 'Hemoglobin', value: 80 }],
+        markers: [{ testKey: 'hemoglobin', label: 'Hemoglobin', value: 10 }],
       });
       const hemo = insights.find(i => i.title.toLowerCase().includes('hemoglobin'));
       expect(hemo).toBeDefined();
@@ -322,7 +322,7 @@ describe('generatePeak360Insights', () => {
 
     it('uric_acid flagged generates an insight', () => {
       const insights = generatePeak360Insights({
-        markers: [{ testKey: 'uric_acid', label: 'Uric Acid', value: 600 }],
+        markers: [{ testKey: 'uric_acid', label: 'Uric Acid', value: 9 }],
       });
       const uric = insights.find(i => i.title.toLowerCase().includes('uric acid'));
       expect(uric).toBeDefined();
@@ -338,7 +338,7 @@ describe('generatePeak360Insights', () => {
 
     it('fsh flagged generates an insight', () => {
       const insights = generatePeak360Insights({
-        markers: [{ testKey: 'fsh', label: 'FSH', value: 50 }],
+        markers: [{ testKey: 'fsh', label: 'FSH', value: 0.5 }],
       });
       const fsh = insights.find(i => i.title.toLowerCase().includes('reproductive') || i.title.toLowerCase().includes('fsh'));
       expect(fsh).toBeDefined();
