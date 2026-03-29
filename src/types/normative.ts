@@ -29,7 +29,7 @@ export interface GenderedMarker {
 export type NormativeMarker = SimpleMarker | GenderedAgeMarker | GenderedMarker;
 
 export interface NormativeData {
-  blood_tests: Record<string, SimpleMarker>;
+  blood_tests: Record<string, SimpleMarker | GenderedMarker>;
   body_comp: {
     bmi: SimpleMarker;
     bwi: SimpleMarker;

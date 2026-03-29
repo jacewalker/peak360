@@ -156,3 +156,55 @@ describe('getPeak360Rating', () => {
     expect(result!.value).toBe(4.5);
   });
 });
+
+describe('getStandards gender-aware blood tests', () => {
+  it('returns male tier ranges for hemoglobin when gender is male', () => {
+    const result = getStandards('hemoglobin', null, 'male');
+    expect(result.standards).not.toBeNull();
+    expect(result.unit).toBe('g/dL');
+    // Male normal range starts at 14.0
+    expect(result.standards!.normal.min).toBe(14.0);
+  });
+
+  it('returns female tier ranges for hemoglobin when gender is female', () => {
+    const result = getStandards('hemoglobin', null, 'female');
+    expect(result.standards).not.toBeNull();
+    expect(result.unit).toBe('g/dL');
+    // Female normal range starts at 12.0
+    expect(result.standards!.normal.min).toBe(12.0);
+  });
+
+  it('falls back to male ranges when gender is null', () => {
+    const result = getStandards('hemoglobin', null, null);
+    expect(result.standards).not.toBeNull();
+    // Should match male normal range
+    expect(result.standards!.normal.min).toBe(14.0);
+  });
+
+  it('falls back to male ranges when gender is empty string', () => {
+    const result = getStandards('hemoglobin', null, '');
+    expect(result.standards).not.toBeNull();
+    expect(result.standards!.normal.min).toBe(14.0);
+  });
+
+  it('still returns SimpleMarker ranges for ungendered blood markers', () => {
+    const result = getStandards('cholesterol_total', null, 'female');
+    expect(result.standards).not.toBeNull();
+    expect(result.unit).toBe('mmol/L');
+    // Cholesterol is not gendered, so same ranges for both
+    const maleResult = getStandards('cholesterol_total', null, 'male');
+    expect(result.standards!.normal.min).toBe(maleResult.standards!.normal.min);
+  });
+
+  it('rates hemoglobin 13.5 as normal for female', () => {
+    const result = getPeak360Rating('hemoglobin', 13.5, null, 'female');
+    expect(result).not.toBeNull();
+    expect(result!.tier).toBe('normal');
+  });
+
+  it('rates hemoglobin 13.5 as cautious for male', () => {
+    const result = getPeak360Rating('hemoglobin', 13.5, null, 'male');
+    expect(result).not.toBeNull();
+    expect(result!.tier).toBe('cautious');
+  });
+});

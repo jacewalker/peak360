@@ -70,6 +70,24 @@ export const normativeData: NormativeData = {
       great: { min: 125, max: 149 },
       elite: { min: 150, max: 300 },
     },
+    hemoglobin: {
+      unit: 'g/dL',
+      note: 'Oxygen-carrying capacity; lower in females is physiologically normal.',
+      male: {
+        poor: { min: 0, max: 12.9 },
+        cautious: { min: 13.0, max: 13.9 },
+        normal: { min: 14.0, max: 16.9 },
+        great: { min: 17.0, max: 17.9 },
+        elite: { min: 18.0, max: 22 },
+      },
+      female: {
+        poor: { min: 0, max: 10.9 },
+        cautious: { min: 11.0, max: 11.9 },
+        normal: { min: 12.0, max: 15.4 },
+        great: { min: 15.5, max: 16.4 },
+        elite: { min: 16.5, max: 22 },
+      },
+    },
   },
 
   body_comp: {

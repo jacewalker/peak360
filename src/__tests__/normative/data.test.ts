@@ -14,23 +14,44 @@ describe('normativeData completeness', () => {
       }
     });
 
-    it('each blood test has all 5 tiers', () => {
+    it('each blood test has all 5 tiers (direct or per-gender)', () => {
       const tiers = ['poor', 'cautious', 'normal', 'great', 'elite'];
       for (const [key, marker] of Object.entries(normativeData.blood_tests)) {
-        for (const tier of tiers) {
-          expect((marker as Record<string, unknown>)[tier], `Missing tier ${tier} in ${key}`).toBeDefined();
-        }
         expect(marker.unit, `Missing unit in ${key}`).toBeDefined();
+        if ('male' in marker && 'female' in marker) {
+          // GenderedMarker: check tiers inside male/female
+          const gendered = marker as { male: Record<string, unknown>; female: Record<string, unknown> };
+          for (const tier of tiers) {
+            expect(gendered.male[tier], `Missing tier ${tier} in ${key}.male`).toBeDefined();
+            expect(gendered.female[tier], `Missing tier ${tier} in ${key}.female`).toBeDefined();
+          }
+        } else {
+          // SimpleMarker: check tiers directly
+          for (const tier of tiers) {
+            expect((marker as Record<string, unknown>)[tier], `Missing tier ${tier} in ${key}`).toBeDefined();
+          }
+        }
       }
     });
 
     it('each tier range has min and max', () => {
       const tiers = ['poor', 'cautious', 'normal', 'great', 'elite'];
       for (const [key, marker] of Object.entries(normativeData.blood_tests)) {
-        for (const tier of tiers) {
-          const range = (marker as Record<string, { min: number; max: number }>)[tier];
-          expect(typeof range.min, `Missing min in ${key}.${tier}`).toBe('number');
-          expect(typeof range.max, `Missing max in ${key}.${tier}`).toBe('number');
+        if ('male' in marker && 'female' in marker) {
+          const gendered = marker as { male: Record<string, { min: number; max: number }>; female: Record<string, { min: number; max: number }> };
+          for (const gender of ['male', 'female'] as const) {
+            for (const tier of tiers) {
+              const range = gendered[gender][tier];
+              expect(typeof range.min, `Missing min in ${key}.${gender}.${tier}`).toBe('number');
+              expect(typeof range.max, `Missing max in ${key}.${gender}.${tier}`).toBe('number');
+            }
+          }
+        } else {
+          for (const tier of tiers) {
+            const range = (marker as Record<string, { min: number; max: number }>)[tier];
+            expect(typeof range.min, `Missing min in ${key}.${tier}`).toBe('number');
+            expect(typeof range.max, `Missing max in ${key}.${tier}`).toBe('number');
+          }
         }
       }
     });

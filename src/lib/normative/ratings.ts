@@ -95,6 +95,10 @@ export function getStandards(testKey: string, age?: number | null, gender?: stri
   // Blood tests
   if (key in normativeData.blood_tests) {
     const test = normativeData.blood_tests[key];
+    if ('male' in test && 'female' in test) {
+      const genderData = test[g === 'female' ? 'female' : 'male'];
+      return { unit: test.unit || null, note: test.note || null, standards: genderData as unknown as TierRanges };
+    }
     return { unit: test.unit || null, note: test.note || null, standards: test as unknown as TierRanges };
   }
 
