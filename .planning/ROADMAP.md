@@ -30,8 +30,8 @@ This milestone transforms Peak360 from a single-user assessment tool into a mult
 **Plans**: 3 plans
 
 Plans:
-- [x] 01-01-PLAN.md — Gender-specific blood marker data layer (types, ranges, rating engine, report-markers)
-- [ ] 01-02-PLAN.md — Enhanced insights with specific supplement dosages and lifestyle recommendations
+- [ ] 01-01-PLAN.md — Gender-specific blood marker data layer (types, ranges, rating engine, report-markers)
+- [x] 01-02-PLAN.md — Enhanced insights with specific supplement dosages and lifestyle recommendations
 - [ ] 01-03-PLAN.md — Report UI: range bars, referral flags, and medical disclaimer
 **UI hint**: yes
 
