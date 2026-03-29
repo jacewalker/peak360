@@ -180,7 +180,7 @@ describe('generatePeak360Insights', () => {
       const insights = generatePeak360Insights({
         markers: [{ testKey: 'homocysteine', label: 'Homocysteine', value: 20 }],
       });
-      const homo = insights.find(i => i.title === 'Inflammation / vascular stress elevated');
+      const homo = insights.find(i => i.title === 'Homocysteine elevated');
       expect(homo).toBeDefined();
       const allDoNow = homo!.doNow.join(' ');
       expect(allDoNow.toLowerCase()).toContain('methylfolate');
