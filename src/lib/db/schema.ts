@@ -9,6 +9,7 @@ export const assessments = pgTable('assessments', {
   assessmentDate: text('assessment_date'),
   currentSection: integer('current_section').default(1),
   status: text('status').default('in_progress'), // in_progress | completed
+  normativeVersionId: text('normative_version_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
@@ -38,5 +39,26 @@ export const uploadedFiles = pgTable('uploaded_files', {
   extractedData: jsonb('extracted_data'),
   verificationResult: jsonb('verification_result'),
   status: text('status').default('pending'), // pending | extracting | verifying | completed | failed
+  createdAt: text('created_at').notNull(),
+});
+
+export const normativeRanges = pgTable('normative_ranges', {
+  id: serial('id').primaryKey(),
+  testKey: text('test_key').notNull(),
+  category: text('category').notNull(),
+  gender: text('gender'),
+  ageGroup: text('age_group'),
+  unit: text('unit'),
+  note: text('note'),
+  tiers: jsonb('tiers'),
+  severityWeight: integer('severity_weight'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const normativeVersions = pgTable('normative_versions', {
+  id: text('id').primaryKey(),
+  rangesJson: jsonb('ranges_json'),
+  contentHash: text('content_hash').notNull(),
   createdAt: text('created_at').notNull(),
 });

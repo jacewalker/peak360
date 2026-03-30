@@ -88,6 +88,30 @@ export async function runMigrations() {
         "created_at" text NOT NULL
       )
     `);
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "normative_ranges" (
+        "id" serial PRIMARY KEY NOT NULL,
+        "test_key" text NOT NULL,
+        "category" text NOT NULL,
+        "gender" text,
+        "age_group" text,
+        "unit" text,
+        "note" text,
+        "tiers" jsonb,
+        "severity_weight" integer,
+        "created_at" text NOT NULL,
+        "updated_at" text NOT NULL
+      )
+    `);
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "normative_versions" (
+        "id" text PRIMARY KEY NOT NULL,
+        "ranges_json" jsonb,
+        "content_hash" text NOT NULL,
+        "created_at" text NOT NULL
+      )
+    `);
+    await d.execute(sql`ALTER TABLE "assessments" ADD COLUMN IF NOT EXISTS "normative_version_id" text`);
   } else {
     d.run(sql`
       CREATE TABLE IF NOT EXISTS "assessments" (
@@ -134,6 +158,32 @@ export async function runMigrations() {
         "created_at" text NOT NULL
       )
     `);
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "normative_ranges" (
+        "id" integer PRIMARY KEY AUTOINCREMENT,
+        "test_key" text NOT NULL,
+        "category" text NOT NULL,
+        "gender" text,
+        "age_group" text,
+        "unit" text,
+        "note" text,
+        "tiers" text,
+        "severity_weight" integer,
+        "created_at" text NOT NULL,
+        "updated_at" text NOT NULL
+      )
+    `);
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "normative_versions" (
+        "id" text PRIMARY KEY NOT NULL,
+        "ranges_json" text,
+        "content_hash" text NOT NULL,
+        "created_at" text NOT NULL
+      )
+    `);
+    try {
+      d.run(sql`ALTER TABLE "assessments" ADD COLUMN "normative_version_id" text`);
+    } catch { /* column already exists */ }
   }
 
   globalForDb.migrated = true;
