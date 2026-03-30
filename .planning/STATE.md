@@ -77,6 +77,12 @@ Recent decisions affecting current work:
 
 None yet.
 
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260331-dob | Section 11 fallback to current DB overrides for assessments without normative snapshot | 2026-03-30 | be400eb | [260331-dob-section11-fallback-to-current-db-overrid](./quick/260331-dob-section11-fallback-to-current-db-overrid/) |
+
 ### Blockers/Concerns
 
 - Better Auth + Next.js 16 proxy.ts integration has limited community examples (Phase 2 risk)
