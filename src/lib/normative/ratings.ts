@@ -1,5 +1,6 @@
-import type { RatingTier, TierRanges, RatingResult } from '@/types/normative';
+import type { RatingTier, TierRanges, RatingResult, NormativeVersionSnapshot } from '@/types/normative';
 import { normativeData } from './data';
+import type { DbRangesMap } from './db-ranges';
 
 function getFitnessAgeGroup(age: number): string | null {
   if (isNaN(age)) return null;
@@ -169,4 +170,98 @@ export function getPeak360Rating(
 export function tierScore(tier: RatingTier): number {
   const scores: Record<RatingTier, number> = { poor: 1, cautious: 2, normal: 3, great: 4, elite: 5 };
   return scores[tier] || 0;
+}
+
+/**
+ * Find the best matching variant from a list of DB range entries.
+ * Priority: exact gender+ageGroup > gender-only > unisex (null gender).
+ */
+function findBestVariant<T extends { gender: string | null; ageGroup: string | null }>(
+  variants: T[],
+  gender?: string | null,
+  ageGroup?: string | null
+): T | null {
+  if (variants.length === 0) return null;
+
+  const g = (gender || '').toLowerCase() || null;
+
+  // Exact match: gender + ageGroup
+  if (g && ageGroup) {
+    const exact = variants.find(v => v.gender === g && v.ageGroup === ageGroup);
+    if (exact) return exact;
+  }
+
+  // Gender-only match (ageGroup null)
+  if (g) {
+    const genderOnly = variants.find(v => v.gender === g && !v.ageGroup);
+    if (genderOnly) return genderOnly;
+  }
+
+  // Unisex match (gender null, ageGroup null)
+  const unisex = variants.find(v => !v.gender && !v.ageGroup);
+  if (unisex) return unisex;
+
+  // Fallback: first variant
+  return variants[0];
+}
+
+/**
+ * Get standards using DB-backed ranges with hardcoded fallback.
+ * dbRangesMap is the Map returned by preloadDbRanges().
+ */
+export function getStandardsWithOverrides(
+  testKey: string,
+  age: number | null | undefined,
+  gender: string | null | undefined,
+  dbRangesMap: DbRangesMap
+): Standards & { severityWeight?: number | null } {
+  const entries = dbRangesMap.get(testKey);
+
+  if (entries && entries.length > 0) {
+    const numAge = age ? Number(age) : NaN;
+    const ageGroup = !isNaN(numAge) ? getFitnessAgeGroup(numAge) : null;
+    const match = findBestVariant(entries, gender, ageGroup);
+
+    if (match && match.tiers) {
+      return {
+        unit: match.unit,
+        note: match.note,
+        standards: match.tiers,
+        severityWeight: match.severityWeight,
+      };
+    }
+  }
+
+  // Fallback to hardcoded data
+  return getStandards(testKey, age, gender);
+}
+
+/**
+ * Get standards from a versioned snapshot (stored in normative_versions.ranges_json).
+ * Falls back to hardcoded data if testKey not found in snapshot.
+ */
+export function getStandardsFromSnapshot(
+  snapshot: NormativeVersionSnapshot,
+  testKey: string,
+  age?: number | null,
+  gender?: string | null
+): Standards {
+  const marker = snapshot[testKey];
+
+  if (marker && marker.variants && marker.variants.length > 0) {
+    const numAge = age ? Number(age) : NaN;
+    const ageGroup = !isNaN(numAge) ? getFitnessAgeGroup(numAge) : null;
+    const match = findBestVariant(marker.variants, gender, ageGroup);
+
+    if (match && match.tiers) {
+      return {
+        unit: marker.unit ?? null,
+        note: marker.note ?? null,
+        standards: match.tiers,
+      };
+    }
+  }
+
+  // Fallback to hardcoded data
+  return getStandards(testKey, age, gender);
 }
