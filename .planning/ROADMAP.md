@@ -60,10 +60,13 @@ Plans:
   3. Existing assessments retain the normative range version they were created with, unaffected by subsequent admin edits
   4. If no DB overrides exist for a marker, the system falls back to hardcoded defaults and ratings still work correctly
   5. An admin can configure red flag marker severity weighting
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 03-01: TBD
+- [ ] 03-01-PLAN.md — DB schema, types, query layer, and rating engine fallback (ADMN-01, ADMN-02)
+- [ ] 03-02-PLAN.md — Normative range versioning with assessment snapshots (ADMN-05)
+- [ ] 03-03-PLAN.md — Admin browse UI: category browser with search/filter (ADMN-03)
+- [ ] 03-04-PLAN.md — Admin edit UI: tier editor, severity slider, save/reset (ADMN-04, ADMN-06)
 **UI hint**: yes
 
 ### Phase 4: Security & Client Portal
@@ -89,5 +92,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Clinical Accuracy & Report Quality | 0/3 | Planning complete | - |
 | 2. Authentication & Ownership | 0/0 | Not started | - |
-| 3. Admin Panel & Normative Data Management | 0/0 | Not started | - |
+| 3. Admin Panel & Normative Data Management | 0/4 | Planning complete | - |
 | 4. Security & Client Portal | 0/0 | Not started | - |
