@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { eq } from 'drizzle-orm';
-import { getVersionSnapshot } from '@/lib/normative/versioning';
+import { getVersionSnapshot, mergeDbWithHardcoded } from '@/lib/normative/versioning';
 
 const isPostgres = !!process.env.DATABASE_URL;
 
@@ -38,8 +38,9 @@ export async function GET(
     const versionId = rows[0].normativeVersionId;
 
     if (!versionId) {
-      // Old assessment without version pinning — fall back to hardcoded
-      return NextResponse.json({ success: true, data: null });
+      // Old assessment without version pinning — build live snapshot from current DB overrides + hardcoded
+      const liveSnapshot = await mergeDbWithHardcoded();
+      return NextResponse.json({ success: true, data: liveSnapshot });
     }
 
     const snapshot = await getVersionSnapshot(versionId);
