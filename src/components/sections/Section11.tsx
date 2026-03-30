@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { getPeak360Rating } from '@/lib/normative/ratings';
+import { getPeak360Rating, getStandardsFromSnapshot, normalizeRating } from '@/lib/normative/ratings';
 import { generatePeak360Insights } from '@/lib/normative/insights';
-import type { RatingTier } from '@/types/normative';
+import type { RatingTier, NormativeVersionSnapshot } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
 
 interface ReportMarker {
@@ -204,13 +204,21 @@ export default function Section11({ assessmentId }: Section11Props) {
 
   useEffect(() => {
     const loadReport = async () => {
+      // Fetch section data and normative version snapshot in parallel
       const sections: Record<number, Record<string, unknown>> = {};
-      const fetches = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(async (num) => {
+      const sectionFetches = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(async (num) => {
         const res = await fetch(`/api/assessments/${assessmentId}/sections/${num}`);
         const { data } = await res.json();
         sections[num] = (data || {}) as Record<string, unknown>;
       });
-      await Promise.all(fetches);
+
+      let normativeSnapshot: NormativeVersionSnapshot | null = null;
+      const snapshotFetch = fetch(`/api/assessments/${assessmentId}/normative-version`)
+        .then(res => res.json())
+        .then(json => { normativeSnapshot = json.data ?? null; })
+        .catch(() => { /* fall back to hardcoded */ });
+
+      await Promise.all([...sectionFetches, snapshotFetch]);
 
       const info = sections[1] || {};
       setClientInfo(info);
@@ -234,8 +242,34 @@ export default function Section11({ assessmentId }: Section11Props) {
           continue;
         }
 
-        const rating = getPeak360Rating(m.testKey, value, age, gender);
-        const tier = rating?.tier || null;
+        // Use versioned snapshot when available, fall back to hardcoded
+        let tier: RatingTier | null = null;
+        let unit = m.fallbackUnit || '';
+
+        if (normativeSnapshot) {
+          const standards = getStandardsFromSnapshot(normativeSnapshot, m.testKey, age, gender);
+          if (standards.standards) {
+            const tiers: RatingTier[] = ['poor', 'cautious', 'normal', 'great', 'elite'];
+            let rawLabel = 'normal';
+            for (const t of tiers) {
+              const range = standards.standards[t];
+              if (range && value >= range.min && value <= range.max) {
+                rawLabel = t;
+                break;
+              }
+            }
+            tier = normalizeRating(rawLabel).tier;
+            unit = standards.unit || m.fallbackUnit || '';
+          }
+        }
+
+        if (!tier) {
+          // Fallback to existing getPeak360Rating (for old assessments or missing snapshot keys)
+          const rating = getPeak360Rating(m.testKey, value, age, gender);
+          tier = rating?.tier || null;
+          if (rating?.unit) unit = rating.unit;
+        }
+
         if (tier) counts[tier]++;
 
         evaluated.push({
@@ -243,7 +277,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           label: m.label,
           value,
           tier,
-          unit: rating?.unit || m.fallbackUnit || '',
+          unit,
           category: m.category,
           subcategory: m.subcategory,
           hasNorms: m.hasNorms,
