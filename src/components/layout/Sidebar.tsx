@@ -16,6 +16,7 @@ const NAV_ITEMS = [
     ),
     matchExact: true,
     matchPaths: ['/'],
+    isAdmin: false,
   },
   {
     label: 'Assessments',
@@ -27,6 +28,7 @@ const NAV_ITEMS = [
     ),
     matchExact: false,
     matchPaths: ['/assessments', '/assessment'],
+    isAdmin: false,
   },
   {
     label: 'Clients',
@@ -38,6 +40,19 @@ const NAV_ITEMS = [
     ),
     matchExact: false,
     matchPaths: ['/clients'],
+    isAdmin: false,
+  },
+  {
+    label: 'Normative Ranges',
+    href: '/admin/normative',
+    icon: (
+      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+      </svg>
+    ),
+    matchExact: false,
+    matchPaths: ['/admin'],
+    isAdmin: true,
   },
 ];
 
@@ -89,27 +104,34 @@ export default function Sidebar() {
 
       {/* Navigation */}
       <nav className="flex-1 px-3 space-y-1">
-        {NAV_ITEMS.map((item) => {
+        {NAV_ITEMS.map((item, index) => {
           const active = isActive(item);
+          const showAdminDivider = item.isAdmin && !NAV_ITEMS[index - 1]?.isAdmin;
           return (
-            <Link
-              key={item.href}
-              href={item.href}
-              className={`
-                flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
-                ${
-                  active
-                    ? 'bg-gold/15 text-gold shadow-[inset_0_0_0_1px_rgba(245,166,35,0.15)]'
-                    : 'text-white/50 hover:text-white/90 hover:bg-white/5'
-                }
-              `}
-            >
-              <span className={active ? 'text-gold' : 'text-white/40'}>{item.icon}</span>
-              {item.label}
-              {active && (
-                <span className="ml-auto w-1.5 h-1.5 rounded-full bg-gold" />
+            <div key={item.href}>
+              {showAdminDivider && (
+                <div className="text-xs uppercase tracking-wide text-gray-400 px-3 pt-4 pb-1 font-bold">
+                  Admin
+                </div>
               )}
-            </Link>
+              <Link
+                href={item.href}
+                className={`
+                  flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150
+                  ${
+                    active
+                      ? 'bg-gold/15 text-gold shadow-[inset_0_0_0_1px_rgba(245,166,35,0.15)]'
+                      : 'text-white/50 hover:text-white/90 hover:bg-white/5'
+                  }
+                `}
+              >
+                <span className={active ? 'text-gold' : 'text-white/40'}>{item.icon}</span>
+                {item.label}
+                {active && (
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-gold" />
+                )}
+              </Link>
+            </div>
           );
         })}
       </nav>
