@@ -50,11 +50,16 @@ Exceptions: none
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 14px (text-sm) | 400 (font-normal) | 1.5 |
-| Label | 14px (text-sm) | 500 (font-medium) | 1.5 |
+| Label | 14px (text-sm) | 700 (font-bold) | 1.5 |
 | Heading | 20px (text-xl) | 700 (font-bold) | 1.2 |
 | Page title | 24px (text-2xl) | 700 (font-bold) | 1.2 |
 
-Source: Existing codebase uses `text-sm font-medium` for labels, `text-xl font-bold` for section headings, `text-2xl font-bold` for page-level headings. This phase follows the same scale.
+Supplementary size: 12px (text-xs) is permitted for badge/pill text and helper captions only.
+
+Declared sizes: 12px, 14px, 20px, 24px (4 total).
+Declared weights: 400 (font-normal), 700 (font-bold) (2 total).
+
+Source: Existing codebase uses `text-sm font-normal` for body, `text-sm font-bold` for labels requiring emphasis, `text-xl font-bold` for section headings, `text-2xl font-bold` for page-level headings. This phase follows the same scale.
 
 ---
 
@@ -83,6 +88,14 @@ These are used in the inline tier preview when editing ranges. Each tier column 
 
 ---
 
+## Focal Point
+
+Primary focal point: the category accordion list on the Normative Browser page, specifically the marker count badges and DB override status pills. These communicate at a glance which markers have been customized vs. remain hardcoded, guiding the admin toward markers that need attention.
+
+Secondary focal point: the 5-column tier range grid on the Marker Range Editor page, where the colored tier headers draw the eye to the editing surface.
+
+---
+
 ## Component Inventory
 
 ### Page: Admin Normative Browser (`/admin/normative`)
@@ -91,16 +104,16 @@ These are used in the inline tier preview when editing ranges. Each tier column 
 
 **Category Accordion/Section List:**
 - Each category (Blood Tests, Body Composition, Cardiovascular, Strength, Mobility & Flexibility, Balance & Power) renders as a collapsible section
-- Section header: `text-lg font-semibold text-navy`, bottom border `border-b border-border pb-2` (matches existing `TestCategory` pattern)
+- Section header: `text-xl font-bold text-navy`, bottom border `border-b border-border pb-2` (matches existing `TestCategory` pattern)
 - Marker count badge next to category name: `text-xs text-muted` showing "12 markers" or "4 with DB overrides"
 
 **Marker Row (within category):**
 - Clickable row: `flex justify-between items-center p-3 bg-surface border border-border rounded-lg hover:border-gold transition-colors`
-- Left: marker label (`text-sm font-medium text-navy`)
+- Left: marker label (`text-sm font-bold text-navy`)
 - Right: status indicator:
-  - "DB override" pill: `text-xs px-2 py-0.5 rounded-full bg-gold/10 text-gold font-medium`
-  - "Hardcoded" pill: `text-xs px-2 py-0.5 rounded-full bg-surface-alt text-muted font-medium`
-  - "No ranges" pill: `text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-500 font-medium` (for `hasNorms: false`)
+  - "DB override" pill: `text-xs px-2 py-1 rounded-full bg-gold/10 text-gold font-bold`
+  - "Hardcoded" pill: `text-xs px-2 py-1 rounded-full bg-surface-alt text-muted font-bold`
+  - "No ranges" pill: `text-xs px-2 py-1 rounded-full bg-red-50 text-red-500 font-bold` (for `hasNorms: false`)
 - Clicking navigates to `/admin/normative/[marker]`
 
 **Search/Filter Bar:**
@@ -115,32 +128,32 @@ These are used in the inline tier preview when editing ranges. Each tier column 
 **Marker Header:**
 - Marker name: `text-2xl font-bold text-navy`
 - Category breadcrumb: `text-sm text-muted` (e.g., "Blood Tests > Lipid Panel")
-- Unit badge: `text-xs px-2 py-1 rounded bg-surface-alt text-muted font-medium` (e.g., "mmol/L")
+- Unit badge: `text-xs px-2 py-1 rounded bg-surface-alt text-muted font-bold` (e.g., "mmol/L")
 
 **Variant Tabs (if gendered/age-bucketed):**
 - For unisex markers: no tabs, show single tier form
 - For gendered markers: horizontal tab bar with "All" / "Male" / "Female" tabs
 - For gendered + age-bucketed: two-level selector: gender tabs + age group dropdown
-- Tab styling: `text-sm font-medium px-4 py-2 rounded-t-lg`, active tab uses `border-b-2 border-gold text-navy`, inactive uses `text-muted hover:text-navy`
+- Tab styling: `text-sm font-bold px-4 py-2 rounded-t-lg`, active tab uses `border-b-2 border-gold text-navy`, inactive uses `text-muted hover:text-navy`
 
 **Tier Range Form (one per variant):**
 - 5-column grid (one per tier): Poor | Cautious | Normal | Great | Elite
 - Each column header: tier label in `text-xs font-bold uppercase tracking-wide` with tier color as top border (4px solid)
 - Each column contains two inputs: "Min" and "Max"
-- Input styling: `w-full px-2 py-1.5 border border-border rounded text-sm text-center tabular-nums` with `focus:border-gold focus:ring-2 focus:ring-gold/25`
+- Input styling: `w-full px-2 py-2 border border-border rounded text-sm text-center tabular-nums` with `focus:border-gold focus:ring-2 focus:ring-gold/25`
 - Validation: min must be less than max; no gaps between tiers (max of poor must equal min of cautious). Validation errors shown as red border + tooltip.
 
 **Severity Weight:**
 - Below tier form: "Red Flag Severity" section
 - Horizontal slider (0-10 scale) using existing slider pattern from `SliderField`
 - Labels at each end: "Low (0)" and "Critical (10)"
-- Current value displayed as `text-lg font-bold text-navy tabular-nums` next to slider
+- Current value displayed as `text-xl font-bold text-navy tabular-nums` next to slider
 - Helper text: `text-xs text-muted` -- "Controls visual prominence of referral flags when this marker is poor or cautious"
 
 **Action Bar:**
 - Sticky bottom bar or fixed at section bottom: `flex justify-between items-center p-4 border-t border-border bg-surface`
-- Left: "Reset to Hardcoded Defaults" button (ghost/outline style, destructive variant)
-- Right: "Save Changes" button (gold CTA: `bg-gold text-white font-medium px-6 py-2.5 rounded-lg hover:bg-gold-dark`)
+- Left: "Reset to Defaults" button (ghost/outline style, destructive variant)
+- Right: "Save Changes" button (gold CTA: `bg-gold text-white font-bold px-6 py-2.5 rounded-lg hover:bg-gold-dark`)
 - Disabled state when no changes: `opacity-50 cursor-not-allowed`
 
 ### Page: Version History (`/admin/normative/versions`)
@@ -148,7 +161,7 @@ These are used in the inline tier preview when editing ranges. Each tier column 
 **Version List:**
 - Table or list of version snapshots: ID (truncated), created date, marker count, number of assessments using this version
 - Each row: `text-sm`, alternating row backgrounds (`bg-surface` / `bg-surface-alt`)
-- "Current" badge on the active version: `text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-600 font-medium`
+- "Current" badge on the active version: `text-xs px-2 py-1 rounded-full bg-emerald-50 text-emerald-600 font-bold`
 
 ---
 
@@ -190,7 +203,7 @@ These are used in the inline tier preview when editing ranges. Each tier column 
 | Validation: tier gap | "Gap between tiers: {prev_tier} max ({value}) must equal {next_tier} min ({value})" |
 | Destructive: reset | Reset to Defaults: "This will remove all custom ranges for {marker_name} and revert to hardcoded values. This cannot be undone." |
 | Destructive: confirmation button | "Yes, Reset to Defaults" |
-| Destructive: cancel button | "Cancel" |
+| Destructive: cancel button | "Keep Current Ranges" |
 | Version snapshot info | "Ranges are versioned automatically. Existing assessments keep the ranges they were created with." |
 | Severity helper | "Controls how prominently this marker's referral flag appears in reports (0 = subtle, 10 = critical)" |
 | Search placeholder | "Search markers..." |
