@@ -9,6 +9,7 @@ export const assessments = sqliteTable('assessments', {
   assessmentDate: text('assessment_date'),
   currentSection: integer('current_section').default(1),
   status: text('status').default('in_progress'),
+  normativeVersionId: text('normative_version_id'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
 });
@@ -38,5 +39,26 @@ export const uploadedFiles = sqliteTable('uploaded_files', {
   extractedData: text('extracted_data', { mode: 'json' }),
   verificationResult: text('verification_result', { mode: 'json' }),
   status: text('status').default('pending'),
+  createdAt: text('created_at').notNull(),
+});
+
+export const normativeRanges = sqliteTable('normative_ranges', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  testKey: text('test_key').notNull(),
+  category: text('category').notNull(),
+  gender: text('gender'),
+  ageGroup: text('age_group'),
+  unit: text('unit'),
+  note: text('note'),
+  tiers: text('tiers', { mode: 'json' }),
+  severityWeight: integer('severity_weight'),
+  createdAt: text('created_at').notNull(),
+  updatedAt: text('updated_at').notNull(),
+});
+
+export const normativeVersions = sqliteTable('normative_versions', {
+  id: text('id').primaryKey(),
+  rangesJson: text('ranges_json', { mode: 'json' }),
+  contentHash: text('content_hash').notNull(),
   createdAt: text('created_at').notNull(),
 });
