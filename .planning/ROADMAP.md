@@ -64,9 +64,9 @@ Plans:
 
 Plans:
 - [ ] 03-01-PLAN.md — DB schema, types, query layer, and rating engine fallback (ADMN-01, ADMN-02)
-- [ ] 03-02-PLAN.md — Normative range versioning with assessment snapshots (ADMN-05)
+- [x] 03-02-PLAN.md — Normative range versioning with assessment snapshots (ADMN-05)
 - [x] 03-03-PLAN.md — Admin browse UI: category browser with search/filter (ADMN-03)
-- [ ] 03-04-PLAN.md — Admin edit UI: tier editor, severity slider, save/reset (ADMN-04, ADMN-06)
+- [x] 03-04-PLAN.md — Admin edit UI: tier editor, severity slider, save/reset (ADMN-04, ADMN-06)
 **UI hint**: yes
 
 ### Phase 4: Security & Client Portal

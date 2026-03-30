@@ -33,9 +33,9 @@
 - [ ] **ADMN-01**: Normative ranges moved from hardcoded TypeScript to database-backed configuration
 - [ ] **ADMN-02**: Hardcoded defaults used as fallback when no DB overrides exist
 - [x] **ADMN-03**: Admin UI to browse all markers grouped by category (blood, body comp, cardio, strength, mobility, balance)
-- [ ] **ADMN-04**: Admin UI to edit min/max values for each tier per marker
+- [x] **ADMN-04**: Admin UI to edit min/max values for each tier per marker
 - [ ] **ADMN-05**: Normative range versioning — snapshot the version used per assessment
-- [ ] **ADMN-06**: Red flag marker weighting with configurable severity
+- [x] **ADMN-06**: Red flag marker weighting with configurable severity
 
 ### Security
 
@@ -96,9 +96,9 @@
 | ADMN-01 | Phase 3 | Pending |
 | ADMN-02 | Phase 3 | Pending |
 | ADMN-03 | Phase 3 | Complete |
-| ADMN-04 | Phase 3 | Pending |
+| ADMN-04 | Phase 3 | Complete |
 | ADMN-05 | Phase 3 | Pending |
-| ADMN-06 | Phase 3 | Pending |
+| ADMN-06 | Phase 3 | Complete |
 | SECU-01 | Phase 4 | Pending |
 | SECU-02 | Phase 4 | Pending |
 | SECU-03 | Phase 4 | Pending |
