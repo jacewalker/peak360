@@ -83,3 +83,37 @@ export const TIER_LABELS: Record<RatingTier, string> = {
   cautious: 'Cautious',
   poor: 'Poor',
 };
+
+export interface NormativeRangeRow {
+  id: number;
+  testKey: string;
+  category: string;
+  gender: string | null;
+  ageGroup: string | null;
+  unit: string | null;
+  note: string | null;
+  tiers: TierRanges | null;
+  severityWeight: number | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** Shape of the JSON stored in normative_versions.ranges_json.
+ *  Each testKey maps to its unit/note metadata and an array of variants
+ *  (one per gender/ageGroup combination). Used by getStandardsFromSnapshot
+ *  in ratings.ts and mergeDbWithHardcoded in versioning.ts.
+ */
+export interface NormativeVersionVariant {
+  gender: string | null;
+  ageGroup: string | null;
+  tiers: TierRanges;
+}
+
+export interface NormativeVersionMarker {
+  unit?: string | null;
+  note?: string | null;
+  severityWeight?: number | null;
+  variants: NormativeVersionVariant[];
+}
+
+export type NormativeVersionSnapshot = Record<string, NormativeVersionMarker>;
