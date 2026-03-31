@@ -156,7 +156,16 @@ export default function Section11({ assessmentId }: Section11Props) {
       const prevScrollY = window.scrollY;
       window.scrollTo(0, 0);
       const containerWidth = container.getBoundingClientRect().width;
-      const pageHeightPx = (297 / 210) * containerWidth;
+      // Page cut positions must match the PDF slicing constants below.
+      // Image is placed at y=PDF_MARGIN (6mm) on each page, so:
+      //   first cut = (297 - 6) mm from image top = 291mm
+      //   subsequent cuts = usableHeight = 281mm apart
+      const PDF_MARGIN_MM = 6;
+      const PAGE_BOTTOM_GUARD_MM = 4;
+      const IMG_WIDTH_MM = 210 - PDF_MARGIN_MM * 2; // 198mm
+      const pxPerMm = containerWidth / IMG_WIDTH_MM;
+      const firstPageCutPx = (297 - PDF_MARGIN_MM) * pxPerMm; // ~1323px at 900px width
+      const pageStepPx = (297 - PDF_MARGIN_MM * 2 - PAGE_BOTTOM_GUARD_MM) * pxPerMm; // 281mm → ~1277px
       const PAGE_MARGIN_PX = 24;
       const spacers: HTMLElement[] = [];
 
@@ -187,18 +196,19 @@ export default function Section11({ assessmentId }: Section11Props) {
         const currentBottom = item.el.getBoundingClientRect().bottom - container.getBoundingClientRect().top;
         const elHeight = currentBottom - currentTop;
 
-        const pageStart = Math.floor(currentTop / pageHeightPx) * pageHeightPx;
-        const pageEnd = pageStart + pageHeightPx;
+        // Find the next physical page cut at or after this element's top
+        let pageEnd = firstPageCutPx;
+        while (pageEnd <= currentTop) pageEnd += pageStepPx;
 
         // Skip if element fits entirely within the page (with margin)
         if (currentBottom <= pageEnd - PAGE_MARGIN_PX) continue;
 
         // Skip if element is taller than a full page (can't avoid splitting)
-        if (elHeight > pageHeightPx - PAGE_MARGIN_PX * 2) continue;
+        if (elHeight > pageStepPx - PAGE_MARGIN_PX * 2) continue;
 
         // Element straddles a page boundary — push it to the next page
         const gap = pageEnd - currentTop + PAGE_MARGIN_PX;
-        if (gap > 0 && gap < pageHeightPx) {
+        if (gap > 0 && gap < pageStepPx) {
           const spacer = document.createElement('div');
           spacer.style.height = `${gap}px`;
           spacer.dataset.pdfSpacer = 'true';
