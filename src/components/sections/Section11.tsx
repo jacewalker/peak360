@@ -150,6 +150,9 @@ export default function Section11({ assessmentId }: Section11Props) {
       if (actionsRef.current) actionsRef.current.style.display = 'none';
 
       const container = reportRef.current;
+      // Stabilise getBoundingClientRect reads — scroll must be 0 before measuring
+      const prevScrollY = window.scrollY;
+      window.scrollTo(0, 0);
       const containerWidth = container.getBoundingClientRect().width;
       const pageHeightPx = (297 / 210) * containerWidth;
       const spacers: HTMLElement[] = [];
@@ -165,6 +168,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           spacer.dataset.pdfSpacer = 'true';
           el.parentNode?.insertBefore(spacer, el);
           spacers.push(spacer);
+          void container.offsetHeight; // force synchronous layout so next getBoundingClientRect is accurate
         }
       });
 
@@ -173,10 +177,14 @@ export default function Section11({ assessmentId }: Section11Props) {
       });
 
       spacers.forEach((s) => s.remove());
+      window.scrollTo(0, prevScrollY); // restore scroll position
       if (actionsRef.current) actionsRef.current.style.display = '';
 
-      const imgWidth = 210;
+      const PDF_MARGIN = 6; // mm margin on each page
+      const PAGE_BOTTOM_GUARD = 4; // mm buffer against sub-pixel rounding drift across pages
+      const imgWidth = 210 - PDF_MARGIN * 2;
       const pageHeight = 297;
+      const usableHeight = pageHeight - PDF_MARGIN * 2 - PAGE_BOTTOM_GUARD;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const pdf = new jsPDF('p', 'mm', 'a4');
 
