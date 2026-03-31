@@ -1,13 +1,16 @@
 'use client';
 
 import { getStandards } from '@/lib/normative/ratings';
-import type { RatingTier } from '@/types/normative';
+import type { RatingTier, TierRanges } from '@/types/normative';
 
 interface RangeBarProps {
   value: number;
   testKey: string;
   age?: number | null;
   gender?: string | null;
+  /** Pre-resolved tier ranges (e.g. from normative snapshot / DB overrides).
+   *  When provided, the component skips the hardcoded getStandards() lookup. */
+  resolvedStandards?: TierRanges | null;
 }
 
 const SEGMENT_COLORS: Record<RatingTier, string> = {
@@ -76,8 +79,10 @@ function computeSegmentWidths(
   return { widths: pcts, fullMin, fullMax };
 }
 
-export function RangeBar({ value, testKey, age, gender }: RangeBarProps) {
-  const { standards } = getStandards(testKey, age, gender);
+export function RangeBar({ value, testKey, age, gender, resolvedStandards }: RangeBarProps) {
+  // Use pre-resolved standards (from snapshot/DB override) when available,
+  // otherwise fall back to hardcoded lookup.
+  const standards = resolvedStandards ?? getStandards(testKey, age, gender).standards;
   if (!standards) return null;
 
   const { widths, fullMin, fullMax } = computeSegmentWidths(standards);

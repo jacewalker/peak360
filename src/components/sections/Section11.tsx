@@ -1,9 +1,9 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { getPeak360Rating, getStandardsFromSnapshot, normalizeRating } from '@/lib/normative/ratings';
+import { getPeak360Rating, getStandards, getStandardsFromSnapshot, normalizeRating } from '@/lib/normative/ratings';
 import { generatePeak360Insights } from '@/lib/normative/insights';
-import type { RatingTier, NormativeVersionSnapshot } from '@/types/normative';
+import type { RatingTier, TierRanges, NormativeVersionSnapshot } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
 
 interface ReportMarker {
@@ -15,6 +15,8 @@ interface ReportMarker {
   category: string;
   subcategory?: string;
   hasNorms: boolean;
+  /** Resolved tier ranges (from snapshot or hardcoded) for the RangeBar */
+  resolvedStandards?: TierRanges | null;
 }
 
 interface Insight {
@@ -155,22 +157,56 @@ export default function Section11({ assessmentId }: Section11Props) {
       window.scrollTo(0, 0);
       const containerWidth = container.getBoundingClientRect().width;
       const pageHeightPx = (297 / 210) * containerWidth;
+      const PAGE_MARGIN_PX = 24;
       const spacers: HTMLElement[] = [];
 
-      container.querySelectorAll('[data-pdf-break]').forEach((el) => {
-        const elTop = (el as HTMLElement).getBoundingClientRect().top - container.getBoundingClientRect().top;
-        const currentPage = Math.floor(elTop / pageHeightPx);
-        const nextPageTop = (currentPage + 1) * pageHeightPx;
-        const gap = nextPageTop - elTop;
+      // Collect all elements that should not be split across page boundaries:
+      // marker rows, insight cards, category headers, section headings, disclaimers
+      const breakableSelectors = [
+        '.report-marker-row',
+        '.report-insight-card',
+        '.report-category',
+        '.report-section',
+        '[data-pdf-break]',
+      ];
+      const breakables = container.querySelectorAll(breakableSelectors.join(','));
+      const containerTop = container.getBoundingClientRect().top;
+
+      // Sort elements by vertical position (top to bottom)
+      const sorted = Array.from(breakables)
+        .map((el) => ({
+          el: el as HTMLElement,
+          top: (el as HTMLElement).getBoundingClientRect().top - containerTop,
+          bottom: (el as HTMLElement).getBoundingClientRect().bottom - containerTop,
+        }))
+        .sort((a, b) => a.top - b.top);
+
+      for (const item of sorted) {
+        // Recalculate position after previous spacers may have shifted things
+        const currentTop = item.el.getBoundingClientRect().top - container.getBoundingClientRect().top;
+        const currentBottom = item.el.getBoundingClientRect().bottom - container.getBoundingClientRect().top;
+        const elHeight = currentBottom - currentTop;
+
+        const pageStart = Math.floor(currentTop / pageHeightPx) * pageHeightPx;
+        const pageEnd = pageStart + pageHeightPx;
+
+        // Skip if element fits entirely within the page (with margin)
+        if (currentBottom <= pageEnd - PAGE_MARGIN_PX) continue;
+
+        // Skip if element is taller than a full page (can't avoid splitting)
+        if (elHeight > pageHeightPx - PAGE_MARGIN_PX * 2) continue;
+
+        // Element straddles a page boundary — push it to the next page
+        const gap = pageEnd - currentTop + PAGE_MARGIN_PX;
         if (gap > 0 && gap < pageHeightPx) {
           const spacer = document.createElement('div');
           spacer.style.height = `${gap}px`;
           spacer.dataset.pdfSpacer = 'true';
-          el.parentNode?.insertBefore(spacer, el);
+          item.el.parentNode?.insertBefore(spacer, item.el);
           spacers.push(spacer);
           void container.offsetHeight; // force synchronous layout so next getBoundingClientRect is accurate
         }
-      });
+      }
 
       const canvas = await html2canvas(container, {
         scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
@@ -189,17 +225,17 @@ export default function Section11({ assessmentId }: Section11Props) {
       const pdf = new jsPDF('p', 'mm', 'a4');
 
       let heightLeft = imgHeight;
-      let position = 0;
+      let position = PDF_MARGIN; // Start with top margin
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
+      pdf.addImage(imgData, 'JPEG', PDF_MARGIN, position, imgWidth, imgHeight);
+      heightLeft -= usableHeight;
 
       while (heightLeft > 0) {
-        position -= pageHeight;
+        position -= usableHeight;
         pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        pdf.addImage(imgData, 'JPEG', PDF_MARGIN, position, imgWidth, imgHeight);
+        heightLeft -= usableHeight;
       }
 
       const clientName = ((clientInfo.clientName as string) || 'Client').replace(/\s+/g, '_');
@@ -256,21 +292,23 @@ export default function Section11({ assessmentId }: Section11Props) {
         // Use versioned snapshot when available, fall back to hardcoded
         let tier: RatingTier | null = null;
         let unit = m.fallbackUnit || '';
+        let resolvedStandards: TierRanges | null = null;
 
         if (normativeSnapshot) {
-          const standards = getStandardsFromSnapshot(normativeSnapshot, m.testKey, age, gender);
-          if (standards.standards) {
+          const snapshotResult = getStandardsFromSnapshot(normativeSnapshot, m.testKey, age, gender);
+          if (snapshotResult.standards) {
+            resolvedStandards = snapshotResult.standards;
             const tiers: RatingTier[] = ['poor', 'cautious', 'normal', 'great', 'elite'];
             let rawLabel = 'normal';
             for (const t of tiers) {
-              const range = standards.standards[t];
+              const range = snapshotResult.standards[t];
               if (range && value >= range.min && value <= range.max) {
                 rawLabel = t;
                 break;
               }
             }
             tier = normalizeRating(rawLabel).tier;
-            unit = standards.unit || m.fallbackUnit || '';
+            unit = snapshotResult.unit || m.fallbackUnit || '';
           }
         }
 
@@ -279,7 +317,15 @@ export default function Section11({ assessmentId }: Section11Props) {
           const rating = getPeak360Rating(m.testKey, value, age, gender);
           tier = rating?.tier || null;
           if (rating?.unit) unit = rating.unit;
+          // Also resolve standards for the RangeBar from hardcoded data
+          if (!resolvedStandards) {
+            const hardcoded = getStandards(m.testKey, age, gender);
+            resolvedStandards = hardcoded.standards;
+          }
         }
+
+        // hasNorms is true if standards were resolved from any source (snapshot, DB, or hardcoded)
+        const hasNorms = m.hasNorms || !!resolvedStandards;
 
         if (tier) counts[tier]++;
 
@@ -291,7 +337,8 @@ export default function Section11({ assessmentId }: Section11Props) {
           unit,
           category: m.category,
           subcategory: m.subcategory,
-          hasNorms: m.hasNorms,
+          hasNorms,
+          resolvedStandards,
         });
       }
 
@@ -373,7 +420,7 @@ export default function Section11({ assessmentId }: Section11Props) {
         {/* Range bar for markers with norms and a value */}
         {m.hasNorms && m.value !== null && m.tier && (
           <div className="w-full mt-1.5">
-            <RangeBar value={m.value} testKey={m.key} age={age} gender={gender} />
+            <RangeBar value={m.value} testKey={m.key} age={age} gender={gender} resolvedStandards={m.resolvedStandards} />
           </div>
         )}
         {/* Referral flags */}

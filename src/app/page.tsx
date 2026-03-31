@@ -90,7 +90,7 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen">
       {/* Page header */}
-      <div className="bg-gradient-to-b from-navy-dark to-navy py-8 sm:py-12 text-white">
+      <div className="py-8 sm:py-12 text-white" style={{ backgroundColor: '#0f2440' }}>
         <div className="max-w-5xl mx-auto pl-14 pr-4 sm:px-6 lg:px-6">
           <div className="flex items-center justify-between gap-4">
             <div>

@@ -5,7 +5,7 @@ import Image from 'next/image';
 
 export default function Header() {
   return (
-    <header className="bg-gradient-to-r from-navy-dark via-navy to-navy-light text-white shadow-lg">
+    <header className="text-white shadow-lg" style={{ backgroundColor: '#0f2440' }}>
       <div className="max-w-6xl mx-auto px-6 py-3 flex items-center justify-between">
         <Link href="/" className="flex items-center gap-3 group">
           <Image

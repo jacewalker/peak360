@@ -131,7 +131,7 @@ export default function ClientsPage() {
   return (
     <div className="min-h-screen">
       {/* Header banner */}
-      <div className="bg-gradient-to-b from-navy-dark to-navy py-10 sm:py-14 text-white">
+      <div className="py-10 sm:py-14 text-white" style={{ backgroundColor: '#0f2440' }}>
         <div className="max-w-4xl mx-auto pl-14 pr-4 sm:px-6 lg:px-6">
           <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Clients</h2>
           <p className="text-white/60 mt-2 text-base">
