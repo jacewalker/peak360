@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
+import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 
 interface Client {
   name: string;
@@ -14,41 +15,58 @@ interface Client {
 
 export default function ClientsPage() {
   const [clients, setClients] = useState<Client[]>([]);
+  const [rawAssessments, setRawAssessments] = useState<Array<{ id: string; clientName?: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [selectedNames, setSelectedNames] = useState<Set<string>>(new Set());
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const selectAllRef = useRef<HTMLInputElement>(null);
+
+  const fetchData = useCallback(async () => {
+    try {
+      const r = await fetch('/api/assessments');
+      const res = await r.json();
+      const data = res.data || [];
+      setRawAssessments(data);
+      const byClient = new Map<string, Client>();
+      for (const a of data) {
+        const name = a.clientName || 'Unnamed Client';
+        const existing = byClient.get(name);
+        if (existing) {
+          existing.assessmentCount++;
+          if (a.assessmentDate > existing.lastAssessment || a.createdAt > existing.lastAssessment) {
+            existing.lastAssessment = a.assessmentDate || a.createdAt.split('T')[0];
+          }
+          if (!existing.email && a.clientEmail) existing.email = a.clientEmail;
+          if (!existing.gender && a.clientGender) existing.gender = a.clientGender;
+          if (!existing.dob && a.clientDob) existing.dob = a.clientDob;
+        } else {
+          byClient.set(name, {
+            name,
+            email: a.clientEmail || '',
+            gender: a.clientGender || null,
+            dob: a.clientDob || null,
+            assessmentCount: 1,
+            lastAssessment: a.assessmentDate || a.createdAt.split('T')[0],
+          });
+        }
+      }
+      setClients(Array.from(byClient.values()).sort((a, b) => a.name.localeCompare(b.name)));
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetch('/api/assessments')
-      .then((r) => r.json())
-      .then((res) => {
-        const byClient = new Map<string, Client>();
-        for (const a of res.data || []) {
-          const name = a.clientName || 'Unnamed Client';
-          const existing = byClient.get(name);
-          if (existing) {
-            existing.assessmentCount++;
-            if (a.assessmentDate > existing.lastAssessment || a.createdAt > existing.lastAssessment) {
-              existing.lastAssessment = a.assessmentDate || a.createdAt.split('T')[0];
-            }
-            if (!existing.email && a.clientEmail) existing.email = a.clientEmail;
-            if (!existing.gender && a.clientGender) existing.gender = a.clientGender;
-            if (!existing.dob && a.clientDob) existing.dob = a.clientDob;
-          } else {
-            byClient.set(name, {
-              name,
-              email: a.clientEmail || '',
-              gender: a.clientGender || null,
-              dob: a.clientDob || null,
-              assessmentCount: 1,
-              lastAssessment: a.assessmentDate || a.createdAt.split('T')[0],
-            });
-          }
-        }
-        setClients(Array.from(byClient.values()).sort((a, b) => a.name.localeCompare(b.name)));
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+    fetchData();
+  }, [fetchData]);
+
+  // Clear selection when search changes
+  useEffect(() => {
+    setSelectedNames(new Set());
+  }, [search]);
 
   const filtered = useMemo(() => {
     if (!search.trim()) return clients;
@@ -59,6 +77,56 @@ export default function ClientsPage() {
         (c.email && c.email.toLowerCase().includes(q))
     );
   }, [clients, search]);
+
+  // Indeterminate state for select-all checkbox
+  useEffect(() => {
+    if (selectAllRef.current) {
+      const allSelected = selectedNames.size === filtered.length && filtered.length > 0;
+      const someSelected = selectedNames.size > 0 && selectedNames.size < filtered.length;
+      selectAllRef.current.indeterminate = someSelected;
+      selectAllRef.current.checked = allSelected;
+    }
+  }, [selectedNames, filtered]);
+
+  const toggleSelectAll = () => {
+    if (selectedNames.size === filtered.length) {
+      setSelectedNames(new Set());
+    } else {
+      setSelectedNames(new Set(filtered.map((c) => c.name)));
+    }
+  };
+
+  const toggleSelectOne = (name: string) => {
+    setSelectedNames((prev) => {
+      const next = new Set(prev);
+      if (next.has(name)) {
+        next.delete(name);
+      } else {
+        next.add(name);
+      }
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    // Map selected client names to their assessment IDs
+    const ids = rawAssessments
+      .filter((a) => selectedNames.has(a.clientName || 'Unnamed Client'))
+      .map((a) => a.id);
+
+    try {
+      await fetch('/api/assessments/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids }),
+      });
+      setSelectedNames(new Set());
+      setShowDeleteModal(false);
+      await fetchData();
+    } catch {
+      // error handled by modal
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -106,6 +174,30 @@ export default function ClientsPage() {
               </div>
             </div>
 
+            {/* Select / Bulk actions toolbar */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-muted">
+                <input
+                  ref={selectAllRef}
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-border text-navy accent-navy"
+                  onChange={toggleSelectAll}
+                />
+                Select all
+              </label>
+              {selectedNames.size > 0 && (
+                <>
+                  <div className="w-px h-5 bg-border" />
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    className="px-4 py-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+                  >
+                    Delete {selectedNames.size} selected
+                  </button>
+                </>
+              )}
+            </div>
+
             {/* Search */}
             <div className="relative">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
@@ -134,6 +226,14 @@ export default function ClientsPage() {
                     className="block bg-white rounded-xl border border-border p-4 sm:p-5 hover:shadow-md hover:border-gold/30 transition-all"
                   >
                   <div className="flex items-center gap-3 sm:gap-4">
+                    <div onClick={(e) => e.preventDefault()} className="shrink-0">
+                      <input
+                        type="checkbox"
+                        className="w-4 h-4 rounded border-border text-navy accent-navy"
+                        checked={selectedNames.has(c.name)}
+                        onChange={() => toggleSelectOne(c.name)}
+                      />
+                    </div>
                     <div className="w-10 h-10 rounded-full bg-navy/5 flex items-center justify-center text-navy font-bold text-sm shrink-0">
                       {c.name[0].toUpperCase()}
                     </div>
@@ -161,6 +261,14 @@ export default function ClientsPage() {
           </div>
         )}
       </main>
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        itemCount={selectedNames.size}
+        itemLabel="client"
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={handleBulkDelete}
+      />
     </div>
   );
 }

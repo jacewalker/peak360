@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState, useMemo, useRef } from 'react';
+import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import type { Assessment } from '@/types/assessment';
+import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 
 interface ImportResult {
   imported: number;
@@ -19,16 +20,30 @@ export default function HomePage() {
   const [importState, setImportState] = useState<'idle' | 'uploading' | 'done'>('idle');
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const selectAllRef = useRef<HTMLInputElement>(null);
+
+  const fetchAssessments = useCallback(async () => {
+    try {
+      const r = await fetch('/api/assessments');
+      const res = await r.json();
+      setAssessments(res.data || []);
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
-    fetch('/api/assessments')
-      .then((r) => r.json())
-      .then((res) => {
-        setAssessments(res.data || []);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
-  }, []);
+    fetchAssessments();
+  }, [fetchAssessments]);
+
+  // Clear selection when search changes
+  useEffect(() => {
+    setSelectedIds(new Set());
+  }, [search]);
 
   const createAssessment = async () => {
     const res = await fetch('/api/assessments', {
@@ -75,6 +90,51 @@ export default function HomePage() {
       (a.clientName || '').toLowerCase().includes(q)
     );
   }, [assessments, search]);
+
+  // Indeterminate state for select-all checkbox
+  useEffect(() => {
+    if (selectAllRef.current) {
+      const allSelected = selectedIds.size === filtered.length && filtered.length > 0;
+      const someSelected = selectedIds.size > 0 && selectedIds.size < filtered.length;
+      selectAllRef.current.indeterminate = someSelected;
+      selectAllRef.current.checked = allSelected;
+    }
+  }, [selectedIds, filtered]);
+
+  const toggleSelectAll = () => {
+    if (selectedIds.size === filtered.length) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(filtered.map((a) => a.id)));
+    }
+  };
+
+  const toggleSelectOne = (id: string) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const handleBulkDelete = async () => {
+    try {
+      await fetch('/api/assessments/bulk-delete', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: Array.from(selectedIds) }),
+      });
+      setSelectedIds(new Set());
+      setShowDeleteModal(false);
+      await fetchAssessments();
+    } catch {
+      // error handled by modal
+    }
+  };
 
   return (
     <div className="min-h-screen">
@@ -186,8 +246,18 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Export / Import toolbar */}
-            <div className="flex items-center gap-2">
+            {/* Export / Import / Bulk toolbar */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <label className="flex items-center gap-2 cursor-pointer text-sm text-muted">
+                <input
+                  ref={selectAllRef}
+                  type="checkbox"
+                  className="w-4 h-4 rounded border-border text-navy accent-navy"
+                  onChange={toggleSelectAll}
+                />
+                Select all
+              </label>
+              <div className="w-px h-5 bg-border" />
               <button
                 onClick={() => { window.location.href = '/api/assessments/export'; }}
                 className="px-4 py-2 text-sm font-medium rounded-lg border border-navy/20 text-navy bg-white hover:bg-navy/5 transition-colors"
@@ -212,6 +282,14 @@ export default function HomePage() {
                   e.target.value = '';
                 }}
               />
+              {selectedIds.size > 0 && (
+                <button
+                  onClick={() => setShowDeleteModal(true)}
+                  className="px-4 py-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors ml-auto"
+                >
+                  Delete {selectedIds.size} selected
+                </button>
+              )}
             </div>
 
             {/* Import results */}
@@ -275,6 +353,14 @@ export default function HomePage() {
                     }
                   >
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded border-border text-navy accent-navy"
+                          checked={selectedIds.has(a.id)}
+                          onChange={() => toggleSelectOne(a.id)}
+                        />
+                      </div>
                       <div className="w-10 h-10 rounded-full bg-navy/5 flex items-center justify-center text-navy font-bold text-sm group-hover:bg-gold/10 transition-colors shrink-0">
                         {(a.clientName || 'U')[0].toUpperCase()}
                       </div>
@@ -313,6 +399,14 @@ export default function HomePage() {
           </div>
         )}
       </main>
+
+      <ConfirmDeleteModal
+        isOpen={showDeleteModal}
+        itemCount={selectedIds.size}
+        itemLabel="assessment"
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={handleBulkDelete}
+      />
     </div>
   );
 }
