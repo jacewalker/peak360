@@ -137,6 +137,7 @@ export default function Section11({ assessmentId }: Section11Props) {
   });
   const reportRef = useRef<HTMLDivElement>(null);
   const actionsRef = useRef<HTMLDivElement>(null);
+  const actionsTopRef = useRef<HTMLDivElement>(null);
 
   // ── PDF Export ──────────────────────────────────────────────────────────────
 
@@ -150,27 +151,23 @@ export default function Section11({ assessmentId }: Section11Props) {
       ]);
 
       if (actionsRef.current) actionsRef.current.style.display = 'none';
+      if (actionsTopRef.current) actionsTopRef.current.style.display = 'none';
 
       const container = reportRef.current;
-      // Stabilise getBoundingClientRect reads — scroll must be 0 before measuring
       const prevScrollY = window.scrollY;
       window.scrollTo(0, 0);
       const containerWidth = container.getBoundingClientRect().width;
-      // Page cut positions must match the PDF slicing constants below.
-      // Image is placed at y=PDF_MARGIN (6mm) on each page, so:
-      //   first cut = (297 - 6) mm from image top = 291mm
-      //   subsequent cuts = usableHeight = 281mm apart
-      const PDF_MARGIN_MM = 6;
-      const PAGE_BOTTOM_GUARD_MM = 4;
+
+      // ── Spacer constants (must match PDF slicing below) ──────────────────────
+      // Image is placed at x=PDF_MARGIN_MM, y=0 and advances by exactly 297mm per
+      // page → no overlap, no duplication. Spacers use the same 297mm step.
+      const PDF_MARGIN_MM = 6; // horizontal side margins only
       const IMG_WIDTH_MM = 210 - PDF_MARGIN_MM * 2; // 198mm
       const pxPerMm = containerWidth / IMG_WIDTH_MM;
-      const firstPageCutPx = (297 - PDF_MARGIN_MM) * pxPerMm; // ~1323px at 900px width
-      const pageStepPx = (297 - PDF_MARGIN_MM * 2 - PAGE_BOTTOM_GUARD_MM) * pxPerMm; // 281mm → ~1277px
-      const PAGE_MARGIN_PX = 24;
+      const pageStepPx = 297 * pxPerMm; // exact A4 page height in DOM pixels
+      const PAGE_MARGIN_PX = Math.round(8 * pxPerMm); // 8mm breathing room near cuts
       const spacers: HTMLElement[] = [];
 
-      // Collect all elements that should not be split across page boundaries:
-      // marker rows, insight cards, category headers, section headings, disclaimers
       const breakableSelectors = [
         '.report-marker-row',
         '.report-insight-card',
@@ -179,34 +176,25 @@ export default function Section11({ assessmentId }: Section11Props) {
         '[data-pdf-break]',
       ];
       const breakables = container.querySelectorAll(breakableSelectors.join(','));
-      const containerTop = container.getBoundingClientRect().top;
 
-      // Sort elements by vertical position (top to bottom)
       const sorted = Array.from(breakables)
         .map((el) => ({
           el: el as HTMLElement,
-          top: (el as HTMLElement).getBoundingClientRect().top - containerTop,
-          bottom: (el as HTMLElement).getBoundingClientRect().bottom - containerTop,
+          top: (el as HTMLElement).getBoundingClientRect().top - container.getBoundingClientRect().top,
         }))
         .sort((a, b) => a.top - b.top);
 
       for (const item of sorted) {
-        // Recalculate position after previous spacers may have shifted things
         const currentTop = item.el.getBoundingClientRect().top - container.getBoundingClientRect().top;
         const currentBottom = item.el.getBoundingClientRect().bottom - container.getBoundingClientRect().top;
         const elHeight = currentBottom - currentTop;
 
-        // Find the next physical page cut at or after this element's top
-        let pageEnd = firstPageCutPx;
-        while (pageEnd <= currentTop) pageEnd += pageStepPx;
+        // Which page cut is immediately after this element's top?
+        const pageEnd = Math.ceil((currentTop + 1) / pageStepPx) * pageStepPx;
 
-        // Skip if element fits entirely within the page (with margin)
-        if (currentBottom <= pageEnd - PAGE_MARGIN_PX) continue;
+        if (currentBottom <= pageEnd - PAGE_MARGIN_PX) continue; // safely before cut
+        if (elHeight > pageStepPx - PAGE_MARGIN_PX * 2) continue; // too tall to fit on one page
 
-        // Skip if element is taller than a full page (can't avoid splitting)
-        if (elHeight > pageStepPx - PAGE_MARGIN_PX * 2) continue;
-
-        // Element straddles a page boundary — push it to the next page
         const gap = pageEnd - currentTop + PAGE_MARGIN_PX;
         if (gap > 0 && gap < pageStepPx) {
           const spacer = document.createElement('div');
@@ -214,7 +202,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           spacer.dataset.pdfSpacer = 'true';
           item.el.parentNode?.insertBefore(spacer, item.el);
           spacers.push(spacer);
-          void container.offsetHeight; // force synchronous layout so next getBoundingClientRect is accurate
+          void container.offsetHeight; // synchronous reflow so next read is accurate
         }
       }
 
@@ -223,29 +211,30 @@ export default function Section11({ assessmentId }: Section11Props) {
       });
 
       spacers.forEach((s) => s.remove());
-      window.scrollTo(0, prevScrollY); // restore scroll position
+      window.scrollTo(0, prevScrollY);
       if (actionsRef.current) actionsRef.current.style.display = '';
+      if (actionsTopRef.current) actionsTopRef.current.style.display = '';
 
-      const PDF_MARGIN = 6; // mm margin on each page
-      const PAGE_BOTTOM_GUARD = 4; // mm buffer against sub-pixel rounding drift across pages
-      const imgWidth = 210 - PDF_MARGIN * 2;
+      // ── PDF slicing ───────────────────────────────────────────────────────────
+      // Image placed at y=0, advances by exactly pageHeight=297mm → zero overlap.
+      const PDF_MARGIN = 6; // horizontal margins (mm)
+      const imgWidth = 210 - PDF_MARGIN * 2; // 198mm
       const pageHeight = 297;
-      const usableHeight = pageHeight - PDF_MARGIN * 2 - PAGE_BOTTOM_GUARD;
       const imgHeight = (canvas.height * imgWidth) / canvas.width;
       const pdf = new jsPDF('p', 'mm', 'a4');
-
-      let heightLeft = imgHeight;
-      let position = PDF_MARGIN; // Start with top margin
       const imgData = canvas.toDataURL('image/jpeg', 0.95);
 
+      let heightLeft = imgHeight;
+      let position = 0; // no top-margin offset → no overlap between pages
+
       pdf.addImage(imgData, 'JPEG', PDF_MARGIN, position, imgWidth, imgHeight);
-      heightLeft -= usableHeight;
+      heightLeft -= pageHeight;
 
       while (heightLeft > 0) {
-        position -= usableHeight;
+        position -= pageHeight;
         pdf.addPage();
         pdf.addImage(imgData, 'JPEG', PDF_MARGIN, position, imgWidth, imgHeight);
-        heightLeft -= usableHeight;
+        heightLeft -= pageHeight;
       }
 
       const clientName = ((clientInfo.clientName as string) || 'Client').replace(/\s+/g, '_');
@@ -444,6 +433,46 @@ export default function Section11({ assessmentId }: Section11Props) {
 
   return (
     <div ref={reportRef} className="report-container bg-white">
+
+      {/* ─── TOP ACTION BAR (hidden in PDF) ─── */}
+      <div ref={actionsTopRef} className="flex flex-col sm:flex-row gap-3 justify-end px-4 pt-4 pb-3 border-b border-gray-100 bg-[#f8fafc]">
+        <button
+          onClick={exportPdf}
+          disabled={exporting}
+          className="group flex items-center justify-center gap-2 px-6 py-2.5 bg-[#1a365d] text-white rounded-xl text-sm font-semibold hover:bg-[#2d5986] transition-all hover:shadow-md active:scale-[0.98] disabled:opacity-60"
+        >
+          {exporting ? (
+            <>
+              <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+              Generating PDF...
+            </>
+          ) : (
+            <>
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Export PDF
+            </>
+          )}
+        </button>
+        <button
+          onClick={async () => {
+            await fetch(`/api/assessments/${assessmentId}`, {
+              method: 'PUT',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ status: 'completed' }),
+            });
+            window.location.href = '/';
+          }}
+          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#F5A623] text-[#1a365d] rounded-xl text-sm font-semibold hover:bg-[#f7bc5a] transition-all hover:shadow-md active:scale-[0.98]"
+        >
+          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+          </svg>
+          Save & Complete Assessment
+        </button>
+      </div>
+
       {/* ─── REPORT COVER / HEADER ─── */}
       <div className="report-header relative overflow-hidden rounded-2xl print:rounded-none bg-gradient-to-br from-[#0f2440] via-[#1a365d] to-[#2d5986] text-white p-8 sm:p-10">
         <div className="absolute top-0 right-0 w-72 h-72 opacity-[0.07]" style={{
