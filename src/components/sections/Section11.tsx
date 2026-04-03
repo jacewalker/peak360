@@ -168,31 +168,13 @@ export default function Section11({ assessmentId }: Section11Props) {
       const PAGE_MARGIN_PX = Math.round(8 * pxPerMm); // 8mm breathing room near cuts
       const spacers: HTMLElement[] = [];
 
-      // ── Forced page breaks (data-pdf-page-break="before") ───────────────────
-      const forceBreaks = container.querySelectorAll<HTMLElement>('[data-pdf-page-break="before"]');
-      forceBreaks.forEach((el) => {
-        const elTop = el.getBoundingClientRect().top - container.getBoundingClientRect().top;
-        const pageIndex = Math.floor(elTop / pageStepPx);
-        const distFromPageStart = elTop - pageIndex * pageStepPx;
-        const nextPageTop = (pageIndex + 1) * pageStepPx;
-        const gap = nextPageTop - elTop;
-        // Only insert if not already at the very top of a page
-        if (distFromPageStart > PAGE_MARGIN_PX && gap > 0 && gap < pageStepPx) {
-          const spacer = document.createElement('div');
-          spacer.style.height = `${gap}px`;
-          spacer.dataset.pdfSpacer = 'true';
-          el.parentNode?.insertBefore(spacer, el);
-          spacers.push(spacer);
-          void container.offsetHeight; // synchronous reflow
-        }
-      });
-
       // ── Boundary-prevention spacers ───────────────────────────────────────────
       const breakableSelectors = [
         '.report-marker-row',
         '.report-insight-card',
         '.report-category',
-        '.report-section',
+        // report-section but not ones with a forced page break (handled separately below)
+        '.report-section:not([data-pdf-page-break])',
         '[data-pdf-break]',
       ];
       const breakables = container.querySelectorAll(breakableSelectors.join(','));
@@ -224,6 +206,26 @@ export default function Section11({ assessmentId }: Section11Props) {
           void container.offsetHeight; // synchronous reflow so next read is accurate
         }
       }
+
+      // ── Forced page breaks (run after boundary-prevention so positions are final) ──
+      // Boundary-prevention spacers may shift elements above — measuring here ensures
+      // the forced-break spacer reaches the correct page boundary.
+      container.querySelectorAll<HTMLElement>('[data-pdf-page-break="before"]').forEach((el) => {
+        const elTop = el.getBoundingClientRect().top - container.getBoundingClientRect().top;
+        const pageIndex = Math.floor(elTop / pageStepPx);
+        const distFromPageStart = elTop - pageIndex * pageStepPx;
+        const nextPageTop = (pageIndex + 1) * pageStepPx;
+        const gap = nextPageTop - elTop;
+        // Only insert if not already at the very top of a page
+        if (distFromPageStart > PAGE_MARGIN_PX && gap > 0 && gap < pageStepPx) {
+          const spacer = document.createElement('div');
+          spacer.style.height = `${gap}px`;
+          spacer.dataset.pdfSpacer = 'true';
+          el.parentNode?.insertBefore(spacer, el);
+          spacers.push(spacer);
+          void container.offsetHeight;
+        }
+      });
 
       const canvas = await html2canvas(container, {
         scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
