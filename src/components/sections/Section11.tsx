@@ -151,6 +151,25 @@ export default function Section11({ assessmentId }: Section11Props) {
       const pageHeightPx = (297 / 210) * containerWidth;
       const spacers: HTMLElement[] = [];
 
+      // ── Forced page breaks ────────────────────────────────────────────────
+      const PAGE_MARGIN_PX = 10;
+      const forceBreaks = container.querySelectorAll<HTMLElement>('[data-pdf-page-break="before"]');
+      forceBreaks.forEach((el) => {
+        const elTop = el.getBoundingClientRect().top - container.getBoundingClientRect().top;
+        const pageIndex = Math.floor(elTop / pageHeightPx);
+        const nextPageTop = (pageIndex + 1) * pageHeightPx + PAGE_MARGIN_PX;
+        const gap = nextPageTop - elTop;
+        const distFromPageStart = elTop - pageIndex * pageHeightPx;
+        if (distFromPageStart > PAGE_MARGIN_PX && gap > 0 && gap < pageHeightPx) {
+          const spacer = document.createElement('div');
+          spacer.style.height = `${gap}px`;
+          spacer.dataset.pdfSpacer = 'true';
+          el.parentNode?.insertBefore(spacer, el);
+          spacers.push(spacer);
+          void container.offsetHeight; // synchronous reflow
+        }
+      });
+
       container.querySelectorAll('[data-pdf-break]').forEach((el) => {
         const elTop = (el as HTMLElement).getBoundingClientRect().top - container.getBoundingClientRect().top;
         const currentPage = Math.floor(elTop / pageHeightPx);
@@ -580,7 +599,7 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       {/* ─── INSIGHTS & RECOMMENDATIONS ─── */}
       {insights.length > 0 && (
-        <div className="report-section report-insights mt-8 print:mt-6">
+        <div data-pdf-page-break="before" className="report-section report-insights mt-8 print:mt-6">
           <SectionHeading>Insights & Recommendations</SectionHeading>
 
           <div className="space-y-4">
