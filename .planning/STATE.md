@@ -85,6 +85,7 @@ None yet.
 | 260331-pte | Replace sidebar admin links with Admin button + overlay panel | 2026-03-31 | bef82cf | [260331-pte-turn-admin-sidebar-section-into-admin-bu](./quick/260331-pte-turn-admin-sidebar-section-into-admin-bu/) |
 | 260331-py9 | Bulk select and delete with password confirmation on assessments and clients pages | 2026-03-31 | c043f5a | [260331-py9-bulk-select-and-delete-with-password-con](./quick/260331-py9-bulk-select-and-delete-with-password-con/) |
 | 260331-r70 | Fix PDF page-break overflow: scroll reset, reflow flush, bottom guard in exportPdf | 2026-03-31 | 3774dbc | [260331-r70-fix-pdf-page-break-overflow-add-padding-](./quick/260331-r70-fix-pdf-page-break-overflow-add-padding-/) |
+| 260403-pze | Force Insights & Recommendations section onto new PDF page | 2026-04-03 | 7ff48d8 | [260403-pze-put-insights-recommendations-section-in-](./quick/260403-pze-put-insights-recommendations-section-in-/) |
 
 ### Blockers/Concerns
 
@@ -94,6 +95,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-31T08:40:15.355Z
-Stopped at: Completed quick-260331-r70-PLAN.md
+Last session: 2026-04-03T07:45:43Z
+Stopped at: Completed quick-260403-pze-PLAN.md
 Resume file: None
