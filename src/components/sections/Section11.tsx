@@ -208,15 +208,14 @@ export default function Section11({ assessmentId }: Section11Props) {
       }
 
       // ── Forced page breaks (run after boundary-prevention so positions are final) ──
-      // Boundary-prevention spacers may shift elements above — measuring here ensures
-      // the forced-break spacer reaches the correct page boundary.
+      const PAGE_TOP_PAD_PX = Math.round(10 * pxPerMm); // 10mm (~1cm) breathing room at top of new page
       container.querySelectorAll<HTMLElement>('[data-pdf-page-break="before"]').forEach((el) => {
         const elTop = el.getBoundingClientRect().top - container.getBoundingClientRect().top;
         const pageIndex = Math.floor(elTop / pageStepPx);
         const distFromPageStart = elTop - pageIndex * pageStepPx;
         const nextPageTop = (pageIndex + 1) * pageStepPx;
-        const gap = nextPageTop - elTop;
-        // Only insert if not already at the very top of a page
+        // Push to next page boundary + top padding so heading doesn't touch the edge
+        const gap = nextPageTop - elTop + PAGE_TOP_PAD_PX;
         if (distFromPageStart > PAGE_MARGIN_PX && gap > 0 && gap < pageStepPx) {
           const spacer = document.createElement('div');
           spacer.style.height = `${gap}px`;
@@ -762,7 +761,7 @@ export default function Section11({ assessmentId }: Section11Props) {
         <div data-pdf-page-break="before" className="report-section report-insights mt-8 print:mt-6">
           <SectionHeading>Insights & Recommendations</SectionHeading>
 
-          <div className="space-y-4">
+          <div className="space-y-2">
             {insights.map((insight, i) => (
               <div key={i} className="report-insight-card relative bg-white rounded-xl border border-gray-100 overflow-hidden">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#F5A623] to-[#d4891a]" />
