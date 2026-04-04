@@ -171,7 +171,6 @@ export default function Section11({ assessmentId }: Section11Props) {
       // ── Boundary-prevention spacers ───────────────────────────────────────────
       const breakableSelectors = [
         '.report-marker-row',
-        '.report-insight-card',
         '.report-category',
         // report-section but not ones with a forced page break (handled separately below)
         '.report-section:not([data-pdf-page-break])',
