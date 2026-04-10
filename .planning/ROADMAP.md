@@ -94,7 +94,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 2. Authentication & Ownership | 0/0 | Not started | - |
 | 3. Admin Panel & Normative Data Management | 0/4 | Planning complete | - |
 | 4. Security & Client Portal | 0/0 | Not started | - |
-| 5. Migrate PDF generation to react-pdf/renderer | 0/3 | Planning complete | - |
+| 5. Migrate PDF generation to react-pdf/renderer | 0/4 | UAT gap closure | - |
 
 ### Phase 5: Migrate PDF generation to react-pdf/renderer
 
@@ -108,9 +108,10 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
   4. Page breaks never split a marker row mid-row
   5. PDF file size is under 500KB (down from 2-5MB)
   6. html2canvas-pro and jspdf are fully removed from the project
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [x] 05-01-PLAN.md — Install deps, shared PDF foundation (types, colors, styles), server-side data loader, API route shell (PDF-01, PDF-02, PDF-03)
 - [x] 05-02-PLAN.md — Build all react-pdf report components and wire into Peak360Report document (PDF-04, PDF-05, PDF-06)
-- [ ] 05-03-PLAN.md — Replace Section 11 export with fetch-and-download, remove old deps, visual verification (PDF-07, PDF-08)
+- [x] 05-03-PLAN.md — Replace Section 11 export with fetch-and-download, remove old deps, visual verification (PDF-07, PDF-08)
+- [ ] 05-04-PLAN.md — Fix footer text overflow and add page break before Detailed Results (gap closure)
