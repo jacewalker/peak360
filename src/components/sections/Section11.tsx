@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { getPeak360Rating } from '@/lib/normative/ratings';
 import { generatePeak360Insights } from '@/lib/normative/insights';
 import type { RatingTier } from '@/types/normative';
@@ -130,75 +130,27 @@ export default function Section11({ assessmentId }: Section11Props) {
   const [tierCounts, setTierCounts] = useState<Record<RatingTier, number>>({
     elite: 0, great: 0, normal: 0, cautious: 0, poor: 0,
   });
-  const reportRef = useRef<HTMLDivElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
-
   // ── PDF Export ──────────────────────────────────────────────────────────────
 
   const exportPdf = useCallback(async () => {
-    if (!reportRef.current || exporting) return;
+    if (exporting) return;
     setExporting(true);
     try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import('html2canvas-pro'),
-        import('jspdf'),
-      ]);
-
-      if (actionsRef.current) actionsRef.current.style.display = 'none';
-
-      const container = reportRef.current;
-      const containerWidth = container.getBoundingClientRect().width;
-      const pageHeightPx = (297 / 210) * containerWidth;
-      const spacers: HTMLElement[] = [];
-
-      container.querySelectorAll('[data-pdf-break]').forEach((el) => {
-        const elTop = (el as HTMLElement).getBoundingClientRect().top - container.getBoundingClientRect().top;
-        const currentPage = Math.floor(elTop / pageHeightPx);
-        const nextPageTop = (currentPage + 1) * pageHeightPx;
-        const gap = nextPageTop - elTop;
-        if (gap > 0 && gap < pageHeightPx) {
-          const spacer = document.createElement('div');
-          spacer.style.height = `${gap}px`;
-          spacer.dataset.pdfSpacer = 'true';
-          el.parentNode?.insertBefore(spacer, el);
-          spacers.push(spacer);
-        }
-      });
-
-      const canvas = await html2canvas(container, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
-      });
-
-      spacers.forEach((s) => s.remove());
-      if (actionsRef.current) actionsRef.current.style.display = '';
-
-      const imgWidth = 210;
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-
-      let heightLeft = imgHeight;
-      let position = 0;
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-      pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position -= pageHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const clientName = ((clientInfo.clientName as string) || 'Client').replace(/\s+/g, '_');
-      pdf.save(`Peak360_Report_${clientName}.pdf`);
+      const response = await fetch(`/api/assessments/${assessmentId}/pdf`);
+      if (!response.ok) throw new Error('PDF generation failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Peak360_Report_${((clientInfo.clientName as string) || 'Client').replace(/\s+/g, '_')}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('PDF export failed:', err);
     } finally {
       setExporting(false);
     }
-  }, [exporting, clientInfo]);
+  }, [exporting, clientInfo, assessmentId]);
 
   // ── Data Loading ────────────────────────────────────────────────────────────
 
@@ -300,7 +252,7 @@ export default function Section11({ assessmentId }: Section11Props) {
   const renderMarkerRow = (m: ReportMarker, i: number) => (
     <div
       key={m.key}
-      className={`report-marker-row flex items-center justify-between py-2 px-4 border-l-[3px] ${
+      className={`flex items-center justify-between py-2 px-4 border-l-[3px] ${
         m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-gray-50/40 border-l-gray-200'
       } ${i > 0 ? 'border-t border-gray-100' : ''}`}
     >
@@ -324,7 +276,7 @@ export default function Section11({ assessmentId }: Section11Props) {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div ref={reportRef} className="report-container bg-white">
+    <div className="bg-white">
       {/* ─── REPORT COVER / HEADER ─── */}
       <div className="report-header relative overflow-hidden rounded-2xl print:rounded-none bg-gradient-to-br from-[#0f2440] via-[#1a365d] to-[#2d5986] text-white p-8 sm:p-10">
         <div className="absolute top-0 right-0 w-72 h-72 opacity-[0.07]" style={{
@@ -371,7 +323,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       <div className="px-6">
 
       {/* ─── SECTION 2: DAILY READINESS ─── */}
-      <div className="report-section mt-8 print:mt-6">
+      <div className="mt-8 print:mt-6">
         <SectionHeading>Assessment Day Readiness</SectionHeading>
         <div className="rounded-xl border border-gray-100 bg-[#f8fafc] overflow-hidden">
           <div className="grid grid-cols-3 sm:grid-cols-6 divide-x divide-gray-100">
@@ -386,7 +338,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── SECTION 3: MEDICAL SCREENING ─── */}
-      <div className="report-section mt-6 print:mt-4">
+      <div className="mt-6 print:mt-4">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
           <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Medical Screening</h2>
@@ -453,7 +405,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── SECTION 4: CONSENT STATUS ─── */}
-      <div className="report-section mt-6 print:mt-4">
+      <div className="mt-6 print:mt-4">
         <div className="flex items-center gap-4 px-4 py-3 bg-[#f8fafc] rounded-lg border border-gray-100 text-[12px]">
           <div className="flex items-center gap-1.5">
             <div className={`w-2.5 h-2.5 rounded-full ${consentSigned ? 'bg-emerald-500' : 'bg-gray-300'}`} />
@@ -475,7 +427,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── TIER SUMMARY ─── */}
-      <div className="report-section mt-8 print:mt-6">
+      <div className="mt-8 print:mt-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
           <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Results Overview</h2>
@@ -510,7 +462,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── DETAILED RESULTS BY CATEGORY ─── */}
-      <div className="report-section mt-8 print:mt-6">
+      <div className="mt-8 print:mt-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
           <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Detailed Results</h2>
@@ -529,7 +481,7 @@ export default function Section11({ assessmentId }: Section11Props) {
               : [];
 
             return (
-              <div key={cat} className="report-category" {...(cat === 'Strength Testing' ? { 'data-pdf-break': true } : {})}>
+              <div key={cat}>
                 {/* Category header */}
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#1a365d]/70">{cat}</span>
@@ -565,7 +517,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── TIER LEGEND ─── */}
-      <div className="report-section mt-6 print:mt-4">
+      <div className="mt-6 print:mt-4">
         <div className="flex items-center justify-center gap-5 py-3 px-4 bg-[#f8fafc] rounded-lg border border-gray-100">
           {(['elite', 'great', 'normal', 'cautious', 'poor'] as RatingTier[]).map((tier) => (
             <div key={tier} className="flex items-center gap-1.5">
@@ -580,7 +532,7 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       {/* ─── INSIGHTS & RECOMMENDATIONS ─── */}
       {insights.length > 0 && (
-        <div className="report-section report-insights mt-8 print:mt-6">
+        <div className="mt-8 print:mt-6">
           <SectionHeading>Insights & Recommendations</SectionHeading>
 
           <div className="space-y-4">
@@ -625,7 +577,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>{/* end px-6 report body wrapper */}
 
       {/* ─── ACTION BUTTONS (hidden in PDF) ─── */}
-      <div ref={actionsRef} className="flex flex-col sm:flex-row gap-3 justify-center pt-8 pb-4">
+      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-8 pb-4">
         <button
           onClick={exportPdf}
           disabled={exporting}
