@@ -16,7 +16,7 @@ Coaches can deliver accurate, gender-aware health assessments with actionable re
 - ✓ AI-powered document extraction (GPT-4o) for blood tests and body composition — existing
 - ✓ 5-tier normative rating system (poor → elite) for biomarkers and fitness tests — existing
 - ✓ SQLite persistence with Drizzle ORM — existing
-- ✓ PDF export of Section 11 longevity report — existing
+- ✓ PDF export of Section 11 longevity report — existing (migrated to @react-pdf/renderer in Phase 5)
 - ✓ Zustand state management with server sync — existing
 
 ### Active
@@ -24,7 +24,7 @@ Coaches can deliver accurate, gender-aware health assessments with actionable re
 - [ ] Gender-specific blood marker normative ranges
 - [ ] Admin panel for normative range and threshold management
 - [ ] Client portal with authentication and role-based access
-- [ ] Report marker range visualization (gauge bars)
+- ✓ Report marker range visualization (gauge bars) — Validated in Phase 5: SVG range bars in PDF
 - [ ] Actionable recommendations and referral flags in reports
 - [ ] Data encryption at rest for sensitive health data
 - [ ] Automated backup strategy
@@ -77,4 +77,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-29 after initialization*
+*Last updated: 2026-04-10 after Phase 5 completion*
