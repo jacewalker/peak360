@@ -94,6 +94,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 2. Authentication & Ownership | 0/0 | Not started | - |
 | 3. Admin Panel & Normative Data Management | 0/4 | Planning complete | - |
 | 4. Security & Client Portal | 0/0 | Not started | - |
+| 5. Migrate PDF generation to react-pdf/renderer | 0/3 | Planning complete | - |
 
 ### Phase 5: Migrate PDF generation to react-pdf/renderer
 

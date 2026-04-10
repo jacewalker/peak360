@@ -17,6 +17,8 @@
     "test:e2e:desktop": "playwright test --project=desktop"
   },
   "dependencies": {
+    "@ag-media/react-pdf-table": "^2.0.3",
+    "@react-pdf/renderer": "^4.4.0",
     "better-sqlite3": "^12.6.2",
     "drizzle-orm": "^0.45.1",
     "html2canvas-pro": "^2.0.0",
