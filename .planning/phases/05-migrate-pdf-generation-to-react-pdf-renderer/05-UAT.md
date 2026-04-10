@@ -1,5 +1,5 @@
 ---
-status: complete
+status: diagnosed
 phase: 05-migrate-pdf-generation-to-react-pdf-renderer
 source: [05-01-SUMMARY.md, 05-02-SUMMARY.md, 05-03-SUMMARY.md]
 started: 2026-04-10T12:00:00Z
@@ -63,13 +63,26 @@ blocked: 0
   reason: "User reported: footer has a lot of text overlapping each other, not wrapped, exceeding right boundary of the page"
   severity: major
   test: 6
-  artifacts: []
-  missing: []
+  root_cause: "styles.footer uses flexDirection: 'row' but ReportFooter renders two children (inner row + disclaimer text) — they layout side-by-side instead of stacking vertically, causing disclaimer to overflow right edge"
+  artifacts:
+    - path: "src/lib/pdf/styles.ts"
+      issue: "footer style has flexDirection: 'row' — should be 'column' for two-row footer layout"
+    - path: "src/lib/pdf/components/ReportFooter.tsx"
+      issue: "component assumes column parent but styles.footer is row — text overflows"
+  missing:
+    - "Change styles.footer flexDirection from 'row' to 'column'"
+    - "Move justifyContent: 'space-between' and alignItems: 'center' to the inner row View in ReportFooter"
 
 - truth: "'Detailed Results' marker tables section should begin on a new page in the PDF"
   status: enhancement
   reason: "User requested: 'I would like the Detailed Results section to begin on a new page'"
   severity: minor
   test: 1
-  artifacts: []
-  missing: []
+  root_cause: "MarkerTable outer View is missing the break prop — compare to InsightsSection which uses <View break>"
+  artifacts:
+    - path: "src/lib/pdf/components/MarkerTable.tsx"
+      issue: "Outer View on line 16 lacks break prop"
+    - path: "src/lib/pdf/Peak360Report.tsx"
+      issue: "MarkerTable rendered after TierSummary with no page break"
+  missing:
+    - "Add break prop to outer View in MarkerTable.tsx"
