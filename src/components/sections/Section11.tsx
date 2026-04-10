@@ -1,9 +1,9 @@
 'use client';
 
-import { useEffect, useState, useRef, useCallback } from 'react';
-import { getPeak360Rating, getStandards, getStandardsFromSnapshot, normalizeRating } from '@/lib/normative/ratings';
+import { useEffect, useState, useCallback } from 'react';
+import { getPeak360Rating } from '@/lib/normative/ratings';
 import { generatePeak360Insights } from '@/lib/normative/insights';
-import type { RatingTier, TierRanges, NormativeVersionSnapshot } from '@/types/normative';
+import type { RatingTier } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
 
 interface ReportMarker {
@@ -15,8 +15,6 @@ interface ReportMarker {
   category: string;
   subcategory?: string;
   hasNorms: boolean;
-  /** Resolved tier ranges (from snapshot or hardcoded) for the RangeBar */
-  resolvedStandards?: TierRanges | null;
 }
 
 interface Insight {
@@ -62,9 +60,6 @@ const TIER_TEXT: Record<RatingTier, string> = {
 };
 
 import { REPORT_MARKERS, type MarkerDef } from '@/lib/report-markers';
-import { RangeBar } from '@/components/report/RangeBar';
-import { ReferralFlag } from '@/components/report/ReferralFlag';
-import { Disclaimer } from '@/components/report/Disclaimer';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -135,155 +130,39 @@ export default function Section11({ assessmentId }: Section11Props) {
   const [tierCounts, setTierCounts] = useState<Record<RatingTier, number>>({
     elite: 0, great: 0, normal: 0, cautious: 0, poor: 0,
   });
-  const reportRef = useRef<HTMLDivElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
-  const actionsTopRef = useRef<HTMLDivElement>(null);
-
   // ── PDF Export ──────────────────────────────────────────────────────────────
 
   const exportPdf = useCallback(async () => {
-    if (!reportRef.current || exporting) return;
+    if (exporting) return;
     setExporting(true);
     try {
-      const [{ default: html2canvas }, { default: jsPDF }] = await Promise.all([
-        import('html2canvas-pro'),
-        import('jspdf'),
-      ]);
-
-      if (actionsRef.current) actionsRef.current.style.display = 'none';
-      if (actionsTopRef.current) actionsTopRef.current.style.display = 'none';
-
-      const container = reportRef.current;
-      const prevScrollY = window.scrollY;
-      window.scrollTo(0, 0);
-      const containerWidth = container.getBoundingClientRect().width;
-
-      // ── Spacer constants (must match PDF slicing below) ──────────────────────
-      // Image is placed at x=PDF_MARGIN_MM, y=0 and advances by exactly 297mm per
-      // page → no overlap, no duplication. Spacers use the same 297mm step.
-      const PDF_MARGIN_MM = 6; // horizontal side margins only
-      const IMG_WIDTH_MM = 210 - PDF_MARGIN_MM * 2; // 198mm
-      const pxPerMm = containerWidth / IMG_WIDTH_MM;
-      const pageStepPx = 297 * pxPerMm; // exact A4 page height in DOM pixels
-      const PAGE_MARGIN_PX = Math.round(8 * pxPerMm); // 8mm breathing room near cuts
-      const spacers: HTMLElement[] = [];
-
-      // ── Boundary-prevention spacers ───────────────────────────────────────────
-      const breakableSelectors = [
-        '.report-marker-row',
-        '.report-category',
-        // report-section but not ones with a forced page break (handled separately below)
-        '.report-section:not([data-pdf-page-break])',
-        '[data-pdf-break]',
-      ];
-      const breakables = container.querySelectorAll(breakableSelectors.join(','));
-
-      const sorted = Array.from(breakables)
-        .map((el) => ({
-          el: el as HTMLElement,
-          top: (el as HTMLElement).getBoundingClientRect().top - container.getBoundingClientRect().top,
-        }))
-        .sort((a, b) => a.top - b.top);
-
-      for (const item of sorted) {
-        const currentTop = item.el.getBoundingClientRect().top - container.getBoundingClientRect().top;
-        const currentBottom = item.el.getBoundingClientRect().bottom - container.getBoundingClientRect().top;
-        const elHeight = currentBottom - currentTop;
-
-        const pageEnd = Math.ceil((currentTop + 1) / pageStepPx) * pageStepPx;
-
-        if (currentBottom <= pageEnd - PAGE_MARGIN_PX) continue; // safely before cut
-        if (elHeight > pageStepPx - PAGE_MARGIN_PX * 2) continue; // too tall to fit on one page
-
-        const gap = pageEnd - currentTop + PAGE_MARGIN_PX;
-        if (gap > 0 && gap < pageStepPx) {
-          const spacer = document.createElement('div');
-          spacer.style.height = `${gap}px`;
-          spacer.dataset.pdfSpacer = 'true';
-          item.el.parentNode?.insertBefore(spacer, item.el);
-          spacers.push(spacer);
-          void container.offsetHeight; // synchronous reflow so next read is accurate
-        }
-      }
-
-      // ── Forced page breaks (run after boundary-prevention so positions are final) ──
-      const PAGE_TOP_PAD_PX = Math.round(10 * pxPerMm); // 10mm (~1cm) breathing room at top of new page
-      container.querySelectorAll<HTMLElement>('[data-pdf-page-break="before"]').forEach((el) => {
-        const elTop = el.getBoundingClientRect().top - container.getBoundingClientRect().top;
-        const pageIndex = Math.floor(elTop / pageStepPx);
-        const distFromPageStart = elTop - pageIndex * pageStepPx;
-        const nextPageTop = (pageIndex + 1) * pageStepPx;
-        // Push to next page boundary + top padding so heading doesn't touch the edge
-        const gap = nextPageTop - elTop + PAGE_TOP_PAD_PX;
-        if (distFromPageStart > PAGE_MARGIN_PX && gap > 0 && gap < pageStepPx) {
-          const spacer = document.createElement('div');
-          spacer.style.height = `${gap}px`;
-          spacer.dataset.pdfSpacer = 'true';
-          el.parentNode?.insertBefore(spacer, el);
-          spacers.push(spacer);
-          void container.offsetHeight;
-        }
-      });
-
-      const canvas = await html2canvas(container, {
-        scale: 2, useCORS: true, backgroundColor: '#ffffff', logging: false,
-      });
-
-      spacers.forEach((s) => s.remove());
-      window.scrollTo(0, prevScrollY);
-      if (actionsRef.current) actionsRef.current.style.display = '';
-      if (actionsTopRef.current) actionsTopRef.current.style.display = '';
-
-      // ── PDF slicing ───────────────────────────────────────────────────────────
-      // Image placed at y=0, advances by exactly pageHeight=297mm → zero overlap.
-      const PDF_MARGIN = 6; // horizontal margins (mm)
-      const imgWidth = 210 - PDF_MARGIN * 2; // 198mm
-      const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
-      const pdf = new jsPDF('p', 'mm', 'a4');
-      const imgData = canvas.toDataURL('image/jpeg', 0.95);
-
-      let heightLeft = imgHeight;
-      let position = 0; // no top-margin offset → no overlap between pages
-
-      pdf.addImage(imgData, 'JPEG', PDF_MARGIN, position, imgWidth, imgHeight);
-      heightLeft -= pageHeight;
-
-      while (heightLeft > 0) {
-        position -= pageHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, 'JPEG', PDF_MARGIN, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
-      }
-
-      const clientName = ((clientInfo.clientName as string) || 'Client').replace(/\s+/g, '_');
-      pdf.save(`Peak360_Report_${clientName}.pdf`);
+      const response = await fetch(`/api/assessments/${assessmentId}/pdf`);
+      if (!response.ok) throw new Error('PDF generation failed');
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Peak360_Report_${((clientInfo.clientName as string) || 'Client').replace(/\s+/g, '_')}.pdf`;
+      a.click();
+      URL.revokeObjectURL(url);
     } catch (err) {
       console.error('PDF export failed:', err);
     } finally {
       setExporting(false);
     }
-  }, [exporting, clientInfo]);
+  }, [exporting, clientInfo, assessmentId]);
 
   // ── Data Loading ────────────────────────────────────────────────────────────
 
   useEffect(() => {
     const loadReport = async () => {
-      // Fetch section data and normative version snapshot in parallel
       const sections: Record<number, Record<string, unknown>> = {};
-      const sectionFetches = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(async (num) => {
+      const fetches = [1, 2, 3, 4, 5, 6, 7, 8, 9].map(async (num) => {
         const res = await fetch(`/api/assessments/${assessmentId}/sections/${num}`);
         const { data } = await res.json();
         sections[num] = (data || {}) as Record<string, unknown>;
       });
-
-      let normativeSnapshot: NormativeVersionSnapshot | null = null;
-      const snapshotFetch = fetch(`/api/assessments/${assessmentId}/normative-version`)
-        .then(res => res.json())
-        .then(json => { normativeSnapshot = json.data ?? null; })
-        .catch(() => { /* fall back to hardcoded */ });
-
-      await Promise.all([...sectionFetches, snapshotFetch]);
+      await Promise.all(fetches);
 
       const info = sections[1] || {};
       setClientInfo(info);
@@ -307,44 +186,8 @@ export default function Section11({ assessmentId }: Section11Props) {
           continue;
         }
 
-        // Use versioned snapshot when available, fall back to hardcoded
-        let tier: RatingTier | null = null;
-        let unit = m.fallbackUnit || '';
-        let resolvedStandards: TierRanges | null = null;
-
-        if (normativeSnapshot) {
-          const snapshotResult = getStandardsFromSnapshot(normativeSnapshot, m.testKey, age, gender);
-          if (snapshotResult.standards) {
-            resolvedStandards = snapshotResult.standards;
-            const tiers: RatingTier[] = ['poor', 'cautious', 'normal', 'great', 'elite'];
-            let rawLabel = 'normal';
-            for (const t of tiers) {
-              const range = snapshotResult.standards[t];
-              if (range && value >= range.min && value <= range.max) {
-                rawLabel = t;
-                break;
-              }
-            }
-            tier = normalizeRating(rawLabel).tier;
-            unit = snapshotResult.unit || m.fallbackUnit || '';
-          }
-        }
-
-        if (!tier) {
-          // Fallback to existing getPeak360Rating (for old assessments or missing snapshot keys)
-          const rating = getPeak360Rating(m.testKey, value, age, gender);
-          tier = rating?.tier || null;
-          if (rating?.unit) unit = rating.unit;
-          // Also resolve standards for the RangeBar from hardcoded data
-          if (!resolvedStandards) {
-            const hardcoded = getStandards(m.testKey, age, gender);
-            resolvedStandards = hardcoded.standards;
-          }
-        }
-
-        // hasNorms is true if standards were resolved from any source (snapshot, DB, or hardcoded)
-        const hasNorms = m.hasNorms || !!resolvedStandards;
-
+        const rating = getPeak360Rating(m.testKey, value, age, gender);
+        const tier = rating?.tier || null;
         if (tier) counts[tier]++;
 
         evaluated.push({
@@ -352,11 +195,10 @@ export default function Section11({ assessmentId }: Section11Props) {
           label: m.label,
           value,
           tier,
-          unit,
+          unit: rating?.unit || m.fallbackUnit || '',
           category: m.category,
           subcategory: m.subcategory,
-          hasNorms,
-          resolvedStandards,
+          hasNorms: m.hasNorms,
         });
       }
 
@@ -407,91 +249,34 @@ export default function Section11({ assessmentId }: Section11Props) {
 
   // ── Render Marker Row ───────────────────────────────────────────────────────
 
-  const renderMarkerRow = (m: ReportMarker, i: number) => {
-    const age = clientInfo.clientAge as number || null;
-    const gender = clientInfo.clientGender as string || null;
-
-    return (
-      <div
-        key={m.key}
-        className={`report-marker-row py-2 px-3 sm:px-4 border-l-[3px] ${
-          m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-gray-50/40 border-l-gray-200'
-        } ${i > 0 ? 'border-t border-gray-100' : ''}`}
-      >
-        {/* Label + value + tier pill row */}
-        <div className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1">
-          <span className="text-[13px] font-medium text-[#1a202c]">{m.label}</span>
-          <div className="flex items-center gap-3">
-            {m.value !== null ? (
-              <>
-                <span className="text-[13px] font-semibold text-[#1a202c] tabular-nums tracking-tight">
-                  {m.value}
-                  <span className="text-[11px] font-normal text-[#64748b] ml-1">{m.unit}</span>
-                </span>
-                {m.tier && <TierPill tier={m.tier} />}
-              </>
-            ) : (
-              <span className="text-[11px] text-[#94a3b8] italic">Not recorded</span>
-            )}
-          </div>
-        </div>
-        {/* Range bar for markers with norms and a value */}
-        {m.hasNorms && m.value !== null && m.tier && (
-          <div className="w-full mt-1.5">
-            <RangeBar value={m.value} testKey={m.key} age={age} gender={gender} resolvedStandards={m.resolvedStandards} />
-          </div>
+  const renderMarkerRow = (m: ReportMarker, i: number) => (
+    <div
+      key={m.key}
+      className={`flex items-center justify-between py-2 px-4 border-l-[3px] ${
+        m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-gray-50/40 border-l-gray-200'
+      } ${i > 0 ? 'border-t border-gray-100' : ''}`}
+    >
+      <span className="text-[13px] font-medium text-[#1a202c]">{m.label}</span>
+      <div className="flex items-center gap-3">
+        {m.value !== null ? (
+          <>
+            <span className="text-[13px] font-semibold text-[#1a202c] tabular-nums tracking-tight">
+              {m.value}
+              <span className="text-[11px] font-normal text-[#64748b] ml-1">{m.unit}</span>
+            </span>
+            {m.tier && <TierPill tier={m.tier} />}
+          </>
+        ) : (
+          <span className="text-[11px] text-[#94a3b8] italic">Not recorded</span>
         )}
-        {/* Referral flags */}
-        {m.tier === 'poor' && <ReferralFlag level="urgent" />}
-        {m.tier === 'cautious' && <ReferralFlag level="monitor" />}
       </div>
-    );
-  };
+    </div>
+  );
 
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div ref={reportRef} className="report-container bg-white">
-
-      {/* ─── TOP ACTION BAR (hidden in PDF) ─── */}
-      <div ref={actionsTopRef} className="flex flex-col sm:flex-row gap-3 justify-end px-4 pt-4 pb-3 border-b border-gray-100 bg-[#f8fafc]">
-        <button
-          onClick={exportPdf}
-          disabled={exporting}
-          className="group flex items-center justify-center gap-2 px-6 py-2.5 bg-[#1a365d] text-white rounded-xl text-sm font-semibold hover:bg-[#2d5986] transition-all hover:shadow-md active:scale-[0.98] disabled:opacity-60"
-        >
-          {exporting ? (
-            <>
-              <span className="w-3.5 h-3.5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-              Generating PDF...
-            </>
-          ) : (
-            <>
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-              </svg>
-              Export PDF
-            </>
-          )}
-        </button>
-        <button
-          onClick={async () => {
-            await fetch(`/api/assessments/${assessmentId}`, {
-              method: 'PUT',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ status: 'completed' }),
-            });
-            window.location.href = '/';
-          }}
-          className="flex items-center justify-center gap-2 px-6 py-2.5 bg-[#F5A623] text-[#1a365d] rounded-xl text-sm font-semibold hover:bg-[#f7bc5a] transition-all hover:shadow-md active:scale-[0.98]"
-        >
-          <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-          </svg>
-          Save & Complete Assessment
-        </button>
-      </div>
-
+    <div className="bg-white">
       {/* ─── REPORT COVER / HEADER ─── */}
       <div className="report-header relative overflow-hidden rounded-2xl print:rounded-none bg-gradient-to-br from-[#0f2440] via-[#1a365d] to-[#2d5986] text-white p-8 sm:p-10">
         <div className="absolute top-0 right-0 w-72 h-72 opacity-[0.07]" style={{
@@ -527,7 +312,7 @@ export default function Section11({ assessmentId }: Section11Props) {
               <p className="text-sm font-semibold">{(clientInfo.clientAge as number) || '—'}</p>
             </div>
             <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-white/50 mb-0.5">Biological Sex</p>
+              <p className="text-[10px] uppercase tracking-[0.15em] text-white/50 mb-0.5">Gender</p>
               <p className="text-sm font-semibold capitalize">{(clientInfo.clientGender as string) || '—'}</p>
             </div>
           </div>
@@ -537,18 +322,8 @@ export default function Section11({ assessmentId }: Section11Props) {
       {/* ─── REPORT BODY ─── */}
       <div className="px-6">
 
-      {/* ─── MEDICAL DISCLAIMER (TOP) ─── */}
-      <div className="mt-4">
-        <Disclaimer />
-      </div>
-      {!clientInfo.clientGender && (
-        <div className="mt-2 px-3 py-2 bg-amber-50 border border-amber-200 rounded-md text-[11px] text-amber-700">
-          Biological sex not specified — ranges shown are for male reference values. Provide biological sex in Section 1 for accurate normative ranges.
-        </div>
-      )}
-
       {/* ─── SECTION 2: DAILY READINESS ─── */}
-      <div className="report-section mt-8 print:mt-6">
+      <div className="mt-8 print:mt-6">
         <SectionHeading>Assessment Day Readiness</SectionHeading>
         <div className="rounded-xl border border-gray-100 bg-[#f8fafc] overflow-hidden">
           <div className="grid grid-cols-3 sm:grid-cols-6 divide-x divide-gray-100">
@@ -563,7 +338,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── SECTION 3: MEDICAL SCREENING ─── */}
-      <div className="report-section mt-6 print:mt-4">
+      <div className="mt-6 print:mt-4">
         <div className="flex items-center gap-3 mb-4">
           <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
           <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Medical Screening</h2>
@@ -630,7 +405,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── SECTION 4: CONSENT STATUS ─── */}
-      <div className="report-section mt-6 print:mt-4">
+      <div className="mt-6 print:mt-4">
         <div className="flex items-center gap-4 px-4 py-3 bg-[#f8fafc] rounded-lg border border-gray-100 text-[12px]">
           <div className="flex items-center gap-1.5">
             <div className={`w-2.5 h-2.5 rounded-full ${consentSigned ? 'bg-emerald-500' : 'bg-gray-300'}`} />
@@ -652,7 +427,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── TIER SUMMARY ─── */}
-      <div className="report-section mt-8 print:mt-6">
+      <div className="mt-8 print:mt-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
           <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Results Overview</h2>
@@ -687,7 +462,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── DETAILED RESULTS BY CATEGORY ─── */}
-      <div className="report-section mt-8 print:mt-6">
+      <div className="mt-8 print:mt-6">
         <div className="flex items-center gap-3 mb-5">
           <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
           <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Detailed Results</h2>
@@ -706,7 +481,7 @@ export default function Section11({ assessmentId }: Section11Props) {
               : [];
 
             return (
-              <div key={cat} className="report-category" {...(cat === 'Strength Testing' ? { 'data-pdf-break': true } : {})}>
+              <div key={cat}>
                 {/* Category header */}
                 <div className="flex items-center gap-2 mb-2">
                   <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#1a365d]/70">{cat}</span>
@@ -742,7 +517,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>
 
       {/* ─── TIER LEGEND ─── */}
-      <div className="report-section mt-6 print:mt-4">
+      <div className="mt-6 print:mt-4">
         <div className="flex items-center justify-center gap-5 py-3 px-4 bg-[#f8fafc] rounded-lg border border-gray-100">
           {(['elite', 'great', 'normal', 'cautious', 'poor'] as RatingTier[]).map((tier) => (
             <div key={tier} className="flex items-center gap-1.5">
@@ -757,10 +532,10 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       {/* ─── INSIGHTS & RECOMMENDATIONS ─── */}
       {insights.length > 0 && (
-        <div data-pdf-page-break="before" className="report-section report-insights mt-8 print:mt-6">
+        <div className="mt-8 print:mt-6">
           <SectionHeading>Insights & Recommendations</SectionHeading>
 
-          <div className="space-y-2">
+          <div className="space-y-4">
             {insights.map((insight, i) => (
               <div key={i} className="report-insight-card relative bg-white rounded-xl border border-gray-100 overflow-hidden">
                 <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#F5A623] to-[#d4891a]" />
@@ -784,11 +559,6 @@ export default function Section11({ assessmentId }: Section11Props) {
         </div>
       )}
 
-      {/* ─── MEDICAL DISCLAIMER (BOTTOM) ─── */}
-      <div className="mt-8 mb-4">
-        <Disclaimer />
-      </div>
-
       {/* ─── REPORT FOOTER ─── */}
       <div className="report-footer mt-10 pt-5 border-t border-gray-200 print:mt-6">
         <div className="flex items-center justify-between text-[10px] text-[#94a3b8]">
@@ -807,7 +577,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>{/* end px-6 report body wrapper */}
 
       {/* ─── ACTION BUTTONS (hidden in PDF) ─── */}
-      <div ref={actionsRef} className="flex flex-col sm:flex-row gap-3 justify-center pt-8 pb-4">
+      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-8 pb-4">
         <button
           onClick={exportPdf}
           disabled={exporting}
