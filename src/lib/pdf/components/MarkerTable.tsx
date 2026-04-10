@@ -13,7 +13,7 @@ export function MarkerTable({ markers }: MarkerTableProps) {
   const categories = [...new Set(markers.map((m) => m.category))];
 
   return (
-    <View>
+    <View break>
       <View style={styles.sectionHeading}>
         <View style={styles.sectionHeadingBar} />
         <Text style={styles.sectionHeadingText}>Detailed Results</Text>
