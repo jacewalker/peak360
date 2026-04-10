@@ -6,11 +6,13 @@ import Sidebar from './Sidebar';
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAssessmentPage = /^\/assessment\/[^/]+\/section\//.test(pathname);
+  const isLoginPage = pathname === '/login';
+  const showSidebar = !isAssessmentPage && !isLoginPage;
 
   return (
     <>
-      {!isAssessmentPage && <Sidebar />}
-      <div className={isAssessmentPage ? '' : 'lg:pl-56'}>
+      {showSidebar && <Sidebar />}
+      <div className={showSidebar ? 'lg:pl-56' : ''}>
         {children}
       </div>
     </>
