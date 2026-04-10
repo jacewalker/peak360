@@ -54,3 +54,4 @@ Latest Peak360 file.html
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+.claude/worktrees/
