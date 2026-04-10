@@ -2,7 +2,7 @@ import { db } from '@/lib/db';
 import { assessments, assessmentSections } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { REPORT_MARKERS } from '@/lib/report-markers';
-import { getPeak360Rating } from '@/lib/normative/ratings';
+import { getPeak360Rating, getStandards } from '@/lib/normative/ratings';
 import { generatePeak360Insights } from '@/lib/normative/insights';
 import type { RatingTier } from '@/types/normative';
 import type { ReportData, ReportMarker } from '@/lib/pdf/types';
@@ -51,6 +51,8 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
     const rawValue = sectionData[m.dataKey];
     const value = rawValue != null ? Number(rawValue) : null;
 
+    const standards = m.hasNorms ? getStandards(m.testKey, age, gender) : null;
+
     if (value === null || isNaN(value)) {
       evaluated.push({
         key: m.testKey,
@@ -61,6 +63,7 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
         category: m.category,
         subcategory: m.subcategory,
         hasNorms: m.hasNorms,
+        resolvedStandards: standards?.standards || null,
       });
       continue;
     }
@@ -78,6 +81,7 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
       category: m.category,
       subcategory: m.subcategory,
       hasNorms: m.hasNorms,
+      resolvedStandards: standards?.standards || null,
     });
   }
 
