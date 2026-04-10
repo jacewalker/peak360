@@ -151,6 +151,16 @@ export default function SectionPage() {
     router.push('/');
   }, [router, saveSection]);
 
+  const handleComplete = useCallback(async () => {
+    await saveSection(true);
+    await fetch(`/api/assessments/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'completed' }),
+    });
+    router.push('/');
+  }, [id, router, saveSection]);
+
   const handleCancel = useCallback(() => {
     if (window.confirm('Discard all unsaved changes and return to home?')) {
       store.markClean();
@@ -184,6 +194,7 @@ export default function SectionPage() {
             currentSection={num}
             onPrev={() => navigate('prev')}
             onNext={() => navigate('next')}
+            onComplete={handleComplete}
             onSaveExit={handleSaveExit}
             onCancel={handleCancel}
             isSaving={store.isSaving}
@@ -209,6 +220,7 @@ export default function SectionPage() {
         currentSection={num}
         onPrev={() => navigate('prev')}
         onNext={() => navigate('next')}
+        onComplete={handleComplete}
         onSaveExit={handleSaveExit}
         onCancel={handleCancel}
         isSaving={store.isSaving}

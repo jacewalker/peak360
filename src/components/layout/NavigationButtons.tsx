@@ -6,6 +6,7 @@ interface NavigationButtonsProps {
   currentSection: number;
   onPrev: () => void;
   onNext: () => void;
+  onComplete?: () => void;
   onSaveExit?: () => void;
   onCancel?: () => void;
   isSaving?: boolean;
@@ -16,11 +17,14 @@ export default function NavigationButtons({
   currentSection,
   onPrev,
   onNext,
+  onComplete,
   onSaveExit,
   onCancel,
   isSaving,
   lastSaved,
 }: NavigationButtonsProps) {
+  const isLastSection = currentSection === VISIBLE_SECTIONS[VISIBLE_SECTIONS.length - 1];
+
   return (
     <div className="bg-white border-t border-border px-4 sm:px-6 py-3 sm:py-4 no-print shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
       <div className="max-w-6xl mx-auto">
@@ -74,7 +78,7 @@ export default function NavigationButtons({
             ) : null}
           </div>
 
-          {/* Right: Save & Exit + Next */}
+          {/* Right: Save & Exit + Next/Complete */}
           <div className="flex items-center gap-2">
             {onSaveExit && (
               <button
@@ -85,14 +89,14 @@ export default function NavigationButtons({
               </button>
             )}
             <button
-              onClick={onNext}
+              onClick={isLastSection && onComplete ? onComplete : onNext}
               className={`px-4 sm:px-6 py-3 sm:py-2.5 rounded-lg font-medium transition-all hover:shadow-md hover:-translate-y-px text-sm sm:text-base ${
-                currentSection === VISIBLE_SECTIONS[VISIBLE_SECTIONS.length - 1]
+                isLastSection
                   ? 'bg-gold text-navy hover:bg-gold-light'
                   : 'bg-navy text-white hover:bg-navy-light'
               }`}
             >
-              {currentSection === VISIBLE_SECTIONS[VISIBLE_SECTIONS.length - 1] ? 'Complete' : <>Next {'\u2192'}</>}
+              {isLastSection ? 'Complete' : <>Next {'\u2192'}</>}
             </button>
           </div>
         </div>
