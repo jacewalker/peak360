@@ -31,7 +31,7 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Invalid password' }, { status: 401 });
     }
 
-    const token = createSessionToken(adminPassword);
+    const token = await createSessionToken(adminPassword);
 
     const response = NextResponse.json({ success: true });
     response.cookies.set('peak360_session', token, {

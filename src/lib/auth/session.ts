@@ -1,15 +1,32 @@
-import { createHmac, randomBytes, timingSafeEqual } from 'crypto';
-
 const SESSION_SECRET_SALT = 'peak360-session-v1';
 
-/**
- * Derives an HMAC signing key from the admin password.
- * The salt ensures the signing key differs from the raw password.
- */
-function getSigningKey(adminPassword: string): string {
-  return createHmac('sha256', SESSION_SECRET_SALT)
-    .update(adminPassword)
-    .digest('hex');
+function hexEncode(buffer: ArrayBuffer): string {
+  return Array.from(new Uint8Array(buffer))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('');
+}
+
+function getRandomHex(bytes: number): string {
+  const array = new Uint8Array(bytes);
+  crypto.getRandomValues(array);
+  return hexEncode(array.buffer);
+}
+
+async function hmacSign(key: string, data: string): Promise<string> {
+  const encoder = new TextEncoder();
+  const cryptoKey = await crypto.subtle.importKey(
+    'raw',
+    encoder.encode(key),
+    { name: 'HMAC', hash: 'SHA-256' },
+    false,
+    ['sign']
+  );
+  const signature = await crypto.subtle.sign('HMAC', cryptoKey, encoder.encode(data));
+  return hexEncode(signature);
+}
+
+async function getSigningKey(adminPassword: string): Promise<string> {
+  return hmacSign(SESSION_SECRET_SALT, adminPassword);
 }
 
 /**
@@ -17,14 +34,12 @@ function getSigningKey(adminPassword: string): string {
  * The token contains no password material and cannot be forged
  * without knowing the admin password.
  */
-export function createSessionToken(adminPassword: string): string {
-  const sessionId = randomBytes(32).toString('hex');
+export async function createSessionToken(adminPassword: string): Promise<string> {
+  const sessionId = getRandomHex(32);
   const date = new Date().toISOString().slice(0, 10);
   const payload = `${sessionId}.${date}`;
-  const signingKey = getSigningKey(adminPassword);
-  const signature = createHmac('sha256', signingKey)
-    .update(payload)
-    .digest('hex');
+  const signingKey = await getSigningKey(adminPassword);
+  const signature = await hmacSign(signingKey, payload);
   return `${payload}.${signature}`;
 }
 
@@ -34,10 +49,10 @@ export function createSessionToken(adminPassword: string): string {
  * 2. The date matches today (sessions expire daily)
  * 3. The HMAC signature is valid (timing-safe comparison)
  */
-export function validateSessionToken(
+export async function validateSessionToken(
   token: string,
   adminPassword: string
-): boolean {
+): Promise<boolean> {
   const parts = token.split('.');
   if (parts.length !== 3) return false;
 
@@ -48,23 +63,21 @@ export function validateSessionToken(
   if (date !== today) return false;
 
   const payload = `${sessionId}.${date}`;
-  const signingKey = getSigningKey(adminPassword);
-  const expectedSignature = createHmac('sha256', signingKey)
-    .update(payload)
-    .digest('hex');
+  const signingKey = await getSigningKey(adminPassword);
+  const expectedSignature = await hmacSign(signingKey, payload);
 
   return timingSafeCompare(signature, expectedSignature);
 }
 
 /**
  * Timing-safe string comparison to prevent timing attacks.
+ * Uses constant-time XOR comparison.
  */
 export function timingSafeCompare(a: string, b: string): boolean {
-  if (a.length !== b.length) {
-    // Compare against itself to maintain constant time
-    const buf = Buffer.from(a);
-    timingSafeEqual(buf, buf);
-    return false;
+  if (a.length !== b.length) return false;
+  let result = 0;
+  for (let i = 0; i < a.length; i++) {
+    result |= a.charCodeAt(i) ^ b.charCodeAt(i);
   }
-  return timingSafeEqual(Buffer.from(a), Buffer.from(b));
+  return result === 0;
 }

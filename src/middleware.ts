@@ -8,7 +8,7 @@ const PUBLIC_PATHS = new Set([
   '/api/health',
 ]);
 
-export function middleware(req: NextRequest) {
+export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
   if (PUBLIC_PATHS.has(pathname)) {
@@ -43,7 +43,7 @@ export function middleware(req: NextRequest) {
     return redirectToLogin(req);
   }
 
-  if (!validateSessionToken(sessionToken, adminPassword)) {
+  if (!await validateSessionToken(sessionToken, adminPassword)) {
     return redirectToLogin(req);
   }
 
