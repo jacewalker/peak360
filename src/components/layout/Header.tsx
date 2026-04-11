@@ -22,8 +22,9 @@ export default function Header() {
         </Link>
         <button
           onClick={() => {
-            document.cookie = 'peak360_session=; Path=/; Max-Age=0';
-            window.location.href = '/login';
+            fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+              window.location.href = '/login';
+            });
           }}
           className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium text-white/60 hover:text-white hover:bg-white/10 transition-all"
         >

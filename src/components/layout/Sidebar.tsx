@@ -143,8 +143,9 @@ export default function Sidebar() {
           {/* Logout */}
           <button
             onClick={() => {
-              document.cookie = 'peak360_session=; Path=/; Max-Age=0';
-              window.location.href = '/login';
+              fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
+                window.location.href = '/login';
+              });
             }}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-all w-full"
           >

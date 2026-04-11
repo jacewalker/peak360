@@ -1,13 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { validateSessionToken } from '@/lib/auth/session';
 
-function makeToken(password: string, date: string): string {
-  return btoa(`${password}:${date}`).replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
-}
+const PUBLIC_PATHS = new Set([
+  '/login',
+  '/api/auth/login',
+  '/api/auth/logout',
+  '/api/health',
+]);
 
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (pathname === '/login' || pathname.startsWith('/api/auth') || pathname === '/api/health') {
+  if (PUBLIC_PATHS.has(pathname)) {
     return NextResponse.next();
   }
 
@@ -23,7 +27,15 @@ export function middleware(req: NextRequest) {
 
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (!adminPassword) {
-    return NextResponse.next();
+    // Fail-closed: deny all access when auth is not configured
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json(
+        { error: 'Authentication not configured' },
+        { status: 503 }
+      );
+    }
+    const loginUrl = new URL('/login', req.url);
+    return NextResponse.redirect(loginUrl);
   }
 
   const sessionToken = req.cookies.get('peak360_session')?.value;
@@ -31,10 +43,7 @@ export function middleware(req: NextRequest) {
     return redirectToLogin(req);
   }
 
-  const today = new Date().toISOString().slice(0, 10);
-  const expectedToken = makeToken(adminPassword, today);
-
-  if (sessionToken !== expectedToken) {
+  if (!validateSessionToken(sessionToken, adminPassword)) {
     return redirectToLogin(req);
   }
 
@@ -42,6 +51,9 @@ export function middleware(req: NextRequest) {
 }
 
 function redirectToLogin(req: NextRequest) {
+  if (req.nextUrl.pathname.startsWith('/api/')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   const loginUrl = new URL('/login', req.url);
   return NextResponse.redirect(loginUrl);
 }
