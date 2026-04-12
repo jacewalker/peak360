@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Completed 02-02-PLAN.md
-last_updated: "2026-04-12T05:47:19.068Z"
+stopped_at: Completed 02-03-PLAN.md
+last_updated: "2026-04-12T05:45:46.228Z"
 last_activity: 2026-04-12
 progress:
   total_phases: 5
@@ -57,7 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P02 | 2m 27s | 2 tasks | 5 files |
 | Phase 05 P03 | 1m 44s | 2 tasks | 3 files |
 | Phase 05 P04 | 1m 1s | 2 tasks | 3 files |
-| Phase 02 P02 | 5m 4s | 2 tasks | 8 files |
+| Phase 02 P03 | 3m 49s | 2 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -79,8 +79,8 @@ Recent decisions affecting current work:
 - [Phase 05]: Footer uses flexDirection column with inner row for horizontal layout
 - [Phase 02]: Better Auth installed with text IDs for all auth tables, dual PG/SQLite schema support
 - [Phase 02]: Middleware temporarily passes all requests while auth is incrementally set up (02-02 adds session checks)
-- [Phase 02]: Shared auth-helpers module with tuple return pattern for clean session validation guards
-- [Phase 02]: hasAccess ownership check duplicated per-route for self-containment
+- [Phase 02]: Welcome message on portal page (not login) for cleaner Better Auth magic link integration
+- [Phase 02]: Invite email links to /login?mode=client for self-service magic link flow
 
 ### Pending Todos
 
@@ -109,6 +109,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-12T05:47:19.066Z
-Stopped at: Completed 02-02-PLAN.md
+Last session: 2026-04-12T05:45:46.226Z
+Stopped at: Completed 02-03-PLAN.md
 Resume file: None
