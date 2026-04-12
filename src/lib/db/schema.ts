@@ -20,7 +20,7 @@ export const assessmentSections = pgTable('assessment_sections', {
   id: serial('id').primaryKey(),
   assessmentId: text('assessment_id').notNull().references(() => assessments.id, { onDelete: 'cascade' }),
   sectionNumber: integer('section_number').notNull(),
-  data: jsonb('data'),
+  data: text('data'),
   completedAt: text('completed_at'),
 });
 
@@ -38,7 +38,7 @@ export const uploadedFiles = pgTable('uploaded_files', {
   assessmentId: text('assessment_id').notNull().references(() => assessments.id, { onDelete: 'cascade' }),
   sectionNumber: integer('section_number').notNull(),
   fileName: text('file_name'),
-  extractedData: jsonb('extracted_data'),
+  extractedData: text('extracted_data'),
   verificationResult: jsonb('verification_result'),
   status: text('status').default('pending'), // pending | extracting | verifying | completed | failed
   createdAt: text('created_at').notNull(),
@@ -56,6 +56,18 @@ export const normativeRanges = pgTable('normative_ranges', {
   severityWeight: integer('severity_weight'),
   createdAt: text('created_at').notNull(),
   updatedAt: text('updated_at').notNull(),
+});
+
+export const auditLogs = pgTable('audit_logs', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  action: text('action').notNull(),
+  resourceType: text('resource_type').notNull(),
+  resourceId: text('resource_id').notNull(),
+  metadata: jsonb('metadata'),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  createdAt: text('created_at').notNull(),
 });
 
 export const normativeVersions = pgTable('normative_versions', {

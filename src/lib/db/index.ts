@@ -62,7 +62,7 @@ export async function runMigrations() {
         "id" serial PRIMARY KEY NOT NULL,
         "assessment_id" text NOT NULL REFERENCES "assessments"("id") ON DELETE CASCADE,
         "section_number" integer NOT NULL,
-        "data" jsonb,
+        "data" text,
         "completed_at" text
       )
     `);
@@ -82,7 +82,7 @@ export async function runMigrations() {
         "assessment_id" text NOT NULL REFERENCES "assessments"("id") ON DELETE CASCADE,
         "section_number" integer NOT NULL,
         "file_name" text,
-        "extracted_data" jsonb,
+        "extracted_data" text,
         "verification_result" jsonb,
         "status" text DEFAULT 'pending',
         "created_at" text NOT NULL
@@ -171,6 +171,33 @@ export async function runMigrations() {
         "updated_at" text
       )
     `);
+
+    // Migrate encrypted columns from jsonb to text for ciphertext storage
+    try {
+      await d.execute(sql`ALTER TABLE "assessment_sections" ALTER COLUMN "data" TYPE text USING "data"::text`);
+    } catch { /* column may already be text */ }
+    try {
+      await d.execute(sql`ALTER TABLE "uploaded_files" ALTER COLUMN "extracted_data" TYPE text USING "extracted_data"::text`);
+    } catch { /* column may already be text */ }
+
+    // Audit logs table
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "audit_logs" (
+        "id" text PRIMARY KEY NOT NULL,
+        "user_id" text NOT NULL,
+        "action" text NOT NULL,
+        "resource_type" text NOT NULL,
+        "resource_id" text NOT NULL,
+        "metadata" jsonb,
+        "ip_address" text,
+        "user_agent" text,
+        "created_at" text NOT NULL
+      )
+    `);
+    await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_user_id" ON "audit_logs" ("user_id")`);
+    await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_action" ON "audit_logs" ("action")`);
+    await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_created_at" ON "audit_logs" ("created_at")`);
+
   } else {
     d.run(sql`
       CREATE TABLE IF NOT EXISTS "assessments" (
@@ -306,6 +333,25 @@ export async function runMigrations() {
         "updated_at" text
       )
     `);
+
+    // Audit logs table
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "audit_logs" (
+        "id" text PRIMARY KEY NOT NULL,
+        "user_id" text NOT NULL,
+        "action" text NOT NULL,
+        "resource_type" text NOT NULL,
+        "resource_id" text NOT NULL,
+        "metadata" text,
+        "ip_address" text,
+        "user_agent" text,
+        "created_at" text NOT NULL
+      )
+    `);
+    d.run(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_user_id" ON "audit_logs" ("user_id")`);
+    d.run(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_action" ON "audit_logs" ("action")`);
+    d.run(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_created_at" ON "audit_logs" ("created_at")`);
+
   }
 
   globalForDb.migrated = true;
