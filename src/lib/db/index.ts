@@ -62,7 +62,7 @@ export async function runMigrations() {
         "id" serial PRIMARY KEY NOT NULL,
         "assessment_id" text NOT NULL REFERENCES "assessments"("id") ON DELETE CASCADE,
         "section_number" integer NOT NULL,
-        "data" jsonb,
+        "data" text,
         "completed_at" text
       )
     `);
@@ -82,7 +82,7 @@ export async function runMigrations() {
         "assessment_id" text NOT NULL REFERENCES "assessments"("id") ON DELETE CASCADE,
         "section_number" integer NOT NULL,
         "file_name" text,
-        "extracted_data" jsonb,
+        "extracted_data" text,
         "verification_result" jsonb,
         "status" text DEFAULT 'pending',
         "created_at" text NOT NULL
@@ -112,6 +112,92 @@ export async function runMigrations() {
       )
     `);
     await d.execute(sql`ALTER TABLE "assessments" ADD COLUMN IF NOT EXISTS "normative_version_id" text`);
+    await d.execute(sql`ALTER TABLE "assessments" ADD COLUMN IF NOT EXISTS "coach_id" text`);
+    await d.execute(sql`ALTER TABLE "assessments" ADD COLUMN IF NOT EXISTS "client_id" text`);
+
+    // Better Auth tables
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "user" (
+        "id" text PRIMARY KEY NOT NULL,
+        "name" text NOT NULL,
+        "email" text NOT NULL UNIQUE,
+        "email_verified" integer,
+        "image" text,
+        "role" text DEFAULT 'coach',
+        "banned" integer,
+        "ban_reason" text,
+        "ban_expires" integer,
+        "created_at" text NOT NULL,
+        "updated_at" text NOT NULL
+      )
+    `);
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "session" (
+        "id" text PRIMARY KEY NOT NULL,
+        "expires_at" text NOT NULL,
+        "token" text NOT NULL UNIQUE,
+        "ip_address" text,
+        "user_agent" text,
+        "user_id" text NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
+        "impersonated_by" text,
+        "created_at" text NOT NULL,
+        "updated_at" text NOT NULL
+      )
+    `);
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "account" (
+        "id" text PRIMARY KEY NOT NULL,
+        "account_id" text NOT NULL,
+        "provider_id" text NOT NULL,
+        "user_id" text NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
+        "access_token" text,
+        "refresh_token" text,
+        "id_token" text,
+        "access_token_expires_at" text,
+        "refresh_token_expires_at" text,
+        "scope" text,
+        "password" text,
+        "created_at" text NOT NULL,
+        "updated_at" text NOT NULL
+      )
+    `);
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "verification" (
+        "id" text PRIMARY KEY NOT NULL,
+        "identifier" text NOT NULL,
+        "value" text NOT NULL,
+        "expires_at" text NOT NULL,
+        "created_at" text,
+        "updated_at" text
+      )
+    `);
+
+    // Migrate encrypted columns from jsonb to text for ciphertext storage
+    try {
+      await d.execute(sql`ALTER TABLE "assessment_sections" ALTER COLUMN "data" TYPE text USING "data"::text`);
+    } catch { /* column may already be text */ }
+    try {
+      await d.execute(sql`ALTER TABLE "uploaded_files" ALTER COLUMN "extracted_data" TYPE text USING "extracted_data"::text`);
+    } catch { /* column may already be text */ }
+
+    // Audit logs table
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "audit_logs" (
+        "id" text PRIMARY KEY NOT NULL,
+        "user_id" text NOT NULL,
+        "action" text NOT NULL,
+        "resource_type" text NOT NULL,
+        "resource_id" text NOT NULL,
+        "metadata" jsonb,
+        "ip_address" text,
+        "user_agent" text,
+        "created_at" text NOT NULL
+      )
+    `);
+    await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_user_id" ON "audit_logs" ("user_id")`);
+    await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_action" ON "audit_logs" ("action")`);
+    await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_created_at" ON "audit_logs" ("created_at")`);
+
   } else {
     d.run(sql`
       CREATE TABLE IF NOT EXISTS "assessments" (
@@ -184,6 +270,88 @@ export async function runMigrations() {
     try {
       d.run(sql`ALTER TABLE "assessments" ADD COLUMN "normative_version_id" text`);
     } catch { /* column already exists */ }
+    try {
+      d.run(sql`ALTER TABLE "assessments" ADD COLUMN "coach_id" text`);
+    } catch { /* column already exists */ }
+    try {
+      d.run(sql`ALTER TABLE "assessments" ADD COLUMN "client_id" text`);
+    } catch { /* column already exists */ }
+
+    // Better Auth tables
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "user" (
+        "id" text PRIMARY KEY NOT NULL,
+        "name" text NOT NULL,
+        "email" text NOT NULL UNIQUE,
+        "email_verified" integer,
+        "image" text,
+        "role" text DEFAULT 'coach',
+        "banned" integer,
+        "ban_reason" text,
+        "ban_expires" integer,
+        "created_at" text NOT NULL,
+        "updated_at" text NOT NULL
+      )
+    `);
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "session" (
+        "id" text PRIMARY KEY NOT NULL,
+        "expires_at" text NOT NULL,
+        "token" text NOT NULL UNIQUE,
+        "ip_address" text,
+        "user_agent" text,
+        "user_id" text NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
+        "impersonated_by" text,
+        "created_at" text NOT NULL,
+        "updated_at" text NOT NULL
+      )
+    `);
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "account" (
+        "id" text PRIMARY KEY NOT NULL,
+        "account_id" text NOT NULL,
+        "provider_id" text NOT NULL,
+        "user_id" text NOT NULL REFERENCES "user"("id") ON DELETE CASCADE,
+        "access_token" text,
+        "refresh_token" text,
+        "id_token" text,
+        "access_token_expires_at" text,
+        "refresh_token_expires_at" text,
+        "scope" text,
+        "password" text,
+        "created_at" text NOT NULL,
+        "updated_at" text NOT NULL
+      )
+    `);
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "verification" (
+        "id" text PRIMARY KEY NOT NULL,
+        "identifier" text NOT NULL,
+        "value" text NOT NULL,
+        "expires_at" text NOT NULL,
+        "created_at" text,
+        "updated_at" text
+      )
+    `);
+
+    // Audit logs table
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "audit_logs" (
+        "id" text PRIMARY KEY NOT NULL,
+        "user_id" text NOT NULL,
+        "action" text NOT NULL,
+        "resource_type" text NOT NULL,
+        "resource_id" text NOT NULL,
+        "metadata" text,
+        "ip_address" text,
+        "user_agent" text,
+        "created_at" text NOT NULL
+      )
+    `);
+    d.run(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_user_id" ON "audit_logs" ("user_id")`);
+    d.run(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_action" ON "audit_logs" ("action")`);
+    d.run(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_created_at" ON "audit_logs" ("created_at")`);
+
   }
 
   globalForDb.migrated = true;

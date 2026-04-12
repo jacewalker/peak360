@@ -5,6 +5,7 @@ import { fieldMappings } from '@/lib/ai/field-mappings';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { uploadedFiles } from '@/lib/db/schema';
+import { encrypt } from '@/lib/crypto';
 
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -193,7 +194,7 @@ export async function POST(request: Request) {
 
     // Update file record
     await db.update(uploadedFiles)
-      .set({ extractedData: extracted, status: 'completed' })
+      .set({ extractedData: encrypt(JSON.stringify(extracted)), status: 'completed' })
       .where(eq(uploadedFiles.id, fileRecord.id));
 
     return NextResponse.json({

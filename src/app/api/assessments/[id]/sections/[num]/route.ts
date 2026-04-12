@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { assessmentSections, assessments } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { encrypt, decrypt } from '@/lib/crypto';
+
+const ENCRYPTED_SECTIONS = new Set([3, 4, 5]);
 
 export async function GET(
   _request: Request,
@@ -20,7 +23,13 @@ export async function GET(
       )
     );
 
-  return NextResponse.json({ success: true, data: row?.data || null });
+  let data: unknown = row?.data ?? null;
+  if (data && typeof data === 'string') {
+    const raw = ENCRYPTED_SECTIONS.has(sectionNum) ? decrypt(data) : data;
+    try { data = JSON.parse(raw); } catch { data = raw; }
+  }
+
+  return NextResponse.json({ success: true, data });
 }
 
 export async function PUT(
@@ -31,6 +40,10 @@ export async function PUT(
   const sectionNum = parseInt(num);
   const body = await request.json();
   const now = new Date().toISOString();
+  const serialized = JSON.stringify(body.data);
+  const dataToStore = ENCRYPTED_SECTIONS.has(sectionNum)
+    ? encrypt(serialized)
+    : serialized;
 
   const [existing] = await db
     .select()
@@ -46,7 +59,7 @@ export async function PUT(
     await db
       .update(assessmentSections)
       .set({
-        data: body.data,
+        data: dataToStore,
         completedAt: body.completed === true ? now : body.completed === false ? null : existing.completedAt,
       })
       .where(eq(assessmentSections.id, existing.id));
@@ -54,7 +67,7 @@ export async function PUT(
     await db.insert(assessmentSections).values({
       assessmentId: id,
       sectionNumber: sectionNum,
-      data: body.data,
+      data: dataToStore,
       completedAt: body.completed ? now : null,
     });
   }
