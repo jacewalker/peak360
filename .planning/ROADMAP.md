@@ -49,7 +49,7 @@ Plans:
 
 Plans:
 - [x] 02-01-PLAN.md -- Auth data layer: Better Auth install, server/client config, DB schemas, email sender, seed script (AUTH-01, AUTH-02, AUTH-04)
-- [ ] 02-02-PLAN.md -- Middleware, login UI, and session management
+- [x] 02-02-PLAN.md -- Middleware, login UI, and session management
 - [ ] 02-03-PLAN.md -- API protection, ownership enforcement, client invitations
 
 ### Phase 3: Admin Panel & Normative Data Management
