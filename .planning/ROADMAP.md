@@ -1,21 +1,14 @@
-# Roadmap: Peak360 Milestone 1
+# Roadmap: Peak360
 
-## Overview
+## Milestones
 
-This milestone transforms Peak360 from a single-user assessment tool into a multi-user, clinically accurate platform. The work starts by fixing clinical correctness (gender-specific ranges and report improvements), then layers on authentication and ownership, followed by admin-managed normative data, and finally security hardening with the client-facing portal. Each phase delivers a coherent capability that builds on the previous one.
+- 🚧 **v1.0 MVP** - Phases 1-5 (in progress)
+- 🚧 **v2.0 Peak360 Landing Page** - Phases 6-7 (in progress)
 
 ## Phases
 
-**Phase Numbering:**
-- Integer phases (1, 2, 3, 4): Planned milestone work
-- Decimal phases (e.g., 2.1): Urgent insertions (marked with INSERTED)
-
-- [ ] **Phase 1: Clinical Accuracy & Report Quality** - Gender-specific ratings, range visualizations, referral flags, and actionable recommendations
-- [ ] **Phase 2: Authentication & Ownership** - Role-based auth, user accounts, assessment ownership, client invitations
-- [ ] **Phase 3: Admin Panel & Normative Data Management** - DB-backed normative ranges, admin CRUD UI, range versioning, red flag weighting
-- [ ] **Phase 4: Security & Client Portal** - Encryption at rest, audit logging, automated backups, client read-only portal
-
-## Phase Details
+<details>
+<summary>v1.0 MVP (Phases 1-5) — Milestone 1</summary>
 
 ### Phase 1: Clinical Accuracy & Report Quality
 **Goal**: Coaches can deliver clinically accurate, gender-aware assessments with visual range indicators and actionable recommendations
@@ -83,24 +76,10 @@ Plans:
 Plans:
 - [ ] 04-01: TBD
 
-## Progress
-
-**Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4
-
-| Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. Clinical Accuracy & Report Quality | 0/3 | Planning complete | - |
-| 2. Authentication & Ownership | 0/0 | Not started | - |
-| 3. Admin Panel & Normative Data Management | 0/4 | Planning complete | - |
-| 4. Security & Client Portal | 0/0 | Not started | - |
-| 5. Migrate PDF generation to react-pdf/renderer | 0/4 | UAT gap closure | - |
-
 ### Phase 5: Migrate PDF generation to react-pdf/renderer
-
-**Goal:** Replace html2canvas+jsPDF rasterize-and-slice PDF export with @react-pdf/renderer for native vector PDFs with built-in pagination, selectable text, and smaller file sizes
+**Goal**: Replace html2canvas+jsPDF rasterize-and-slice PDF export with @react-pdf/renderer for native vector PDFs with built-in pagination, selectable text, and smaller file sizes
+**Depends on**: None (independent of other phases)
 **Requirements**: PDF-01, PDF-02, PDF-03, PDF-04, PDF-05, PDF-06, PDF-07, PDF-08
-**Depends on:** None (independent of other phases)
 **Success Criteria** (what must be TRUE):
   1. Export PDF button produces a vector PDF with selectable text (not a raster bitmap)
   2. All report sections (header, readiness, medical, consent, tier summary, markers, insights, disclaimer) appear in the PDF
@@ -115,3 +94,59 @@ Plans:
 - [x] 05-02-PLAN.md — Build all react-pdf report components and wire into Peak360Report document (PDF-04, PDF-05, PDF-06)
 - [x] 05-03-PLAN.md — Replace Section 11 export with fetch-and-download, remove old deps, visual verification (PDF-07, PDF-08)
 - [x] 05-04-PLAN.md — Fix footer text overflow and add page break before Detailed Results (gap closure)
+
+</details>
+
+### v2.0 Peak360 Landing Page
+
+**Milestone Goal:** Prospective clients can discover the Peak360 Longevity Program through a branded landing page that communicates the program's philosophy, testing protocol, and benefits -- and reach out via a contact form. Hostname routing separates the public site from the coach portal.
+
+- [ ] **Phase 6: Routing Infrastructure & Design System** - Hostname-based routing middleware, DNS configuration, and brand design tokens (fonts, colors, gradients)
+- [ ] **Phase 7: Landing Page & Contact Form** - All landing page content sections, contact form with DB persistence, responsive design, and smooth scroll navigation
+
+## Phase Details
+
+### Phase 6: Routing Infrastructure & Design System
+**Goal**: The application correctly serves different experiences based on hostname, and the landing page design system (fonts, colors, gradients) is established as reusable Tailwind tokens
+**Depends on**: Phase 5
+**Requirements**: HOST-01, HOST-02, HOST-03, DSGN-01
+**Success Criteria** (what must be TRUE):
+  1. Visiting peak360.com.au in a browser serves the landing page route (not the dashboard)
+  2. Visiting portal.peak360.com.au in a browser serves the existing dashboard and assessment routes unchanged
+  3. Montserrat and Open Sans fonts load on the landing page, and navy/gold brand colors render correctly via Tailwind theme tokens
+  4. DNS for peak360.com.au resolves to the DigitalOcean app
+**Plans**: TBD
+
+Plans:
+- [ ] 06-01: TBD
+
+### Phase 7: Landing Page & Contact Form
+**Goal**: Visitors experience a complete, responsive landing page that communicates the Peak360 Longevity Program and can submit inquiries via a validated contact form
+**Depends on**: Phase 6
+**Requirements**: LAND-01, LAND-02, LAND-03, LAND-04, LAND-05, LAND-06, LAND-07, CONT-01, CONT-02, CONT-03, DSGN-02, DSGN-03
+**Success Criteria** (what must be TRUE):
+  1. Visitor scrolls through all landing page sections in order: hero, philosophy, what we test, technology showcase, testing protocol timeline, benefits grid, and CTA
+  2. Visitor can fill out the contact form with name, email, phone, and message, and sees inline validation errors for missing required fields (name, email)
+  3. Submitted contact form data appears in a new database table accessible for coach review
+  4. Landing page renders correctly on mobile (375px), tablet (768px), and desktop (1280px) with no horizontal overflow or broken layouts
+  5. Clicking a navigation link smooth-scrolls to the target section on the page
+**Plans**: TBD
+**UI hint**: yes
+
+Plans:
+- [ ] 07-01: TBD
+
+## Progress
+
+**Execution Order:**
+Phases execute in numeric order: 6 -> 7
+
+| Phase | Milestone | Plans Complete | Status | Completed |
+|-------|-----------|----------------|--------|-----------|
+| 1. Clinical Accuracy & Report Quality | v1.0 | 1/3 | In progress | - |
+| 2. Authentication & Ownership | v1.0 | 0/0 | Not started | - |
+| 3. Admin Panel & Normative Data Management | v1.0 | 2/4 | In progress | - |
+| 4. Security & Client Portal | v1.0 | 0/0 | Not started | - |
+| 5. PDF Migration | v1.0 | 4/4 | Complete | 2026-04-10 |
+| 6. Routing Infrastructure & Design System | v2.0 | 0/0 | Not started | - |
+| 7. Landing Page & Contact Form | v2.0 | 0/0 | Not started | - |

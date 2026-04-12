@@ -87,13 +87,28 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| HOST-01 | Phase 6 | Pending |
+| HOST-02 | Phase 6 | Pending |
+| HOST-03 | Phase 6 | Pending |
+| DSGN-01 | Phase 6 | Pending |
+| LAND-01 | Phase 7 | Pending |
+| LAND-02 | Phase 7 | Pending |
+| LAND-03 | Phase 7 | Pending |
+| LAND-04 | Phase 7 | Pending |
+| LAND-05 | Phase 7 | Pending |
+| LAND-06 | Phase 7 | Pending |
+| LAND-07 | Phase 7 | Pending |
+| CONT-01 | Phase 7 | Pending |
+| CONT-02 | Phase 7 | Pending |
+| CONT-03 | Phase 7 | Pending |
+| DSGN-02 | Phase 7 | Pending |
+| DSGN-03 | Phase 7 | Pending |
 
 **Coverage:**
 - v2.0 requirements: 16 total
-- Mapped to phases: 0
-- Unmapped: 16
+- Mapped to phases: 16
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-12*
-*Last updated: 2026-04-12 after initial definition*
+*Last updated: 2026-04-12 after roadmap creation*
