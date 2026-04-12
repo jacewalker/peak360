@@ -22,10 +22,10 @@
 
 ### Authentication
 
-- [ ] **AUTH-01**: User accounts with role-based access (admin, coach, client)
-- [ ] **AUTH-02**: Assessment ownership via coach_id and client_id columns on assessments table
+- [x] **AUTH-01**: User accounts with role-based access (admin, coach, client)
+- [x] **AUTH-02**: Assessment ownership via coach_id and client_id columns on assessments table
 - [ ] **AUTH-03**: Every API route independently validates auth (not middleware-only)
-- [ ] **AUTH-04**: Coaches can invite clients via email link or generated credentials
+- [x] **AUTH-04**: Coaches can invite clients via email link or generated credentials
 - [ ] **AUTH-05**: Client login provides read-only access to own assessments only
 
 ### Admin Panel
@@ -88,10 +88,10 @@
 | REPT-03 | Phase 1 | Complete |
 | REPT-04 | Phase 1 | Complete |
 | REPT-05 | Phase 1 | Pending |
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
+| AUTH-01 | Phase 2 | Complete |
+| AUTH-02 | Phase 2 | Complete |
 | AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Pending |
+| AUTH-04 | Phase 2 | Complete |
 | AUTH-05 | Phase 2 | Pending |
 | ADMN-01 | Phase 3 | Complete |
 | ADMN-02 | Phase 3 | Complete |

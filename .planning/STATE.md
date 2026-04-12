@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-29)
 
 **Core value:** Coaches can deliver accurate, gender-aware health assessments with actionable recommendations and give clients secure access to track their progress over time.
-**Current focus:** Phase 05 — migrate-pdf-generation-to-react-pdf-renderer
+**Current focus:** Phase 02 — authentication-ownership
 
 ## Current Position
 
-Phase: 05
-Plan: Not started
-Status: Completed 05-04-PLAN.md
-Last activity: 2026-04-10 - Completed quick task 260410-pzr: Fix Complete button on Section 11
+Phase: 02
+Plan: 01 of 3
+Status: Completed 02-01-PLAN.md
+Last activity: 2026-04-12 - Completed 02-01 auth data layer
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -76,6 +76,8 @@ Recent decisions affecting current work:
 - [Phase 03]: Version pinning is non-fatal -- assessment still created if versioning fails
 - [Phase 05]: Kept semantic report-* CSS classes (header, tier-pill, tier-card, insight-card, footer) that are not PDF-spacer related
 - [Phase 05]: Footer uses flexDirection column with inner row for horizontal layout
+- [Phase 02]: Better Auth installed with text IDs for all auth tables, dual PG/SQLite schema support
+- [Phase 02]: Middleware temporarily passes all requests while auth is incrementally set up (02-02 adds session checks)
 
 ### Pending Todos
 
@@ -104,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T08:00:10.900Z
-Stopped at: Completed 05-04-PLAN.md
+Last session: 2026-04-12T05:37:22Z
+Stopped at: Completed 02-01-PLAN.md
 Resume file: None
