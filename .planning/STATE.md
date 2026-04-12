@@ -1,13 +1,13 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: Peak360 Landing Page
+milestone: v3.0
+milestone_name: Client Login & Trainer Dashboard
 status: active
 stopped_at: null
 last_updated: "2026-04-12T00:00:00.000Z"
 last_activity: 2026-04-12
 progress:
-  total_phases: 2
+  total_phases: 0
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -20,15 +20,15 @@ progress:
 
 See: .planning/PROJECT.md (updated 2026-04-12)
 
-**Core value:** Prospective clients can discover the Peak360 Longevity Program through a branded landing page with program overview and contact form.
-**Current focus:** Phase 6 - Routing Infrastructure & Design System
+**Core value:** Clients can securely log in to view their own assessment results, and coaches have a dashboard to manage clients and track progress.
+**Current focus:** Defining requirements for Milestone v3.0
 
 ## Current Position
 
-Phase: 6 of 7 (Routing Infrastructure & Design System)
-Plan: 0 of 0 in current phase (not yet planned)
-Status: Ready to plan
-Last activity: 2026-04-12 — Roadmap created for Milestone v2.0
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-12 — Milestone v3.0 started
 
 Progress: [░░░░░░░░░░] 0%
 
