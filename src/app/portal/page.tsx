@@ -4,11 +4,17 @@ import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import type { Assessment } from '@/types/assessment';
+import { authClient } from '@/lib/auth-client';
 
 export default function DashboardPage() {
   const router = useRouter();
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviteLoading, setInviteLoading] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const { data: sessionData } = authClient.useSession();
+  const userRole = sessionData?.user?.role;
 
   useEffect(() => {
     fetch('/api/assessments')
@@ -28,6 +34,31 @@ export default function DashboardPage() {
     });
     const { data } = await res.json();
     router.push(`/portal/assessment/${data.id}/section/1`);
+  };
+
+  const handleInvite = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!inviteEmail.trim()) return;
+    setInviteLoading(true);
+    setInviteMessage(null);
+    try {
+      const res = await fetch('/api/invitations', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: inviteEmail.trim() }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        setInviteMessage({ type: 'success', text: data.message ?? 'Invitation sent' });
+        setInviteEmail('');
+      } else {
+        setInviteMessage({ type: 'error', text: data.error ?? 'Failed to send invite' });
+      }
+    } catch {
+      setInviteMessage({ type: 'error', text: 'Connection error. Please try again.' });
+    } finally {
+      setInviteLoading(false);
+    }
   };
 
   const totalCount = assessments.length;
@@ -189,6 +220,40 @@ export default function DashboardPage() {
             <p className="hidden sm:block text-xs text-muted font-medium mt-1">Clients</p>
           </Link>
         </div>
+
+        {/* Invite Client — coach/admin only */}
+        {(userRole === 'coach' || userRole === 'admin') && (
+          <div className="bg-white rounded-xl border border-border p-5 mb-6">
+            <div className="flex items-center gap-2 mb-3">
+              <svg className="w-4 h-4 text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
+              </svg>
+              <h3 className="text-sm font-semibold text-navy">Invite Client</h3>
+            </div>
+            <form onSubmit={handleInvite} className="flex gap-2">
+              <input
+                type="email"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+                placeholder="Client email address"
+                required
+                className="flex-1 px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/25"
+              />
+              <button
+                type="submit"
+                disabled={inviteLoading || !inviteEmail.trim()}
+                className="bg-gold text-navy px-4 py-2 rounded-md font-medium hover:bg-gold/90 text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap"
+              >
+                {inviteLoading ? 'Sending...' : 'Send Invite'}
+              </button>
+            </form>
+            {inviteMessage && (
+              <p className={`text-xs mt-2 ${inviteMessage.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
+                {inviteMessage.text}
+              </p>
+            )}
+          </div>
+        )}
 
         <div className="grid md:grid-cols-5 gap-6">
           {/* Action Items — wider column */}
