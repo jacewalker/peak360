@@ -1,113 +1,99 @@
-# Requirements: Peak360 Milestone 1
+# Requirements: Peak360 Milestone 2 — Landing Page
 
-**Defined:** 2026-03-29
-**Core Value:** Coaches can deliver accurate, gender-aware health assessments with actionable recommendations and give clients secure access to track their progress over time.
+**Defined:** 2026-04-12
+**Core Value:** Prospective clients can discover the Peak360 Longevity Program through a branded landing page with program overview and contact form.
 
-## v1 Requirements
+**Constraint:** No data loss on existing database. All schema changes must be additive (new tables only). Existing tables must not be altered or migrated in a way that risks data loss.
 
-### Clinical Accuracy
+## v2.0 Requirements
 
-- [ ] **CLIN-01**: Rating engine accepts gender parameter and selects gender-specific thresholds for blood markers
-- [ ] **CLIN-02**: Gender-specific normative ranges added for ~15-20 blood markers where male/female ranges differ clinically (hemoglobin, ferritin, testosterone, iron, creatinine, etc.)
-- [ ] **CLIN-03**: Combined age-bucketed and gender-specific threshold lookups work together
-- [ ] **CLIN-04**: Gender propagated from Section 1 (clientGender) through to Section 11 rating calls
+Requirements for Milestone 2. Each maps to roadmap phases.
 
-### Report Visualization
+### Landing Page Content
 
-- [ ] **REPT-01**: Horizontal range bar/gauge next to each marker showing value position within 5-tier range (poor to elite)
-- [ ] **REPT-02**: Referral flags for markers critically out of range (e.g., "Refer to GP for further investigation")
-- [x] **REPT-03**: Supplementation recommendations for markers in poor/cautious tiers
-- [x] **REPT-04**: Lifestyle/dietary suggestions for markers in cautious tier
-- [ ] **REPT-05**: Medical advice disclaimer clearly displayed on report
+- [ ] **LAND-01**: Visitor sees a hero section with Peak360 logo, "Discover Your True Health Age" headline, subtitle, and "Are You Aging Faster Than You Should?" callout banner
+- [ ] **LAND-02**: Visitor sees the program philosophy section with "We don't train people to be younger. We train people to be harder to age." and three pillars (Measure First, Act Early, Maintain What Matters)
+- [ ] **LAND-03**: Visitor sees "What We Test" section with four categories: Advanced Blood Biomarkers (60+), VO2 Max Testing, Strength & Flexibility, and Evolt 360 Body Composition
+- [ ] **LAND-04**: Visitor sees technology showcase cards for Vald Force Decks, Evolt360 Scanner, and Calibre VO2 Tester with feature bullet lists
+- [ ] **LAND-05**: Visitor sees a testing protocol timeline (Week 1-4 + Ongoing quarterly reassessments)
+- [ ] **LAND-06**: Visitor sees benefits grid with checkmark items covering healthspan optimization, fall prevention, biomarker tracking, etc.
+- [ ] **LAND-07**: Visitor sees a CTA section with "Ready to Invest in Your Longevity?" headline and action button
 
-### Authentication
+### Contact Form
 
-- [ ] **AUTH-01**: User accounts with role-based access (admin, coach, client)
-- [ ] **AUTH-02**: Assessment ownership via coach_id and client_id columns on assessments table
-- [ ] **AUTH-03**: Every API route independently validates auth (not middleware-only)
-- [ ] **AUTH-04**: Coaches can invite clients via email link or generated credentials
-- [ ] **AUTH-05**: Client login provides read-only access to own assessments only
+- [ ] **CONT-01**: Visitor can submit a contact form with name, email, phone, and message fields
+- [ ] **CONT-02**: Contact form submissions are stored in the database for coach review
+- [ ] **CONT-03**: Contact form validates required fields (name, email) and shows inline errors
 
-### Admin Panel
+### Design & Responsiveness
 
-- [x] **ADMN-01**: Normative ranges moved from hardcoded TypeScript to database-backed configuration
-- [x] **ADMN-02**: Hardcoded defaults used as fallback when no DB overrides exist
-- [ ] **ADMN-03**: Admin UI to browse all markers grouped by category (blood, body comp, cardio, strength, mobility, balance)
-- [ ] **ADMN-04**: Admin UI to edit min/max values for each tier per marker
-- [x] **ADMN-05**: Normative range versioning — snapshot the version used per assessment
-- [ ] **ADMN-06**: Red flag marker weighting with configurable severity
+- [ ] **DSGN-01**: Landing page uses Peak360 brand colors (navy #1a2332, gold #f5b041), Montserrat headings, Open Sans body text via Tailwind CSS theme tokens
+- [ ] **DSGN-02**: Landing page is fully responsive across mobile, tablet, and desktop breakpoints
+- [ ] **DSGN-03**: Landing page includes smooth scroll navigation between sections
 
-### Security
+### Hostname Routing
 
-- [ ] **SECU-01**: AES-256-GCM encryption at rest for sensitive fields (blood results, medical screening)
-- [ ] **SECU-02**: Audit log recording who accessed what data and when
-- [ ] **SECU-03**: Automated SQLite backup strategy with point-in-time recovery capability
+- [ ] **HOST-01**: Requests to peak360.com.au serve landing page routes via Next.js middleware hostname detection
+- [ ] **HOST-02**: Requests to portal.peak360.com.au continue serving existing dashboard/assessment routes unchanged
+- [ ] **HOST-03**: Root domain peak360.com.au is added to the DigitalOcean app and DNS configured
 
-## v2 Requirements
+## Previous Milestone Requirements (v1.0)
 
-### Client Engagement
+Carried forward from Milestone 1. Not in scope for this milestone's roadmap.
 
-- **ENGE-01**: Client dashboard showing trends across multiple assessments
-- **ENGE-02**: Magic link login for clients (requires email infrastructure)
-- **ENGE-03**: Coach notes per assessment visible to client
-- **ENGE-04**: Branded PDF export with coach/business logo
+### Clinical Accuracy (Phase 1)
+- CLIN-01 through CLIN-04: Gender-specific ratings — Pending
+- REPT-01 through REPT-05: Report visualization — Partial (REPT-03, REPT-04 complete)
 
-### Admin Enhancements
+### Authentication (Phase 2)
+- AUTH-01 through AUTH-05: Role-based auth — Pending
 
-- **ADEX-01**: Preview of how range changes affect a sample reading
-- **ADEX-02**: Risk threshold configuration for readiness and medical screening questions
-- **ADEX-03**: Bulk import/export of normative ranges
+### Admin Panel (Phase 3)
+- ADMN-01 through ADMN-06: Normative data management — Partial (ADMN-01, ADMN-02, ADMN-05 complete)
 
-### Data Portability
+### Security (Phase 4)
+- SECU-01 through SECU-03: Encryption, audit, backup — Pending
 
-- **DATA-01**: Client data export for portability (GDPR-style data access)
-- **DATA-02**: Encryption key rotation strategy
+## Future Requirements
+
+Deferred to future milestones. Tracked but not in current roadmap.
+
+### Email Notifications
+
+- **EMAL-01**: Contact form submissions trigger email notification to coach
+- **EMAL-02**: Auto-reply confirmation email sent to visitor after form submission
+
+### Landing Page Enhancements
+
+- **LNDE-01**: Testimonials section with client success stories
+- **LNDE-02**: Pricing/packages section
+- **LNDE-03**: FAQ accordion section
+- **LNDE-04**: Blog/articles section
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Mobile native app | Web-first; responsive design sufficient for current use |
-| Real-time collaboration | Coaches and clients don't need simultaneous editing |
-| Wearable integrations (Fitbit, Apple Health) | Complexity sinkhole, not core value |
-| HIPAA certification | Compliance process, not a software feature — address organizationally |
-| Lab ordering integration | Out of domain, coaches work with existing lab results |
-| AI treatment plans | Liability risk, coaches provide guidance not prescriptions |
-| Video consultations | Out of domain, coaches meet clients in person |
+| Email sending from contact form | Requires SMTP setup; v2.0 stores submissions for manual review |
+| Online booking/scheduling | Complex integration; contact form sufficient for now |
+| Payment processing | Not needed for landing page; future milestone |
+| CMS for landing page content | Hardcoded content matches brochure; no dynamic editing needed |
+| Separate deployment for landing page | One-app approach with hostname routing is more cost-effective |
+| Existing database migration | No data loss constraint; schema changes are additive only |
 
 ## Traceability
 
+Which phases cover which requirements. Updated during roadmap creation.
+
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CLIN-01 | Phase 1 | Pending |
-| CLIN-02 | Phase 1 | Pending |
-| CLIN-03 | Phase 1 | Pending |
-| CLIN-04 | Phase 1 | Pending |
-| REPT-01 | Phase 1 | Pending |
-| REPT-02 | Phase 1 | Pending |
-| REPT-03 | Phase 1 | Complete |
-| REPT-04 | Phase 1 | Complete |
-| REPT-05 | Phase 1 | Pending |
-| AUTH-01 | Phase 2 | Pending |
-| AUTH-02 | Phase 2 | Pending |
-| AUTH-03 | Phase 2 | Pending |
-| AUTH-04 | Phase 2 | Pending |
-| AUTH-05 | Phase 2 | Pending |
-| ADMN-01 | Phase 3 | Complete |
-| ADMN-02 | Phase 3 | Complete |
-| ADMN-03 | Phase 3 | Pending |
-| ADMN-04 | Phase 3 | Pending |
-| ADMN-05 | Phase 3 | Complete |
-| ADMN-06 | Phase 3 | Pending |
-| SECU-01 | Phase 4 | Pending |
-| SECU-02 | Phase 4 | Pending |
-| SECU-03 | Phase 4 | Pending |
+| — | — | — |
 
 **Coverage:**
-- v1 requirements: 23 total
-- Mapped to phases: 23
-- Unmapped: 0
+- v2.0 requirements: 16 total
+- Mapped to phases: 0
+- Unmapped: 16
 
 ---
-*Requirements defined: 2026-03-29*
-*Last updated: 2026-03-29 after roadmap creation*
+*Requirements defined: 2026-04-12*
+*Last updated: 2026-04-12 after initial definition*
