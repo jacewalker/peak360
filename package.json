@@ -14,7 +14,8 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:mobile": "playwright test --project=mobile",
-    "test:e2e:desktop": "playwright test --project=desktop"
+    "test:e2e:desktop": "playwright test --project=desktop",
+    "db:seed-admin": "tsx scripts/seed-admin.ts"
   },
   "dependencies": {
     "@ag-media/react-pdf-table": "^2.0.3",
