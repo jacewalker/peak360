@@ -1,16 +1,16 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: completed
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-04-10T08:42:06.632Z"
-last_activity: 2026-04-10
+milestone: v2.0
+milestone_name: Peak360 Landing Page
+status: active
+stopped_at: null
+last_updated: "2026-04-12T00:00:00.000Z"
+last_activity: 2026-04-12
 progress:
-  total_phases: 5
-  completed_phases: 2
-  total_plans: 11
-  completed_plans: 10
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
   percent: 0
 ---
 
@@ -18,17 +18,17 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-29)
+See: .planning/PROJECT.md (updated 2026-04-12)
 
-**Core value:** Coaches can deliver accurate, gender-aware health assessments with actionable recommendations and give clients secure access to track their progress over time.
-**Current focus:** Phase 05 — migrate-pdf-generation-to-react-pdf-renderer
+**Core value:** Prospective clients can discover the Peak360 Longevity Program through a branded landing page with program overview and contact form.
+**Current focus:** Defining requirements for Milestone v2.0
 
 ## Current Position
 
-Phase: 05
-Plan: Not started
-Status: Completed 05-04-PLAN.md
-Last activity: 2026-04-10 - Completed quick task 260410-pzr: Fix Complete button on Section 11
+Phase: Not started (defining requirements)
+Plan: —
+Status: Defining requirements
+Last activity: 2026-04-12 — Milestone v2.0 started
 
 Progress: [░░░░░░░░░░] 0%
 

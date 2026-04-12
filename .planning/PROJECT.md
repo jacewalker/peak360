@@ -1,12 +1,27 @@
-# Peak360 — Milestone 1
+# Peak360 — Milestone 2
 
 ## What This Is
 
-Peak360 is a full-stack longevity assessment platform built with Next.js. Coaches use it to evaluate clients across 11 sections (body composition, cardiovascular fitness, strength, mobility, biomarkers) with AI-powered document extraction and a 5-tier normative rating system. This milestone evolves the platform from a single-user assessment tool into a multi-user, clinically accurate, coach-and-client platform.
+Peak360 is a full-stack longevity assessment platform built with Next.js. Coaches use it to evaluate clients across 11 sections (body composition, cardiovascular fitness, strength, mobility, biomarkers) with AI-powered document extraction and a 5-tier normative rating system. This milestone adds a public-facing landing page that showcases the Peak360 Longevity Program, with program overview, testing protocol details, and a contact form — giving the platform a professional public presence.
 
 ## Core Value
 
-Coaches can deliver accurate, gender-aware health assessments with actionable recommendations and give clients secure access to track their progress over time.
+Prospective clients can discover the Peak360 Longevity Program through a branded landing page that communicates the program's philosophy, testing protocol, and benefits — and reach out via a contact form.
+
+## Current Milestone: v2.0 Peak360 Landing Page
+
+**Goal:** Build a public-facing landing page matching the Peak360 brochure design (navy/gold, Montserrat/Open Sans), with program overview sections and a contact form, while restructuring routes so the dashboard moves to `/dashboard`.
+
+**Target features:**
+- Hero section with program headline and callout banner
+- Program Philosophy section
+- What We Test section (biomarkers, VO2 Max, body composition, strength)
+- Technology Showcase (Vald Force Decks, Evolt360, Calibre VO2)
+- Testing Protocol Timeline
+- Benefits grid
+- CTA section with contact form
+- Responsive Tailwind CSS design matching brochure branding
+- Route restructure: landing page at `/`, dashboard at `/dashboard`
 
 ## Requirements
 
@@ -77,4 +92,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-10 after Phase 5 completion*
+*Last updated: 2026-04-12 — Milestone v2.0 started*
