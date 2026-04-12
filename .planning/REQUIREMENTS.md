@@ -84,13 +84,27 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| — | — | — |
+| AUTH-01 | Phase 8 | Pending |
+| AUTH-02 | Phase 8 | Pending |
+| AUTH-03 | Phase 8 | Pending |
+| AUTH-04 | Phase 8 | Pending |
+| AUTH-05 | Phase 8 | Pending |
+| SAFE-02 | Phase 8 | Pending |
+| DASH-04 | Phase 9 | Pending |
+| SAFE-01 | Phase 9 | Pending |
+| DASH-01 | Phase 10 | Pending |
+| DASH-02 | Phase 10 | Pending |
+| DASH-03 | Phase 10 | Pending |
+| CLNT-04 | Phase 10 | Pending |
+| CLNT-01 | Phase 11 | Pending |
+| CLNT-02 | Phase 11 | Pending |
+| CLNT-03 | Phase 11 | Pending |
 
 **Coverage:**
 - v3.0 requirements: 15 total
-- Mapped to phases: 0
-- Unmapped: 15
+- Mapped to phases: 15
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-12*
-*Last updated: 2026-04-12 after initial definition*
+*Last updated: 2026-04-12 after roadmap creation*

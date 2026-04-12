@@ -7,7 +7,7 @@ stopped_at: null
 last_updated: "2026-04-12T00:00:00.000Z"
 last_activity: 2026-04-12
 progress:
-  total_phases: 0
+  total_phases: 4
   completed_phases: 0
   total_plans: 0
   completed_plans: 0
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-12)
 
 **Core value:** Clients can securely log in to view their own assessment results, and coaches have a dashboard to manage clients and track progress.
-**Current focus:** Defining requirements for Milestone v3.0
+**Current focus:** Phase 8 — Auth Infrastructure
 
 ## Current Position
 
-Phase: Not started (defining requirements)
-Plan: —
-Status: Defining requirements
-Last activity: 2026-04-12 — Milestone v3.0 started
+Phase: 8 of 11 (Auth Infrastructure) — first phase of v3.0
+Plan: 0 of 0 in current phase
+Status: Ready to plan
+Last activity: 2026-04-12 — v3.0 roadmap created (Phases 8-11)
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [░░░░░░░░░░] 0% (v3.0 milestone)
 
 ## Performance Metrics
 
@@ -60,9 +60,9 @@ Progress: [░░░░░░░░░░] 0%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Hostname routing via Next.js middleware (not separate deployments)
-- No data loss constraint: schema changes additive only (new contact_submissions table)
-- Hardcoded landing page content (matches brochure, no CMS needed)
+- Better Auth with Drizzle adapter chosen for authentication
+- Schema changes must be additive only (no data loss)
+- portal.peak360.com.au serves the dashboard (from v2.0 hostname routing)
 
 ### Pending Todos
 
@@ -70,10 +70,10 @@ None yet.
 
 ### Blockers/Concerns
 
-- HOST-03 (DNS configuration) is an operational task, not code -- may need manual steps outside the codebase
+- v1.0 phases 2 and 4 had overlapping auth/security scope -- v3.0 supersedes those requirements
 
 ## Session Continuity
 
 Last session: 2026-04-12
-Stopped at: Roadmap created for v2.0 milestone
+Stopped at: v3.0 roadmap created, ready to plan Phase 8
 Resume file: None

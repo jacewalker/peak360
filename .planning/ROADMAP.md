@@ -4,6 +4,7 @@
 
 - 🚧 **v1.0 MVP** - Phases 1-5 (in progress)
 - 🚧 **v2.0 Peak360 Landing Page** - Phases 6-7 (in progress)
+- 🚧 **v3.0 Client Login & Trainer Dashboard** - Phases 8-11 (in progress)
 
 ## Phases
 
@@ -136,10 +137,79 @@ Plans:
 Plans:
 - [ ] 07-01: TBD
 
+---
+
+### v3.0 Client Login & Trainer Dashboard
+
+**Milestone Goal:** Clients can securely log in to view their own assessment results, and coaches have a dedicated dashboard to manage clients, track progress, and deliver assessments -- all with proper role-based access control.
+
+- [ ] **Phase 8: Auth Infrastructure** - Better Auth setup with role-based accounts, session management, middleware guards, and API route protection
+- [ ] **Phase 9: Assessment Ownership & Data Migration** - Link assessments to coaches and clients with additive schema changes and backwards compatibility for existing data
+- [ ] **Phase 10: Coach Dashboard** - Coach-facing UI for managing clients, creating assessments, tracking progress, and inviting clients
+- [ ] **Phase 11: Client Portal** - Client-facing read-only portal for viewing own assessments and reports
+
+### Phase 8: Auth Infrastructure
+**Goal**: Users can create accounts, log in with role-based access (admin/coach/client), and all routes enforce authentication and authorization
+**Depends on**: Phase 7
+**Requirements**: AUTH-01, AUTH-02, AUTH-03, AUTH-04, AUTH-05, SAFE-02
+**Success Criteria** (what must be TRUE):
+  1. A user can log in with email and password and is assigned the correct role (admin, coach, or client)
+  2. A coach can create their own account and access coach-level routes
+  3. An admin can access admin-only routes; coaches and clients receive a 403 when attempting the same
+  4. A logged-in user's session persists across browser refresh and expires after a configurable inactivity period
+  5. API routes return 401 for unauthenticated requests and 403 for insufficient role, independently of middleware
+**Plans**: TBD
+
+Plans:
+- [ ] 08-01: TBD
+
+### Phase 9: Assessment Ownership & Data Migration
+**Goal**: Every assessment is linked to a coach and optionally a client, and existing assessments without ownership continue to function normally
+**Depends on**: Phase 8
+**Requirements**: DASH-04, SAFE-01
+**Success Criteria** (what must be TRUE):
+  1. New assessments are created with a coach_id linking them to the logged-in coach
+  2. New assessments can be linked to a client_id when created for a specific client
+  3. Existing assessments that predate ownership fields load, display, and save without errors
+  4. The database schema changes are additive only -- no existing columns are removed or renamed
+**Plans**: TBD
+
+Plans:
+- [ ] 09-01: TBD
+
+### Phase 10: Coach Dashboard
+**Goal**: Coaches have a dedicated dashboard to manage their client roster, create and track assessments, and invite new clients to the platform
+**Depends on**: Phase 9
+**Requirements**: DASH-01, DASH-02, DASH-03, CLNT-04
+**Success Criteria** (what must be TRUE):
+  1. A logged-in coach sees a dashboard listing their clients with assessment counts and last activity
+  2. A coach can create a new assessment and assign it to a specific client from the dashboard
+  3. A coach can view assessment history and progress trends for any of their clients
+  4. A coach can invite a client via email link or generated credentials, and the invited client can log in
+**Plans**: TBD
+**UI hint**: yes
+
+Plans:
+- [ ] 10-01: TBD
+
+### Phase 11: Client Portal
+**Goal**: Clients can log in and view their own assessment results in a secure, read-only portal
+**Depends on**: Phase 10
+**Requirements**: CLNT-01, CLNT-02, CLNT-03
+**Success Criteria** (what must be TRUE):
+  1. A client can log in and see a list of only their own assessments (not other clients' data)
+  2. A client can open a completed assessment and view the Section 11 longevity report in read-only mode
+  3. A client who attempts to access another client's assessment URL receives a 403 or is redirected away
+**Plans**: TBD
+**UI hint**: yes
+
+Plans:
+- [ ] 11-01: TBD
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 6 -> 7
+Phases execute in numeric order: 8 -> 9 -> 10 -> 11
 
 | Phase | Milestone | Plans Complete | Status | Completed |
 |-------|-----------|----------------|--------|-----------|
@@ -150,3 +220,7 @@ Phases execute in numeric order: 6 -> 7
 | 5. PDF Migration | v1.0 | 4/4 | Complete | 2026-04-10 |
 | 6. Routing Infrastructure & Design System | v2.0 | 0/0 | Not started | - |
 | 7. Landing Page & Contact Form | v2.0 | 0/0 | Not started | - |
+| 8. Auth Infrastructure | v3.0 | 0/0 | Not started | - |
+| 9. Assessment Ownership & Data Migration | v3.0 | 0/0 | Not started | - |
+| 10. Coach Dashboard | v3.0 | 0/0 | Not started | - |
+| 11. Client Portal | v3.0 | 0/0 | Not started | - |
