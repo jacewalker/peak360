@@ -4,13 +4,47 @@ import { assessments } from '@/lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { v4 as uuid } from 'uuid';
 import { createOrReuseVersion } from '@/lib/normative/versioning';
+import { requireSession } from '@/lib/auth-helpers';
 
 export async function GET() {
-  const rows = await db.select().from(assessments).orderBy(desc(assessments.updatedAt));
+  const [session, errorRes] = await requireSession();
+  if (errorRes) return errorRes;
+
+  let rows;
+  if (session.user.role === 'admin') {
+    // Admin sees all assessments (including legacy with null coach_id)
+    rows = await db.select().from(assessments).orderBy(desc(assessments.updatedAt));
+  } else if (session.user.role === 'coach') {
+    // Coach sees only their own assessments
+    rows = await db
+      .select()
+      .from(assessments)
+      .where(eq(assessments.coachId, session.user.id))
+      .orderBy(desc(assessments.updatedAt));
+  } else {
+    // Client sees only assessments assigned to them
+    rows = await db
+      .select()
+      .from(assessments)
+      .where(eq(assessments.clientId, session.user.id))
+      .orderBy(desc(assessments.updatedAt));
+  }
+
   return NextResponse.json({ success: true, data: rows });
 }
 
 export async function POST(request: Request) {
+  const [session, errorRes] = await requireSession();
+  if (errorRes) return errorRes;
+
+  // Clients cannot create assessments
+  if (session.user.role === 'client') {
+    return NextResponse.json(
+      { error: 'Clients cannot create assessments' },
+      { status: 403 }
+    );
+  }
+
   const body = await request.json();
   const id = uuid();
   const now = new Date().toISOString();
@@ -24,6 +58,7 @@ export async function POST(request: Request) {
     assessmentDate: body.assessmentDate || now.split('T')[0],
     currentSection: 1,
     status: 'in_progress',
+    coachId: session.user.id,
     createdAt: now,
     updatedAt: now,
   });

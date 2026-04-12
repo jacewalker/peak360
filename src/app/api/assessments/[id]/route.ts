@@ -2,11 +2,33 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { assessments, assessmentSections } from '@/lib/db/schema';
 import { eq, and, isNotNull } from 'drizzle-orm';
+import { requireSession } from '@/lib/auth-helpers';
+
+/**
+ * Check if the user has access to this assessment based on role.
+ */
+function hasAccess(
+  role: string,
+  userId: string,
+  assessment: { coachId: string | null; clientId: string | null }
+): boolean {
+  if (role === 'admin') return true;
+  if (role === 'coach') return assessment.coachId === userId;
+  if (role === 'client') return assessment.clientId === userId;
+  return false;
+}
 
 export async function GET(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const [session, errorRes] = await requireSession();
+  if (errorRes) return errorRes;
+
   const { id } = await params;
   const [row] = await db.select().from(assessments).where(eq(assessments.id, id));
   if (!row) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+
+  if (!hasAccess(session.user.role, session.user.id, row)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const completedRows = await db
     .select({ sectionNumber: assessmentSections.sectionNumber })
@@ -23,7 +45,22 @@ export async function GET(_request: Request, { params }: { params: Promise<{ id:
 }
 
 export async function PUT(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const [session, errorRes] = await requireSession();
+  if (errorRes) return errorRes;
+
+  // Clients are read-only
+  if (session.user.role === 'client') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { id } = await params;
+  const [row] = await db.select().from(assessments).where(eq(assessments.id, id));
+  if (!row) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+
+  if (!hasAccess(session.user.role, session.user.id, row)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const body = await request.json();
   const now = new Date().toISOString();
 
@@ -36,7 +73,22 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
 }
 
 export async function DELETE(_request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const [session, errorRes] = await requireSession();
+  if (errorRes) return errorRes;
+
+  // Clients cannot delete
+  if (session.user.role === 'client') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { id } = await params;
+  const [row] = await db.select().from(assessments).where(eq(assessments.id, id));
+  if (!row) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+
+  if (!hasAccess(session.user.role, session.user.id, row)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   await db.delete(assessments).where(eq(assessments.id, id));
   return NextResponse.json({ success: true });
 }

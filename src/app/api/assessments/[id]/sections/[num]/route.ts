@@ -2,13 +2,38 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { assessmentSections, assessments } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { requireSession } from '@/lib/auth-helpers';
+
+/**
+ * Check if the user has access to this assessment based on role.
+ */
+function hasAccess(
+  role: string,
+  userId: string,
+  assessment: { coachId: string | null; clientId: string | null }
+): boolean {
+  if (role === 'admin') return true;
+  if (role === 'coach') return assessment.coachId === userId;
+  if (role === 'client') return assessment.clientId === userId;
+  return false;
+}
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string; num: string }> }
 ) {
+  const [session, errorRes] = await requireSession();
+  if (errorRes) return errorRes;
+
   const { id, num } = await params;
   const sectionNum = parseInt(num);
+
+  // Verify access to parent assessment
+  const [assessment] = await db.select().from(assessments).where(eq(assessments.id, id));
+  if (!assessment) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+  if (!hasAccess(session.user.role, session.user.id, assessment)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const [row] = await db
     .select()
@@ -27,8 +52,24 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string; num: string }> }
 ) {
+  const [session, errorRes] = await requireSession();
+  if (errorRes) return errorRes;
+
+  // Clients are strictly read-only - cannot write section data
+  if (session.user.role === 'client') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { id, num } = await params;
   const sectionNum = parseInt(num);
+
+  // Verify access to parent assessment (coach must own it, admin can edit any)
+  const [assessment] = await db.select().from(assessments).where(eq(assessments.id, id));
+  if (!assessment) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+  if (!hasAccess(session.user.role, session.user.id, assessment)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const body = await request.json();
   const now = new Date().toISOString();
 

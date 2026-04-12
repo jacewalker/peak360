@@ -1,22 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { getSessionCookie } from 'better-auth/cookies';
 
-const PUBLIC_PATHS = new Set([
-  '/login',
-  '/api/health',
-]);
+const PUBLIC_PATHS = new Set(['/login', '/api/health']);
+
+const PORTAL_SUBDOMAIN_HOSTNAMES = new Set(
+  (process.env.PORTAL_HOSTNAMES ?? 'portal.peak360.com.au').split(',')
+);
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow Better Auth catch-all routes
-  if (pathname.startsWith('/api/auth/')) {
-    return NextResponse.next();
-  }
-
-  if (PUBLIC_PATHS.has(pathname)) {
-    return NextResponse.next();
-  }
-
+  // Static assets - pass through
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
@@ -27,18 +21,39 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // TODO: Plan 02-02 will add proper Better Auth session checks here.
-  // For now, allow all requests through to avoid blocking the app
-  // while the auth system is being set up incrementally.
-  return NextResponse.next();
-}
-
-function redirectToLogin(req: NextRequest) {
-  if (req.nextUrl.pathname.startsWith('/api/')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  // Portal subdomain redirect
+  const hostname = req.headers.get('host')?.split(':')[0] ?? '';
+  if (PORTAL_SUBDOMAIN_HOSTNAMES.has(hostname)) {
+    const targetPath = pathname === '/' ? '/portal' : `/portal${pathname}`;
+    const targetUrl = new URL(targetPath, req.url);
+    return NextResponse.redirect(targetUrl);
   }
-  const loginUrl = new URL('/login', req.url);
-  return NextResponse.redirect(loginUrl);
+
+  // Better Auth catch-all routes must be public
+  if (pathname.startsWith('/api/auth/')) {
+    return NextResponse.next();
+  }
+
+  // Public paths
+  if (PUBLIC_PATHS.has(pathname)) {
+    return NextResponse.next();
+  }
+
+  // Landing page (non-portal, non-api) - public
+  if (!pathname.startsWith('/portal') && !pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  // Protected paths: check session cookie (optimistic, real validation in API handlers)
+  const sessionCookie = getSessionCookie(req);
+  if (!sessionCookie) {
+    if (pathname.startsWith('/api/')) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    return NextResponse.redirect(new URL('/login', req.url));
+  }
+
+  return NextResponse.next();
 }
 
 export const config = {
