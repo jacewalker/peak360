@@ -116,10 +116,11 @@ Plans:
   2. Visiting portal.peak360.com.au in a browser serves the existing dashboard and assessment routes unchanged
   3. Montserrat and Open Sans fonts load on the landing page, and navy/gold brand colors render correctly via Tailwind theme tokens
   4. DNS for peak360.com.au resolves to the DigitalOcean app
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 06-01: TBD
+- [ ] 06-01-PLAN.md — Hostname routing middleware, font setup, design tokens, landing route (HOST-01, HOST-02, DSGN-01)
+- [ ] 06-02-PLAN.md — DNS configuration for peak360.com.au and portal subdomain (HOST-03)
 
 ### Phase 7: Landing Page & Contact Form
 **Goal**: Visitors experience a complete, responsive landing page that communicates the Peak360 Longevity Program and can submit inquiries via a validated contact form
@@ -218,7 +219,7 @@ Phases execute in numeric order: 8 -> 9 -> 10 -> 11
 | 3. Admin Panel & Normative Data Management | v1.0 | 2/4 | In progress | - |
 | 4. Security & Client Portal | v1.0 | 0/0 | Not started | - |
 | 5. PDF Migration | v1.0 | 4/4 | Complete | 2026-04-10 |
-| 6. Routing Infrastructure & Design System | v2.0 | 0/0 | Not started | - |
+| 6. Routing Infrastructure & Design System | v2.0 | 0/2 | Not started | - |
 | 7. Landing Page & Contact Form | v2.0 | 0/0 | Not started | - |
 | 8. Auth Infrastructure | v3.0 | 0/0 | Not started | - |
 | 9. Assessment Ownership & Data Migration | v3.0 | 0/0 | Not started | - |
