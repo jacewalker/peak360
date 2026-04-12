@@ -1,85 +1,82 @@
-# Requirements: Peak360 Milestone 2 — Landing Page
+# Requirements: Peak360 Milestone 3 — Client Login & Trainer Dashboard
 
 **Defined:** 2026-04-12
-**Core Value:** Prospective clients can discover the Peak360 Longevity Program through a branded landing page with program overview and contact form.
+**Core Value:** Clients can securely log in to view their own assessment results, and coaches have a dedicated dashboard to manage clients, track progress, and deliver assessments.
 
-**Constraint:** No data loss on existing database. All schema changes must be additive (new tables only). Existing tables must not be altered or migrated in a way that risks data loss.
+**Constraint:** No data loss on existing database. Schema changes must be additive only (new columns/tables with defaults, new tables). Existing assessments without ownership must continue to work.
 
-## v2.0 Requirements
+## v3.0 Requirements
 
-Requirements for Milestone 2. Each maps to roadmap phases.
+Requirements for Milestone 3. Each maps to roadmap phases.
 
-### Landing Page Content
+### Authentication
 
-- [ ] **LAND-01**: Visitor sees a hero section with Peak360 logo, "Discover Your True Health Age" headline, subtitle, and "Are You Aging Faster Than You Should?" callout banner
-- [ ] **LAND-02**: Visitor sees the program philosophy section with "We don't train people to be younger. We train people to be harder to age." and three pillars (Measure First, Act Early, Maintain What Matters)
-- [ ] **LAND-03**: Visitor sees "What We Test" section with four categories: Advanced Blood Biomarkers (60+), VO2 Max Testing, Strength & Flexibility, and Evolt 360 Body Composition
-- [ ] **LAND-04**: Visitor sees technology showcase cards for Vald Force Decks, Evolt360 Scanner, and Calibre VO2 Tester with feature bullet lists
-- [ ] **LAND-05**: Visitor sees a testing protocol timeline (Week 1-4 + Ongoing quarterly reassessments)
-- [ ] **LAND-06**: Visitor sees benefits grid with checkmark items covering healthspan optimization, fall prevention, biomarker tracking, etc.
-- [ ] **LAND-07**: Visitor sees a CTA section with "Ready to Invest in Your Longevity?" headline and action button
+- [ ] **AUTH-01**: User can log in with email and password using role-based accounts (admin, coach, client)
+- [ ] **AUTH-02**: Coach can create and manage their own account
+- [ ] **AUTH-03**: Admin can access admin-only routes that coaches and clients cannot reach
+- [ ] **AUTH-04**: Session persists across browser refresh and expires after inactivity
+- [ ] **AUTH-05**: API routes reject unauthenticated requests and enforce role-based access independently of middleware
 
-### Contact Form
+### Client Portal
 
-- [ ] **CONT-01**: Visitor can submit a contact form with name, email, phone, and message fields
-- [ ] **CONT-02**: Contact form submissions are stored in the database for coach review
-- [ ] **CONT-03**: Contact form validates required fields (name, email) and shows inline errors
+- [ ] **CLNT-01**: Client can log in and see only their own assessments in a read-only view
+- [ ] **CLNT-02**: Client can view their completed assessment report (Section 11) from the portal
+- [ ] **CLNT-03**: Client cannot view or access assessments belonging to other clients
+- [ ] **CLNT-04**: Coach can invite a client via email link or generated credentials
 
-### Design & Responsiveness
+### Coach Dashboard
 
-- [ ] **DSGN-01**: Landing page uses Peak360 brand colors (navy #1a2332, gold #f5b041), Montserrat headings, Open Sans body text via Tailwind CSS theme tokens
-- [ ] **DSGN-02**: Landing page is fully responsive across mobile, tablet, and desktop breakpoints
-- [ ] **DSGN-03**: Landing page includes smooth scroll navigation between sections
+- [ ] **DASH-01**: Coach sees a dashboard with their client list and assessment overview
+- [ ] **DASH-02**: Coach can create a new assessment linked to a specific client
+- [ ] **DASH-03**: Coach can view assessment history and progress for each client
+- [ ] **DASH-04**: Assessment ownership: each assessment is linked to a coach_id and client_id
 
-### Hostname Routing
+### Data Safety
 
-- [ ] **HOST-01**: Requests to peak360.com.au serve landing page routes via Next.js middleware hostname detection
-- [ ] **HOST-02**: Requests to portal.peak360.com.au continue serving existing dashboard/assessment routes unchanged
-- [ ] **HOST-03**: Root domain peak360.com.au is added to the DigitalOcean app and DNS configured
+- [ ] **SAFE-01**: Existing assessments without ownership fields continue to work (backwards compatible)
+- [ ] **SAFE-02**: Database schema changes are additive only (new columns/tables); no data loss
 
-## Previous Milestone Requirements (v1.0)
+## Previous Milestone Requirements
 
-Carried forward from Milestone 1. Not in scope for this milestone's roadmap.
+### v1.0 MVP (Phases 1-5)
+- Clinical Accuracy (CLIN-01-04): Gender-specific ratings — Partial
+- Report Visualization (REPT-01-05): Range bars, referral flags — Partial
+- Admin Panel (ADMN-01-06): Normative data management — Partial
+- Security (SECU-01-03): Encryption, audit, backup — Pending
+- PDF Migration (PDF-01-08): React-pdf renderer — Complete
 
-### Clinical Accuracy (Phase 1)
-- CLIN-01 through CLIN-04: Gender-specific ratings — Pending
-- REPT-01 through REPT-05: Report visualization — Partial (REPT-03, REPT-04 complete)
-
-### Authentication (Phase 2)
-- AUTH-01 through AUTH-05: Role-based auth — Pending
-
-### Admin Panel (Phase 3)
-- ADMN-01 through ADMN-06: Normative data management — Partial (ADMN-01, ADMN-02, ADMN-05 complete)
-
-### Security (Phase 4)
-- SECU-01 through SECU-03: Encryption, audit, backup — Pending
+### v2.0 Landing Page (Phases 6-7)
+- Landing Page Content (LAND-01-07): All content sections — Pending
+- Contact Form (CONT-01-03): Form with DB persistence — Pending
+- Design & Responsiveness (DSGN-01-03): Brand tokens, responsive — Pending
+- Hostname Routing (HOST-01-03): Middleware routing, DNS — Pending
 
 ## Future Requirements
 
-Deferred to future milestones. Tracked but not in current roadmap.
+### Client Engagement
 
-### Email Notifications
+- **ENGE-01**: Client dashboard showing trends across multiple assessments with charts
+- **ENGE-02**: Magic link login for clients (requires email infrastructure)
+- **ENGE-03**: Coach notes per assessment visible to client
+- **ENGE-04**: Branded PDF export with coach/business logo
 
-- **EMAL-01**: Contact form submissions trigger email notification to coach
-- **EMAL-02**: Auto-reply confirmation email sent to visitor after form submission
+### Security Hardening
 
-### Landing Page Enhancements
-
-- **LNDE-01**: Testimonials section with client success stories
-- **LNDE-02**: Pricing/packages section
-- **LNDE-03**: FAQ accordion section
-- **LNDE-04**: Blog/articles section
+- **SECU-01**: AES-256-GCM encryption at rest for sensitive fields
+- **SECU-02**: Audit log recording who accessed what data and when
+- **SECU-03**: Automated backup strategy with point-in-time recovery
 
 ## Out of Scope
 
 | Feature | Reason |
 |---------|--------|
-| Email sending from contact form | Requires SMTP setup; v2.0 stores submissions for manual review |
-| Online booking/scheduling | Complex integration; contact form sufficient for now |
-| Payment processing | Not needed for landing page; future milestone |
-| CMS for landing page content | Hardcoded content matches brochure; no dynamic editing needed |
-| Separate deployment for landing page | One-app approach with hostname routing is more cost-effective |
-| Existing database migration | No data loss constraint; schema changes are additive only |
+| OAuth/social login | Email/password sufficient for v3.0; adds complexity |
+| Two-factor authentication | Future enhancement; not critical for initial auth |
+| Password reset via email | Requires email sending infrastructure; coaches can reset manually for now |
+| Real-time notifications | Not needed for initial dashboard |
+| Client self-registration | Clients are invited by coaches; no public signup |
+| Data encryption at rest | Deferred to security-focused milestone |
+| Existing table schema changes | No data loss constraint; additive only |
 
 ## Traceability
 
@@ -87,28 +84,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| HOST-01 | Phase 6 | Pending |
-| HOST-02 | Phase 6 | Pending |
-| HOST-03 | Phase 6 | Pending |
-| DSGN-01 | Phase 6 | Pending |
-| LAND-01 | Phase 7 | Pending |
-| LAND-02 | Phase 7 | Pending |
-| LAND-03 | Phase 7 | Pending |
-| LAND-04 | Phase 7 | Pending |
-| LAND-05 | Phase 7 | Pending |
-| LAND-06 | Phase 7 | Pending |
-| LAND-07 | Phase 7 | Pending |
-| CONT-01 | Phase 7 | Pending |
-| CONT-02 | Phase 7 | Pending |
-| CONT-03 | Phase 7 | Pending |
-| DSGN-02 | Phase 7 | Pending |
-| DSGN-03 | Phase 7 | Pending |
+| — | — | — |
 
 **Coverage:**
-- v2.0 requirements: 16 total
-- Mapped to phases: 16
-- Unmapped: 0
+- v3.0 requirements: 15 total
+- Mapped to phases: 0
+- Unmapped: 15
 
 ---
 *Requirements defined: 2026-04-12*
-*Last updated: 2026-04-12 after roadmap creation*
+*Last updated: 2026-04-12 after initial definition*
