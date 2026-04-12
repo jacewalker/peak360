@@ -1,17 +1,17 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: completed
-stopped_at: Completed 05-04-PLAN.md
-last_updated: "2026-04-10T08:42:06.632Z"
-last_activity: 2026-04-10
+milestone: v2.0
+milestone_name: landing-page
+status: in_progress
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-04-12T03:53:00Z"
+last_activity: 2026-04-12
 progress:
-  total_phases: 5
-  completed_phases: 2
-  total_plans: 11
-  completed_plans: 10
-  percent: 0
+  total_phases: 2
+  completed_phases: 0
+  total_plans: 3
+  completed_plans: 1
+  percent: 33
 ---
 
 # Project State
@@ -21,16 +21,16 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-29)
 
 **Core value:** Coaches can deliver accurate, gender-aware health assessments with actionable recommendations and give clients secure access to track their progress over time.
-**Current focus:** Phase 05 — migrate-pdf-generation-to-react-pdf-renderer
+**Current focus:** Phase 06 — routing-infrastructure-design-system
 
 ## Current Position
 
-Phase: 05
-Plan: Not started
-Status: Completed 05-04-PLAN.md
-Last activity: 2026-04-10 - Completed quick task 260410-pzr: Fix Complete button on Section 11
+Phase: 06
+Plan: 1 of 2 complete
+Status: Completed 06-01-PLAN.md
+Last activity: 2026-04-12 - Completed 06-01 hostname routing, fonts, design tokens
 
-Progress: [░░░░░░░░░░] 0%
+Progress: [███░░░░░░░] 33%
 
 ## Performance Metrics
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P02 | 2m 27s | 2 tasks | 5 files |
 | Phase 05 P03 | 1m 44s | 2 tasks | 3 files |
 | Phase 05 P04 | 1m 1s | 2 tasks | 3 files |
+| Phase 06 P01 | 2m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,7 @@ Recent decisions affecting current work:
 - [Phase 03]: Version pinning is non-fatal -- assessment still created if versioning fails
 - [Phase 05]: Kept semantic report-* CSS classes (header, tier-pill, tier-card, insight-card, footer) that are not PDF-spacer related
 - [Phase 05]: Footer uses flexDirection column with inner row for horizontal layout
+- [Phase 06]: Use next/font/google for self-hosted fonts, LANDING_HOSTNAMES env var for configurable routing
 
 ### Pending Todos
 
@@ -104,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T08:00:10.900Z
-Stopped at: Completed 05-04-PLAN.md
+Last session: 2026-04-12T03:53:00Z
+Stopped at: Completed 06-01-PLAN.md
 Resume file: None

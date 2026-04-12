@@ -115,3 +115,18 @@ Plans:
 - [x] 05-02-PLAN.md — Build all react-pdf report components and wire into Peak360Report document (PDF-04, PDF-05, PDF-06)
 - [x] 05-03-PLAN.md — Replace Section 11 export with fetch-and-download, remove old deps, visual verification (PDF-07, PDF-08)
 - [x] 05-04-PLAN.md — Fix footer text overflow and add page break before Detailed Results (gap closure)
+
+### Phase 6: Routing Infrastructure & Design System
+**Goal**: The application correctly serves different experiences based on hostname, and the landing page design system (fonts, colors, gradients) is established as reusable Tailwind tokens
+**Depends on**: Phase 5
+**Requirements**: HOST-01, HOST-02, HOST-03, DSGN-01
+**Success Criteria** (what must be TRUE):
+  1. Visiting peak360.com.au in a browser serves the landing page route (not the dashboard)
+  2. Visiting portal.peak360.com.au in a browser serves the existing dashboard and assessment routes unchanged
+  3. Montserrat and Open Sans fonts load on the landing page, and navy/gold brand colors render correctly via Tailwind theme tokens
+  4. DNS for peak360.com.au resolves to the DigitalOcean app
+**Plans**: 2 plans
+
+Plans:
+- [x] 06-01-PLAN.md — Hostname routing middleware, font setup, design tokens, landing route (HOST-01, HOST-02, DSGN-01)
+- [ ] 06-02-PLAN.md — DNS configuration for peak360.com.au and portal subdomain (HOST-03)
