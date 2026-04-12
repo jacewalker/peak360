@@ -1,7 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import { inter } from '@/lib/fonts';
-import AppShell from '@/components/layout/AppShell';
 
 export const metadata: Metadata = {
   title: 'Peak360 Longevity Assessment',
@@ -19,7 +18,7 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
       </head>
       <body className={`${inter.variable} antialiased min-h-screen bg-background font-sans`}>
-        <AppShell>{children}</AppShell>
+        {children}
       </body>
     </html>
   );

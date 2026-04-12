@@ -1,42 +1,42 @@
 ---
 gsd_state_version: 1.0
-milestone: v2.0
-milestone_name: landing-page
-status: in_progress
-stopped_at: Completed 06-01-PLAN.md
-last_updated: "2026-04-12T03:53:00Z"
-last_activity: 2026-04-12
+milestone: v1.0
+milestone_name: MVP
+status: executing
+stopped_at: v3.0 roadmap created, ready to plan Phase 8
+last_updated: "2026-04-12T03:50:56.613Z"
+last_activity: 2026-04-12 -- Phase 06 execution started
 progress:
-  total_phases: 2
+  total_phases: 6
   completed_phases: 0
-  total_plans: 3
-  completed_plans: 1
-  percent: 33
+  total_plans: 2
+  completed_plans: 0
+  percent: 0
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-03-29)
+See: .planning/PROJECT.md (updated 2026-04-12)
 
-**Core value:** Coaches can deliver accurate, gender-aware health assessments with actionable recommendations and give clients secure access to track their progress over time.
+**Core value:** Clients can securely log in to view their own assessment results, and coaches have a dashboard to manage clients and track progress.
 **Current focus:** Phase 06 — routing-infrastructure-design-system
 
 ## Current Position
 
-Phase: 06
-Plan: 1 of 2 complete
-Status: Completed 06-01-PLAN.md
-Last activity: 2026-04-12 - Completed 06-01 hostname routing, fonts, design tokens
+Phase: 06 (routing-infrastructure-design-system) — EXECUTING
+Plan: 1 of 2
+Status: Executing Phase 06
+Last activity: 2026-04-12 -- Phase 06 execution started
 
-Progress: [███░░░░░░░] 33%
+Progress: [░░░░░░░░░░] 0% (v3.0 milestone)
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
+- Total plans completed: 0 (this milestone)
 - Average duration: -
 - Total execution time: 0 hours
 
@@ -46,18 +46,12 @@ Progress: [███░░░░░░░] 33%
 |-------|-------|-------|----------|
 | - | - | - | - |
 
-**Recent Trend:**
+**Recent Trend (from Milestone 1):**
 
-- Last 5 plans: -
-- Trend: -
+- Last 5 plans: 5m, 2m34s, 2m27s, 1m44s, 1m1s
+- Trend: Improving
 
 *Updated after each plan completion*
-| Phase 01 P02 | 5m | 1 tasks | 2 files |
-| Phase 03 P01 | 2m 34s | 2 tasks | 6 files |
-| Phase 03 P02 | 2m 27s | 2 tasks | 5 files |
-| Phase 05 P03 | 1m 44s | 2 tasks | 3 files |
-| Phase 05 P04 | 1m 1s | 2 tasks | 3 files |
-| Phase 06 P01 | 2m | 3 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -66,46 +60,20 @@ Progress: [███░░░░░░░] 33%
 Decisions are logged in PROJECT.md Key Decisions table.
 Recent decisions affecting current work:
 
-- Gender ranges before admin panel (clinical accuracy is the foundation)
-- Application-level AES-256-GCM encryption (simpler than DB-level, works with SQLite)
-- Better Auth for authentication (built-in RBAC, Drizzle adapter, replaces shared password)
-- [Phase 01]: Markers without normative data still produce insight guidance (null rating no longer skips flagIf)
-- [Phase 01]: Homocysteine separated from CRP into own case with methylation-specific B vitamin recommendations
-- [Phase 03]: Keep original getStandards/getPeak360Rating unchanged for backwards compatibility
-- [Phase 03]: Use variant matching pattern (exact gender+ageGroup > gender-only > unisex) for DB range lookups
-- [Phase 03]: Content-hash SHA-256 deduplication prevents duplicate version rows when ranges haven't changed
-- [Phase 03]: Version pinning is non-fatal -- assessment still created if versioning fails
-- [Phase 05]: Kept semantic report-* CSS classes (header, tier-pill, tier-card, insight-card, footer) that are not PDF-spacer related
-- [Phase 05]: Footer uses flexDirection column with inner row for horizontal layout
-- [Phase 06]: Use next/font/google for self-hosted fonts, LANDING_HOSTNAMES env var for configurable routing
+- Better Auth with Drizzle adapter chosen for authentication
+- Schema changes must be additive only (no data loss)
+- portal.peak360.com.au serves the dashboard (from v2.0 hostname routing)
 
 ### Pending Todos
 
 None yet.
 
-### Quick Tasks Completed
-
-| # | Description | Date | Commit | Directory |
-|---|-------------|------|--------|-----------|
-| 260331-dob | Section 11 fallback to current DB overrides for assessments without normative snapshot | 2026-03-30 | be400eb | [260331-dob-section11-fallback-to-current-db-overrid](./quick/260331-dob-section11-fallback-to-current-db-overrid/) |
-| 260331-pte | Replace sidebar admin links with Admin button + overlay panel | 2026-03-31 | bef82cf | [260331-pte-turn-admin-sidebar-section-into-admin-bu](./quick/260331-pte-turn-admin-sidebar-section-into-admin-bu/) |
-| 260331-py9 | Bulk select and delete with password confirmation on assessments and clients pages | 2026-03-31 | c043f5a | [260331-py9-bulk-select-and-delete-with-password-con](./quick/260331-py9-bulk-select-and-delete-with-password-con/) |
-| 260331-r70 | Fix PDF page-break overflow: scroll reset, reflow flush, bottom guard in exportPdf | 2026-03-31 | 3774dbc | [260331-r70-fix-pdf-page-break-overflow-add-padding-](./quick/260331-r70-fix-pdf-page-break-overflow-add-padding-/) |
-| 260403-pze | Force Insights & Recommendations section onto new PDF page | 2026-04-03 | 7ff48d8 | [260403-pze-put-insights-recommendations-section-in-](./quick/260403-pze-put-insights-recommendations-section-in-/) |
-| 260410-pzr | Fix Complete button on Section 11 to save, mark completed, redirect home | 2026-04-10 | b6be831 | [260410-pzr-the-complete-button-on-the-final-page-of](./quick/260410-pzr-the-complete-button-on-the-final-page-of/) |
-
-### Roadmap Evolution
-
-- Phase 5 added: Migrate PDF generation to react-pdf/renderer
-
 ### Blockers/Concerns
 
-- Better Auth + Next.js 16 proxy.ts integration has limited community examples (Phase 2 risk)
-- Range versioning schema design needs resolution during Phase 3 planning
-- Sex vs gender terminology decision needed in Phase 1 planning
+- v1.0 phases 2 and 4 had overlapping auth/security scope -- v3.0 supersedes those requirements
 
 ## Session Continuity
 
-Last session: 2026-04-12T03:53:00Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-04-12
+Stopped at: v3.0 roadmap created, ready to plan Phase 8
 Resume file: None

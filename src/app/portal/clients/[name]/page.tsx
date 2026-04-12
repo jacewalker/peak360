@@ -128,7 +128,7 @@ export default function ClientDetailPage() {
       {/* Header */}
       <div className="bg-gradient-to-b from-navy-dark to-navy py-8 sm:py-10 text-white">
         <div className="max-w-5xl mx-auto pl-14 pr-4 sm:px-6 lg:px-6">
-          <Link href="/clients" className="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 text-sm mb-4 transition-colors">
+          <Link href="/portal/clients" className="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 text-sm mb-4 transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
@@ -198,7 +198,7 @@ export default function ClientDetailPage() {
                 return (
                   <Link
                     key={a.id}
-                    href={`/assessment/${a.id}/section/${a.currentSection}`}
+                    href={`/portal/assessment/${a.id}/section/${a.currentSection}`}
                     className="block bg-white rounded-xl border border-border p-5 hover:shadow-md hover:border-gold/30 transition-all group"
                   >
                     <div className="flex items-center justify-between mb-3">

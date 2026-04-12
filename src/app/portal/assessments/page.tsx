@@ -52,7 +52,7 @@ export default function HomePage() {
       body: JSON.stringify({}),
     });
     const { data } = await res.json();
-    router.push(`/assessment/${data.id}/section/1`);
+    router.push(`/portal/assessment/${data.id}/section/1`);
   };
 
   const deleteAssessment = async (id: string) => {
@@ -349,7 +349,7 @@ export default function HomePage() {
                     key={a.id}
                     className="bg-white rounded-xl border border-border p-4 sm:p-5 flex items-center justify-between hover:shadow-md hover:border-gold/30 transition-all cursor-pointer group"
                     onClick={() =>
-                      router.push(`/assessment/${a.id}/section/${a.currentSection}`)
+                      router.push(`/portal/assessment/${a.id}/section/${a.currentSection}`)
                     }
                   >
                     <div className="flex items-center gap-3 sm:gap-4 min-w-0">

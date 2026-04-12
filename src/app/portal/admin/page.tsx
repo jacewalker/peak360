@@ -5,7 +5,7 @@ import Link from 'next/link';
 const ADMIN_SECTIONS = [
   {
     label: 'Normative Ranges',
-    href: '/admin/normative',
+    href: '/portal/admin/normative',
     description:
       'Manage rating thresholds for all biomarkers and fitness tests across all 5 tiers — poor, cautious, normal, great, and elite.',
     stat: '63 markers',

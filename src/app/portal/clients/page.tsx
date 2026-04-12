@@ -222,7 +222,7 @@ export default function ClientsPage() {
                 {filtered.map((c) => (
                   <Link
                     key={c.name}
-                    href={`/clients/${encodeURIComponent(c.name)}`}
+                    href={`/portal/clients/${encodeURIComponent(c.name)}`}
                     className="block bg-white rounded-xl border border-border p-4 sm:p-5 hover:shadow-md hover:border-gold/30 transition-all"
                   >
                   <div className="flex items-center gap-3 sm:gap-4">

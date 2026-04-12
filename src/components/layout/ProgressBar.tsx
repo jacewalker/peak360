@@ -40,7 +40,7 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
             return (
               <Link
                 key={num}
-                href={`/assessment/${assessmentId}/section/${num}`}
+                href={`/portal/assessment/${assessmentId}/section/${num}`}
                 className={`
                   group relative w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shrink-0
                   text-[10px] sm:text-xs font-semibold transition-all duration-300 hover:scale-110

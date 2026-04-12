@@ -140,7 +140,7 @@ export default function SectionPage() {
       const currentIdx = VISIBLE_SECTIONS.indexOf(num);
       const targetIdx = direction === 'next' ? currentIdx + 1 : currentIdx - 1;
       if (targetIdx >= 0 && targetIdx < VISIBLE_SECTIONS.length) {
-        router.push(`/assessment/${id}/section/${VISIBLE_SECTIONS[targetIdx]}`);
+        router.push(`/portal/assessment/${id}/section/${VISIBLE_SECTIONS[targetIdx]}`);
       }
     },
     [id, num, router, saveSection]
@@ -148,7 +148,7 @@ export default function SectionPage() {
 
   const handleSaveExit = useCallback(async () => {
     await saveSection();
-    router.push('/');
+    router.push('/portal');
   }, [router, saveSection]);
 
   const handleComplete = useCallback(async () => {
@@ -158,13 +158,13 @@ export default function SectionPage() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ status: 'completed' }),
     });
-    router.push('/');
+    router.push('/portal');
   }, [id, router, saveSection]);
 
   const handleCancel = useCallback(() => {
     if (window.confirm('Discard all unsaved changes and return to home?')) {
       store.markClean();
-      router.push('/');
+      router.push('/portal');
     }
   }, [router, store]);
 

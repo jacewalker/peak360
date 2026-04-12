@@ -324,7 +324,7 @@ export default function MarkerEditorPage({
     <div className="max-w-6xl mx-auto p-6">
       {/* Back link */}
       <a
-        href="/admin/normative"
+        href="/portal/admin/normative"
         className="inline-flex items-center gap-1 text-sm text-muted hover:text-navy mb-4"
       >
         <svg

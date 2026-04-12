@@ -606,7 +606,7 @@ export default function Section11({ assessmentId }: Section11Props) {
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ status: 'completed' }),
             });
-            window.location.href = '/';
+            window.location.href = '/portal';
           }}
           className="px-8 py-3 bg-[#F5A623] text-[#1a365d] rounded-xl font-semibold hover:bg-[#f7bc5a] transition-all hover:shadow-lg active:scale-[0.98]"
         >

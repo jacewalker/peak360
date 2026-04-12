@@ -8,17 +8,14 @@ const PUBLIC_PATHS = new Set([
   '/api/health',
 ]);
 
-const LANDING_HOSTNAMES = new Set(
-  (process.env.LANDING_HOSTNAMES ?? 'peak360.com.au,www.peak360.com.au').split(',')
+const PORTAL_SUBDOMAIN_HOSTNAMES = new Set(
+  (process.env.PORTAL_HOSTNAMES ?? 'portal.peak360.com.au').split(',')
 );
 
 export async function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  if (PUBLIC_PATHS.has(pathname)) {
-    return NextResponse.next();
-  }
-
+  // Static assets — pass through
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
@@ -29,33 +26,29 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Hostname routing: landing page vs portal
+  // Redirect portal.peak360.com.au/* → peak360.com.au/portal/*
   const hostname = req.headers.get('host')?.split(':')[0] ?? '';
-
-  if (LANDING_HOSTNAMES.has(hostname)) {
-    // Root path on landing domain -> rewrite to /landing route
-    if (pathname === '/') {
-      const url = req.nextUrl.clone();
-      url.pathname = '/landing';
-      return NextResponse.rewrite(url);
-    }
-    // API routes on landing domain pass through (e.g., contact form in Phase 7)
-    if (pathname.startsWith('/api/')) {
-      return NextResponse.next();
-    }
-    // All other paths on landing domain -> redirect to portal
-    const portalUrl = new URL(pathname, 'https://portal.peak360.com.au');
-    return NextResponse.redirect(portalUrl);
+  if (PORTAL_SUBDOMAIN_HOSTNAMES.has(hostname)) {
+    const targetPath = pathname === '/' ? '/portal' : `/portal${pathname}`;
+    const targetUrl = new URL(targetPath, 'https://peak360.com.au');
+    return NextResponse.redirect(targetUrl);
   }
 
-  // Block direct access to /landing on portal hostname
-  if (pathname === '/landing' || pathname.startsWith('/landing/')) {
-    return NextResponse.redirect(new URL('/', req.url));
+  // Public paths — no auth required
+  if (PUBLIC_PATHS.has(pathname)) {
+    return NextResponse.next();
   }
+
+  // Landing page (root and non-portal paths) — no auth required
+  if (!pathname.startsWith('/portal') && !pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  // API routes not in public paths — require auth
+  // Portal routes — require auth
 
   const adminPassword = process.env.ADMIN_PASSWORD;
   if (!adminPassword) {
-    // Fail-closed: deny all access when auth is not configured
     if (pathname.startsWith('/api/')) {
       return NextResponse.json(
         { error: 'Authentication not configured' },

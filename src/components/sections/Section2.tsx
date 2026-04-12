@@ -1,6 +1,6 @@
 'use client';
 
-import type { SectionProps } from '@/app/assessment/[id]/section/[num]/page';
+import type { SectionProps } from '@/app/portal/assessment/[id]/section/[num]/page';
 import SectionHeader from '@/components/ui/SectionHeader';
 import SliderField from '@/components/forms/SliderField';
 import SelectField from '@/components/forms/SelectField';
