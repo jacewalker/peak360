@@ -45,10 +45,11 @@ Plans:
   3. A coach can invite a client via email link, and that client can log in to view their own assessments in read-only mode
   4. API routes reject unauthenticated requests and enforce role-based access independently of middleware
   5. A client cannot view or access assessments belonging to other clients
-**Plans**: TBD
+**Plans**: 2 plans
 
 Plans:
-- [ ] 02-01: TBD
+- [ ] 02-01-PLAN.md — Better Auth core setup: install, config, schemas, catch-all route, email sender, seed script (AUTH-01, AUTH-02, AUTH-04)
+- [ ] 02-02-PLAN.md — Middleware rewrite, API route protection, login page with dual auth modes (AUTH-03, AUTH-05)
 
 ### Phase 3: Admin Panel & Normative Data Management
 **Goal**: Admins can manage normative ranges through a UI, and the rating engine uses DB-backed ranges with hardcoded fallback and per-assessment versioning
@@ -91,7 +92,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Clinical Accuracy & Report Quality | 0/3 | Planning complete | - |
-| 2. Authentication & Ownership | 0/0 | Not started | - |
+| 2. Authentication & Ownership | 0/2 | Planning complete | - |
 | 3. Admin Panel & Normative Data Management | 0/4 | Planning complete | - |
 | 4. Security & Client Portal | 0/0 | Not started | - |
 | 5. Migrate PDF generation to react-pdf/renderer | 0/4 | UAT gap closure | - |
