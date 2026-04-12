@@ -7,7 +7,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isAssessmentPage = /^\/assessment\/[^/]+\/section\//.test(pathname);
   const isLoginPage = pathname === '/login';
-  const showSidebar = !isAssessmentPage && !isLoginPage;
+  const isLandingPage = pathname.startsWith('/landing');
+  const showSidebar = !isAssessmentPage && !isLoginPage && !isLandingPage;
 
   return (
     <>
