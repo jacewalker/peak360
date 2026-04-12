@@ -13,8 +13,18 @@ export default function DashboardPage() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteMessage, setInviteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+  const [showWelcome, setShowWelcome] = useState(false);
   const { data: sessionData } = authClient.useSession();
   const userRole = sessionData?.user?.role;
+
+  // First-login welcome for clients (D-04)
+  useEffect(() => {
+    if (userRole === 'client' && typeof window !== 'undefined') {
+      if (!localStorage.getItem('peak360_welcomed')) {
+        setShowWelcome(true);
+      }
+    }
+  }, [userRole]);
 
   useEffect(() => {
     fetch('/api/assessments')
@@ -141,6 +151,25 @@ export default function DashboardPage() {
       </div>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        {/* First-login welcome banner for clients (D-04) */}
+        {showWelcome && (
+          <div className="bg-navy/5 border border-navy/10 rounded-xl p-6 mb-6">
+            <h3 className="text-2xl font-bold text-navy">Welcome to Peak360!</h3>
+            <p className="text-gray-600 mt-2">
+              Your coach has set up your health assessment. You can view your results and track your progress here.
+            </p>
+            <button
+              onClick={() => {
+                localStorage.setItem('peak360_welcomed', 'true');
+                setShowWelcome(false);
+              }}
+              className="mt-4 bg-navy text-white py-2.5 px-6 rounded-md font-medium hover:bg-navy/90 transition-all text-sm"
+            >
+              View My Assessments
+            </button>
+          </div>
+        )}
+
         {/* Stat cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
           {/* Total Assessments */}
