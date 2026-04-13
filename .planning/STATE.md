@@ -21,14 +21,14 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-29)
 
 **Core value:** Coaches can deliver accurate, gender-aware health assessments with actionable recommendations and give clients secure access to track their progress over time.
-**Current focus:** Phase 05 — migrate-pdf-generation-to-react-pdf-renderer
+**Current focus:** Phase 04 — security-client-portal (audit logging)
 
 ## Current Position
 
-Phase: 05
-Plan: Not started
-Status: Completed 05-04-PLAN.md
-Last activity: 2026-04-10 - Completed quick task 260410-pzr: Fix Complete button on Section 11
+Phase: 04
+Plan: 03 of 03
+Status: Completed 04-03-PLAN.md
+Last activity: 2026-04-13 - Completed 04-03 audit logging plan
 
 Progress: [░░░░░░░░░░] 0%
 
@@ -57,6 +57,7 @@ Progress: [░░░░░░░░░░] 0%
 | Phase 03 P02 | 2m 27s | 2 tasks | 5 files |
 | Phase 05 P03 | 1m 44s | 2 tasks | 3 files |
 | Phase 05 P04 | 1m 1s | 2 tasks | 3 files |
+| Phase 04 P03 | 3m 24s | 3 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -76,6 +77,9 @@ Recent decisions affecting current work:
 - [Phase 03]: Version pinning is non-fatal -- assessment still created if versioning fails
 - [Phase 05]: Kept semantic report-* CSS classes (header, tier-pill, tier-card, insight-card, footer) that are not PDF-spacer related
 - [Phase 05]: Footer uses flexDirection column with inner row for horizontal layout
+- [Phase 04]: Used 'admin' as audit userId since current auth is single-user password-based
+- [Phase 04]: Added auditLogs schema inline since 04-01 branch not merged into worktree
+- [Phase 04]: Admin audit UI at /admin/audit-logs matching existing admin route structure
 
 ### Pending Todos
 
@@ -104,6 +108,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-10T08:00:10.900Z
-Stopped at: Completed 05-04-PLAN.md
+Last session: 2026-04-13T08:10:25Z
+Stopped at: Completed 04-03-PLAN.md
 Resume file: None
