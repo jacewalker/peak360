@@ -4,6 +4,7 @@ import { assessmentSections, assessments } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth-helpers';
 import { encrypt, decrypt } from '@/lib/crypto';
+import { logAuditEvent, getRequestContext } from '@/lib/audit';
 
 const ENCRYPTED_SECTIONS = new Set([3, 4, 5]);
 
@@ -53,6 +54,16 @@ export async function GET(
     const raw = ENCRYPTED_SECTIONS.has(sectionNum) ? decrypt(data) : data;
     try { data = JSON.parse(raw); } catch { data = raw; }
   }
+
+  const ctx = await getRequestContext();
+  logAuditEvent({
+    userId: session.user.id,
+    action: 'assessment.view',
+    resourceType: 'assessment_section',
+    resourceId: `${id}/section/${sectionNum}`,
+    metadata: { sectionNumber: sectionNum },
+    ...ctx,
+  });
 
   return NextResponse.json({ success: true, data });
 }
@@ -130,6 +141,16 @@ export async function PUT(
     .update(assessments)
     .set(updatePayload)
     .where(eq(assessments.id, id));
+
+  const ctx = await getRequestContext();
+  logAuditEvent({
+    userId: session.user.id,
+    action: 'section.edit',
+    resourceType: 'assessment_section',
+    resourceId: `${id}/section/${sectionNum}`,
+    metadata: { sectionNumber: sectionNum },
+    ...ctx,
+  });
 
   return NextResponse.json({ success: true });
 }
