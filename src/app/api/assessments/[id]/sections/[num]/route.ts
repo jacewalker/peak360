@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { assessmentSections, assessments } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { logAuditEvent, getRequestContext } from '@/lib/audit';
 
 export async function GET(
   _request: Request,
@@ -19,6 +20,16 @@ export async function GET(
         eq(assessmentSections.sectionNumber, sectionNum)
       )
     );
+
+  const ctx = await getRequestContext();
+  logAuditEvent({
+    userId: 'admin',
+    action: 'assessment.view',
+    resourceType: 'assessment_section',
+    resourceId: `${id}/section/${sectionNum}`,
+    metadata: { sectionNumber: sectionNum },
+    ...ctx,
+  });
 
   return NextResponse.json({ success: true, data: row?.data || null });
 }
@@ -76,6 +87,16 @@ export async function PUT(
     .update(assessments)
     .set(updatePayload)
     .where(eq(assessments.id, id));
+
+  const ctx = await getRequestContext();
+  logAuditEvent({
+    userId: 'admin',
+    action: 'section.edit',
+    resourceType: 'assessment_section',
+    resourceId: `${id}/section/${sectionNum}`,
+    metadata: { sectionNumber: sectionNum },
+    ...ctx,
+  });
 
   return NextResponse.json({ success: true });
 }
