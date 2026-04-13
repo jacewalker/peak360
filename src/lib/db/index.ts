@@ -354,5 +354,13 @@ export async function runMigrations() {
 
   }
 
+  // Start backup scheduler for SQLite (must be called at app startup)
+  try {
+    const { startBackupScheduler } = require('@/lib/backup');
+    startBackupScheduler();
+  } catch {
+    // Backup module may not be available in all environments
+  }
+
   globalForDb.migrated = true;
 }
