@@ -78,10 +78,10 @@ Plans:
   2. An audit log records who accessed what assessment data and when, viewable by admins
   3. Automated SQLite backups run on a schedule with point-in-time recovery capability
   4. The application continues to function correctly with encrypted data (read, write, display in reports)
-**Plans**: TBD
+**Plans**: 1 plan
 
 Plans:
-- [x] 04-01: TBD
+- [x] 04-01-PLAN.md -- Data encryption at rest: AES-256-GCM for sections 3/4/5, AI extractions, audit_logs schema (SECU-01)
 
 ## Progress
 
@@ -93,7 +93,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Clinical Accuracy & Report Quality | 0/3 | Planning complete | - |
 | 2. Authentication & Ownership | 0/0 | Not started | - |
 | 3. Admin Panel & Normative Data Management | 0/4 | Planning complete | - |
-| 4. Security & Client Portal | 0/0 | Not started | - |
+| 4. Security & Client Portal | 1/1 | Complete | 2026-04-13 |
 | 5. Migrate PDF generation to react-pdf/renderer | 0/4 | UAT gap closure | - |
 
 ### Phase 5: Migrate PDF generation to react-pdf/renderer
