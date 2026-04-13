@@ -56,6 +56,18 @@ export const normativeRanges = pgTable('normative_ranges', {
   updatedAt: text('updated_at').notNull(),
 });
 
+export const auditLogs = pgTable('audit_logs', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  action: text('action').notNull(),
+  resourceType: text('resource_type').notNull(),
+  resourceId: text('resource_id').notNull(),
+  metadata: jsonb('metadata'),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  createdAt: text('created_at').notNull(),
+});
+
 export const normativeVersions = pgTable('normative_versions', {
   id: text('id').primaryKey(),
   rangesJson: jsonb('ranges_json'),

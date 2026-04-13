@@ -56,6 +56,18 @@ export const normativeRanges = sqliteTable('normative_ranges', {
   updatedAt: text('updated_at').notNull(),
 });
 
+export const auditLogs = sqliteTable('audit_logs', {
+  id: text('id').primaryKey(),
+  userId: text('user_id').notNull(),
+  action: text('action').notNull(),
+  resourceType: text('resource_type').notNull(),
+  resourceId: text('resource_id').notNull(),
+  metadata: text('metadata', { mode: 'json' }),
+  ipAddress: text('ip_address'),
+  userAgent: text('user_agent'),
+  createdAt: text('created_at').notNull(),
+});
+
 export const normativeVersions = sqliteTable('normative_versions', {
   id: text('id').primaryKey(),
   rangesJson: text('ranges_json', { mode: 'json' }),

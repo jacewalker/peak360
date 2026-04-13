@@ -111,6 +111,19 @@ export async function runMigrations() {
         "created_at" text NOT NULL
       )
     `);
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "audit_logs" (
+        "id" text PRIMARY KEY NOT NULL,
+        "user_id" text NOT NULL,
+        "action" text NOT NULL,
+        "resource_type" text NOT NULL,
+        "resource_id" text NOT NULL,
+        "metadata" jsonb,
+        "ip_address" text,
+        "user_agent" text,
+        "created_at" text NOT NULL
+      )
+    `);
     await d.execute(sql`ALTER TABLE "assessments" ADD COLUMN IF NOT EXISTS "normative_version_id" text`);
   } else {
     d.run(sql`
@@ -178,6 +191,19 @@ export async function runMigrations() {
         "id" text PRIMARY KEY NOT NULL,
         "ranges_json" text,
         "content_hash" text NOT NULL,
+        "created_at" text NOT NULL
+      )
+    `);
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "audit_logs" (
+        "id" text PRIMARY KEY NOT NULL,
+        "user_id" text NOT NULL,
+        "action" text NOT NULL,
+        "resource_type" text NOT NULL,
+        "resource_id" text NOT NULL,
+        "metadata" text,
+        "ip_address" text,
+        "user_agent" text,
         "created_at" text NOT NULL
       )
     `);
