@@ -84,7 +84,7 @@ Plans:
 
 Plans:
 - [ ] 04-01-PLAN.md — Encryption at rest: AES-256-GCM crypto module, schema additions, route integration, migration script (SECU-01)
-- [ ] 04-02-PLAN.md — Automated SQLite backups with daily scheduling and 30-day retention (SECU-03)
+- [x] 04-02-PLAN.md — Automated SQLite backups with daily scheduling and 30-day retention (SECU-03)
 - [ ] 04-03-PLAN.md — Audit logging: event logger, route integration, admin browser UI (SECU-02)
 
 ## Progress
