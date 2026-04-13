@@ -39,7 +39,7 @@
 
 ### Security
 
-- [ ] **SECU-01**: AES-256-GCM encryption at rest for sensitive fields (blood results, medical screening)
+- [x] **SECU-01**: AES-256-GCM encryption at rest for sensitive fields (blood results, medical screening)
 - [ ] **SECU-02**: Audit log recording who accessed what data and when
 - [ ] **SECU-03**: Automated SQLite backup strategy with point-in-time recovery capability
 
@@ -99,7 +99,7 @@
 | ADMN-04 | Phase 3 | Pending |
 | ADMN-05 | Phase 3 | Complete |
 | ADMN-06 | Phase 3 | Pending |
-| SECU-01 | Phase 4 | Pending |
+| SECU-01 | Phase 4 | Complete |
 | SECU-02 | Phase 4 | Pending |
 | SECU-03 | Phase 4 | Pending |
 

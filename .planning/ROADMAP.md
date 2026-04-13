@@ -83,8 +83,8 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 04-01-PLAN.md — Encryption at rest: AES-256-GCM crypto module, schema additions, route integration, migration script (SECU-01)
-- [ ] 04-02-PLAN.md — Automated SQLite backups with daily scheduling and 30-day retention (SECU-03)
+- [x] 04-01-PLAN.md — Encryption at rest: AES-256-GCM crypto module, schema additions, route integration, migration script (SECU-01)
+- [x] 04-02-PLAN.md — Automated SQLite backups with daily scheduling and 30-day retention (SECU-03)
 - [ ] 04-03-PLAN.md — Audit logging: event logger, route integration, admin browser UI (SECU-02)
 
 ## Progress
@@ -97,7 +97,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Clinical Accuracy & Report Quality | 0/3 | Planning complete | - |
 | 2. Authentication & Ownership | 1/3 | In progress | - |
 | 3. Admin Panel & Normative Data Management | 0/4 | Planning complete | - |
-| 4. Security & Client Portal | 0/3 | Planning complete | - |
+| 4. Security & Client Portal | 2/3 | In progress | - |
 | 5. Migrate PDF generation to react-pdf/renderer | 0/4 | UAT gap closure | - |
 
 ### Phase 5: Migrate PDF generation to react-pdf/renderer
