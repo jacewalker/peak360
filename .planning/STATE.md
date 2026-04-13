@@ -58,6 +58,7 @@ Progress: [░░░░░░░░░░] 0% (v3.0 milestone)
 | Phase 05 P03 | 1m 44s | 2 tasks | 3 files |
 | Phase 05 P04 | 1m 1s | 2 tasks | 3 files |
 | Phase 04 P01 | 5m 44s | 3 tasks | 9 files |
+| Phase 04 P02 | 3m 51s | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -79,6 +80,8 @@ Recent decisions affecting current work:
 - [Phase 05]: Footer uses flexDirection column with inner row for horizontal layout
 - [Phase 04]: PG encrypted columns migrated from jsonb to text since AES ciphertext is not valid JSON
 - [Phase 04]: Section 4 included in encryption scope per D-02 (consent signatures in section data blobs)
+- [Phase 04]: node-cron for daily backup scheduling with cron expression support
+- [Phase 04]: Optional dbPath parameter on runBackup() for testability without mocking
 
 ### Pending Todos
 
