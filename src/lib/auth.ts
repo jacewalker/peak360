@@ -6,12 +6,41 @@ import { nextCookies } from 'better-auth/next-js';
 import { db } from '@/lib/db';
 import { sendEmailViaSMTP2Go } from '@/lib/email/send';
 
+const isSQLite = !process.env.DATABASE_URL;
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
-    provider: process.env.DATABASE_URL ? 'pg' : 'sqlite',
+    provider: isSQLite ? 'sqlite' : 'pg',
   }),
   emailAndPassword: {
     enabled: true,
+    minPasswordLength: 4,
+  },
+  databaseHooks: {
+    user: {
+      create: {
+        before: async (user) => {
+          if (typeof user.emailVerified === 'boolean') {
+            user.emailVerified = user.emailVerified ? 1 : 0;
+          }
+          if (typeof user.banned === 'boolean') {
+            user.banned = user.banned ? 1 : 0;
+          }
+          return { data: user };
+        },
+      },
+      update: {
+        before: async (user) => {
+          if (typeof user.emailVerified === 'boolean') {
+            (user as Record<string, unknown>).emailVerified = user.emailVerified ? 1 : 0;
+          }
+          if (typeof (user as Record<string, unknown>).banned === 'boolean') {
+            (user as Record<string, unknown>).banned = (user as Record<string, unknown>).banned ? 1 : 0;
+          }
+          return { data: user };
+        },
+      },
+    },
   },
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days (AUTH-04)

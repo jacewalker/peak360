@@ -327,54 +327,110 @@ export default function LoginPage() {
           {mode === 'client' && (
             <>
               <h2 className="text-white text-lg font-semibold mb-1 text-center">Client Access</h2>
-              <p className="text-white/40 text-xs text-center mb-6">We&apos;ll send a login link to your email</p>
+              <p className="text-white/40 text-xs text-center mb-6">
+                {process.env.NODE_ENV === 'development'
+                  ? 'Sign in with email and password'
+                  : 'We\'ll send a login link to your email'}
+              </p>
 
-              <form onSubmit={handleMagicLink} className="space-y-4">
-                <div>
-                  <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
-                    autoFocus
-                    required
-                    className="w-full px-4 py-3 bg-white/[0.06] border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/25 transition-all"
-                  />
-                </div>
-
-                {error && (
-                  <div className="flex items-center gap-2 text-red-400 text-xs">
-                    <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
-                    </svg>
-                    <span>{error}</span>
+              {process.env.NODE_ENV === 'development' ? (
+                <form onSubmit={handleCoachLogin} className="space-y-4">
+                  <div>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email"
+                      autoFocus
+                      required
+                      className="w-full px-4 py-3 bg-white/[0.06] border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/25 transition-all"
+                    />
                   </div>
-                )}
-
-                {success && (
-                  <div className="flex items-center gap-2 text-green-400 text-xs">
-                    <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                    <span>{success}</span>
+                  <div>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password"
+                      required
+                      className="w-full px-4 py-3 bg-white/[0.06] border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/25 transition-all"
+                    />
                   </div>
-                )}
 
-                <button
-                  type="submit"
-                  disabled={loading || !email || !!success}
-                  className="w-full py-3 bg-[#F5A623] text-[#1a365d] rounded-xl font-semibold text-sm hover:bg-[#f7bc5a] transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
-                >
-                  {loading ? (
-                    <span className="flex items-center justify-center gap-2">
-                      <span className="w-4 h-4 border-2 border-[#1a365d]/30 border-t-[#1a365d] rounded-full animate-spin" />
-                      Sending link...
-                    </span>
-                  ) : (
-                    'Send Login Link'
+                  {error && (
+                    <div className="flex items-center gap-2 text-red-400 text-xs">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span>{error}</span>
+                    </div>
                   )}
-                </button>
-              </form>
+
+                  <button
+                    type="submit"
+                    disabled={loading || !email || !password}
+                    className="w-full py-3 bg-[#F5A623] text-[#1a365d] rounded-xl font-semibold text-sm hover:bg-[#f7bc5a] transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-4 h-4 border-2 border-[#1a365d]/30 border-t-[#1a365d] rounded-full animate-spin" />
+                        Signing in...
+                      </span>
+                    ) : (
+                      'Sign In'
+                    )}
+                  </button>
+
+                  <p className="text-amber-400/60 text-[10px] text-center">Dev mode: password login enabled</p>
+                </form>
+              ) : (
+                <form onSubmit={handleMagicLink} className="space-y-4">
+                  <div>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email"
+                      autoFocus
+                      required
+                      className="w-full px-4 py-3 bg-white/[0.06] border border-white/10 rounded-xl text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/25 transition-all"
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="flex items-center gap-2 text-red-400 text-xs">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  {success && (
+                    <div className="flex items-center gap-2 text-green-400 text-xs">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>{success}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || !email || !!success}
+                    className="w-full py-3 bg-[#F5A623] text-[#1a365d] rounded-xl font-semibold text-sm hover:bg-[#f7bc5a] transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-4 h-4 border-2 border-[#1a365d]/30 border-t-[#1a365d] rounded-full animate-spin" />
+                        Sending link...
+                      </span>
+                    ) : (
+                      'Send Login Link'
+                    )}
+                  </button>
+                </form>
+              )}
             </>
           )}
         </div>
