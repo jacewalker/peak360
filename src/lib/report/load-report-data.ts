@@ -4,8 +4,11 @@ import { eq } from 'drizzle-orm';
 import { REPORT_MARKERS } from '@/lib/report-markers';
 import { getPeak360Rating, getStandards } from '@/lib/normative/ratings';
 import { generatePeak360Insights } from '@/lib/normative/insights';
+import { decrypt } from '@/lib/crypto';
 import type { RatingTier } from '@/types/normative';
 import type { ReportData, ReportMarker } from '@/lib/pdf/types';
+
+const ENCRYPTED_SECTIONS = new Set([3, 4, 5]);
 
 export async function loadReportData(assessmentId: string): Promise<ReportData> {
   // Fetch assessment metadata
@@ -24,11 +27,17 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
     .from(assessmentSections)
     .where(eq(assessmentSections.assessmentId, assessmentId));
 
-  // Partition by section number
+  // Partition by section number; decrypt sensitive sections at read time.
   const sections: Record<number, Record<string, unknown>> = {};
   for (const row of sectionRows) {
-    const data = typeof row.data === 'string' ? JSON.parse(row.data) : row.data;
-    sections[row.sectionNumber] = (data || {}) as Record<string, unknown>;
+    let parsed: unknown;
+    if (typeof row.data === 'string') {
+      const raw = ENCRYPTED_SECTIONS.has(row.sectionNumber) ? decrypt(row.data) : row.data;
+      parsed = JSON.parse(raw);
+    } else {
+      parsed = row.data;
+    }
+    sections[row.sectionNumber] = (parsed || {}) as Record<string, unknown>;
   }
 
   const clientInfo = sections[1] || {};
