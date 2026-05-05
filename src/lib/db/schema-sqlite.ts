@@ -24,14 +24,7 @@ export const assessmentSections = sqliteTable('assessment_sections', {
   completedAt: text('completed_at'),
 });
 
-export const signatures = sqliteTable('signatures', {
-  id: integer('id').primaryKey({ autoIncrement: true }),
-  assessmentId: text('assessment_id').notNull().references(() => assessments.id, { onDelete: 'cascade' }),
-  type: text('type').notNull(),
-  signerName: text('signer_name'),
-  signatureData: text('signature_data'),
-  signedDate: text('signed_date'),
-});
+// `signatures` table removed — see schema.ts for rationale.
 
 export const uploadedFiles = sqliteTable('uploaded_files', {
   id: integer('id').primaryKey({ autoIncrement: true }),

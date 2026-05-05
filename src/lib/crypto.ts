@@ -51,8 +51,12 @@ export function decrypt(ciphertext: string): string {
 }
 
 export function isEncrypted(value: string): boolean {
-  // Unencrypted JSON starts with { or [; base64-encoded ciphertext won't
+  // Unencrypted JSON starts with { or [; base64-encoded ciphertext won't.
   if (value.startsWith('{') || value.startsWith('[')) return false;
+  // Data URLs (e.g. signature canvas data:image/png;base64,...) base64-decode
+  // to a long buffer and would otherwise pass the length test. Reject them
+  // explicitly so they're treated as plaintext.
+  if (value.startsWith('data:')) return false;
   try {
     const buf = Buffer.from(value, 'base64');
     return buf.length >= IV_LENGTH + TAG_LENGTH + 1;

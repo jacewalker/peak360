@@ -128,15 +128,18 @@ async function run(): Promise<Counts> {
       counts.filesEncrypted++;
     }
 
-    // 3. signatures.signature_data
-    const sigRes = await client.query<{
-      id: number;
-      signature_data: string | null;
-    }>(
-      `SELECT id, signature_data
-       FROM signatures
-       WHERE signature_data IS NOT NULL`,
+    // 3. signatures.signature_data (table removed in later cleanup; tolerate absence)
+    const sigTableExists = await client.query<{ exists: boolean }>(
+      `SELECT EXISTS (
+         SELECT 1 FROM information_schema.tables
+         WHERE table_schema = 'public' AND table_name = 'signatures'
+       ) AS exists`,
     );
+    const sigRes = sigTableExists.rows[0]?.exists
+      ? await client.query<{ id: number; signature_data: string | null }>(
+          `SELECT id, signature_data FROM signatures WHERE signature_data IS NOT NULL`,
+        )
+      : { rowCount: 0, rows: [] as { id: number; signature_data: string | null }[] };
     counts.signaturesTotal = sigRes.rowCount ?? 0;
 
     for (const row of sigRes.rows) {

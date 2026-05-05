@@ -24,14 +24,9 @@ export const assessmentSections = pgTable('assessment_sections', {
   completedAt: text('completed_at'),
 });
 
-export const signatures = pgTable('signatures', {
-  id: serial('id').primaryKey(),
-  assessmentId: text('assessment_id').notNull().references(() => assessments.id, { onDelete: 'cascade' }),
-  type: text('type').notNull(), // client | coach
-  signerName: text('signer_name'),
-  signatureData: text('signature_data'), // base64 data URL
-  signedDate: text('signed_date'),
-});
+// `signatures` table removed — signatures live inline inside
+// assessment_sections.data (Section 4) as clientSignature / coachSignature
+// data URLs. The standalone table was never written to.
 
 export const uploadedFiles = pgTable('uploaded_files', {
   id: serial('id').primaryKey(),
