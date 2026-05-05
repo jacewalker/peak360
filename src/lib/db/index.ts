@@ -389,4 +389,13 @@ export async function runMigrations() {
   }
 
   globalForDb.migrated = true;
+
+  // Idempotent primary admin seed — runs once per process, only if env vars set
+  // and no admin user exists yet. Errors are logged but never crash the app.
+  try {
+    const { seedPrimaryAdmin } = require('@/lib/seed-admin');
+    await seedPrimaryAdmin();
+  } catch (err) {
+    console.error('[seed-admin] unexpected error:', err);
+  }
 }
