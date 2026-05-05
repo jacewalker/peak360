@@ -6,9 +6,10 @@ const PUBLIC_PATHS = new Set(['/login', '/api/health']);
 const PORTAL_SUBDOMAIN_HOSTNAMES = new Set(
   (process.env.PORTAL_HOSTNAMES ?? 'portal.peak360.com.au').split(',')
 );
+const APEX_HOSTNAME = process.env.APEX_HOSTNAME ?? 'peak360.com.au';
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  const { pathname, search } = req.nextUrl;
 
   // Static assets - pass through
   if (
@@ -21,11 +22,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Portal subdomain redirect
+  // Portal subdomain → apex /portal cross-domain redirect
   const hostname = req.headers.get('host')?.split(':')[0] ?? '';
   if (PORTAL_SUBDOMAIN_HOSTNAMES.has(hostname)) {
     const targetPath = pathname === '/' ? '/portal' : `/portal${pathname}`;
-    const targetUrl = new URL(targetPath, req.url);
+    const targetUrl = new URL(`https://${APEX_HOSTNAME}${targetPath}${search}`);
     return NextResponse.redirect(targetUrl);
   }
 
