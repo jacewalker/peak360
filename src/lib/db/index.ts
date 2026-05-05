@@ -66,16 +66,8 @@ export async function runMigrations() {
         "completed_at" text
       )
     `);
-    await d.execute(sql`
-      CREATE TABLE IF NOT EXISTS "signatures" (
-        "id" serial PRIMARY KEY NOT NULL,
-        "assessment_id" text NOT NULL REFERENCES "assessments"("id") ON DELETE CASCADE,
-        "type" text NOT NULL,
-        "signer_name" text,
-        "signature_data" text,
-        "signed_date" text
-      )
-    `);
+    // `signatures` table removed — signatures live inside assessment_sections.data
+    await d.execute(sql`DROP TABLE IF EXISTS "signatures"`);
     await d.execute(sql`
       CREATE TABLE IF NOT EXISTS "uploaded_files" (
         "id" serial PRIMARY KEY NOT NULL,
@@ -235,16 +227,8 @@ export async function runMigrations() {
         "completed_at" text
       )
     `);
-    d.run(sql`
-      CREATE TABLE IF NOT EXISTS "signatures" (
-        "id" integer PRIMARY KEY AUTOINCREMENT,
-        "assessment_id" text NOT NULL REFERENCES "assessments"("id") ON DELETE CASCADE,
-        "type" text NOT NULL,
-        "signer_name" text,
-        "signature_data" text,
-        "signed_date" text
-      )
-    `);
+    // `signatures` table removed — signatures live inside assessment_sections.data
+    d.run(sql`DROP TABLE IF EXISTS "signatures"`);
     d.run(sql`
       CREATE TABLE IF NOT EXISTS "uploaded_files" (
         "id" integer PRIMARY KEY AUTOINCREMENT,
