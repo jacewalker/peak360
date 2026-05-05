@@ -8,7 +8,8 @@ type AuthMode = 'coach' | 'client';
 type CoachView = 'login' | 'register';
 
 export default function LoginPage() {
-  const [mode, setMode] = useState<AuthMode>('coach');
+  // Client portal not yet ready — locked to coach mode. Re-enable toggle to restore client login.
+  const mode: AuthMode = 'coach';
   const [coachView, setCoachView] = useState<CoachView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -18,15 +19,6 @@ export default function LoginPage() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
-
-  const resetForm = () => {
-    setEmail('');
-    setPassword('');
-    setName('');
-    setConfirmPassword('');
-    setError('');
-    setSuccess('');
-  };
 
   const handleCoachLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -144,31 +136,7 @@ export default function LoginPage() {
           </p>
         </div>
 
-        {/* Mode toggle */}
-        <div className="flex mb-6 bg-white/[0.05] rounded-xl p-1">
-          <button
-            type="button"
-            onClick={() => { setMode('coach'); resetForm(); setCoachView('login'); }}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              mode === 'coach'
-                ? 'bg-[#F5A623] text-[#1a365d] shadow-sm'
-                : 'text-white/50 hover:text-white/70'
-            }`}
-          >
-            Coach / Admin
-          </button>
-          <button
-            type="button"
-            onClick={() => { setMode('client'); resetForm(); }}
-            className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-all ${
-              mode === 'client'
-                ? 'bg-[#F5A623] text-[#1a365d] shadow-sm'
-                : 'text-white/50 hover:text-white/70'
-            }`}
-          >
-            Client
-          </button>
-        </div>
+        {/* Mode toggle hidden — client portal not yet ready */}
 
         {/* Form card */}
         <div className="bg-white/[0.07] backdrop-blur-xl rounded-2xl border border-white/10 p-8 shadow-2xl">
