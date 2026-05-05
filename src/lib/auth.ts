@@ -21,10 +21,10 @@ export const auth = betterAuth({
       create: {
         before: async (user) => {
           if (typeof user.emailVerified === 'boolean') {
-            user.emailVerified = user.emailVerified ? 1 : 0;
+            (user as Record<string, unknown>).emailVerified = user.emailVerified ? 1 : 0;
           }
-          if (typeof user.banned === 'boolean') {
-            user.banned = user.banned ? 1 : 0;
+          if (typeof (user as Record<string, unknown>).banned === 'boolean') {
+            (user as Record<string, unknown>).banned = (user as Record<string, unknown>).banned ? 1 : 0;
           }
           return { data: user };
         },

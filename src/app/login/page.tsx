@@ -9,7 +9,8 @@ type CoachView = 'login' | 'register';
 
 export default function LoginPage() {
   // Client portal not yet ready — locked to coach mode. Re-enable toggle to restore client login.
-  const mode: AuthMode = 'coach';
+  // The `as AuthMode` cast widens the literal so TS doesn't flag the unreachable client branch.
+  const mode = 'coach' as AuthMode;
   const [coachView, setCoachView] = useState<CoachView>('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
