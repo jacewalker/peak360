@@ -1,20 +1,17 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { validateSessionToken } from '@/lib/auth/session';
+import { getSessionCookie } from 'better-auth/cookies';
 
-const PUBLIC_PATHS = new Set([
-  '/login',
-  '/api/auth/login',
-  '/api/auth/logout',
-  '/api/health',
-]);
+const PUBLIC_PATHS = new Set(['/login', '/api/health']);
+
+const PORTAL_SUBDOMAIN_HOSTNAMES = new Set(
+  (process.env.PORTAL_HOSTNAMES ?? 'portal.peak360.com.au').split(',')
+);
+const APEX_HOSTNAME = process.env.APEX_HOSTNAME ?? 'peak360.com.au';
 
 export async function middleware(req: NextRequest) {
-  const { pathname } = req.nextUrl;
+  const { pathname, search } = req.nextUrl;
 
-  if (PUBLIC_PATHS.has(pathname)) {
-    return NextResponse.next();
-  }
-
+  // Static assets - pass through
   if (
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon') ||
@@ -25,37 +22,39 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  const adminPassword = process.env.ADMIN_PASSWORD;
-  if (!adminPassword) {
-    // Fail-closed: deny all access when auth is not configured
+  // Portal subdomain → apex /portal cross-domain redirect
+  const hostname = req.headers.get('host')?.split(':')[0] ?? '';
+  if (PORTAL_SUBDOMAIN_HOSTNAMES.has(hostname)) {
+    const targetPath = pathname === '/' ? '/portal' : `/portal${pathname}`;
+    const targetUrl = new URL(`https://${APEX_HOSTNAME}${targetPath}${search}`);
+    return NextResponse.redirect(targetUrl);
+  }
+
+  // Better Auth catch-all routes must be public
+  if (pathname.startsWith('/api/auth/')) {
+    return NextResponse.next();
+  }
+
+  // Public paths
+  if (PUBLIC_PATHS.has(pathname)) {
+    return NextResponse.next();
+  }
+
+  // Landing page (non-portal, non-api) - public
+  if (!pathname.startsWith('/portal') && !pathname.startsWith('/api/')) {
+    return NextResponse.next();
+  }
+
+  // Protected paths: check session cookie (optimistic, real validation in API handlers)
+  const sessionCookie = getSessionCookie(req);
+  if (!sessionCookie) {
     if (pathname.startsWith('/api/')) {
-      return NextResponse.json(
-        { error: 'Authentication not configured' },
-        { status: 503 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    const loginUrl = new URL('/login', req.url);
-    return NextResponse.redirect(loginUrl);
-  }
-
-  const sessionToken = req.cookies.get('peak360_session')?.value;
-  if (!sessionToken) {
-    return redirectToLogin(req);
-  }
-
-  if (!await validateSessionToken(sessionToken, adminPassword)) {
-    return redirectToLogin(req);
+    return NextResponse.redirect(new URL('/login', req.url));
   }
 
   return NextResponse.next();
-}
-
-function redirectToLogin(req: NextRequest) {
-  if (req.nextUrl.pathname.startsWith('/api/')) {
-    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-  }
-  const loginUrl = new URL('/login', req.url);
-  return NextResponse.redirect(loginUrl);
 }
 
 export const config = {

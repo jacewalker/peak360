@@ -42,7 +42,8 @@ yarn-error.log*
 *.db-wal
 
 # Dev artifacts
-backup/
+/backup/
+/backups/
 .playwright-mcp/
 test_imports/
 *.png

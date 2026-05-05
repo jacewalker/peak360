@@ -19,6 +19,17 @@
   --color-rating-cautious: #f59e0b;
   --color-rating-poor: #ef4444;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+
+  /* Landing page fonts */
+  --font-heading: var(--font-heading);  /* Montserrat via next/font CSS var */
+  --font-body: var(--font-body);        /* Open Sans via next/font CSS var */
+
+  /* Extended brand palette for landing page */
+  --color-navy-950: #0a1628;
+  --color-gold-50: #fef7e8;
+  --color-gold-100: #fdefc5;
+  --color-gradient-start: #0f2440;
+  --color-gradient-end: #1a365d;
 }
 
 body {

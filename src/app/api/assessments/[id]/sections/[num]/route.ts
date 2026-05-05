@@ -2,13 +2,42 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { assessmentSections, assessments } from '@/lib/db/schema';
 import { eq, and } from 'drizzle-orm';
+import { requireSession } from '@/lib/auth-helpers';
+import { encrypt, decrypt } from '@/lib/crypto';
+import { logAuditEvent, getRequestContext } from '@/lib/audit';
+
+const ENCRYPTED_SECTIONS = new Set([3, 4, 5]);
+
+/**
+ * Check if the user has access to this assessment based on role.
+ */
+function hasAccess(
+  role: string,
+  userId: string,
+  assessment: { coachId: string | null; clientId: string | null }
+): boolean {
+  if (role === 'admin') return true;
+  if (role === 'coach') return assessment.coachId === userId;
+  if (role === 'client') return assessment.clientId === userId;
+  return false;
+}
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string; num: string }> }
 ) {
+  const [session, errorRes] = await requireSession();
+  if (errorRes) return errorRes;
+
   const { id, num } = await params;
   const sectionNum = parseInt(num);
+
+  // Verify access to parent assessment
+  const [assessment] = await db.select().from(assessments).where(eq(assessments.id, id));
+  if (!assessment) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+  if (!hasAccess(session.user.role, session.user.id, assessment)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
 
   const [row] = await db
     .select()
@@ -20,17 +49,53 @@ export async function GET(
       )
     );
 
-  return NextResponse.json({ success: true, data: row?.data || null });
+  let data: unknown = row?.data ?? null;
+  if (data && typeof data === 'string') {
+    const raw = ENCRYPTED_SECTIONS.has(sectionNum) ? decrypt(data) : data;
+    try { data = JSON.parse(raw); } catch { data = raw; }
+  }
+
+  const ctx = await getRequestContext();
+  logAuditEvent({
+    userId: session.user.id,
+    action: 'assessment.view',
+    resourceType: 'assessment_section',
+    resourceId: `${id}/section/${sectionNum}`,
+    metadata: { sectionNumber: sectionNum },
+    ...ctx,
+  });
+
+  return NextResponse.json({ success: true, data });
 }
 
 export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string; num: string }> }
 ) {
+  const [session, errorRes] = await requireSession();
+  if (errorRes) return errorRes;
+
+  // Clients are strictly read-only - cannot write section data
+  if (session.user.role === 'client') {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const { id, num } = await params;
   const sectionNum = parseInt(num);
+
+  // Verify access to parent assessment (coach must own it, admin can edit any)
+  const [assessment] = await db.select().from(assessments).where(eq(assessments.id, id));
+  if (!assessment) return NextResponse.json({ success: false, error: 'Not found' }, { status: 404 });
+  if (!hasAccess(session.user.role, session.user.id, assessment)) {
+    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+  }
+
   const body = await request.json();
   const now = new Date().toISOString();
+  const serialized = JSON.stringify(body.data);
+  const dataToStore = ENCRYPTED_SECTIONS.has(sectionNum)
+    ? encrypt(serialized)
+    : serialized;
 
   const [existing] = await db
     .select()
@@ -46,7 +111,7 @@ export async function PUT(
     await db
       .update(assessmentSections)
       .set({
-        data: body.data,
+        data: dataToStore,
         completedAt: body.completed === true ? now : body.completed === false ? null : existing.completedAt,
       })
       .where(eq(assessmentSections.id, existing.id));
@@ -54,7 +119,7 @@ export async function PUT(
     await db.insert(assessmentSections).values({
       assessmentId: id,
       sectionNumber: sectionNum,
-      data: body.data,
+      data: dataToStore,
       completedAt: body.completed ? now : null,
     });
   }
@@ -76,6 +141,16 @@ export async function PUT(
     .update(assessments)
     .set(updatePayload)
     .where(eq(assessments.id, id));
+
+  const ctx = await getRequestContext();
+  logAuditEvent({
+    userId: session.user.id,
+    action: 'section.edit',
+    resourceType: 'assessment_section',
+    resourceId: `${id}/section/${sectionNum}`,
+    metadata: { sectionNumber: sectionNum },
+    ...ctx,
+  });
 
   return NextResponse.json({ success: true });
 }

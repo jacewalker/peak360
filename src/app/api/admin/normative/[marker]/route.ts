@@ -3,6 +3,7 @@ import { REPORT_MARKERS } from '@/lib/report-markers';
 import { getDbRangesByTestKey, upsertDbRange, deleteDbRange } from '@/lib/normative/db-ranges';
 import { getStandards } from '@/lib/normative/ratings';
 import type { RatingTier, TierRanges } from '@/types/normative';
+import { requireAdmin } from '@/lib/auth-helpers';
 
 const TIER_ORDER: RatingTier[] = ['poor', 'cautious', 'normal', 'great', 'elite'];
 
@@ -39,6 +40,9 @@ export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ marker: string }> }
 ) {
+  const [, errorRes] = await requireAdmin();
+  if (errorRes) return errorRes;
+
   try {
     const { marker } = await params;
 
@@ -88,6 +92,9 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ marker: string }> }
 ) {
+  const [, errorRes] = await requireAdmin();
+  if (errorRes) return errorRes;
+
   try {
     const { marker } = await params;
 
@@ -180,6 +187,9 @@ export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ marker: string }> }
 ) {
+  const [, errorRes] = await requireAdmin();
+  if (errorRes) return errorRes;
+
   try {
     const { marker } = await params;
 

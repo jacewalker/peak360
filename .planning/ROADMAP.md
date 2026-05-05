@@ -30,9 +30,9 @@ This milestone transforms Peak360 from a single-user assessment tool into a mult
 **Plans**: 3 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Gender-specific blood marker data layer (types, ranges, rating engine, report-markers)
+- [x] 01-01-PLAN.md — Gender-specific blood marker data layer (types, ranges, rating engine, report-markers)
 - [x] 01-02-PLAN.md — Enhanced insights with specific supplement dosages and lifestyle recommendations
-- [ ] 01-03-PLAN.md — Report UI: range bars, referral flags, and medical disclaimer
+- [x] 01-03-PLAN.md — Report UI: range bars, referral flags, and medical disclaimer
 **UI hint**: yes
 
 ### Phase 2: Authentication & Ownership
@@ -45,10 +45,12 @@ Plans:
   3. A coach can invite a client via email link, and that client can log in to view their own assessments in read-only mode
   4. API routes reject unauthenticated requests and enforce role-based access independently of middleware
   5. A client cannot view or access assessments belonging to other clients
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: TBD
+- [x] 02-01-PLAN.md -- Auth data layer: Better Auth install, server/client config, DB schemas, email sender, seed script (AUTH-01, AUTH-02, AUTH-04)
+- [ ] 02-02-PLAN.md -- Middleware, login UI, and session management
+- [x] 02-03-PLAN.md -- API protection, ownership enforcement, client invitations
 
 ### Phase 3: Admin Panel & Normative Data Management
 **Goal**: Admins can manage normative ranges through a UI, and the rating engine uses DB-backed ranges with hardcoded fallback and per-assessment versioning
@@ -70,7 +72,7 @@ Plans:
 **UI hint**: yes
 
 ### Phase 4: Security & Client Portal
-**Goal**: Sensitive health data is encrypted at rest with audit trails and automated backups, and clients have a dedicated portal to view their assessments
+**Goal**: Sensitive health data is encrypted at rest with audit trails and automated backups
 **Depends on**: Phase 2, Phase 3
 **Requirements**: SECU-01, SECU-02, SECU-03
 **Success Criteria** (what must be TRUE):
@@ -78,10 +80,12 @@ Plans:
   2. An audit log records who accessed what assessment data and when, viewable by admins
   3. Automated SQLite backups run on a schedule with point-in-time recovery capability
   4. The application continues to function correctly with encrypted data (read, write, display in reports)
-**Plans**: TBD
+**Plans**: 3 plans
 
 Plans:
-- [ ] 04-01: TBD
+- [x] 04-01-PLAN.md — Encryption at rest: AES-256-GCM crypto module, schema additions, route integration, migration script (SECU-01)
+- [x] 04-02-PLAN.md — Automated SQLite backups with daily scheduling and 30-day retention (SECU-03)
+- [x] 04-03-PLAN.md — Audit logging: event logger, route integration, admin browser UI (SECU-02)
 
 ## Progress
 
@@ -91,9 +95,9 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Clinical Accuracy & Report Quality | 0/3 | Planning complete | - |
-| 2. Authentication & Ownership | 0/0 | Not started | - |
+| 2. Authentication & Ownership | 1/3 | In progress | - |
 | 3. Admin Panel & Normative Data Management | 0/4 | Planning complete | - |
-| 4. Security & Client Portal | 0/0 | Not started | - |
+| 4. Security & Client Portal | 3/3 | Complete | 2026-04-13 |
 | 5. Migrate PDF generation to react-pdf/renderer | 0/4 | UAT gap closure | - |
 
 ### Phase 5: Migrate PDF generation to react-pdf/renderer

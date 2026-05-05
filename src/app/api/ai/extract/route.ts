@@ -5,6 +5,8 @@ import { fieldMappings } from '@/lib/ai/field-mappings';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { uploadedFiles } from '@/lib/db/schema';
+import { encrypt } from '@/lib/crypto';
+import { logAuditEvent, getRequestContext } from '@/lib/audit';
 
 function getOpenAI() {
   return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
@@ -193,8 +195,18 @@ export async function POST(request: Request) {
 
     // Update file record
     await db.update(uploadedFiles)
-      .set({ extractedData: extracted, status: 'completed' })
+      .set({ extractedData: encrypt(JSON.stringify(extracted)), status: 'completed' })
       .where(eq(uploadedFiles.id, fileRecord.id));
+
+    const ctx = await getRequestContext();
+    logAuditEvent({
+      userId: 'admin',
+      action: 'file.upload',
+      resourceType: 'uploaded_file',
+      resourceId: fileRecord.id?.toString() ?? assessmentId,
+      metadata: { fileName: file.name, sectionNumber, assessmentId },
+      ...ctx,
+    });
 
     return NextResponse.json({
       success: true,

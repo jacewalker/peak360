@@ -1,27 +1,24 @@
-# Peak360 — Milestone 2
+# Peak360 — Milestone 3
 
 ## What This Is
 
-Peak360 is a full-stack longevity assessment platform built with Next.js. Coaches use it to evaluate clients across 11 sections (body composition, cardiovascular fitness, strength, mobility, biomarkers) with AI-powered document extraction and a 5-tier normative rating system. This milestone adds a public-facing landing page that showcases the Peak360 Longevity Program, with program overview, testing protocol details, and a contact form — giving the platform a professional public presence.
+Peak360 is a full-stack longevity assessment platform built with Next.js. Coaches use it to evaluate clients across 11 sections (body composition, cardiovascular fitness, strength, mobility, biomarkers) with AI-powered document extraction and a 5-tier normative rating system. This milestone adds secure authentication with role-based access, a client self-service portal, and a coach dashboard — transforming the platform from a single-user tool into a multi-user system.
 
 ## Core Value
 
-Prospective clients can discover the Peak360 Longevity Program through a branded landing page that communicates the program's philosophy, testing protocol, and benefits — and reach out via a contact form.
+Clients can securely log in to view their own assessment results, and coaches have a dedicated dashboard to manage clients, track progress, and deliver assessments — all with proper role-based access control.
 
-## Current Milestone: v2.0 Peak360 Landing Page
+## Current Milestone: v3.0 Client Login & Trainer Dashboard
 
-**Goal:** Build a public-facing landing page matching the Peak360 brochure design (navy/gold, Montserrat/Open Sans), with program overview sections and a contact form, while restructuring routes so the dashboard moves to `/dashboard`.
+**Goal:** Create secure role-based authentication so clients can log in to view their assessments, and coaches have a dashboard to manage clients and track progress.
 
 **Target features:**
-- Hero section with program headline and callout banner
-- Program Philosophy section
-- What We Test section (biomarkers, VO2 Max, body composition, strength)
-- Technology Showcase (Vald Force Decks, Evolt360, Calibre VO2)
-- Testing Protocol Timeline
-- Benefits grid
-- CTA section with contact form
-- Responsive Tailwind CSS design matching brochure branding
-- Route restructure: landing page at `/`, dashboard at `/dashboard`
+- Role-based authentication (admin, coach, client) replacing shared password
+- Client self-service portal: login, view own assessment results (read-only)
+- Coach dashboard: manage clients, create/view assessments, track progress
+- Assessment ownership: each assessment linked to a coach and client
+- Client invitation flow (coach invites client)
+- API-level auth enforcement on all routes
 
 ## Requirements
 
@@ -92,4 +89,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-12 — Milestone v2.0 started*
+*Last updated: 2026-04-12 — Milestone v3.0 started*

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect } from 'react';
-import type { SectionProps } from '@/app/assessment/[id]/section/[num]/page';
+import type { SectionProps } from '@/app/portal/assessment/[id]/section/[num]/page';
 import SectionHeader from '@/components/ui/SectionHeader';
 import FormField from '@/components/forms/FormField';
 import FormRow from '@/components/forms/FormRow';

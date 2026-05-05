@@ -14,14 +14,17 @@
     "test:watch": "vitest",
     "test:e2e": "playwright test",
     "test:e2e:mobile": "playwright test --project=mobile",
-    "test:e2e:desktop": "playwright test --project=desktop"
+    "test:e2e:desktop": "playwright test --project=desktop",
+    "db:seed-admin": "tsx scripts/seed-admin.ts"
   },
   "dependencies": {
     "@ag-media/react-pdf-table": "^2.0.3",
     "@react-pdf/renderer": "^4.4.0",
+    "better-auth": "^1.6.2",
     "better-sqlite3": "^12.6.2",
     "drizzle-orm": "^0.45.1",
     "next": "16.1.6",
+    "node-cron": "^4.2.1",
     "openai": "^6.22.0",
     "pg": "^8.18.0",
     "react": "19.2.3",
@@ -38,6 +41,7 @@
     "@testing-library/user-event": "^14.6.1",
     "@types/better-sqlite3": "^7.6.13",
     "@types/node": "^20",
+    "@types/node-cron": "^3.0.11",
     "@types/pg": "^8.16.0",
     "@types/react": "^19",
     "@types/react-dom": "^19",

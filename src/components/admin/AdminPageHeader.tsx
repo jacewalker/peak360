@@ -20,7 +20,7 @@ export default function AdminPageHeader({ title, description, breadcrumb }: Admi
         {/* Breadcrumb */}
         <div className="flex items-center gap-1.5 mb-4">
           <Link
-            href="/admin"
+            href="/portal/admin"
             className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 hover:text-gold/70 transition-colors"
           >
             Administration
