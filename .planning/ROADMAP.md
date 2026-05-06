@@ -119,3 +119,19 @@ Plans:
 - [x] 05-02-PLAN.md — Build all react-pdf report components and wire into Peak360Report document (PDF-04, PDF-05, PDF-06)
 - [x] 05-03-PLAN.md — Replace Section 11 export with fetch-and-download, remove old deps, visual verification (PDF-07, PDF-08)
 - [x] 05-04-PLAN.md — Fix footer text overflow and add page break before Detailed Results (gap closure)
+
+### Phase 7: Multi-tenant auth UX
+
+**Goal:** Complete the deferred client and coach experiences from milestone v3.0 — distinct login flows per role, coach dashboard differentiated from admin, invitation flow accepts either coach or admin as inviter, multi-coach data scoping enforced (coach sees own clients only, admin sees all plus own clients), admins inherit coach capabilities (admin IS a coach but not all coaches are admins), clients read-only on own data.
+**Requirements**: TBD (run /gsd-spec-phase 7 to clarify and lock)
+**Depends on:** Phase 2 (auth backbone), Phase 4 (encryption + audit)
+**Plans:** 0 plans
+
+**Open spec questions to resolve before planning:**
+- Login UX differentiation — separate URLs (e.g. `/login/client`, `/login/coach`) vs. same URL with mode toggle vs. branding-only?
+- Coach dashboard vs. admin dashboard — what differs beyond data scope (UI affordances, invitation surfaces, navigation)?
+- Admin acting as coach for own clients — "coach mode" toggle, or scope inferred from `coach_id` ownership only?
+- Self-service signup vs. invitation-only for coaches?
+
+Plans:
+- [ ] TBD (run /gsd-spec-phase 7 → /gsd-plan-phase 7 to break down)
