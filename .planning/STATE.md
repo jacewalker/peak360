@@ -85,6 +85,10 @@ Recent decisions affecting current work:
 - [Phase 04]: Optional dbPath parameter on runBackup() for testability without mocking
 - [Phase 04]: Admin audit UI at /admin/audit-logs matching existing admin route structure
 
+### Roadmap Evolution
+
+- 2026-05-05: Phase 7 added — Multi-tenant auth UX (completes deferred client/coach UX from milestone v3.0). Slot 6 already used by 06-routing-infrastructure-design-system; this phase numbered 7 to avoid collision.
+
 ### Pending Todos
 
 None yet.

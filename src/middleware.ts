@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
+import { GATE_COOKIE_NAME, verifyGateToken } from '@/lib/landing-gate';
 
 const PUBLIC_PATHS = new Set(['/login', '/api/health']);
 
@@ -7,6 +8,16 @@ const PORTAL_SUBDOMAIN_HOSTNAMES = new Set(
   (process.env.PORTAL_HOSTNAMES ?? 'portal.peak360.com.au').split(',')
 );
 const APEX_HOSTNAME = process.env.APEX_HOSTNAME ?? 'peak360.com.au';
+
+// Paths that bypass the landing gate. The gate exists to lock down marketing
+// pages — auth, the gate UI itself, the gate's POST handler, the portal, and
+// admin all need to keep working without the cookie. Static assets are
+// excluded earlier in the function.
+const GATE_EXEMPT_PREFIXES = ['/api/', '/portal/', '/admin/'];
+function isGateExempt(pathname: string): boolean {
+  if (pathname === '/login' || pathname === '/gate') return true;
+  return GATE_EXEMPT_PREFIXES.some((p) => pathname.startsWith(p));
+}
 
 export async function middleware(req: NextRequest) {
   const { pathname, search } = req.nextUrl;
@@ -28,6 +39,34 @@ export async function middleware(req: NextRequest) {
     const targetPath = pathname === '/' ? '/portal' : `/portal${pathname}`;
     const targetUrl = new URL(`https://${APEX_HOSTNAME}${targetPath}${search}`);
     return NextResponse.redirect(targetUrl);
+  }
+
+  // Landing gate: restrict public marketing routes behind a password.
+  // Exempt: /api/*, /portal/*, /admin/*, /login, /gate. The gate runs
+  // BEFORE the better-auth bypass and protected-path checks below so we
+  // gate even unauthenticated visits to "/" but never interfere with auth
+  // or session-protected flows (which are exempt by prefix).
+  if (!isGateExempt(pathname)) {
+    const secret = process.env.LANDING_GATE_SECRET;
+    if (!secret) {
+      if (process.env.NODE_ENV === 'production') {
+        // Fail-closed in prod so the deployer notices a misconfiguration.
+        const gateUrl = new URL('/gate', req.url);
+        gateUrl.searchParams.set('next', `${pathname}${search}`);
+        return NextResponse.redirect(gateUrl);
+      }
+      console.warn(
+        '[landing-gate] LANDING_GATE_SECRET unset; allowing request through (dev fail-open).',
+      );
+    } else {
+      const token = req.cookies.get(GATE_COOKIE_NAME)?.value;
+      const ok = token ? await verifyGateToken(token, secret) : false;
+      if (!ok) {
+        const gateUrl = new URL('/gate', req.url);
+        gateUrl.searchParams.set('next', `${pathname}${search}`);
+        return NextResponse.redirect(gateUrl);
+      }
+    }
   }
 
   // Better Auth catch-all routes must be public
