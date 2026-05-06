@@ -5,7 +5,7 @@ milestone_name: milestone
 status: executing
 stopped_at: Phase 4 all plans complete
 last_updated: "2026-04-14T09:10:23.355Z"
-last_activity: 2026-04-14 -- Phase 01 execution started
+last_activity: 2026-05-06 -- Completed quick task 260506-snj: Promote v2 landing to / and add password gate
 progress:
   total_phases: 5
   completed_phases: 5
@@ -96,6 +96,12 @@ None yet.
 ### Blockers/Concerns
 
 - v1.0 phases 2 and 4 had overlapping auth/security scope -- v3.0 supersedes those requirements
+
+### Quick Tasks Completed
+
+| # | Description | Date | Commit | Directory |
+|---|-------------|------|--------|-----------|
+| 260506-snj | Promote v2 landing to / and add password gate | 2026-05-06 | 8720867 | [260506-snj-promote-v2-landing-to-and-add-password-g](./quick/260506-snj-promote-v2-landing-to-and-add-password-g/) |
 
 ## Session Continuity
 
