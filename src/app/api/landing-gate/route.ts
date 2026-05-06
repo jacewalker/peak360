@@ -24,15 +24,13 @@ function constantTimeEqualStrings(a: string, b: string): boolean {
   return diff === 0;
 }
 
+const LANDING_PASSWORD = 'peakage';
+
 export async function POST(req: NextRequest) {
-  const password = process.env.LANDING_PASSWORD;
   const secret = process.env.LANDING_GATE_SECRET;
-  if (!password || !secret) {
+  if (!secret) {
     return NextResponse.json(
-      {
-        error:
-          'Landing gate not configured: LANDING_PASSWORD and LANDING_GATE_SECRET must be set.',
-      },
+      { error: 'Landing gate not configured: LANDING_GATE_SECRET must be set.' },
       { status: 500 },
     );
   }
@@ -40,7 +38,7 @@ export async function POST(req: NextRequest) {
   const form = await req.formData();
   const submitted = String(form.get('password') ?? '');
   const next = safeNext(typeof form.get('next') === 'string' ? String(form.get('next')) : null);
-  const ok = constantTimeEqualStrings(submitted, password);
+  const ok = constantTimeEqualStrings(submitted, LANDING_PASSWORD);
 
   if (!ok) {
     const url = new URL('/gate', req.url);
