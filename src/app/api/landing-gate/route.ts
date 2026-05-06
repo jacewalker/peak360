@@ -41,14 +41,19 @@ export async function POST(req: NextRequest) {
   const ok = constantTimeEqualStrings(submitted, LANDING_PASSWORD);
 
   if (!ok) {
-    const url = new URL('/gate', req.url);
-    url.searchParams.set('error', '1');
-    if (next !== '/') url.searchParams.set('next', next);
-    return NextResponse.redirect(url, 303);
+    const params = new URLSearchParams({ error: '1' });
+    if (next !== '/') params.set('next', next);
+    return new NextResponse(null, {
+      status: 303,
+      headers: { Location: `/gate?${params}` },
+    });
   }
 
   const token = await signGateToken(secret);
-  const res = NextResponse.redirect(new URL(next, req.url), 303);
+  const res = new NextResponse(null, {
+    status: 303,
+    headers: { Location: next },
+  });
   res.cookies.set(GATE_COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === 'production',
