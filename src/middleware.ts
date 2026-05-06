@@ -15,7 +15,7 @@ const APEX_HOSTNAME = process.env.APEX_HOSTNAME ?? 'peak360.com.au';
 // excluded earlier in the function.
 const GATE_EXEMPT_PREFIXES = ['/api/', '/portal/', '/admin/'];
 function isGateExempt(pathname: string): boolean {
-  if (pathname === '/login' || pathname === '/gate') return true;
+  if (pathname === '/login' || pathname === '/gate' || pathname === '/portal' || pathname === '/admin') return true;
   return GATE_EXEMPT_PREFIXES.some((p) => pathname.startsWith(p));
 }
 
