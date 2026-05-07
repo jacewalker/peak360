@@ -17,6 +17,24 @@ export default function DashboardPage() {
   const { data: sessionData } = authClient.useSession();
   const userRole = sessionData?.user?.role;
 
+  // Admin-only grouping by coach (D-15, D-16)
+  const grouped = useMemo(() => {
+    if (userRole !== 'admin') return null;
+    const myUserId = sessionData?.user?.id;
+    const myClients = assessments.filter((a) => a.coachId === myUserId);
+    const others = assessments.filter((a) => a.coachId && a.coachId !== myUserId);
+    const unassigned = assessments.filter((a) => !a.coachId);
+
+    const byCoach = new Map<string, { name: string; rows: Assessment[] }>();
+    for (const a of others) {
+      const key = a.coachId!;
+      const label = a.coachName || `Coach ${key.slice(-4)}`; // D-16 fallback
+      if (!byCoach.has(key)) byCoach.set(key, { name: label, rows: [] });
+      byCoach.get(key)!.rows.push(a);
+    }
+    return { myClients, byCoach: Array.from(byCoach.values()), unassigned };
+  }, [assessments, userRole, sessionData?.user?.id]);
+
   // First-login welcome for clients (D-04)
   useEffect(() => {
     if (userRole === 'client' && typeof window !== 'undefined') {
@@ -352,44 +370,93 @@ export default function DashboardPage() {
               </div>
 
               {assessments.length === 0 ? (
-                <div className="px-5 py-10 text-center">
-                  <p className="text-sm text-muted mb-3">No assessments yet</p>
-                  <button
-                    onClick={createAssessment}
-                    className="text-sm font-medium text-gold hover:text-gold-dark transition-colors"
-                  >
-                    Create your first assessment
-                  </button>
+                <div className="text-center py-12 px-5">
+                  {userRole === 'client' ? (
+                    <>
+                      <h3 className="text-lg font-semibold text-navy mb-2">No assessments yet</h3>
+                      <p className="text-sm text-muted">Your coach will set up your first assessment. You&apos;ll see it here when it&apos;s ready.</p>
+                    </>
+                  ) : userRole === 'admin' ? (
+                    <>
+                      <h3 className="text-lg font-semibold text-navy mb-2">No assessments in the system yet</h3>
+                      <p className="text-sm text-muted mb-4">Once coaches start creating assessments, you&apos;ll see them grouped here.</p>
+                      <button onClick={createAssessment} className="text-sm font-semibold text-gold hover:text-gold-dark">Create assessment</button>
+                    </>
+                  ) : (
+                    <>
+                      <h3 className="text-lg font-semibold text-navy mb-2">Start your first assessment</h3>
+                      <p className="text-sm text-muted mb-4">Create an assessment to begin tracking a client&apos;s longevity profile.</p>
+                      <button onClick={createAssessment} className="text-sm font-semibold text-gold hover:text-gold-dark">Create assessment</button>
+                    </>
+                  )}
+                </div>
+              ) : userRole === 'admin' && grouped ? (
+                <div className="divide-y divide-border">
+                  {/* Pinned first, gold left border */}
+                  {grouped.myClients.length > 0 && (
+                    <div className="border-l-4 border-gold">
+                      <div className="px-5 py-3 flex items-center justify-between bg-surface-alt/50">
+                        <h4 className="text-xl font-semibold text-navy">My clients (you)</h4>
+                        <span className="text-xs text-muted">
+                          {new Set(grouped.myClients.map((a) => a.clientName || a.id)).size} client
+                          {new Set(grouped.myClients.map((a) => a.clientName || a.id)).size === 1 ? '' : 's'}
+                          {' · '}
+                          {grouped.myClients.length} assessment{grouped.myClients.length === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                      <div className="divide-y divide-border">
+                        {grouped.myClients.map((a) => (
+                          <AssessmentRow key={a.id} a={a} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  {/* Other coaches — navy left border */}
+                  {grouped.byCoach.map((g, idx) => (
+                    <div key={idx} className="border-l-4 border-navy">
+                      <div className="px-5 py-3 flex items-center justify-between bg-surface-alt/50">
+                        <h4 className="text-xl font-semibold text-navy">{g.name}</h4>
+                        <span className="text-xs text-muted">
+                          {new Set(g.rows.map((a) => a.clientName || a.id)).size} client
+                          {new Set(g.rows.map((a) => a.clientName || a.id)).size === 1 ? '' : 's'}
+                          {' · '}
+                          {g.rows.length} assessment{g.rows.length === 1 ? '' : 's'}
+                        </span>
+                      </div>
+                      <div className="divide-y divide-border">
+                        {g.rows.map((a) => (
+                          <AssessmentRow key={a.id} a={a} />
+                        ))}
+                      </div>
+                    </div>
+                  ))}
+                  {/* Unassigned — slate left border */}
+                  {grouped.unassigned.length > 0 && (
+                    <div className="border-l-4 border-slate-300">
+                      <div className="px-5 py-3 bg-surface-alt/50">
+                        <div className="flex items-center justify-between">
+                          <h4 className="text-xl font-semibold text-navy">Unassigned</h4>
+                          <span className="text-xs text-muted">
+                            {new Set(grouped.unassigned.map((a) => a.clientName || a.id)).size} client
+                            {new Set(grouped.unassigned.map((a) => a.clientName || a.id)).size === 1 ? '' : 's'}
+                            {' · '}
+                            {grouped.unassigned.length} assessment{grouped.unassigned.length === 1 ? '' : 's'}
+                          </span>
+                        </div>
+                        <p className="text-xs text-muted mt-1">Legacy assessments without an owner.</p>
+                      </div>
+                      <div className="divide-y divide-border">
+                        {grouped.unassigned.map((a) => (
+                          <AssessmentRow key={a.id} a={a} />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="divide-y divide-border">
                   {assessments.slice(0, 5).map((a) => (
-                    <Link
-                      key={a.id}
-                      href={`/portal/assessment/${a.id}/section/${a.currentSection}`}
-                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-surface-alt transition-colors group"
-                    >
-                      <div className="w-8 h-8 rounded-full bg-navy/5 flex items-center justify-center text-navy font-semibold text-xs group-hover:bg-gold/10 transition-colors shrink-0">
-                        {(a.clientName || 'U')[0].toUpperCase()}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-navy truncate">
-                          {a.clientName || 'Unnamed Client'}
-                        </p>
-                        <p className="text-xs text-muted mt-0.5">
-                          {a.assessmentDate || a.createdAt.split('T')[0]}
-                        </p>
-                      </div>
-                      <span
-                        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
-                          a.status === 'completed'
-                            ? 'bg-emerald-50 text-emerald-600'
-                            : 'bg-gold/10 text-gold-dark'
-                        }`}
-                      >
-                        {a.status === 'completed' ? 'Done' : `${a.currentSection}/11`}
-                      </span>
-                    </Link>
+                    <AssessmentRow key={a.id} a={a} />
                   ))}
                 </div>
               )}
@@ -398,5 +465,35 @@ export default function DashboardPage() {
         </div>
       </main>
     </div>
+  );
+}
+
+function AssessmentRow({ a }: { a: Assessment }) {
+  return (
+    <Link
+      href={`/portal/assessment/${a.id}/section/${a.currentSection}`}
+      className="flex items-center gap-3 px-5 py-3.5 hover:bg-surface-alt transition-colors group"
+    >
+      <div className="w-8 h-8 rounded-full bg-navy/5 flex items-center justify-center text-navy font-semibold text-xs group-hover:bg-gold/10 transition-colors shrink-0">
+        {(a.clientName || 'U')[0].toUpperCase()}
+      </div>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-medium text-navy truncate">
+          {a.clientName || 'Unnamed Client'}
+        </p>
+        <p className="text-xs text-muted mt-0.5">
+          {a.assessmentDate || a.createdAt.split('T')[0]}
+        </p>
+      </div>
+      <span
+        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+          a.status === 'completed'
+            ? 'bg-emerald-50 text-emerald-600'
+            : 'bg-gold/10 text-gold-dark'
+        }`}
+      >
+        {a.status === 'completed' ? 'Done' : `${a.currentSection}/11`}
+      </span>
+    </Link>
   );
 }
