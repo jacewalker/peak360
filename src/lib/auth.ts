@@ -15,6 +15,14 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     minPasswordLength: 4,
+    disableSignUp: true, // D-01: block public coach signup; existing accounts unaffected (D-04)
+    sendResetPassword: async ({ user, url }) => {
+      await sendEmailViaSMTP2Go({
+        to: user.email,
+        subject: 'Reset your Peak360 password',
+        html: `<p>Click the link below to set a new password:</p><a href="${url}">Reset password</a><p>This link expires in 1 hour. If you didn't request this, ignore this email.</p>`,
+      });
+    },
   },
   databaseHooks: {
     user: {
