@@ -20,7 +20,7 @@ export default function PillarsDisplay({ pillars }: Props) {
         </p>
       </header>
 
-      <div className="grid grid-cols-5 gap-2 sm:gap-4">
+      <div className="grid grid-cols-5 gap-1 sm:gap-1.5">
         {pillars.map((p) => (
           <Pillar key={p.key} pillar={p} />
         ))}
@@ -49,9 +49,9 @@ function Pillar({ pillar }: { pillar: PillarScore }) {
         )}
       </div>
 
-      {/* Thin vertical pillar */}
+      {/* Thick vertical pillar */}
       <div
-        className="relative w-6 sm:w-7 h-48 sm:h-56 rounded-full overflow-hidden ring-1"
+        className="relative w-full h-56 sm:h-64 rounded-2xl overflow-hidden"
         style={{
           backgroundColor: palette.bg,
           boxShadow: `inset 0 0 0 1px ${palette.ring}`,
@@ -68,9 +68,9 @@ function Pillar({ pillar }: { pillar: PillarScore }) {
           />
         )}
         {/* tick marks for visual reference */}
-        <div className="absolute inset-0 flex flex-col justify-between py-2 pointer-events-none">
+        <div className="absolute inset-0 flex flex-col justify-between py-3 pointer-events-none">
           {[0, 1, 2, 3, 4].map((i) => (
-            <div key={i} className="h-px bg-white/50 mx-1" />
+            <div key={i} className="h-px bg-white/40 mx-3" />
           ))}
         </div>
       </div>
