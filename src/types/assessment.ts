@@ -191,6 +191,9 @@ export interface Assessment {
   assessmentDate: string | null;
   currentSection: number;
   status: string;
+  coachId?: string | null;
+  clientId?: string | null;
+  coachName?: string | null;
   createdAt: string;
   updatedAt: string;
 }
