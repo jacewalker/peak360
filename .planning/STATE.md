@@ -88,6 +88,7 @@ Recent decisions affecting current work:
 ### Roadmap Evolution
 
 - 2026-05-05: Phase 7 added — Multi-tenant auth UX (completes deferred client/coach UX from milestone v3.0). Slot 6 already used by 06-routing-infrastructure-design-system; this phase numbered 7 to avoid collision.
+- 2026-05-07: Phase 8 added — Client report design refresh. User-driven design change for the final report (Section 11) as it appears in the /portal client area. Context to be captured via discuss-phase.
 
 ### Pending Todos
 
