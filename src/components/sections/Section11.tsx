@@ -60,6 +60,8 @@ const TIER_TEXT: Record<RatingTier, string> = {
 };
 
 import { REPORT_MARKERS, type MarkerDef } from '@/lib/report-markers';
+import { computeAllPillarScores, type PillarScore } from '@/lib/pillars/mapping';
+import PillarsDisplay from '@/components/report/PillarsDisplay';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -130,6 +132,7 @@ export default function Section11({ assessmentId }: Section11Props) {
   const [tierCounts, setTierCounts] = useState<Record<RatingTier, number>>({
     elite: 0, great: 0, normal: 0, cautious: 0, poor: 0,
   });
+  const [pillars, setPillars] = useState<PillarScore[]>([]);
   // ── PDF Export ──────────────────────────────────────────────────────────────
 
   const exportPdf = useCallback(async () => {
@@ -204,6 +207,18 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       setMarkers(evaluated);
       setTierCounts(counts);
+
+      const pillarMarkers = REPORT_MARKERS.map((m) => {
+        const ev = evaluated.find((e) => e.key === m.testKey);
+        return {
+          testKey: m.testKey,
+          label: m.label,
+          category: m.category,
+          subcategory: m.subcategory,
+          tier: ev?.tier ?? null,
+        };
+      });
+      setPillars(computeAllPillarScores(pillarMarkers));
 
       const insightMarkers = evaluated
         .filter((m) => m.value !== null)
@@ -321,6 +336,9 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       {/* ─── REPORT BODY ─── */}
       <div className="px-6">
+
+      {/* ─── PEAK LIVING PILLARS ─── */}
+      <PillarsDisplay pillars={pillars} />
 
       {/* ─── SECTION 2: DAILY READINESS ─── */}
       <div className="mt-8 print:mt-6">

@@ -169,6 +169,7 @@ Peak360 is a full-stack longevity assessment platform built with Next.js. Coache
 - PostgreSQL via `pg` driver
 - Activated when `DATABASE_URL` environment variable is set
 - Same schema structure, uses JSONB for JSON columns instead of TEXT
+- **Dev DB host:** `Jaces-Mac-mini.local` (mDNS, resolves on the local network). Use this hostname in `DATABASE_URL` rather than a raw IP so the config survives DHCP changes.
 ## Platform Requirements
 - Node.js (version not pinned in `.nvmrc`, inferred from `@types/node: ^20`)
 - npm (included with Node.js)
