@@ -1,5 +1,7 @@
 import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { readFileSync } from 'fs';
+import { resolve } from 'path';
 import Sidebar from '@/components/layout/Sidebar';
 
 /**
@@ -63,5 +65,31 @@ describe('Sidebar role-flash — D-12 regression guard', () => {
       expect(screen.queryByText('Dashboard')).not.toBeNull();
       unmount();
     }
+  });
+});
+
+describe('Sidebar logout wiring — BL-03 regression guard', () => {
+  const sidebarSource = readFileSync(
+    resolve(process.cwd(), 'src/components/layout/Sidebar.tsx'),
+    'utf-8'
+  );
+
+  it('the Logout button calls authClient.signOut (Better Auth)', () => {
+    // BL-03: the previous fetch('/api/auth/logout') 404'd and never cleared the session cookie.
+    // The fix wires the button to authClient.signOut() which hits /api/auth/sign-out and clears the cookie.
+    expect(sidebarSource).toMatch(/authClient\.signOut\s*\(/);
+  });
+
+  it('the Logout button does NOT fetch the deprecated /api/auth/logout endpoint', () => {
+    // Negative regression: the broken endpoint must never appear again.
+    expect(sidebarSource).not.toMatch(/['"]\/api\/auth\/logout['"]/);
+  });
+
+  it('the Logout flow redirects to /login AFTER signOut completes (cookie cleared first)', () => {
+    // Locate the onClick body that contains authClient.signOut and verify it also references /login.
+    const onClickMatch = sidebarSource.match(/onClick=\{[\s\S]+?authClient\.signOut[\s\S]+?\}\}/);
+    expect(onClickMatch).not.toBeNull();
+    const onClickBody = onClickMatch?.[0] ?? '';
+    expect(onClickBody).toMatch(/\/login/);
   });
 });
