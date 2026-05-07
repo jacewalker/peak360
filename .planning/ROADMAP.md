@@ -136,4 +136,4 @@ Plans:
 - [x] 07-06-PLAN.md — Invitations API rewrite + /portal/admin/invitations page + StatusPill (REQ-7.11, REQ-7.2)
 - [x] 07-07-PLAN.md — Admin users API + /portal/admin/users page + last-admin guard + audit log + RolePill + Toast (REQ-7.10)
 - [x] 07-08-PLAN.md — Client read-only /report route + section page redirect + admin home placeholder replacement (REQ-7.6, REQ-7.10, REQ-7.11)
-- [ ] 07-09-PLAN.md — Security regression tests (auth-config, invitations role, last-admin guard, sidebar role-flash, client redirect)
+- [x] 07-09-PLAN.md — Security regression tests (auth-config, invitations role, last-admin guard, sidebar role-flash, client redirect)
