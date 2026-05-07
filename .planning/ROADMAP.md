@@ -123,15 +123,17 @@ Plans:
 ### Phase 7: Multi-tenant auth UX
 
 **Goal:** Complete the deferred client and coach experiences from milestone v3.0 — distinct login flows per role, coach dashboard differentiated from admin, invitation flow accepts either coach or admin as inviter, multi-coach data scoping enforced (coach sees own clients only, admin sees all plus own clients), admins inherit coach capabilities (admin IS a coach but not all coaches are admins), clients read-only on own data.
-**Requirements**: TBD (run /gsd-spec-phase 7 to clarify and lock)
+**Requirements**: REQ-7.1 through REQ-7.12 (locked in 07-SPEC.md)
 **Depends on:** Phase 2 (auth backbone), Phase 4 (encryption + audit)
-**Plans:** 0 plans
-
-**Open spec questions to resolve before planning:**
-- Login UX differentiation — separate URLs (e.g. `/login/client`, `/login/coach`) vs. same URL with mode toggle vs. branding-only?
-- Coach dashboard vs. admin dashboard — what differs beyond data scope (UI affordances, invitation surfaces, navigation)?
-- Admin acting as coach for own clients — "coach mode" toggle, or scope inferred from `coach_id` ownership only?
-- Self-service signup vs. invitation-only for coaches?
+**Plans:** 9 plans
 
 Plans:
-- [ ] TBD (run /gsd-spec-phase 7 → /gsd-plan-phase 7 to break down)
+- [ ] 07-01-PLAN.md — Auth config: disableSignUp + sendResetPassword + /reset-password page (REQ-7.2, REQ-7.8)
+- [ ] 07-02-PLAN.md — Sidebar role-filtered nav with no privileged-item flash (REQ-7.3)
+- [ ] 07-03-PLAN.md — /api/assessments JOIN user table to project coachName (REQ-7.4 enabler)
+- [ ] 07-04-PLAN.md — Login page rework: mode toggle + remove signup + Forgot/Magic-link CTAs (REQ-7.1, REQ-7.2, REQ-7.8, REQ-7.9)
+- [ ] 07-05-PLAN.md — Portal dashboard role-aware grouping + empty states + client trends (REQ-7.4, REQ-7.5, REQ-7.7, REQ-7.12)
+- [ ] 07-06-PLAN.md — Invitations API rewrite + /portal/admin/invitations page + StatusPill (REQ-7.11, REQ-7.2)
+- [ ] 07-07-PLAN.md — Admin users API + /portal/admin/users page + last-admin guard + audit log + RolePill + Toast (REQ-7.10)
+- [ ] 07-08-PLAN.md — Client read-only /report route + section page redirect + admin home placeholder replacement (REQ-7.6, REQ-7.10, REQ-7.11)
+- [ ] 07-09-PLAN.md — Security regression tests (auth-config, invitations role, last-admin guard, sidebar role-flash, client redirect)
