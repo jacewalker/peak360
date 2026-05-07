@@ -35,6 +35,38 @@ const ADMIN_SECTIONS = [
       </svg>
     ),
   },
+  {
+    label: 'Users',
+    href: '/portal/admin/users',
+    description:
+      'View everyone with portal access. Edit roles, see assigned assessments, and audit activity.',
+    stat: 'Roles',
+    icon: (
+      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z"
+        />
+      </svg>
+    ),
+  },
+  {
+    label: 'Invitations',
+    href: '/portal/admin/invitations',
+    description:
+      'Invite new coaches, admins, or clients. Track which invitations have been accepted.',
+    stat: 'Onboarding',
+    icon: (
+      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M6 12 3.269 3.125A59.769 59.769 0 0 1 21.485 12 59.768 59.768 0 0 1 3.27 20.875L5.999 12Zm0 0h7.5"
+        />
+      </svg>
+    ),
+  },
 ];
 
 export default function AdminHomePage() {
@@ -69,7 +101,7 @@ export default function AdminHomePage() {
             </span>
           </div>
 
-          <h1 className="text-[2.75rem] font-black text-white tracking-tight leading-none mb-3">
+          <h1 className="text-[2.75rem] font-semibold text-white tracking-tight leading-none mb-3">
             Administration
           </h1>
           <p className="text-white/40 text-sm max-w-md leading-relaxed">
@@ -125,24 +157,6 @@ export default function AdminHomePage() {
               </div>
             </Link>
           ))}
-
-          {/* User Management — coming soon */}
-          <div className="rounded-2xl border border-dashed border-border bg-surface/40 p-6 flex flex-col gap-5 min-h-[200px]">
-            <div className="flex items-start justify-between">
-              <div className="w-12 h-12 rounded-xl bg-navy/5 border border-navy/10 flex items-center justify-center text-navy/30">
-                <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
-              </div>
-              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-navy/5 text-navy/30 border border-navy/8">
-                Coming Soon
-              </span>
-            </div>
-            <div className="flex-1">
-              <h3 className="font-bold text-navy/40 text-base mb-1.5">User Management</h3>
-              <p className="text-sm text-muted/50 leading-relaxed">Create coach and client accounts, link users to existing clients, and enable clients to securely log in and view their own assessment data.</p>
-            </div>
-          </div>
 
           {/* Spot Integration — coming soon */}
           <div className="rounded-2xl border border-dashed border-border bg-surface/40 p-6 flex flex-col gap-5 min-h-[200px]">
