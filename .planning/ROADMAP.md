@@ -136,13 +136,17 @@ Plans:
 - [x] 07-06-PLAN.md — Invitations API rewrite + /portal/admin/invitations page + StatusPill (REQ-7.11, REQ-7.2)
 - [x] 07-07-PLAN.md — Admin users API + /portal/admin/users page + last-admin guard + audit log + RolePill + Toast (REQ-7.10)
 - [x] 07-08-PLAN.md — Client read-only /report route + section page redirect + admin home placeholder replacement (REQ-7.6, REQ-7.10, REQ-7.11)
-- [x] 07-09-PLAN.md — Security regression tests (auth-config, invitations role, last-admin guard, sidebar role-flash, client redirect)
+- [x] 07-09-PLAN.md — Security regression tests (auth-config, invitations role, last-admin-guard, sidebar role-flash, client redirect)
 ### Phase 8: Client report design refresh
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Replace the dense Section 11 report hero with a five-pillar Peak Living module (portal interactive + PDF static mirror) backed by admin-authored definitions, page copy, and per-assessment per-pillar prescriptions, with composite-score traffic-light status derived from existing tier ratings.
+**Requirements**: REQ-08-01 through REQ-08-10 (implicit, locked via decisions D-01..D-30 in 08-CONTEXT.md and the 08-UI-SPEC.md visual contract)
 **Depends on:** Phase 7
-**Plans:** 0 plans
+**Plans:** 5 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 8 to break down)
+- [ ] 08-01-PLAN.md — Schema (3 new tables: pillar_definitions, pillar_page_copy, pillar_prescriptions) + idempotent seed migration + AuditAction extension + BLOCKING db push (REQ-08-05, REQ-08-08; D-13, D-17, D-18, D-19)
+- [ ] 08-02-PLAN.md — Pure pillar layer: types, single-source-of-truth colours, marker→pillar mapping with D-05 Option A balance reclassification, score formula, SSR queries + Vitest unit tests (REQ-08-04; D-05, D-06, D-08, D-10, D-28)
+- [ ] 08-03-PLAN.md — Portal: hand-rolled Dialog + PillarsGrid/Card/Modal + Detailed marker results disclosure + ReportShell + extend SSR report page with pillar/page-copy/prescriptions/markers data load (preserves Phase 7 BL-05) (REQ-08-01, REQ-08-02, REQ-08-09; D-01..D-03, D-21..D-25, D-29)
+- [ ] 08-04-PLAN.md — Admin authoring: /api/admin/pillars + /api/admin/assessments/[id]/prescriptions + /portal/admin/pillars + /portal/admin/assessments/[id]/prescriptions + RBAC regression tests (REQ-08-06, REQ-08-07, REQ-08-08; D-12, D-15, D-16, D-19, D-20, D-30)
+- [ ] 08-05-PLAN.md — PDF mirror: extend ReportData + loadReportData + new PillarsPage component + insert before TierSummary in Peak360Report (REQ-08-03, REQ-08-10; D-01, D-26..D-28)
