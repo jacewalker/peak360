@@ -92,6 +92,7 @@ Recent decisions affecting current work:
 ### Pending Todos
 
 - [auth] Add password reset, account management, and admin invitations (2026-05-07) — likely Phase 7 scope
+- [auth] Admin reassign clients/assessments between coaches (2026-05-07) — pairs with above, same Phase 7 batch
 
 ### Blockers/Concerns
 
