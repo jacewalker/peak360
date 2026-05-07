@@ -67,8 +67,8 @@ Type scale for this phase. **3 sizes, 2 weights** — anything outside this scal
 | Heading | 18–20px (`text-lg`/`text-xl`) | 600 (`font-semibold`) | 1.2 | Glass-card heading ("Welcome back" / "Reset your password"), page titles ("Users", "Invitations") inside `/portal/admin/*` |
 | Display | 28px (`text-3xl` or `text-[1.75rem]`) | 600 (`font-semibold`) | 1.2 | Coach-grouped dashboard group headers ("My clients (you)", "{Coach Name}", "Unassigned"); `/portal/admin/users` and `/invitations` page H1 |
 
-**Micro-text (already established, KEEP — does NOT count against the scale because it's purely tracking/uppercase metadata, not body content):**
-- Eyebrow / breadcrumb labels: `text-[10px]` `tracking-[0.2em]` `uppercase` `font-bold` — used for breadcrumbs and the "AUTHORISED ACCESS ONLY" footer on `/login`. Reuse as-is on `/reset-password` and admin pages for consistency.
+**Micro-text (already established, KEEP):**
+- Eyebrow / breadcrumb labels: `text-[10px]` `tracking-[0.2em]` `uppercase` `font-semibold` — used for breadcrumbs and the "AUTHORISED ACCESS ONLY" footer on `/login`. Reuse as-is on `/reset-password` and admin pages for consistency. Uses the same `font-semibold` (600) weight as the rest of the scale — total declared weights remain at 2 (400 + 600).
 
 **Forbidden in this phase:** No new H1 sizes, no `text-2xl` headings (use `text-xl` semibold instead), no italic, no decorative font on portal/admin surfaces.
 
