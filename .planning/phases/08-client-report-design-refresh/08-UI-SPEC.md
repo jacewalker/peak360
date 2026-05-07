@@ -1,10 +1,11 @@
 ---
 phase: 8
 slug: client-report-design-refresh
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-07
+reviewed_at: 2026-05-07T00:00:00Z
 ---
 
 # Phase 8 — UI Design Contract
@@ -52,7 +53,7 @@ Exceptions:
 
 ## Typography
 
-Four sizes, two weights. Body line-height 1.5; heading line-height 1.2.
+Four sizes, two weights. Body line-height 1.5; heading line-height 1.25.
 
 | Role | Size | Weight | Line Height | Usage |
 |------|------|--------|-------------|-------|
@@ -270,11 +271,11 @@ New components introduced in this phase. The planner expands these into discrete
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS — every user-facing string is specified above; admin-editable copy has seed values; empty / error / loading states have explicit copy; destructive action confirmation is explicit; anti-claims constraint is documented and surfaced in the admin UI.
-- [ ] Dimension 2 Visuals: PASS — pillar card chrome (radius 16px, 1px border `--color-border`, subtle shadow `0 1px 2px rgba(15,36,64,0.04), 0 4px 12px rgba(15,36,64,0.06)`, hover lift 2px on desktop, no lift on mobile), traffic-light pill (rounded-full, 6px vertical / 12px horizontal padding, 14px / 600 label, dot 8px), modal chrome (radius 16px, 32px padding, sticky close button) are specified.
-- [ ] Dimension 3 Color: PASS — 60/30/10 split declared; gold reserved-for list is exhaustive; navy reserved-for list is exhaustive; traffic-light palette has its own single-source-of-truth module (`src/lib/pillars/colors.ts`); destructive colour overlap with `poor` tier is explicitly disambiguated by shape.
-- [ ] Dimension 4 Typography: PASS — exactly four roles + one deliberate exception (the score numeral) declared; two weights (400, 600); body 1.5 / heading 1.2; mobile downscale rule is explicit.
-- [ ] Dimension 5 Spacing: PASS — multiples of 4 only; touch-target exception (44px) and bottom-sheet drag handle exception are documented.
-- [ ] Dimension 6 Registry Safety: PASS — no shadcn / third-party registry blocks introduced; safety gate is "not applicable".
+- [x] Dimension 1 Copywriting: PASS — every user-facing string is specified above; admin-editable copy has seed values; empty / error / loading states have explicit copy; destructive action confirmation is explicit; anti-claims constraint is documented and surfaced in the admin UI.
+- [x] Dimension 2 Visuals: PASS — pillar card chrome (radius 16px, 1px border `--color-border`, subtle shadow `0 1px 2px rgba(15,36,64,0.04), 0 4px 12px rgba(15,36,64,0.06)`, hover lift 2px on desktop, no lift on mobile), traffic-light pill (rounded-full, 6px vertical / 12px horizontal padding, 14px / 600 label, dot 8px), modal chrome (radius 16px, 32px padding, sticky close button) are specified.
+- [x] Dimension 3 Color: PASS — 60/30/10 split declared; gold reserved-for list is exhaustive; navy reserved-for list is exhaustive; traffic-light palette has its own single-source-of-truth module (`src/lib/pillars/colors.ts`); destructive colour overlap with `poor` tier is explicitly disambiguated by shape.
+- [x] Dimension 4 Typography: PASS — exactly four roles + one deliberate exception (the score numeral) declared; two weights (400, 600); body 1.5 / heading 1.25; mobile downscale rule is explicit.
+- [x] Dimension 5 Spacing: PASS — multiples of 4 only; touch-target exception (44px) and bottom-sheet drag handle exception are documented.
+- [x] Dimension 6 Registry Safety: PASS — no shadcn / third-party registry blocks introduced; safety gate is "not applicable".
 
-**Approval:** pending
+**Approval:** approved 2026-05-07 by gsd-ui-checker (1 non-blocking FLAG resolved: heading line-height reconciled to 1.25)
