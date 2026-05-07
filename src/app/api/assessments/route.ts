@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { assessments } from '@/lib/db/schema';
+import { assessments, user } from '@/lib/db/schema';
 import { desc, eq } from 'drizzle-orm';
 import { v4 as uuid } from 'uuid';
 import { createOrReuseVersion } from '@/lib/normative/versioning';
@@ -13,19 +13,70 @@ export async function GET() {
   let rows;
   if (session.user.role === 'admin') {
     // Admin sees all assessments (including legacy with null coach_id)
-    rows = await db.select().from(assessments).orderBy(desc(assessments.updatedAt));
+    rows = await db
+      .select({
+        id: assessments.id,
+        clientName: assessments.clientName,
+        clientEmail: assessments.clientEmail,
+        clientDob: assessments.clientDob,
+        clientGender: assessments.clientGender,
+        assessmentDate: assessments.assessmentDate,
+        currentSection: assessments.currentSection,
+        status: assessments.status,
+        coachId: assessments.coachId,
+        clientId: assessments.clientId,
+        normativeVersionId: assessments.normativeVersionId,
+        createdAt: assessments.createdAt,
+        updatedAt: assessments.updatedAt,
+        coachName: user.name,
+      })
+      .from(assessments)
+      .leftJoin(user, eq(assessments.coachId, user.id))
+      .orderBy(desc(assessments.updatedAt));
   } else if (session.user.role === 'coach') {
     // Coach sees only their own assessments
     rows = await db
-      .select()
+      .select({
+        id: assessments.id,
+        clientName: assessments.clientName,
+        clientEmail: assessments.clientEmail,
+        clientDob: assessments.clientDob,
+        clientGender: assessments.clientGender,
+        assessmentDate: assessments.assessmentDate,
+        currentSection: assessments.currentSection,
+        status: assessments.status,
+        coachId: assessments.coachId,
+        clientId: assessments.clientId,
+        normativeVersionId: assessments.normativeVersionId,
+        createdAt: assessments.createdAt,
+        updatedAt: assessments.updatedAt,
+        coachName: user.name,
+      })
       .from(assessments)
+      .leftJoin(user, eq(assessments.coachId, user.id))
       .where(eq(assessments.coachId, session.user.id))
       .orderBy(desc(assessments.updatedAt));
   } else {
     // Client sees only assessments assigned to them
     rows = await db
-      .select()
+      .select({
+        id: assessments.id,
+        clientName: assessments.clientName,
+        clientEmail: assessments.clientEmail,
+        clientDob: assessments.clientDob,
+        clientGender: assessments.clientGender,
+        assessmentDate: assessments.assessmentDate,
+        currentSection: assessments.currentSection,
+        status: assessments.status,
+        coachId: assessments.coachId,
+        clientId: assessments.clientId,
+        normativeVersionId: assessments.normativeVersionId,
+        createdAt: assessments.createdAt,
+        updatedAt: assessments.updatedAt,
+        coachName: user.name,
+      })
       .from(assessments)
+      .leftJoin(user, eq(assessments.coachId, user.id))
       .where(eq(assessments.clientId, session.user.id))
       .orderBy(desc(assessments.updatedAt));
   }
