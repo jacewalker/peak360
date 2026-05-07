@@ -91,7 +91,7 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-None yet.
+- [auth] Add password reset, account management, and admin invitations (2026-05-07) — likely Phase 7 scope
 
 ### Blockers/Concerns
 
