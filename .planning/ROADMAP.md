@@ -128,12 +128,12 @@ Plans:
 **Plans:** 9 plans
 
 Plans:
-- [ ] 07-01-PLAN.md — Auth config: disableSignUp + sendResetPassword + /reset-password page (REQ-7.2, REQ-7.8)
-- [ ] 07-02-PLAN.md — Sidebar role-filtered nav with no privileged-item flash (REQ-7.3)
-- [ ] 07-03-PLAN.md — /api/assessments JOIN user table to project coachName (REQ-7.4 enabler)
+- [x] 07-01-PLAN.md — Auth config: disableSignUp + sendResetPassword + /reset-password page (REQ-7.2, REQ-7.8)
+- [x] 07-02-PLAN.md — Sidebar role-filtered nav with no privileged-item flash (REQ-7.3)
+- [x] 07-03-PLAN.md — /api/assessments JOIN user table to project coachName (REQ-7.4 enabler)
 - [ ] 07-04-PLAN.md — Login page rework: mode toggle + remove signup + Forgot/Magic-link CTAs (REQ-7.1, REQ-7.2, REQ-7.8, REQ-7.9)
 - [ ] 07-05-PLAN.md — Portal dashboard role-aware grouping + empty states + client trends (REQ-7.4, REQ-7.5, REQ-7.7, REQ-7.12)
-- [ ] 07-06-PLAN.md — Invitations API rewrite + /portal/admin/invitations page + StatusPill (REQ-7.11, REQ-7.2)
+- [x] 07-06-PLAN.md — Invitations API rewrite + /portal/admin/invitations page + StatusPill (REQ-7.11, REQ-7.2)
 - [ ] 07-07-PLAN.md — Admin users API + /portal/admin/users page + last-admin guard + audit log + RolePill + Toast (REQ-7.10)
-- [ ] 07-08-PLAN.md — Client read-only /report route + section page redirect + admin home placeholder replacement (REQ-7.6, REQ-7.10, REQ-7.11)
+- [x] 07-08-PLAN.md — Client read-only /report route + section page redirect + admin home placeholder replacement (REQ-7.6, REQ-7.10, REQ-7.11)
 - [ ] 07-09-PLAN.md — Security regression tests (auth-config, invitations role, last-admin guard, sidebar role-flash, client redirect)
