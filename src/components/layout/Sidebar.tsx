@@ -186,10 +186,15 @@ export default function Sidebar() {
 
           {/* Logout */}
           <button
-            onClick={() => {
-              fetch('/api/auth/logout', { method: 'POST' }).finally(() => {
-                window.location.href = '/login';
-              });
+            onClick={async () => {
+              try {
+                await authClient.signOut();
+              } catch {
+                // Sign-out errors should not strand the user on the portal — the redirect
+                // below still kicks them to /login. Better Auth still attempts cookie
+                // clearing via Set-Cookie even on partial errors.
+              }
+              window.location.href = '/login';
             }}
             className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-white/40 hover:text-white/70 hover:bg-white/5 transition-all w-full"
           >

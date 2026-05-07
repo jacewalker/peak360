@@ -165,12 +165,14 @@ export default function DashboardPage() {
                 Your longevity assessment overview
               </p>
             </div>
-            <button
-              onClick={createAssessment}
-              className="px-6 py-2.5 bg-gold text-navy font-bold rounded-lg hover:bg-gold-light transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm whitespace-nowrap"
-            >
-              + New Assessment
-            </button>
+            {(userRole === 'coach' || userRole === 'admin') && (
+              <button
+                onClick={createAssessment}
+                className="px-6 py-2.5 bg-gold text-navy font-bold rounded-lg hover:bg-gold-light transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm whitespace-nowrap"
+              >
+                + New Assessment
+              </button>
+            )}
           </div>
         </div>
       </div>
