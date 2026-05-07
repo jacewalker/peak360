@@ -47,10 +47,12 @@ Declared values (must be multiples of 4 — matches existing usage in `Sidebar.t
 | 3xl | `14`–`16` | 56–64px | Auth shell vertical centering (already `min-h-screen flex items-center`) |
 
 **Exceptions:**
-- Sidebar nav items use `px-3 py-2.5` (10px Y) — already established in `Sidebar.tsx`; keep verbatim for new role-conditional items so they visually match Dashboard/Assessments/Clients/Admin.
 - Glass card on `/login` and `/reset-password`: `p-8` (32px) interior padding — preserves the existing visual; new "Forgot password?" / magic-link CTAs sit inside the same card, NOT in a new container.
 - "Forgot password?" link spacing: `mt-3` (12px) below password field — tighter than primary CTA spacing to read as a tertiary action.
 - Magic-link secondary CTA spacing: separated from primary submit by an `mt-4` divider row (16px) with a `text-white/30 text-[10px]` "OR" hairline label.
+
+**Executor instruction (outside the spacing-scale contract):**
+- Sidebar nav items use `px-3 py-2.5` — this is an existing file value in `Sidebar.tsx`; do not change it, and do not carry it into any new components. New role-conditional nav items inherit the existing `px-3 py-2.5` literally so they visually match Dashboard/Assessments/Clients/Admin.
 
 ---
 
@@ -63,7 +65,7 @@ Type scale for this phase. **3 sizes, 2 weights** — anything outside this scal
 | Body | 14px (`text-sm`) | 400 (`font-normal`) | 1.5 | Form fields, table rows, list items, helper text on `/login`, `/reset-password`, `/portal/admin/users`, `/portal/admin/invitations`, role-grouped dashboard |
 | Body emphasis | 14px (`text-sm`) | 600 (`font-semibold`) | 1.5 | Primary CTA button labels ("Sign In", "Send reset link", "Send invitation"), section headers in role-grouped dashboard, table column headers |
 | Heading | 18–20px (`text-lg`/`text-xl`) | 600 (`font-semibold`) | 1.2 | Glass-card heading ("Welcome back" / "Reset your password"), page titles ("Users", "Invitations") inside `/portal/admin/*` |
-| Display | 28px (`text-3xl` or `text-[1.75rem]`) | 700 (`font-bold`) | 1.2 | Coach-grouped dashboard group headers ("My clients (you)", "{Coach Name}", "Unassigned"); `/portal/admin/users` and `/invitations` page H1 |
+| Display | 28px (`text-3xl` or `text-[1.75rem]`) | 600 (`font-semibold`) | 1.2 | Coach-grouped dashboard group headers ("My clients (you)", "{Coach Name}", "Unassigned"); `/portal/admin/users` and `/invitations` page H1 |
 
 **Micro-text (already established, KEEP — does NOT count against the scale because it's purely tracking/uppercase metadata, not body content):**
 - Eyebrow / breadcrumb labels: `text-[10px]` `tracking-[0.2em]` `uppercase` `font-bold` — used for breadcrumbs and the "AUTHORISED ACCESS ONLY" footer on `/login`. Reuse as-is on `/reset-password` and admin pages for consistency.
@@ -75,6 +77,17 @@ Type scale for this phase. **3 sizes, 2 weights** — anything outside this scal
 ## Color
 
 60/30/10 contract. Two distinct contexts coexist: the **unauthed glassmorphic shell** (`/login`, `/reset-password`) and the **portal/admin shell** (everything under `/portal`). Both share the same accent rules.
+
+### Primary visual anchor per key screen
+
+| Screen | Primary visual anchor |
+|--------|------------------------|
+| `/login` | Centered glass card with gold-underlined Peak360 logo above and the gold primary `Sign In` button as the singular focal action. |
+| `/reset-password` | Centered glass card mirroring `/login`, with the gold primary `Set new password` button as the singular focal action. |
+| `/portal` (role-grouped dashboard) | Vertically stacked group-section blocks; the pinned "My clients (you)" block (gold left border) reads as the visual anchor at the top of the page. |
+| `/portal/admin/users` | Hero header strip with `Users` H1, anchored by the user table beneath it; gold appears only on the per-row `Save role` button when active. |
+| `/portal/admin/invitations` | Hero header strip with `Invitations` H1, with the `Send an invitation` form panel as the focal action region above the past-invitations table. |
+| `/portal/assessment/[id]/report` | The `Section11` longevity report itself; the slim header bar above it (date + gold `Download PDF` button) is the only chrome added. |
 
 ### Unauthed shell (`/login`, `/reset-password`)
 
@@ -309,7 +322,7 @@ Hand-rolled (no shadcn). Reuse existing where listed; create new only where indi
 ### Error states
 - All API errors surface as either inline form errors (for synchronous submit failures) or toasts (for async row mutations like role change).
 - Network errors get the same generic copy regardless of cause: `"We couldn't reach the server. Check your connection and try again."`
-- 403 errors on the `/portal/admin/*` pages redirect to `/portal` with a toast: `"You don't have access to that page."`
+- 403 errors on the `/portal/admin/*` pages redirect to `/portal` with a toast: `"You don't have access to that page. Return to your dashboard."`
 
 ### Empty states
 All empty states have an icon + heading + body + (optional) CTA, vertically centered in the available space, max-width `max-w-sm`. Icons are Heroicons-style outline strokes at `w-12 h-12 text-muted` — pick a contextually relevant glyph (clipboard for assessments, users-group for admin user list, paper-airplane for invitations).
