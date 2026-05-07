@@ -3,8 +3,15 @@
 import { useEffect, useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import type { Assessment } from '@/types/assessment';
 import { authClient } from '@/lib/auth-client';
+import { REPORT_MARKERS } from '@/lib/report-markers';
+import { getPeak360Rating } from '@/lib/normative/ratings';
+import type { RatingTier } from '@/types/normative';
+import type { ChartPoint } from '@/components/charts/MetricChart';
+
+const MetricChart = dynamic(() => import('@/components/charts/MetricChart'), { ssr: false });
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -463,6 +470,14 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+
+        {/* Client trends section — D-28 (gated to ≥ 2 completed assessments) */}
+        {userRole === 'client' && (
+          <ClientTrendsSection
+            assessments={assessments}
+            completedCount={completedCount}
+          />
+        )}
       </main>
     </div>
   );
@@ -495,5 +510,170 @@ function AssessmentRow({ a }: { a: Assessment }) {
         {a.status === 'completed' ? 'Done' : `${a.currentSection}/11`}
       </span>
     </Link>
+  );
+}
+
+interface MarkerPoint {
+  date: string;
+  value: number;
+  tier: RatingTier | null;
+}
+
+function ClientTrendsSection({
+  assessments,
+  completedCount,
+}: {
+  assessments: Assessment[];
+  completedCount: number;
+}) {
+  const [chartData, setChartData] = useState<
+    { testKey: string; label: string; unit: string; data: ChartPoint[] }[]
+  >([]);
+  const [trendsLoading, setTrendsLoading] = useState(false);
+
+  // Sort completed assessments chronologically
+  const completedAssessments = useMemo(
+    () =>
+      assessments
+        .filter((a) => a.status === 'completed')
+        .sort((a, b) =>
+          (a.assessmentDate || a.createdAt).localeCompare(
+            b.assessmentDate || b.createdAt
+          )
+        ),
+    [assessments]
+  );
+
+  useEffect(() => {
+    if (completedCount < 2) {
+      setChartData([]);
+      return;
+    }
+
+    let cancelled = false;
+    async function loadTrends() {
+      setTrendsLoading(true);
+      try {
+        // Fetch section data for each completed assessment in parallel.
+        // API already scopes to the calling client — no client-side filter needed (D-28, T-07-18 mitigation).
+        const sectionsNeeded = [...new Set(REPORT_MARKERS.map((m) => m.section))];
+        const sectionsToFetch = [1, ...sectionsNeeded];
+
+        const timelines = await Promise.all(
+          completedAssessments.map(async (a) => {
+            const sectionData: Record<number, Record<string, unknown>> = {};
+            const results = await Promise.all(
+              sectionsToFetch.map((s) =>
+                fetch(`/api/assessments/${a.id}/sections/${s}`)
+                  .then((r) => r.json())
+                  .then((j) => ({ section: s, data: j.data || {} }))
+                  .catch(() => ({ section: s, data: {} }))
+              )
+            );
+            results.forEach((r) => {
+              sectionData[r.section] = r.data;
+            });
+
+            const age = (sectionData[1]?.clientAge as number) || null;
+            const gender = (sectionData[1]?.clientGender as string) || null;
+
+            const markers: Record<
+              string,
+              { value: number; tier: RatingTier | null; unit: string }
+            > = {};
+            for (const m of REPORT_MARKERS) {
+              const blob = sectionData[m.section];
+              if (!blob) continue;
+              const raw = blob[m.dataKey];
+              const value =
+                typeof raw === 'number'
+                  ? raw
+                  : typeof raw === 'string' && raw !== ''
+                  ? Number(raw)
+                  : null;
+              if (value == null || isNaN(value)) continue;
+
+              const rating = m.hasNorms
+                ? getPeak360Rating(
+                    m.testKey,
+                    value,
+                    age ?? undefined,
+                    gender ?? undefined
+                  )
+                : null;
+              markers[m.testKey] = {
+                value,
+                tier: rating?.tier ?? null,
+                unit: rating?.unit || m.fallbackUnit || '',
+              };
+            }
+
+            return {
+              date: a.assessmentDate || a.createdAt.split('T')[0],
+              markers,
+            };
+          })
+        );
+
+        if (cancelled) return;
+
+        // Build per-marker series — only include markers with ≥ 2 points
+        const series: { testKey: string; label: string; unit: string; data: ChartPoint[] }[] = [];
+        for (const m of REPORT_MARKERS) {
+          const points: MarkerPoint[] = [];
+          for (const tl of timelines) {
+            const entry = tl.markers[m.testKey];
+            if (entry) {
+              points.push({ date: tl.date, value: entry.value, tier: entry.tier });
+            }
+          }
+          if (points.length >= 2) {
+            series.push({
+              testKey: m.testKey,
+              label: m.label,
+              unit: m.fallbackUnit || '',
+              data: points,
+            });
+          }
+        }
+        setChartData(series);
+      } catch {
+        // silently fail — show empty trends rather than break the dashboard
+      } finally {
+        if (!cancelled) setTrendsLoading(false);
+      }
+    }
+    loadTrends();
+    return () => {
+      cancelled = true;
+    };
+  }, [completedAssessments, completedCount]);
+
+  if (completedCount < 2) {
+    return (
+      <div className="mt-8">
+        <p className="text-sm text-muted">Complete more assessments to see trends over time.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mt-8">
+      <h3 className="text-xl font-semibold text-navy mb-4">Your trends over time</h3>
+      {trendsLoading ? (
+        <div className="text-center py-8">
+          <div className="w-5 h-5 border-2 border-navy border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <p className="text-xs text-muted">Loading trends...</p>
+        </div>
+      ) : chartData.length === 0 ? (
+        <p className="text-sm text-muted">No trended metrics yet across your assessments.</p>
+      ) : (
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {chartData.map((c) => (
+            <MetricChart key={c.testKey} label={c.label} unit={c.unit} data={c.data} />
+          ))}
+        </div>
+      )}
+    </div>
   );
 }
