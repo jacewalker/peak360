@@ -14,7 +14,7 @@ export const auth = betterAuth({
   }),
   emailAndPassword: {
     enabled: true,
-    minPasswordLength: 4,
+    minPasswordLength: 8,
     disableSignUp: true, // D-01: block public coach signup; existing accounts unaffected (D-04)
     sendResetPassword: async ({ user, url }) => {
       await sendEmailViaSMTP2Go({

@@ -30,4 +30,11 @@ describe('Better Auth config — D-01 regression guard', () => {
     const block = authSource.slice(idx, idx + 600);
     expect(block).toMatch(/sendEmailViaSMTP2Go/);
   });
+
+  it('emailAndPassword.minPasswordLength is 8 (Phase 7 BL-01 fix — health-data sensitivity floor)', () => {
+    // BL-01 from 07-VERIFICATION.md: the API floor must match the /reset-password UI's minLength={8}.
+    expect(authSource).toMatch(/minPasswordLength:\s*8/);
+    // Negative: ensure the regression value (4) is no longer present.
+    expect(authSource).not.toMatch(/minPasswordLength:\s*4/);
+  });
 });

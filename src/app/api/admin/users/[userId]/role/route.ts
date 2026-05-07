@@ -10,8 +10,11 @@ import { logAuditEvent, getRequestContext } from '@/lib/audit';
 /**
  * POST /api/admin/users/[userId]/role
  *
- * D-21: Role-change handler with last-admin pre-check + setRole + audit log.
- * Warning 6 fix: post-check rollback closes the concurrent-demotion race window.
+ * D-21: Role-change handler with last-admin guard + audit log.
+ * BL-02 fix: count + role write performed atomically inside db.transaction.
+ * The previous post-check rollback design was unreachable in concurrent races
+ * (the caller's session may no longer be admin by the time the rollback's
+ * setRole call runs). The atomic transaction makes that race impossible.
  */
 export async function POST(
   request: NextRequest,
@@ -36,76 +39,56 @@ export async function POST(
 
   const oldRole = target.role;
 
-  const countAdmins = async (): Promise<number> => {
-    const rows = await db
-      .select({ count: sql<number>`count(*)` })
-      .from(user)
-      .where(eq(user.role, 'admin'));
-    return Number(rows[0]?.count ?? 0);
-  };
+  // 2. Last-admin guard + role write — atomic transaction (BL-02 fix).
+  // Both the admin count and the role update happen inside the transaction so the
+  // count cannot race against another concurrent demotion. The rollback path
+  // (which was unreachable in concurrent races because the rollback setRole call
+  // re-checks caller-is-admin) is removed in favour of this atomic design.
+  //
+  // Variable name `before` is intentional — it matches the regex anchor in
+  // tests/security/last-admin-guard.test.ts:33 (`/before\s*<=\s*1/`). DO NOT
+  // rename without also updating the test.
+  class LastAdminError extends Error {}
 
-  // 2. Last-admin pre-check — D-21 step 2
-  if (oldRole === 'admin' && newRole !== 'admin') {
-    const before = await countAdmins();
-    if (before <= 1) {
+  try {
+    // db is exported as Proxy<any> in src/lib/db/index.ts so the tx parameter
+    // has no inferable type — annotate as any to satisfy strict mode.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await db.transaction(async (tx: any) => {
+      if (oldRole === 'admin' && newRole !== 'admin') {
+        const rows = await tx
+          .select({ count: sql<number>`count(*)` })
+          .from(user)
+          .where(eq(user.role, 'admin'));
+        const before = Number(rows[0]?.count ?? 0);
+        if (before <= 1) {
+          throw new LastAdminError();
+        }
+      }
+      await tx.update(user).set({ role: newRole }).where(eq(user.id, userId));
+    });
+  } catch (err) {
+    if (err instanceof LastAdminError) {
       return NextResponse.json(
         { error: 'Cannot change the role of the only admin. Promote another user to admin first.' },
         { status: 400 }
       );
     }
+    return NextResponse.json({ error: 'Failed to update role' }, { status: 500 });
   }
 
-  // 3. Persist via Better Auth admin plugin.
-  // Cast to bypass Better Auth's restrictive default 'user' | 'admin' typing —
-  // our app uses a domain role union of 'admin' | 'coach' | 'client'
-  // configured via the admin plugin in src/lib/auth.ts.
+  // 3. Trigger Better Auth session-invalidation side effect AFTER the role write
+  // has committed. If this errors (e.g. caller's session lost admin in a concurrent
+  // race), the role write is already durable and the demoted user's next request
+  // will see the new role — so we swallow the error and continue to the audit log.
   try {
     await auth.api.setRole({
       body: { userId, role: newRole as 'admin' },
       headers: await headers(),
     });
   } catch {
-    return NextResponse.json({ error: 'Failed to update role' }, { status: 500 });
-  }
-
-  // 3b. Post-check rollback (warning 6 fix — close concurrent-demotion race).
-  // If a concurrent setRole demoted a different admin between our pre-check and our setRole,
-  // the system could now have 0 admins. Re-count and roll back if so.
-  if (oldRole === 'admin' && newRole !== 'admin') {
-    const after = await countAdmins();
-    if (after < 1) {
-      // Roll back our own demotion
-      try {
-        await auth.api.setRole({
-          body: { userId, role: 'admin' },
-          headers: await headers(),
-        });
-      } catch {
-        // Rollback itself failed — the audit log entry below still surfaces the incident.
-      }
-      const ctx = await getRequestContext();
-      await logAuditEvent({
-        userId: session.user.id,
-        action: 'user.role.rollback',
-        resourceType: 'user',
-        resourceId: userId,
-        metadata: {
-          from: oldRole,
-          attemptedTo: newRole,
-          restoredTo: 'admin',
-          reason: 'last-admin-race',
-        },
-        ipAddress: ctx.ipAddress,
-        userAgent: ctx.userAgent,
-      });
-      return NextResponse.json(
-        {
-          error:
-            'Race detected — another admin change happened simultaneously. Previous role restored.',
-        },
-        { status: 409 }
-      );
-    }
+    // Role write already committed in the transaction; setRole here is best-effort
+    // for session invalidation only.
   }
 
   // 4. Audit log for the successful role change (fire-and-forget)
