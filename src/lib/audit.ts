@@ -9,7 +9,9 @@ export type AuditAction =
   | 'report.export'
   | 'file.upload'
   | 'normative.update'
-  | 'user.manage';
+  | 'user.manage'
+  | 'user.role.changed'
+  | 'user.role.rollback';
 
 export async function logAuditEvent(params: {
   userId: string;
