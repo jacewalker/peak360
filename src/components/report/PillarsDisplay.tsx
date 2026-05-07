@@ -20,7 +20,7 @@ export default function PillarsDisplay({ pillars }: Props) {
         </p>
       </header>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-5 gap-2 sm:gap-4">
         {pillars.map((p) => (
           <Pillar key={p.key} pillar={p} />
         ))}
@@ -35,82 +35,68 @@ function Pillar({ pillar }: { pillar: PillarScore }) {
   const isPending = pillar.status === 'pending';
 
   return (
-    <article
-      className="relative flex flex-col rounded-xl border bg-white overflow-hidden"
-      style={{ borderColor: palette.ring }}
-    >
-      {/* Top status band */}
-      <div
-        className="h-1.5 w-full"
-        style={{ backgroundColor: palette.fill }}
-        aria-hidden="true"
-      />
-
-      {/* Header */}
-      <div className="px-4 pt-3 pb-2">
-        <p className="text-[11px] font-semibold tracking-[0.12em] uppercase text-[#64748b]">
-          {pillar.label}
-        </p>
-        <p className="text-[11px] text-[#94a3b8] mt-0.5 leading-tight">{pillar.blurb}</p>
-      </div>
-
-      {/* Vertical pillar — score bar */}
-      <div className="px-4 pb-3 flex items-end gap-3">
-        <div
-          className="relative w-12 h-32 rounded-md overflow-hidden"
-          style={{ backgroundColor: palette.bg }}
-          aria-label={`${pillar.label} score`}
+    <article className="flex flex-col items-center text-center">
+      {/* Score */}
+      <div className="flex items-baseline gap-0.5 mb-2">
+        <span
+          className="text-2xl sm:text-3xl font-bold tabular-nums leading-none"
+          style={{ color: palette.text }}
         >
-          {!isPending && (
-            <div
-              className="absolute bottom-0 left-0 right-0 transition-[height] duration-500"
-              style={{
-                height: `${fillPct}%`,
-                background: `linear-gradient(180deg, ${palette.fill} 0%, ${palette.fill} 100%)`,
-              }}
-            />
-          )}
-          {/* Tick marks */}
-          <div className="absolute inset-0 flex flex-col justify-between py-1.5 pointer-events-none">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="h-px bg-white/40" />
-            ))}
-          </div>
-        </div>
+          {isPending ? '—' : pillar.score}
+        </span>
+        {!isPending && (
+          <span className="text-[10px] font-medium text-[#94a3b8]">/100</span>
+        )}
+      </div>
 
-        <div className="flex-1 min-w-0">
-          <div className="flex items-baseline gap-1">
-            <span
-              className="text-3xl font-bold tabular-nums leading-none"
-              style={{ color: palette.text }}
-            >
-              {isPending ? '—' : pillar.score}
-            </span>
-            {!isPending && (
-              <span className="text-xs font-medium text-[#94a3b8]">/100</span>
-            )}
-          </div>
+      {/* Thin vertical pillar */}
+      <div
+        className="relative w-6 sm:w-7 h-48 sm:h-56 rounded-full overflow-hidden ring-1"
+        style={{
+          backgroundColor: palette.bg,
+          boxShadow: `inset 0 0 0 1px ${palette.ring}`,
+        }}
+        aria-label={`${pillar.label} score ${isPending ? 'pending' : pillar.score}`}
+      >
+        {!isPending && (
           <div
-            className="mt-2 inline-flex items-center gap-1.5 rounded-full px-2 py-0.5"
-            style={{ backgroundColor: palette.bg }}
-          >
-            <span
-              className="w-1.5 h-1.5 rounded-full"
-              style={{ backgroundColor: palette.fill }}
-              aria-hidden="true"
-            />
-            <span
-              className="text-[10px] font-semibold tracking-wide"
-              style={{ color: palette.text }}
-            >
-              {palette.label}
-            </span>
-          </div>
-          <p className="mt-2 text-[10px] text-[#94a3b8]">
-            {pillar.rated}/{pillar.total} markers
-          </p>
+            className="absolute bottom-0 left-0 right-0 transition-[height] duration-700 ease-out"
+            style={{
+              height: `${fillPct}%`,
+              background: `linear-gradient(180deg, ${palette.fill} 0%, ${palette.fill} 100%)`,
+            }}
+          />
+        )}
+        {/* tick marks for visual reference */}
+        <div className="absolute inset-0 flex flex-col justify-between py-2 pointer-events-none">
+          {[0, 1, 2, 3, 4].map((i) => (
+            <div key={i} className="h-px bg-white/50 mx-1" />
+          ))}
         </div>
       </div>
+
+      {/* Status dot + label */}
+      <div className="mt-3 flex items-center gap-1.5">
+        <span
+          className="w-1.5 h-1.5 rounded-full"
+          style={{ backgroundColor: palette.fill }}
+          aria-hidden="true"
+        />
+        <span
+          className="text-[10px] font-semibold uppercase tracking-wider"
+          style={{ color: palette.text }}
+        >
+          {palette.label}
+        </span>
+      </div>
+
+      {/* Pillar name */}
+      <p className="mt-2 text-[11px] sm:text-xs font-semibold text-[#1a365d] leading-tight px-1">
+        {pillar.label}
+      </p>
+      <p className="mt-0.5 text-[10px] text-[#94a3b8]">
+        {pillar.rated}/{pillar.total}
+      </p>
     </article>
   );
 }
