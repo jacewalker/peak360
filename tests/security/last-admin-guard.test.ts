@@ -3,14 +3,17 @@ import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
 /**
- * Phase 7 — D-21 + warning 6 regression guard for the role-change route.
+ * Phase 7 — D-21 + BL-02 fix regression guard for the role-change route.
  *
- * Two regressions are guarded here:
- *   D-21 step 2: count remaining admins BEFORE allowing demotion.
- *   Warning 6 fix: re-count admins AFTER setRole and roll back if count < 1
- *     (closes the concurrent-demotion race window).
+ * Regressions guarded:
+ *   D-21 step 2: count remaining admins BEFORE allowing demotion (verbatim error
+ *     copy + status:400; pinned on the local variable name `before`).
+ *   BL-02 fix (07-10-PLAN, supersedes the previous "warning 6 fix" rollback):
+ *     count + role update happen inside an atomic db.transaction. The previous
+ *     post-check rollback was unreachable in concurrent races and has been
+ *     removed in favour of the atomic design.
  */
-describe('POST /api/admin/users/[userId]/role last-admin guard — D-21 + warning 6 regression guard', () => {
+describe('POST /api/admin/users/[userId]/role last-admin guard — D-21 + BL-02 fix regression guard', () => {
   const source = readFileSync(
     resolve(process.cwd(), 'src/app/api/admin/users/[userId]/role/route.ts'),
     'utf-8'
@@ -53,21 +56,46 @@ describe('POST /api/admin/users/[userId]/role last-admin guard — D-21 + warnin
     expect(source).toMatch(/to:\s*newRole/);
   });
 
-  // ---- Warning 6 fix: post-check rollback ----
-  it('post-check rollback: re-counts admins AFTER setRole and rolls back if count < 1 (warning 6)', () => {
-    // The setRole call appears at least twice — once forward, once for the rollback.
+  // ---- BL-02 fix: atomic transaction replaces the unreachable rollback ----
+  it('count + role update happen inside an atomic db.transaction (BL-02 fix)', () => {
+    // The transactional shape is the new contract.
+    expect(source).toMatch(/db\.transaction\s*\(/);
+
+    // The role write goes through tx.update(user), NOT auth.api.setRole, for the durable write.
+    expect(source).toMatch(/tx\.update\(user\)/);
+
+    // The count query and the role write both happen inside the transaction body.
+    // Brace-balance the transaction body manually because the body contains nested
+    // braces (if-block, template-literal-with-braces) that defeat naive regex.
+    const txStart = source.search(/db\.transaction\s*\(\s*async\s*\(/);
+    expect(txStart).toBeGreaterThanOrEqual(0);
+    const bodyStart = source.indexOf('{', txStart);
+    expect(bodyStart).toBeGreaterThanOrEqual(0);
+    let depth = 1;
+    let bodyEnd = bodyStart + 1;
+    while (bodyEnd < source.length && depth > 0) {
+      const ch = source[bodyEnd];
+      if (ch === '{') depth++;
+      else if (ch === '}') depth--;
+      if (depth === 0) break;
+      bodyEnd++;
+    }
+    const txBlock = source.slice(bodyStart, bodyEnd + 1);
+    // Inside the transaction body: admin-count filter + role write.
+    expect(txBlock).toMatch(/eq\(user\.role,\s*'admin'\)/);
+    expect(txBlock).toMatch(/tx\.update\(user\)/);
+  });
+
+  it('the unreachable post-check rollback is removed (no user.role.rollback audit; no 409 status)', () => {
+    // BL-02 from 07-VERIFICATION.md: the rollback path was unreachable; replaced by atomic transaction.
+    expect(source).not.toMatch(/'user\.role\.rollback'/);
+    expect(source).not.toMatch(/status:\s*409/);
+  });
+
+  it('auth.api.setRole is called at most once (post-commit, for session side-effects only)', () => {
+    // Forward-write + rollback both used auth.api.setRole, totalling 2+ calls.
+    // Post-fix: at most 1 call, made AFTER db.transaction commits, purely for session invalidation.
     const setRoleMatches = source.match(/auth\.api\.setRole/g) ?? [];
-    expect(setRoleMatches.length).toBeGreaterThanOrEqual(2);
-
-    // The rollback writes a distinct audit action.
-    expect(source).toMatch(/'user\.role\.rollback'/);
-
-    // The rollback returns 409 — the canonical "race detected" status.
-    expect(source).toMatch(/status:\s*409/);
-
-    // The rollback path appears AFTER the first setRole call.
-    const firstSetRoleIdx = source.search(/auth\.api\.setRole/);
-    const rollbackIdx = source.search(/'user\.role\.rollback'/);
-    expect(rollbackIdx).toBeGreaterThan(firstSetRoleIdx);
+    expect(setRoleMatches.length).toBeLessThanOrEqual(1);
   });
 });
