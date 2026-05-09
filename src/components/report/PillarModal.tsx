@@ -1,0 +1,345 @@
+'use client';
+
+import Dialog from '@/components/ui/Dialog';
+import type {
+  PillarDefinition,
+  PillarPrescription,
+  PillarStatus,
+} from '@/lib/pillars/types';
+import { TRAFFIC_LIGHT_HEX, TRAFFIC_LIGHT_TEXT, STATUS_LABEL } from '@/lib/pillars/colors';
+import type { ReportMarker } from '@/lib/pdf/types';
+import type { RatingTier } from '@/types/normative';
+import { TIER_LABELS } from '@/types/normative';
+
+/**
+ * Phase 8 — PillarModal — seven-section drill-down.
+ *
+ * Locked section order (UI-SPEC §Modal sections):
+ *   1. Header (no label)         5. What needs attention
+ *   2. What this pillar means    6. Score breakdown
+ *   3. Your results              7. Recommended plan
+ *   4. What you are doing well
+ *
+ * D-11 anti-pattern: 5-tier marker palette is used inside the modal
+ * (TierPill / TIER_DOT) for marker rows; the traffic-light palette is
+ * used ONLY for the header status pill.
+ */
+
+interface PillarModalProps {
+  open: boolean;
+  onClose: () => void;
+  definition: PillarDefinition;
+  prescription: PillarPrescription | null;
+  score: number | null;
+  status: PillarStatus;
+  primaryMarkers: ReportMarker[];
+  supportingMarkers: ReportMarker[];
+}
+
+// Lifted from Section11.tsx (5-tier marker dot palette)
+const TIER_DOT: Record<RatingTier, string> = {
+  elite: '#10b981',
+  great: '#3b82f6',
+  normal: '#6b7280',
+  cautious: '#f59e0b',
+  poor: '#ef4444',
+};
+
+// D-08 — tier-rollup score values (mirrors src/lib/pillars/mapping.ts TIER_VALUE).
+// Local copy so the modal can show per-marker contributions without re-importing
+// the private constant.
+const TIER_VALUE: Record<RatingTier, number> = {
+  elite: 100,
+  great: 80,
+  normal: 60,
+  cautious: 40,
+  poor: 20,
+};
+
+// Lifted verbatim from Section11.tsx (lines 73–86).
+function TierPill({ tier }: { tier: RatingTier }) {
+  const bg: Record<RatingTier, string> = {
+    elite: 'bg-emerald-600',
+    great: 'bg-blue-600',
+    normal: 'bg-gray-500',
+    cautious: 'bg-amber-500',
+    poor: 'bg-red-600',
+  };
+  return (
+    <span className={`report-tier-pill inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase text-white ${bg[tier]}`}>
+      {TIER_LABELS[tier]}
+    </span>
+  );
+}
+
+function relativeTime(epochMs: number): string {
+  const now = Date.now();
+  const diffSec = Math.max(0, Math.floor((now - epochMs) / 1000));
+  if (diffSec < 60) return diffSec === 1 ? '1 second ago' : `${diffSec} seconds ago`;
+  const diffMin = Math.floor(diffSec / 60);
+  if (diffMin < 60) return diffMin === 1 ? '1 minute ago' : `${diffMin} minutes ago`;
+  const diffHr = Math.floor(diffMin / 60);
+  if (diffHr < 24) return diffHr === 1 ? '1 hour ago' : `${diffHr} hours ago`;
+  const diffDay = Math.floor(diffHr / 24);
+  if (diffDay < 30) return diffDay === 1 ? '1 day ago' : `${diffDay} days ago`;
+  const diffMon = Math.floor(diffDay / 30);
+  if (diffMon < 12) return diffMon === 1 ? '1 month ago' : `${diffMon} months ago`;
+  const diffYr = Math.floor(diffMon / 12);
+  return diffYr === 1 ? '1 year ago' : `${diffYr} years ago`;
+}
+
+function formatValue(m: ReportMarker): string {
+  if (m.value === null) return '—';
+  return m.unit ? `${m.value} ${m.unit}` : `${m.value}`;
+}
+
+export default function PillarModal({
+  open,
+  onClose,
+  definition,
+  prescription,
+  score,
+  status,
+  primaryMarkers,
+  supportingMarkers,
+}: PillarModalProps) {
+  const isPending = status === 'pending';
+  const pillBg = isPending ? 'transparent' : TRAFFIC_LIGHT_HEX[status];
+  const pillText = TRAFFIC_LIGHT_TEXT[status];
+  const dotColor = isPending ? '#94a3b8' : TRAFFIC_LIGHT_TEXT[status];
+
+  // Rated markers only contribute to score; filter once for sections 3/4/5/6
+  const ratedPrimary = primaryMarkers.filter((m) => m.tier !== null);
+  const doingWell = ratedPrimary.filter((m) => m.tier === 'great' || m.tier === 'elite');
+  const needsAttention = ratedPrimary.filter((m) => m.tier === 'cautious' || m.tier === 'poor');
+
+  const breakdownCount = ratedPrimary.length;
+  const breakdownFooter = `Pillar score is the average tier value across ${breakdownCount} rated marker${breakdownCount === 1 ? '' : 's'}. Markers without normative ranges are excluded.`;
+
+  return (
+    <Dialog open={open} onClose={onClose} mode="auto" ariaLabel={`${definition.label} details`}>
+      {/* Sticky top-right close button (44x44 hit area, autofocus target) */}
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Close"
+        data-autofocus
+        className="absolute top-3 right-3 w-11 h-11 inline-flex items-center justify-center rounded-full text-navy/70 hover:text-navy hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(245,166,35,0.25)]"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+          <path d="M3 3l10 10M13 3L3 13" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+
+      <div className="space-y-6">
+        {/* ── Section 1: Header (no heading label) ── */}
+        <header>
+          <h2
+            className="font-semibold leading-[1.15] text-navy"
+            style={{ fontSize: 'clamp(24px, 4vw, 28px)' }}
+          >
+            {definition.label}
+          </h2>
+          <div className="mt-2 flex items-center gap-3">
+            <div
+              className="text-navy font-semibold leading-none"
+              style={{ fontSize: '48px', fontVariantNumeric: 'tabular-nums' }}
+            >
+              {score === null ? '—' : score}
+              <span className="text-base font-normal text-muted ml-1 align-baseline">/100</span>
+            </div>
+            <span
+              className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold"
+              style={{
+                backgroundColor: pillBg,
+                color: pillText,
+                border: isPending ? '1px solid #e2e8f0' : undefined,
+              }}
+            >
+              <span
+                aria-hidden="true"
+                className="inline-block w-2 h-2 rounded-full"
+                style={{ backgroundColor: dotColor }}
+              />
+              {STATUS_LABEL[status]}
+            </span>
+          </div>
+        </header>
+
+        {/* ── Section 2: What this pillar means ── */}
+        <section>
+          <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            What this pillar means
+          </h3>
+          <p className="mt-2 text-base leading-[1.5] text-muted">
+            {definition.plainMeaning}
+          </p>
+        </section>
+
+        {/* ── Section 3: Your results ── */}
+        <section>
+          <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            Your results
+          </h3>
+          {ratedPrimary.length === 0 ? (
+            <p className="mt-2 text-base leading-[1.5] text-muted">
+              We don&apos;t have any rated markers for this pillar in this assessment yet. Check the detailed marker results below the pillars grid for any raw values your coach has entered.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {ratedPrimary.map((m) => (
+                <li key={m.key} className="flex items-center justify-between gap-3 text-sm">
+                  <span className="text-navy font-medium">{m.label}</span>
+                  <span className="flex items-center gap-3">
+                    <span className="text-navy tabular-nums">{formatValue(m)}</span>
+                    {m.tier && <TierPill tier={m.tier} />}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* ── Section 4: What you are doing well ── */}
+        <section>
+          <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            What you are doing well
+          </h3>
+          {doingWell.length === 0 ? (
+            <p className="mt-2 text-base leading-[1.5] text-muted">
+              No standout strengths in this pillar yet — every score below tells you where momentum can build.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {doingWell.map((m) => (
+                <li key={m.key} className="flex items-center gap-2 text-sm text-navy">
+                  <span
+                    aria-hidden="true"
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ backgroundColor: m.tier ? TIER_DOT[m.tier] : '#94a3b8' }}
+                  />
+                  {m.label}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* ── Section 5: What needs attention ── */}
+        <section>
+          <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            What needs attention
+          </h3>
+          {needsAttention.length === 0 ? (
+            <p className="mt-2 text-base leading-[1.5] text-muted">
+              Nothing in this pillar is flagged for attention right now — keep it up.
+            </p>
+          ) : (
+            <ul className="mt-3 space-y-2">
+              {needsAttention.map((m) => (
+                <li key={m.key} className="flex items-center gap-2 text-sm text-navy">
+                  <span
+                    aria-hidden="true"
+                    className="inline-block w-2 h-2 rounded-full"
+                    style={{ backgroundColor: m.tier ? TIER_DOT[m.tier] : '#94a3b8' }}
+                  />
+                  {m.label}
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* ── Section 6: Score breakdown ── */}
+        <section>
+          <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            Score breakdown
+          </h3>
+          {ratedPrimary.length > 0 && (
+            <table className="w-full text-sm mt-3">
+              <thead>
+                <tr className="text-left text-xs uppercase tracking-wide text-muted">
+                  <th className="py-1 pr-2 font-semibold">Marker</th>
+                  <th className="py-1 px-2 font-semibold">Value</th>
+                  <th className="py-1 px-2 font-semibold">Tier</th>
+                  <th className="py-1 pl-2 font-semibold text-right">Contribution</th>
+                </tr>
+              </thead>
+              <tbody>
+                {ratedPrimary.map((m) => (
+                  <tr key={m.key} className="border-t border-border">
+                    <td className="py-2 pr-2 text-navy font-medium">{m.label}</td>
+                    <td className="py-2 px-2 text-navy tabular-nums">{formatValue(m)}</td>
+                    <td className="py-2 px-2">{m.tier && <TierPill tier={m.tier} />}</td>
+                    <td className="py-2 pl-2 text-right text-navy tabular-nums">
+                      {m.tier ? `+${TIER_VALUE[m.tier]}` : ''}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+          <p className="mt-3 text-sm text-muted">{breakdownFooter}</p>
+
+          {supportingMarkers.length > 0 && (
+            <div className="mt-5">
+              <h4 className="text-base font-semibold text-navy">Supporting markers</h4>
+              <p className="mt-1 text-sm text-muted">
+                Surfaced for transparency — these markers are NOT included in the pillar score.
+              </p>
+              <ul className="mt-3 space-y-2">
+                {supportingMarkers.map((m) => (
+                  <li key={m.key} className="flex items-center justify-between gap-3 text-sm">
+                    <span className="text-navy font-medium">{m.label}</span>
+                    <span className="flex items-center gap-3">
+                      <span className="text-navy tabular-nums">{formatValue(m)}</span>
+                      {m.tier && <TierPill tier={m.tier} />}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
+        </section>
+
+        {/* ── Section 7: Recommended plan ── */}
+        <section>
+          <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            Recommended plan
+          </h3>
+          {!prescription ? (
+            <p className="mt-2 text-base leading-[1.5] text-muted">
+              Your coach hasn&apos;t written a recommendation for this pillar yet. Check back soon.
+            </p>
+          ) : (
+            <div className="mt-2">
+              <p className="text-base leading-[1.5] text-navy">{prescription.summary}</p>
+              {prescription.bullets && prescription.bullets.length > 0 && (
+                <ul className="mt-3 space-y-1.5 list-disc list-inside text-sm text-navy">
+                  {prescription.bullets.map((b, i) => (
+                    <li key={i}>{b}</li>
+                  ))}
+                </ul>
+              )}
+              {prescription.fullPlanHref && (
+                <div className="mt-4">
+                  <a
+                    href={prescription.fullPlanHref}
+                    className="inline-block px-4 py-2 bg-navy text-white text-sm font-semibold rounded-lg hover:bg-navy/90"
+                  >
+                    Open full plan
+                  </a>
+                </div>
+              )}
+              {prescription.updatedBy?.name && prescription.updatedAt && (
+                <p className="mt-4 pl-3 border-l-4 border-gold text-xs text-muted">
+                  Updated by {prescription.updatedBy.name} · {relativeTime(prescription.updatedAt)}
+                </p>
+              )}
+            </div>
+          )}
+        </section>
+      </div>
+    </Dialog>
+  );
+}
