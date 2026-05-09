@@ -1,1 +1,67 @@
-{"version":"1.0","timestamp":"2026-04-12T04:24:38.035Z","phase":"06","phase_name":"routing-infrastructure-design-system","status":"paused","next_action":"Commit all changes, then review landing page styling","context_notes":"Path-based routing done. Full landing page built. All uncommitted."}
+{
+  "version": "1.0",
+  "timestamp": "2026-05-09T10:56:20.532Z",
+  "phase": "08",
+  "phase_name": "client-report-design-refresh",
+  "phase_dir": ".planning/phases/08-client-report-design-refresh",
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
+  "status": "paused",
+  "context": "post-quick-task UX iteration on Section 11 pillar visual + drill-down pattern",
+  "completed_tasks": [
+    {"id": "08-01", "name": "Schema + seed migration + AuditAction extension", "status": "done", "commit": "00e626e"},
+    {"id": "08-02", "name": "Pure pillar layer + Vitest tests", "status": "done", "commit": "5d59890"},
+    {"id": "08-03", "name": "Portal pillars UI (Dialog + PillarsGrid + Modal)", "status": "done", "commit": "6a86ed3"},
+    {"id": "08-04", "name": "Admin authoring (pillars + prescriptions + RBAC tests)", "status": "done", "commit": "2cf8968"},
+    {"id": "08-05", "name": "PDF mirror (PillarsPage + ReportData extensions)", "status": "done", "commit": "cd20558"},
+    {"id": "phase-08-verification", "name": "Phase 08 automated verification (14/14 must-haves passed)", "status": "done", "result": "human_needed", "commit": "9b4faf7"},
+    {"id": "phase-08-playwright", "name": "Phase 8 Playwright spec (6/6 pass against /portal report)", "status": "done", "commit": "c679a9f"},
+    {"id": "admin-breadcrumbs", "name": "Admin breadcrumbs + audit-logs moved into portal", "status": "done", "commit": "7cd2766"},
+    {"id": "260509-ody", "name": "Quick task: pillars clickable + section-local marker modal", "status": "done", "commit": "f3488b3"},
+    {"id": "redesign-r1", "name": "PillarsDisplay redesign #1: HUD digital signal columns", "status": "done", "commit": "0699eb0"},
+    {"id": "redesign-r2", "name": "PillarsDisplay redesign #2: Tailwind-native bubbly + colourful (current HEAD)", "status": "done", "commit": "0629cc0"},
+    {"id": "research", "name": "Research: how Whoop/Oura/Apple/Garmin/Function/InsideTracker present composite scores + drill-downs", "status": "done", "result": "summary delivered, 5 archetypes identified, modal-vs-drawer convention surfaced"},
+    {"id": "mockup", "name": "Build side-by-side comparison HTML at mockups/pillar-options.html", "status": "done", "result": "untracked file — 3 pillar styles + shared side drawer"}
+  ],
+  "remaining_tasks": [
+    {"id": "user-pick", "name": "User chooses one of: Option 1 (horizontal tier bars), Option 2 (rings + contributor chips), Option 3 (tile + sparkline grid)", "status": "awaiting_user", "blocking": true},
+    {"id": "section11-rewire", "name": "Wire chosen option into src/components/report/PillarsDisplay.tsx (replaces current bubbly redesign)", "status": "not_started", "depends_on": ["user-pick"]},
+    {"id": "drawer-replace-modal", "name": "Replace src/components/report/PillarsDisplayModal.tsx with a side-drawer component (desktop side drawer + mobile full-page or bottom-sheet)", "status": "not_started", "depends_on": ["user-pick"]},
+    {"id": "phase-08-uat", "name": "Resolve outstanding UAT items in 08-HUMAN-UAT.md (#2 admin round-trip, #3 PDF render). #1 portal modal is already covered by Playwright.", "status": "awaiting_human", "blocking_phase_complete": true},
+    {"id": "phase-08-complete", "name": "Mark Phase 08 complete via /gsd-execute-phase 08 --auto once UAT resolves", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "User has not yet picked between Option 1/2/3 from mockups/pillar-options.html", "type": "human_action", "workaround": "open the HTML, click any pillar in any section to demo the shared drawer, reply with 1/2/3"},
+    {"description": "Phase 08 status is 'human_needed' (14/14 automated must-haves passed but 3 UAT items pending)", "type": "human_action", "workaround": "see 08-HUMAN-UAT.md — items 2 and 3 still need manual verification"}
+  ],
+  "human_actions_pending": [
+    {"action": "Open mockups/pillar-options.html and pick Option 1, 2, or 3 for the pillar style", "context": "Three side-by-side designs, each clickable to demo the shared side drawer", "blocking": true},
+    {"action": "Decide whether the current bubbly redesign (commit 0629cc0) should be reverted before wiring the chosen option, or replaced in-place", "context": "PillarsDisplay.tsx and PillarsDisplayModal.tsx will be overwritten when the chosen option lands", "blocking": false},
+    {"action": "Manually verify 08-HUMAN-UAT.md item #2 (admin authoring round-trip: /portal/admin/pillars edit -> save -> audit_log row -> report shows update)", "context": "Required to mark Phase 08 complete", "blocking": false},
+    {"action": "Manually verify 08-HUMAN-UAT.md item #3 (PDF render: /api/assessments/{id}/pdf, pillars page first, file size under 500KB)", "context": "Required to mark Phase 08 complete", "blocking": false}
+  ],
+  "decisions": [
+    {"decision": "Drill-down should be a side drawer (desktop) + full sub-page or bottom-sheet (mobile), NOT a centered modal", "rationale": "User chose this. Research confirmed Whoop/Oura/Apple/Garmin all use full-page navigation or drawers, not modals, for primary domains. Modals compete with the report flow.", "phase": "08"},
+    {"decision": "Build the comparison as a static HTML file at mockups/pillar-options.html using Tailwind CDN", "rationale": "User explicitly asked to see all three side-by-side in a new HTML file before picking", "phase": "08"},
+    {"decision": "Quick task 260509-ody is considered complete and tracked in STATE.md, even though the modal it built is being reconsidered", "rationale": "The clickable-pillar wiring + state mgmt + drawer-style mount-point lands cleanly; only the modal visual is being replaced", "phase": "quick"},
+    {"decision": "Admin pages (/portal/admin/users, invitations, pillars, audit-logs, prescriptions) all use a clickable Administration breadcrumb link to /portal/admin", "rationale": "User asked for breadcrumbs to go back. Audit-logs additionally moved from /admin/audit-logs into /portal/admin/audit-logs so it inherits the portal sidebar.", "phase": "08"}
+  ],
+  "uncommitted_files": [
+    {"path": "mockups/pillar-options.html", "status": "untracked", "purpose": "Side-by-side comparison of 3 pillar styles + shared side drawer (Tailwind CDN, no server). Open file:// directly in browser."},
+    {"path": ".planning/phases/08-client-report-design-refresh/08-PATTERNS.md", "status": "untracked", "purpose": "Pattern map produced during /gsd-plan-phase 08 — leftover from planning, never committed. Safe to commit or delete."}
+  ],
+  "background_processes": [
+    {"name": "Next.js dev server", "command": "PORT=8080 npm run dev", "url": "http://localhost:8080", "status": "running", "started_in": "this session for Playwright smoke tests + UI verification"}
+  ],
+  "test_credentials": {
+    "note": "Set up earlier this session. Password stored in .env.local as UAT_PASSWORD=password123. All three accounts share the same password.",
+    "accounts": [
+      {"email": "admin@admin.com", "role": "admin"},
+      {"email": "coach@peak360.com", "role": "coach"},
+      {"email": "client@peak360.com", "role": "client"}
+    ]
+  },
+  "next_action": "Wait for user to pick Option 1, 2, or 3 from mockups/pillar-options.html. Once chosen, rewrite src/components/report/PillarsDisplay.tsx to that style and replace PillarsDisplayModal.tsx with a side drawer (desktop right slide-in + mobile full-page or bottom-sheet).",
+  "context_notes": "Mid-redesign of the Section 11 'Peak Living Pillars' visual. Multiple iterations: HUD digital columns -> Tailwind bubbly -> user said 'looks bad' -> research -> mockup HTML with 3 options + shared drawer. Current src/components/report/PillarsDisplay.tsx is the bubbly Tailwind version (commit 0629cc0). The user wants a side drawer for drill-down (not a modal) regardless of which pillar style wins. The existing PillarsDisplayModal.tsx is the section-local modal built by quick task 260509-ody — its data wiring (markerToPillar grouping, tier buckets, marker rows) can be reused when building the drawer; only the chrome changes."
+}
