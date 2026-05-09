@@ -145,7 +145,7 @@ Plans:
 **Plans:** 5 plans
 
 Plans:
-- [ ] 08-01-PLAN.md — Schema (3 new tables: pillar_definitions, pillar_page_copy, pillar_prescriptions) + idempotent seed migration + AuditAction extension + BLOCKING db push (REQ-08-05, REQ-08-08; D-13, D-17, D-18, D-19)
+- [x] 08-01-PLAN.md — Schema (3 new tables: pillar_definitions, pillar_page_copy, pillar_prescriptions) + idempotent seed migration + AuditAction extension + BLOCKING db push (REQ-08-05, REQ-08-08; D-13, D-17, D-18, D-19)
 - [ ] 08-02-PLAN.md — Pure pillar layer: types, single-source-of-truth colours, marker→pillar mapping with D-05 Option A balance reclassification, score formula, SSR queries + Vitest unit tests (REQ-08-04; D-05, D-06, D-08, D-10, D-28)
 - [ ] 08-03-PLAN.md — Portal: hand-rolled Dialog + PillarsGrid/Card/Modal + Detailed marker results disclosure + ReportShell + extend SSR report page with pillar/page-copy/prescriptions/markers data load (preserves Phase 7 BL-05) (REQ-08-01, REQ-08-02, REQ-08-09; D-01..D-03, D-21..D-25, D-29)
 - [ ] 08-04-PLAN.md — Admin authoring: /api/admin/pillars + /api/admin/assessments/[id]/prescriptions + /portal/admin/pillars + /portal/admin/assessments/[id]/prescriptions + RBAC regression tests (REQ-08-06, REQ-08-07, REQ-08-08; D-12, D-15, D-16, D-19, D-20, D-30)
