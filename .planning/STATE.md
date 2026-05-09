@@ -104,6 +104,7 @@ Recent decisions affecting current work:
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260506-snj | Promote v2 landing to / and add password gate | 2026-05-06 | 8720867 | [260506-snj-promote-v2-landing-to-and-add-password-g](./quick/260506-snj-promote-v2-landing-to-and-add-password-g/) |
+| 260509-ody | Make Section 11 pillars clickable with marker breakdown modal | 2026-05-09 | f5474f8 | [260509-ody-pillar-clickable-modal-with-marker-breakdown](./quick/260509-ody-pillar-clickable-modal-with-marker-breakdown/) |
 
 ## Session Continuity
 
