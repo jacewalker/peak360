@@ -11,7 +11,12 @@ export type AuditAction =
   | 'normative.update'
   | 'user.manage'
   | 'user.role.changed'
-  | 'user.role.rollback';
+  | 'user.role.rollback'
+  // Phase 8 — Peak Living pillar authoring (D-16, D-20)
+  | 'pillar_definition.update'
+  | 'pillar_page_copy.update'
+  | 'pillar_prescription.upsert'
+  | 'pillar_prescription.delete';
 
 export async function logAuditEvent(params: {
   userId: string;
