@@ -48,3 +48,12 @@ export const TIER_TEXT_PDF: Record<RatingTier, string> = {
   cautious: '#92400e',
   poor: '#991b1b',
 };
+
+/**
+ * Phase 8 — D-28 single-source-of-truth re-export.
+ * The PDF mirror page (`src/lib/pdf/components/PillarsPage.tsx`) imports
+ * traffic-light colours from this module so PDF-side hex values can never
+ * drift from portal-side hex values. The actual constants live in
+ * `src/lib/pillars/colors.ts`.
+ */
+export { TRAFFIC_LIGHT_HEX, TRAFFIC_LIGHT_TEXT, PILLAR_THRESHOLDS, STATUS_LABEL } from '@/lib/pillars/colors';
