@@ -4,20 +4,30 @@ import { assessments } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { headers } from 'next/headers';
 import { redirect, notFound } from 'next/navigation';
-import Section11 from '@/components/sections/Section11';
+import ReportShell from '@/components/report/ReportShell';
+import {
+  getPillarDefinitions,
+  getPillarPageCopy,
+  getPillarPrescriptions,
+} from '@/lib/pillars/queries';
+import { loadReportData } from '@/lib/report/load-report-data';
 import type { AuthSession } from '@/lib/auth-helpers';
 
 /**
  * BL-05 fix: SSR ownership gate.
  *
  * The /report page is now a server component. It reads the session, fetches
- * the assessment row, calls hasAccess(), and issues notFound()/redirect()
+ * the assessment row, calls hasAccess(), and issues 404/302
  * BEFORE any HTML is rendered. The page chrome (header + Download PDF button)
  * is inside the gated branch only — a client guessing another client's UUID
  * never sees the page shell.
  *
- * Section11 itself remains a client component; Next.js handles the
- * server-to-client boundary at the <Section11 /> JSX site.
+ * Phase 8 (Plan 03): Section 11 was replaced by ReportShell, which renders
+ * the new Peak Living five-pillar grid + collapsed detailed marker results.
+ * Pillar definitions / page copy / per-assessment prescriptions and the
+ * pre-computed marker set are loaded server-side post-gate in parallel
+ * (D-21 SSR + Pitfall #8 fix — portal and PDF use the same loadReportData
+ * source, so pillar scores never drift between surfaces).
  */
 
 // hasAccess is duplicated from src/app/api/assessments/[id]/pdf/route.ts:11-20.
@@ -62,13 +72,24 @@ export default async function ReportPage({
 
   // 3. Enforce ownership BEFORE rendering any chrome.
   if (!hasAccess(session.user.role, session.user.id, row)) {
-    // redirect('/portal') matches the VERIFICATION.md row-5 missing-list option;
-    // notFound() is the alternative. We pick redirect to give the user a
-    // sensible landing page instead of a 404.
+    // Redirect to the portal landing page (matches VERIFICATION.md row-5
+    // missing-list option); we pick redirect over a 404 to give the user a
+    // sensible landing page.
     redirect('/portal');
   }
 
-  // 4. Format date label server-side (locale: en-GB to match prior client behaviour).
+  // 4. Load pillar definitions, page copy, prescriptions, and the pre-computed
+  //    marker set in parallel. Pulling markers from `loadReportData` (the same
+  //    helper the PDF route uses) is the Pitfall #8 fix — portal and PDF derive
+  //    pillar scores from the same source of truth (D-21 SSR + D-22 score parity).
+  const [definitions, pageCopy, prescriptions, reportData] = await Promise.all([
+    getPillarDefinitions(),
+    getPillarPageCopy(),
+    getPillarPrescriptions(id),
+    loadReportData(id),
+  ]);
+
+  // 5. Format date label server-side (locale: en-GB to match prior client behaviour).
   const dateLabel = row.assessmentDate
     ? new Date(row.assessmentDate).toLocaleDateString('en-GB', {
         day: 'numeric',
@@ -91,7 +112,13 @@ export default async function ReportPage({
           Download PDF
         </a>
       </div>
-      <Section11 assessmentId={id} />
+      <ReportShell
+        assessmentId={id}
+        definitions={definitions}
+        pageCopy={pageCopy}
+        prescriptions={prescriptions}
+        markers={reportData.markers}
+      />
     </main>
   );
 }
