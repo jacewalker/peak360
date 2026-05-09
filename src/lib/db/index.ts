@@ -203,6 +203,67 @@ export async function runMigrations() {
     await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_action" ON "audit_logs" ("action")`);
     await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_created_at" ON "audit_logs" ("created_at")`);
 
+    // Phase 8 — Peak Living pillar tables
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "pillar_definitions" (
+        "pillar_key" text PRIMARY KEY NOT NULL,
+        "label" text NOT NULL,
+        "short_summary" text NOT NULL,
+        "plain_meaning" text NOT NULL,
+        "sort_order" integer NOT NULL,
+        "updated_by" text NOT NULL,
+        "updated_at" bigint NOT NULL
+      )
+    `);
+
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "pillar_page_copy" (
+        "id" serial PRIMARY KEY NOT NULL,
+        "heading" text NOT NULL,
+        "intro" text NOT NULL,
+        "updated_by" text NOT NULL,
+        "updated_at" bigint NOT NULL
+      )
+    `);
+
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "pillar_prescriptions" (
+        "assessment_id" text NOT NULL REFERENCES "assessments"("id") ON DELETE CASCADE,
+        "pillar_key" text NOT NULL,
+        "summary" text NOT NULL,
+        "bullets" jsonb,
+        "full_plan_href" text,
+        "updated_by" text NOT NULL,
+        "updated_at" bigint NOT NULL,
+        PRIMARY KEY ("assessment_id", "pillar_key")
+      )
+    `);
+
+    // Idempotent seed — pillar definitions (D-18; copy verbatim from 08-UI-SPEC.md)
+    {
+      const now8 = Date.now();
+      await d.execute(sql`
+        INSERT INTO "pillar_definitions" ("pillar_key", "label", "short_summary", "plain_meaning", "sort_order", "updated_by", "updated_at")
+        VALUES
+          ('cardiometabolic', 'Cardiometabolic Health', 'How well your heart, vessels, and metabolism are working together.', 'Cardiometabolic health covers the markers that drive long-term heart, vessel, and metabolic function — cholesterol balance, blood sugar control, inflammation, and blood pressure. Strong numbers here mean your engine is running clean.', 0, 'system', ${now8}),
+          ('vo2', 'VO2 / Fitness Capacity', 'The size of your aerobic engine — the single best predictor of all-cause mortality.', 'VO2 max measures how efficiently your body uses oxygen during effort. It is one of the strongest predictors of healthspan and is highly trainable at any age. A larger aerobic engine means more capacity for everything else.', 1, 'system', ${now8}),
+          ('bodyComposition', 'Body Composition', 'The balance of muscle, fat, and where it sits on your frame.', 'Body composition looks beyond weight — at the proportion of muscle to fat and how it''s distributed. A favourable composition supports metabolic health, joint longevity, and how capable you feel day-to-day.', 2, 'system', ${now8}),
+          ('strength', 'Strength', 'Your ability to produce force — a leading indicator of healthy ageing.', 'Strength is one of the clearest signals of how well you are ageing. The ability to lift, push, and grip translates directly into independence, injury resistance, and quality of life as the decades roll on.', 3, 'system', ${now8}),
+          ('balance', 'Balance', 'Stability and proprioception — your body''s quiet defence against falls.', 'Balance combines coordination, proprioception, and postural control. Strong balance now means a dramatically lower fall risk later, and it tracks closely with overall neurological and musculoskeletal health.', 4, 'system', ${now8})
+        ON CONFLICT ("pillar_key") DO NOTHING
+      `);
+
+      // Idempotent seed — page copy (D-19; one row only)
+      await d.execute(sql`
+        INSERT INTO "pillar_page_copy" ("heading", "intro", "updated_by", "updated_at")
+        SELECT 'The Peak Living Pillars',
+               'Peak360 translates your results into five core pillars to show where you are performing strongly, where you may be exposed, and where focused intervention can help move you toward peak living.',
+               'system',
+               ${now8}
+        WHERE NOT EXISTS (SELECT 1 FROM "pillar_page_copy")
+      `);
+    }
+
   } else {
     d.run(sql`
       CREATE TABLE IF NOT EXISTS "assessments" (
@@ -361,6 +422,66 @@ export async function runMigrations() {
     d.run(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_user_id" ON "audit_logs" ("user_id")`);
     d.run(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_action" ON "audit_logs" ("action")`);
     d.run(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_created_at" ON "audit_logs" ("created_at")`);
+
+    // Phase 8 — Peak Living pillar tables
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "pillar_definitions" (
+        "pillar_key" text PRIMARY KEY NOT NULL,
+        "label" text NOT NULL,
+        "short_summary" text NOT NULL,
+        "plain_meaning" text NOT NULL,
+        "sort_order" integer NOT NULL,
+        "updated_by" text NOT NULL,
+        "updated_at" integer NOT NULL
+      )
+    `);
+
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "pillar_page_copy" (
+        "id" integer PRIMARY KEY AUTOINCREMENT,
+        "heading" text NOT NULL,
+        "intro" text NOT NULL,
+        "updated_by" text NOT NULL,
+        "updated_at" integer NOT NULL
+      )
+    `);
+
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "pillar_prescriptions" (
+        "assessment_id" text NOT NULL REFERENCES "assessments"("id") ON DELETE CASCADE,
+        "pillar_key" text NOT NULL,
+        "summary" text NOT NULL,
+        "bullets" text,
+        "full_plan_href" text,
+        "updated_by" text NOT NULL,
+        "updated_at" integer NOT NULL,
+        PRIMARY KEY ("assessment_id", "pillar_key")
+      )
+    `);
+
+    // Idempotent seed — pillar definitions (D-18; copy verbatim from 08-UI-SPEC.md)
+    {
+      const now8 = Date.now();
+      d.run(sql`
+        INSERT OR IGNORE INTO "pillar_definitions" ("pillar_key", "label", "short_summary", "plain_meaning", "sort_order", "updated_by", "updated_at")
+        VALUES
+          ('cardiometabolic', 'Cardiometabolic Health', 'How well your heart, vessels, and metabolism are working together.', 'Cardiometabolic health covers the markers that drive long-term heart, vessel, and metabolic function — cholesterol balance, blood sugar control, inflammation, and blood pressure. Strong numbers here mean your engine is running clean.', 0, 'system', ${now8}),
+          ('vo2', 'VO2 / Fitness Capacity', 'The size of your aerobic engine — the single best predictor of all-cause mortality.', 'VO2 max measures how efficiently your body uses oxygen during effort. It is one of the strongest predictors of healthspan and is highly trainable at any age. A larger aerobic engine means more capacity for everything else.', 1, 'system', ${now8}),
+          ('bodyComposition', 'Body Composition', 'The balance of muscle, fat, and where it sits on your frame.', 'Body composition looks beyond weight — at the proportion of muscle to fat and how it''s distributed. A favourable composition supports metabolic health, joint longevity, and how capable you feel day-to-day.', 2, 'system', ${now8}),
+          ('strength', 'Strength', 'Your ability to produce force — a leading indicator of healthy ageing.', 'Strength is one of the clearest signals of how well you are ageing. The ability to lift, push, and grip translates directly into independence, injury resistance, and quality of life as the decades roll on.', 3, 'system', ${now8}),
+          ('balance', 'Balance', 'Stability and proprioception — your body''s quiet defence against falls.', 'Balance combines coordination, proprioception, and postural control. Strong balance now means a dramatically lower fall risk later, and it tracks closely with overall neurological and musculoskeletal health.', 4, 'system', ${now8})
+      `);
+
+      // Idempotent seed — page copy (D-19; one row only)
+      d.run(sql`
+        INSERT INTO "pillar_page_copy" ("heading", "intro", "updated_by", "updated_at")
+        SELECT 'The Peak Living Pillars',
+               'Peak360 translates your results into five core pillars to show where you are performing strongly, where you may be exposed, and where focused intervention can help move you toward peak living.',
+               'system',
+               ${now8}
+        WHERE NOT EXISTS (SELECT 1 FROM "pillar_page_copy")
+      `);
+    }
 
   }
 
