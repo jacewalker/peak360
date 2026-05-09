@@ -338,7 +338,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       <div className="px-6">
 
       {/* ─── PEAK LIVING PILLARS ─── */}
-      <PillarsDisplay pillars={pillars} />
+      <PillarsDisplay pillars={pillars} markers={markers} />
 
       {/* ─── SECTION 2: DAILY READINESS ─── */}
       <div className="mt-8 print:mt-6">
