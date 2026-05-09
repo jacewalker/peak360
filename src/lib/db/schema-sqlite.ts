@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, integer, primaryKey } from 'drizzle-orm/sqlite-core';
 
 export const assessments = sqliteTable('assessments', {
   id: text('id').primaryKey(),
@@ -62,6 +62,43 @@ export const auditLogs = sqliteTable('audit_logs', {
   userAgent: text('user_agent'),
   createdAt: text('created_at').notNull(),
 });
+
+// Phase 8 — Peak Living five-pillar report tables
+export const pillarDefinitions = sqliteTable('pillar_definitions', {
+  pillarKey: text('pillar_key').primaryKey(),
+  label: text('label').notNull(),
+  shortSummary: text('short_summary').notNull(),
+  plainMeaning: text('plain_meaning').notNull(),
+  sortOrder: integer('sort_order').notNull(),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+
+export const pillarPageCopy = sqliteTable('pillar_page_copy', {
+  id: integer('id').primaryKey({ autoIncrement: true }),
+  heading: text('heading').notNull(),
+  intro: text('intro').notNull(),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+
+export const pillarPrescriptions = sqliteTable(
+  'pillar_prescriptions',
+  {
+    assessmentId: text('assessment_id')
+      .notNull()
+      .references(() => assessments.id, { onDelete: 'cascade' }),
+    pillarKey: text('pillar_key').notNull(),
+    summary: text('summary').notNull(),
+    bullets: text('bullets', { mode: 'json' }).$type<string[] | null>(),
+    fullPlanHref: text('full_plan_href'),
+    updatedBy: text('updated_by').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.assessmentId, t.pillarKey] }),
+  })
+);
 
 export const normativeVersions = sqliteTable('normative_versions', {
   id: text('id').primaryKey(),
