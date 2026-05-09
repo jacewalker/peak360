@@ -1,4 +1,4 @@
-import { test, expect, type Page, type APIRequestContext } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
 /**
  * Phase 8: Five-pillar Peak Living module — portal interactive UI.
@@ -20,8 +20,9 @@ const ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL ?? '';
 const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? '';
 const ASSESSMENT_ID = process.env.TEST_ASSESSMENT_ID ?? '';
 
-async function signIn(request: APIRequestContext): Promise<void> {
-  const res = await request.post('/api/auth/sign-in/email', {
+async function signIn(page: Page): Promise<void> {
+  // Use page.request so the auth cookie lands in the page's context.
+  const res = await page.request.post('/api/auth/sign-in/email', {
     data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
   });
   expect(res.ok(), `sign-in failed: ${res.status()} ${await res.text()}`).toBeTruthy();
@@ -38,8 +39,8 @@ test.describe('Phase 8: Peak Living pillars module', () => {
     'Set TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD, TEST_ASSESSMENT_ID to run',
   );
 
-  test.beforeEach(async ({ request }) => {
-    await signIn(request);
+  test.beforeEach(async ({ page }) => {
+    await signIn(page);
   });
 
   test('renders heading + intro from pillar_page_copy', async ({ page }) => {
