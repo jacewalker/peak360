@@ -1,4 +1,5 @@
 import type { RatingTier, TierRanges } from '@/types/normative';
+import type { PillarDefinition, PillarPageCopy, PillarPrescription } from '@/lib/pillars/types';
 
 export interface ReportMarker {
   key: string;
@@ -33,4 +34,8 @@ export interface ReportData {
   insights: Insight[];
   tierCounts: Record<RatingTier, number>;
   totalRated: number;
+  // Phase 8 — Peak Living pillars data
+  definitions: PillarDefinition[];
+  pageCopy: PillarPageCopy | null;
+  prescriptions: PillarPrescription[];
 }

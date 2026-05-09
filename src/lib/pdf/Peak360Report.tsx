@@ -12,6 +12,7 @@ import { TierSummary } from './components/TierSummary';
 import { MarkerTable } from './components/MarkerTable';
 import { InsightsSection } from './components/InsightsSection';
 import { ReportFooter } from './components/ReportFooter';
+import PillarsPage from '@/lib/pdf/components/PillarsPage';
 
 interface Peak360ReportProps {
   data: ReportData;
@@ -20,6 +21,14 @@ interface Peak360ReportProps {
 export function Peak360Report({ data }: Peak360ReportProps) {
   return (
     <Document>
+      {/* Phase 8 — Peak Living pillars page (D-26, D-27 — inserted ahead of existing blocks) */}
+      <PillarsPage
+        definitions={data.definitions}
+        pageCopy={data.pageCopy}
+        prescriptions={data.prescriptions}
+        markers={data.markers}
+      />
+
       <Page size="A4" style={styles.page}>
         {/* Fixed footer on every page */}
         <ReportFooter />
