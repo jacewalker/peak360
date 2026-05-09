@@ -60,7 +60,7 @@ const TIER_TEXT: Record<RatingTier, string> = {
 };
 
 import { REPORT_MARKERS, type MarkerDef } from '@/lib/report-markers';
-import { computeAllPillarScores, type PillarScore } from '@/lib/pillars/mapping';
+import { computeAllPillarScoresLegacy, type PillarScore } from '@/lib/pillars/mapping';
 import PillarsDisplay from '@/components/report/PillarsDisplay';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
@@ -218,7 +218,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           tier: ev?.tier ?? null,
         };
       });
-      setPillars(computeAllPillarScores(pillarMarkers));
+      setPillars(computeAllPillarScoresLegacy(pillarMarkers));
 
       const insightMarkers = evaluated
         .filter((m) => m.value !== null)
