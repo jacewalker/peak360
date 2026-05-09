@@ -7,6 +7,11 @@ import { generatePeak360Insights } from '@/lib/normative/insights';
 import { decrypt } from '@/lib/crypto';
 import type { RatingTier } from '@/types/normative';
 import type { ReportData, ReportMarker } from '@/lib/pdf/types';
+import {
+  getPillarDefinitions,
+  getPillarPageCopy,
+  getPillarPrescriptions,
+} from '@/lib/pillars/queries';
 
 const ENCRYPTED_SECTIONS = new Set([3, 4, 5]);
 
@@ -102,6 +107,15 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
 
   const totalRated = Object.values(counts).reduce((a, b) => a + b, 0);
 
+  // Phase 8 — fetch pillar layer in parallel (D-21 SSR reads).
+  // Both the portal report page (Plan 03) and the PDF route (Plan 05)
+  // share this loader so PDF and portal scores stay identical.
+  const [definitions, pageCopy, prescriptions] = await Promise.all([
+    getPillarDefinitions(),
+    getPillarPageCopy(),
+    getPillarPrescriptions(assessmentId),
+  ]);
+
   return {
     assessmentId,
     clientName: (clientInfo.clientName as string) || assessment.clientName || '',
@@ -117,5 +131,8 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
     insights,
     tierCounts: counts,
     totalRated,
+    definitions,
+    pageCopy,
+    prescriptions,
   };
 }
