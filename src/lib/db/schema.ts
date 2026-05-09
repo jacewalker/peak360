@@ -1,4 +1,4 @@
-import { pgTable, text, integer, serial, jsonb } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, serial, jsonb, primaryKey } from 'drizzle-orm/pg-core';
 
 export const assessments = pgTable('assessments', {
   id: text('id').primaryKey(),
@@ -64,6 +64,43 @@ export const auditLogs = pgTable('audit_logs', {
   userAgent: text('user_agent'),
   createdAt: text('created_at').notNull(),
 });
+
+// Phase 8 — Peak Living five-pillar report tables
+export const pillarDefinitions = pgTable('pillar_definitions', {
+  pillarKey: text('pillar_key').primaryKey(),
+  label: text('label').notNull(),
+  shortSummary: text('short_summary').notNull(),
+  plainMeaning: text('plain_meaning').notNull(),
+  sortOrder: integer('sort_order').notNull(),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+
+export const pillarPageCopy = pgTable('pillar_page_copy', {
+  id: serial('id').primaryKey(),
+  heading: text('heading').notNull(),
+  intro: text('intro').notNull(),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+
+export const pillarPrescriptions = pgTable(
+  'pillar_prescriptions',
+  {
+    assessmentId: text('assessment_id')
+      .notNull()
+      .references(() => assessments.id, { onDelete: 'cascade' }),
+    pillarKey: text('pillar_key').notNull(),
+    summary: text('summary').notNull(),
+    bullets: jsonb('bullets').$type<string[] | null>(),
+    fullPlanHref: text('full_plan_href'),
+    updatedBy: text('updated_by').notNull(),
+    updatedAt: integer('updated_at').notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.assessmentId, t.pillarKey] }),
+  })
+);
 
 export const normativeVersions = pgTable('normative_versions', {
   id: text('id').primaryKey(),
