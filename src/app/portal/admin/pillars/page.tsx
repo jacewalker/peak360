@@ -1,3 +1,4 @@
+import Link from 'next/link';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
@@ -38,9 +39,12 @@ export default async function AdminPillarsPage() {
       >
         <div className="relative px-8 py-14 max-w-6xl">
           <div className="flex items-center gap-1.5 mb-5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
-              Peak360
-            </span>
+            <Link
+              href="/portal/admin"
+              className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 hover:text-gold/70 transition-colors"
+            >
+              Administration
+            </Link>
             <svg
               className="w-3 h-3 text-white/20"
               fill="none"

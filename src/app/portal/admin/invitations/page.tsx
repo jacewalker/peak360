@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 import StatusPill from '@/components/ui/StatusPill';
@@ -116,9 +117,12 @@ export default function AdminInvitationsPage() {
       >
         <div className="relative px-8 py-14">
           <div className="flex items-center gap-1.5 mb-5">
-            <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/30">
-              Peak360
-            </span>
+            <Link
+              href="/portal/admin"
+              className="text-[10px] font-medium uppercase tracking-[0.2em] text-white/30 hover:text-gold/70 transition-colors"
+            >
+              Administration
+            </Link>
             <svg
               className="w-3 h-3 text-white/20"
               fill="none"
@@ -129,7 +133,7 @@ export default function AdminInvitationsPage() {
               <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
             </svg>
             <span className="text-[10px] font-medium uppercase tracking-[0.2em] text-gold/70">
-              Onboarding
+              Invitations
             </span>
           </div>
 

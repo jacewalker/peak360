@@ -21,7 +21,7 @@ const ADMIN_SECTIONS = [
   },
   {
     label: 'Audit Logs',
-    href: '/admin/audit-logs',
+    href: '/portal/admin/audit-logs',
     description:
       'View security event logs for all system actions — assessment views, section edits, file uploads, and more.',
     stat: 'Security',
