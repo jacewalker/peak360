@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { TRAFFIC_LIGHT, type PillarScore } from '@/lib/pillars/mapping';
+import { type PillarScore } from '@/lib/pillars/mapping';
 import type { PillarKey, PillarStatus } from '@/lib/pillars/types';
 import type { ReportMarker } from '@/lib/pdf/types';
 import PillarsDisplayModal from '@/components/report/PillarsDisplayModal';
@@ -11,69 +11,83 @@ interface Props {
   markers?: ReportMarker[];
 }
 
-const MONO = 'ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace';
+type StatusClasses = {
+  ring: string;
+  /** Capsule background — vibrant tint of the status hue. */
+  bg: string;
+  border: string;
+  /** Liquid fill column gradient — multi-stop vibrant. */
+  fill: string;
+  /** Outer halo behind the capsule. */
+  halo: string;
+  /** Inner radial sheen overlay (top-left highlight blob). */
+  sheen: string;
+  /** Status pill chip below the capsule. */
+  pill: string;
+  /** Status label text colour (used on light surfaces). */
+  label: string;
+  /** Drop-shadow glow on the capsule when active. */
+  shadow: string;
+};
 
-/**
- * Per-status duotone palette: a lighter tint for the empty capsule background
- * and a darker, saturated tone for the rising fill. Keeps each pillar in a
- * single hue family so the bubble reads as one coherent vessel.
- */
-const DUOTONE: Record<
-  PillarStatus,
-  {
-    bg: string;
-    bgDeep: string;
-    fillTop: string;
-    fillBottom: string;
-    ring: string;
-    glow: string;
-    accent: string;
-  }
-> = {
+const STATUS: Record<PillarStatus, StatusClasses> = {
   green: {
-    bg: '#d1fae5',
-    bgDeep: '#a7f3d0',
-    fillTop: '#047857',
-    fillBottom: '#064e3b',
-    ring: 'rgba(6,78,59,0.22)',
-    glow: 'rgba(4,120,87,0.40)',
-    accent: '#10b981',
+    ring: 'focus-visible:ring-emerald-500/60',
+    bg: 'bg-gradient-to-br from-emerald-100 via-emerald-200 to-emerald-300',
+    border: 'border-emerald-700/20',
+    fill: 'bg-gradient-to-b from-emerald-400 via-emerald-600 to-emerald-800',
+    halo: 'bg-emerald-400/60',
+    sheen:
+      'bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.55),transparent_55%)]',
+    pill: 'bg-emerald-500/90 text-white ring-1 ring-emerald-700/30 shadow-emerald-500/30',
+    label: 'text-emerald-900',
+    shadow: 'shadow-emerald-500/40',
   },
   amber: {
-    bg: '#fde68a',
-    bgDeep: '#fcd34d',
-    fillTop: '#b45309',
-    fillBottom: '#7c2d12',
-    ring: 'rgba(180,83,9,0.24)',
-    glow: 'rgba(180,83,9,0.40)',
-    accent: '#f59e0b',
+    ring: 'focus-visible:ring-amber-500/60',
+    bg: 'bg-gradient-to-br from-amber-100 via-amber-200 to-amber-300',
+    border: 'border-amber-700/20',
+    fill: 'bg-gradient-to-b from-amber-400 via-amber-600 to-amber-800',
+    halo: 'bg-amber-400/60',
+    sheen:
+      'bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.55),transparent_55%)]',
+    pill: 'bg-amber-500/90 text-white ring-1 ring-amber-700/30 shadow-amber-500/30',
+    label: 'text-amber-900',
+    shadow: 'shadow-amber-500/40',
   },
   red: {
-    bg: '#fecaca',
-    bgDeep: '#fca5a5',
-    fillTop: '#b91c1c',
-    fillBottom: '#7f1d1d',
-    ring: 'rgba(127,29,29,0.24)',
-    glow: 'rgba(185,28,28,0.40)',
-    accent: '#ef4444',
+    ring: 'focus-visible:ring-red-500/60',
+    bg: 'bg-gradient-to-br from-red-100 via-red-200 to-red-300',
+    border: 'border-red-700/20',
+    fill: 'bg-gradient-to-b from-red-400 via-red-600 to-red-800',
+    halo: 'bg-red-400/60',
+    sheen:
+      'bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.55),transparent_55%)]',
+    pill: 'bg-red-500/90 text-white ring-1 ring-red-700/30 shadow-red-500/30',
+    label: 'text-red-900',
+    shadow: 'shadow-red-500/40',
   },
   pending: {
-    bg: '#e2e8f0',
-    bgDeep: '#cbd5e1',
-    fillTop: '#64748b',
-    fillBottom: '#475569',
-    ring: 'rgba(100,116,139,0.24)',
-    glow: 'rgba(100,116,139,0.20)',
-    accent: '#94a3b8',
+    ring: 'focus-visible:ring-slate-400/60',
+    bg: 'bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300',
+    border: 'border-slate-400/30',
+    fill: '',
+    halo: 'bg-slate-400/30',
+    sheen:
+      'bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.45),transparent_55%)]',
+    pill: 'bg-slate-300 text-slate-700 ring-1 ring-slate-400/30',
+    label: 'text-slate-600',
+    shadow: 'shadow-slate-400/20',
   },
 };
 
-/**
- * "Liquid Signal Columns" — futuristic glass capsules echoing the landing
- * page's gold/champagne accents and atmospheric radial glows. Each pillar is
- * a backlit vial; the score sits centred inside the bubble. Layout (5-up row,
- * heights, scoring data) is preserved.
- */
+const STATUS_LABEL: Record<PillarStatus, string> = {
+  green: 'Strong',
+  amber: 'Needs focus',
+  red: 'Priority',
+  pending: 'Awaiting data',
+};
+
 export default function PillarsDisplay({ pillars, markers }: Props) {
   const [selectedKey, setSelectedKey] = useState<PillarKey | null>(null);
   const selected = selectedKey
@@ -82,98 +96,33 @@ export default function PillarsDisplay({ pillars, markers }: Props) {
 
   return (
     <section className="relative mt-10 print:mt-6">
-      {/* Atmospheric backdrop — radial gold bloom + faint grid mask */}
-      <div
-        aria-hidden
-        className="absolute inset-0 -mx-2 sm:-mx-4 rounded-[32px] pointer-events-none overflow-hidden"
-        style={{
-          background:
-            'radial-gradient(ellipse 70% 60% at 50% 0%, rgba(245,166,35,0.08), transparent 70%),' +
-            'radial-gradient(ellipse 50% 80% at 50% 100%, rgba(26,54,93,0.04), transparent 70%),' +
-            'linear-gradient(180deg, rgba(248,250,252,0.6) 0%, rgba(255,255,255,0) 80%)',
-        }}
-      >
-        <div
-          className="absolute inset-0 opacity-[0.18]"
-          style={{
-            backgroundImage:
-              'linear-gradient(rgba(26,54,93,0.06) 1px, transparent 1px),' +
-              'linear-gradient(90deg, rgba(26,54,93,0.06) 1px, transparent 1px)',
-            backgroundSize: '32px 32px',
-            maskImage:
-              'radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent 80%)',
-            WebkitMaskImage:
-              'radial-gradient(ellipse 70% 70% at 50% 50%, black, transparent 80%)',
-          }}
-        />
-      </div>
-
-      {/* Header — mono eyebrow + display heading + live status */}
-      <header className="relative px-2 sm:px-4 pt-6 sm:pt-8 pb-6 flex items-end justify-between gap-6 flex-wrap">
-        <div>
-          <div className="flex items-center gap-3 mb-3">
-            <span
-              className="text-[10px] tracking-[0.22em] uppercase font-semibold"
-              style={{ color: '#c9a24a', fontFamily: MONO }}
-            >
-              05 · Peak Living
-            </span>
-            <span className="h-px w-10 bg-[#c9a24a]/40" />
-          </div>
-          <h2
-            className="text-2xl sm:text-3xl font-semibold tracking-tight text-[#1a365d]"
-            style={{ letterSpacing: '-0.02em' }}
-          >
-            The five pillars
-          </h2>
-          <p className="mt-2 text-sm text-[#475569] max-w-2xl leading-relaxed">
-            Each column reads the rated markers in its domain and reports a
-            single composite signal — green is strong, amber needs attention,
-            red is a priority, grey is awaiting data.
-          </p>
-        </div>
-
-        {/* Live signal chip */}
-        <div
-          className="inline-flex items-center gap-2 text-[10px] uppercase font-semibold px-2.5 py-1 rounded-sm"
-          style={{
-            color: '#c9a24a',
-            letterSpacing: '0.2em',
-            fontFamily: MONO,
-            border: '1px solid rgba(201,162,74,0.35)',
-            background:
-              'linear-gradient(180deg, rgba(201,162,74,0.06), rgba(201,162,74,0.01))',
-          }}
-        >
-          <span className="relative inline-flex h-1.5 w-1.5">
-            <span
-              className="absolute inline-flex h-full w-full rounded-full opacity-75 animate-ping"
-              style={{ backgroundColor: '#c9a24a' }}
-            />
-            <span
-              className="relative inline-flex h-1.5 w-1.5 rounded-full"
-              style={{ backgroundColor: '#c9a24a' }}
-            />
+      {/* Section header with landing-page-style gold mono eyebrow */}
+      <header className="px-2 sm:px-4 pt-4 pb-8">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">
+            05 · Peak Living
           </span>
-          Signal · Live
+          <span className="h-px w-10 bg-gold-dark/40" />
         </div>
+        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-navy">
+          The five pillars
+        </h2>
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+          Each column reads the rated markers in its domain and reports a
+          single composite signal. Tap a pillar for the marker breakdown.
+        </p>
       </header>
 
       {/* Pillars row */}
-      <div className="relative grid grid-cols-5 gap-2 sm:gap-3 px-2 sm:px-4 pb-8">
-        {pillars.map((p, idx) => (
-          <Pillar
-            key={p.key}
-            pillar={p}
-            index={idx}
-            onSelect={() => setSelectedKey(p.key)}
-          />
+      <div className="grid grid-cols-5 gap-3 sm:gap-5 px-2 sm:px-4 pb-10">
+        {pillars.map((p) => (
+          <Pillar key={p.key} pillar={p} onSelect={() => setSelectedKey(p.key)} />
         ))}
       </div>
 
       {selected && (
         <PillarsDisplayModal
-          open={selected !== null}
+          open
           onClose={() => setSelectedKey(null)}
           pillar={selected}
           markers={markers ?? []}
@@ -185,280 +134,106 @@ export default function PillarsDisplay({ pillars, markers }: Props) {
 
 function Pillar({
   pillar,
-  index,
   onSelect,
 }: {
   pillar: PillarScore;
-  index: number;
   onSelect: () => void;
 }) {
-  const palette = TRAFFIC_LIGHT[pillar.status];
-  const tone = DUOTONE[pillar.status];
-  const fillPct = pillar.score ?? 0;
+  const cls = STATUS[pillar.status];
   const isPending = pillar.status === 'pending';
+  const fillPct = pillar.score ?? 0;
   const scoreOnFill = !isPending && fillPct >= 55;
-  const idxLabel = `P.${String(index + 1).padStart(2, '0')}`;
 
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-label={`Open ${pillar.label} pillar details`}
-      className="group relative flex flex-col items-center text-center cursor-pointer rounded-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a24a]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-safe:transition-transform hover:-translate-y-0.5"
+      className={`group flex w-full flex-col items-center text-center outline-none cursor-pointer
+                  rounded-[2rem] focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-offset-white
+                  motion-safe:transition-all duration-300
+                  hover:-translate-y-1 ${cls.ring}`}
     >
-      {/* Mono channel label above */}
-      <div
-        className="mb-2 text-[9px] uppercase font-semibold tabular-nums"
-        style={{
-          color: tone.fillBottom,
-          letterSpacing: '0.22em',
-          fontFamily: MONO,
-          opacity: 0.7,
-        }}
-      >
-        {idxLabel} · CH {String(index + 1).padStart(2, '0')}
-      </div>
-
-      {/* Outer glow halo — sits behind capsule */}
-      {!isPending && (
+      {/* Capsule with halo */}
+      <div className="relative w-full">
+        {/* Soft outer halo glow */}
         <div
           aria-hidden
-          className="absolute left-1/2 top-10 -translate-x-1/2 w-[80%] h-48 sm:h-56 rounded-full blur-3xl opacity-30 pointer-events-none"
-          style={{ backgroundColor: tone.fillTop }}
+          className={`pointer-events-none absolute -inset-2 rounded-[3rem] blur-2xl opacity-70
+                      motion-safe:transition-opacity duration-300
+                      group-hover:opacity-100 ${cls.halo}`}
         />
-      )}
 
-      {/* Capsule */}
-      <div
-        className="relative w-full h-56 sm:h-64 overflow-hidden"
-        style={{
-          borderRadius: '36px',
-          background: `linear-gradient(180deg, ${tone.bg} 0%, ${tone.bgDeep} 100%)`,
-          border: `1px solid ${tone.ring}`,
-          boxShadow: `inset 0 1px 0 rgba(255,255,255,0.45),
-                      inset 0 -20px 40px -16px ${tone.glow},
-                      0 6px 20px -10px ${tone.glow},
-                      0 1px 2px rgba(15,23,42,0.05)`,
-        }}
-        aria-label={`${pillar.label} score ${isPending ? 'pending' : pillar.score}`}
-      >
-        {/* Liquid fill column */}
-        {!isPending && (
-          <div
-            className="absolute bottom-0 left-0 right-0 transition-[height] duration-700 ease-out"
-            style={{
-              height: `${fillPct}%`,
-              background: `linear-gradient(180deg, ${tone.fillTop} 0%, ${tone.fillBottom} 100%)`,
-              boxShadow: `inset 0 1px 0 rgba(255,255,255,0.18),
-                          inset 0 -24px 48px -16px rgba(0,0,0,0.30)`,
-            }}
-          >
-            {/* CRT scanlines across the fill */}
-            <div
-              aria-hidden
-              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-30"
-              style={{
-                backgroundImage:
-                  'repeating-linear-gradient(0deg, rgba(0,0,0,0.5) 0px, rgba(0,0,0,0.5) 1px, transparent 1px, transparent 4px)',
-              }}
-            />
-            {/* Meniscus highlight at the top of the fill */}
-            <div
-              aria-hidden
-              className="absolute top-0 left-2 right-2 h-px opacity-80"
-              style={{
-                background:
-                  'linear-gradient(90deg, transparent, rgba(255,255,255,0.7), transparent)',
-              }}
-            />
-          </div>
-        )}
-
-        {/* HUD corner brackets — gold accent at each corner */}
-        <CornerBrackets color={tone.fillBottom} />
-
-        {/* Vertical tick scale on right edge */}
+        {/* Capsule */}
         <div
-          aria-hidden
-          className="absolute right-3 top-6 bottom-6 w-1.5 flex flex-col justify-between pointer-events-none"
+          className={`relative h-60 sm:h-64 w-full overflow-hidden rounded-[2rem] border
+                      shadow-2xl ${cls.bg} ${cls.border} ${cls.shadow}
+                      motion-safe:transition-shadow duration-300
+                      group-hover:shadow-2xl`}
+          aria-label={`${pillar.label} score ${isPending ? 'pending' : pillar.score}`}
         >
-          {[100, 75, 50, 25, 0].map((pct) => (
-            <div key={pct} className="flex items-center justify-end gap-1">
-              <span
-                className="text-[7px] font-semibold tabular-nums"
-                style={{
-                  color: tone.fillBottom,
-                  fontFamily: MONO,
-                  opacity: pct % 50 === 0 ? 0.55 : 0.3,
-                  letterSpacing: '0.05em',
-                }}
-              >
-                {String(pct).padStart(3, '0')}
-              </span>
-              <span
-                className="block h-px"
-                style={{
-                  width: pct % 50 === 0 ? '6px' : '3px',
-                  backgroundColor: tone.fillBottom,
-                  opacity: pct % 50 === 0 ? 0.45 : 0.25,
-                }}
+          {/* Liquid fill column */}
+          {!isPending && (
+            <div
+              className={`absolute inset-x-0 bottom-0 motion-safe:transition-[height] motion-safe:duration-1000 motion-safe:ease-out ${cls.fill}`}
+              style={{ height: `${fillPct}%` }}
+            >
+              {/* Meniscus shimmer */}
+              <div
+                aria-hidden
+                className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"
+              />
+              {/* Subtle shimmer overlay on the fill */}
+              <div
+                aria-hidden
+                className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/15 to-transparent"
               />
             </div>
-          ))}
-        </div>
+          )}
 
-        {/* Live indicator dot — top centre */}
-        {!isPending && (
+          {/* Inner sheen — radial highlight (the "bubble" cue) */}
           <div
             aria-hidden
-            className="absolute top-3 left-1/2 -translate-x-1/2 flex items-center gap-1"
-          >
-            <span className="relative inline-flex h-1 w-1">
-              <span
-                className="absolute inline-flex h-full w-full rounded-full opacity-70 animate-ping"
-                style={{ backgroundColor: tone.accent }}
-              />
-              <span
-                className="relative inline-flex h-1 w-1 rounded-full"
-                style={{ backgroundColor: tone.accent }}
-              />
+            className={`pointer-events-none absolute inset-0 ${cls.sheen}`}
+          />
+
+          {/* Centred score */}
+          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+            <span
+              className={`font-mono text-4xl sm:text-5xl font-bold tabular-nums leading-none
+                          drop-shadow-md ${scoreOnFill ? 'text-white' : cls.label}`}
+            >
+              {isPending ? '—' : pillar.score}
             </span>
           </div>
-        )}
 
-        {/* Specular dome highlight (top inner glow) */}
-        <div
-          aria-hidden
-          className="absolute top-0 left-0 right-0 h-12 pointer-events-none"
-          style={{
-            background:
-              'radial-gradient(ellipse 80% 100% at 50% 0%, rgba(255,255,255,0.35), transparent 70%)',
-          }}
-        />
-
-        {/* Centred digital readout */}
-        <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-          <span
-            className="text-3xl sm:text-4xl font-bold tabular-nums leading-none"
-            style={{
-              color: scoreOnFill ? '#ffffff' : tone.fillBottom,
-              textShadow: scoreOnFill
-                ? `0 0 12px ${tone.accent}99, 0 1px 2px rgba(0,0,0,0.45)`
-                : `0 1px 0 rgba(255,255,255,0.5)`,
-              fontFamily: MONO,
-              fontFeatureSettings: '"tnum", "ss01"',
-              letterSpacing: '-0.03em',
-            }}
-          >
-            {isPending ? '—' : String(pillar.score).padStart(2, '0')}
-          </span>
-          <span
-            className="mt-1 text-[8px] font-semibold uppercase"
-            style={{
-              color: scoreOnFill ? 'rgba(255,255,255,0.65)' : tone.fillBottom,
-              opacity: scoreOnFill ? 1 : 0.55,
-              letterSpacing: '0.3em',
-              fontFamily: MONO,
-            }}
-          >
-            Index
-          </span>
+          {/* Bottom inner shadow for orb depth */}
+          <div
+            aria-hidden
+            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/15 to-transparent"
+          />
         </div>
       </div>
 
-      {/* Status row — mono uppercase, tinted to match the pillar */}
-      <div className="mt-4 flex items-center gap-1.5">
-        <span
-          className="w-1.5 h-1.5 rounded-full"
-          style={{
-            backgroundColor: tone.fillTop,
-            boxShadow: isPending ? undefined : `0 0 8px ${tone.fillTop}88`,
-          }}
-          aria-hidden
-        />
-        <span
-          className="text-[10px] font-semibold uppercase"
-          style={{
-            color: tone.fillBottom,
-            letterSpacing: '0.18em',
-            fontFamily: MONO,
-          }}
-        >
-          {palette.label}
-        </span>
-      </div>
+      {/* Status pill */}
+      <span
+        className={`mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider shadow-md ${cls.pill}`}
+      >
+        <span className="size-1.5 rounded-full bg-white/90" aria-hidden />
+        {STATUS_LABEL[pillar.status]}
+      </span>
 
       {/* Pillar name */}
-      <p
-        className="mt-2 text-[12px] sm:text-sm font-semibold text-[#1a365d] leading-tight px-1"
-        style={{ letterSpacing: '-0.005em' }}
-      >
+      <p className="mt-2 text-sm font-semibold leading-tight text-navy">
         {pillar.label}
       </p>
 
-      {/* Rated count — mono fraction */}
-      <p
-        className="mt-1 text-[10px] tabular-nums"
-        style={{
-          color: '#94a3b8',
-          letterSpacing: '0.12em',
-          fontFamily: MONO,
-        }}
-      >
-        {String(pillar.rated).padStart(2, '0')}{' '}
-        <span className="opacity-50">/</span>{' '}
+      {/* Rated count */}
+      <p className="mt-0.5 font-mono text-[10px] tabular-nums tracking-wider text-muted">
+        {String(pillar.rated).padStart(2, '0')}
+        <span className="mx-0.5 opacity-50">/</span>
         {String(pillar.total).padStart(2, '0')}
       </p>
     </button>
-  );
-}
-
-/**
- * HUD-style L-shaped corner brackets — echoes the landing page's `.teaser-corner`
- * markers. Sized to sit just inside the rounded capsule corners.
- */
-function CornerBrackets({ color }: { color: string }) {
-  const size = 10;
-  const inset = 12;
-  const stroke = `1px solid ${color}`;
-  const opacity = 0.55;
-  const corners: Array<{
-    pos: React.CSSProperties;
-    borders: React.CSSProperties;
-  }> = [
-    {
-      pos: { top: inset, left: inset },
-      borders: { borderTop: stroke, borderLeft: stroke },
-    },
-    {
-      pos: { top: inset, right: inset },
-      borders: { borderTop: stroke, borderRight: stroke },
-    },
-    {
-      pos: { bottom: inset, left: inset },
-      borders: { borderBottom: stroke, borderLeft: stroke },
-    },
-    {
-      pos: { bottom: inset, right: inset },
-      borders: { borderBottom: stroke, borderRight: stroke },
-    },
-  ];
-  return (
-    <>
-      {corners.map((c, i) => (
-        <span
-          key={i}
-          aria-hidden
-          className="absolute pointer-events-none"
-          style={{
-            width: size,
-            height: size,
-            opacity,
-            ...c.pos,
-            ...c.borders,
-          }}
-        />
-      ))}
-    </>
   );
 }
