@@ -1,10 +1,14 @@
 'use client';
 
+import { useState } from 'react';
 import { TRAFFIC_LIGHT, type PillarScore } from '@/lib/pillars/mapping';
-import type { PillarStatus } from '@/lib/pillars/types';
+import type { PillarKey, PillarStatus } from '@/lib/pillars/types';
+import type { ReportMarker } from '@/lib/pdf/types';
+import PillarsDisplayModal from '@/components/report/PillarsDisplayModal';
 
 interface Props {
   pillars: PillarScore[];
+  markers?: ReportMarker[];
 }
 
 const MONO = 'ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace';
@@ -70,7 +74,12 @@ const DUOTONE: Record<
  * a backlit vial; the score sits centred inside the bubble. Layout (5-up row,
  * heights, scoring data) is preserved.
  */
-export default function PillarsDisplay({ pillars }: Props) {
+export default function PillarsDisplay({ pillars, markers }: Props) {
+  const [selectedKey, setSelectedKey] = useState<PillarKey | null>(null);
+  const selected = selectedKey
+    ? pillars.find((p) => p.key === selectedKey) ?? null
+    : null;
+
   return (
     <section className="relative mt-10 print:mt-6">
       {/* Atmospheric backdrop — radial gold bloom + faint grid mask */}
@@ -153,14 +162,36 @@ export default function PillarsDisplay({ pillars }: Props) {
       {/* Pillars row */}
       <div className="relative grid grid-cols-5 gap-2 sm:gap-3 px-2 sm:px-4 pb-8">
         {pillars.map((p, idx) => (
-          <Pillar key={p.key} pillar={p} index={idx} />
+          <Pillar
+            key={p.key}
+            pillar={p}
+            index={idx}
+            onSelect={() => setSelectedKey(p.key)}
+          />
         ))}
       </div>
+
+      {selected && (
+        <PillarsDisplayModal
+          open={selected !== null}
+          onClose={() => setSelectedKey(null)}
+          pillar={selected}
+          markers={markers ?? []}
+        />
+      )}
     </section>
   );
 }
 
-function Pillar({ pillar, index }: { pillar: PillarScore; index: number }) {
+function Pillar({
+  pillar,
+  index,
+  onSelect,
+}: {
+  pillar: PillarScore;
+  index: number;
+  onSelect: () => void;
+}) {
   const palette = TRAFFIC_LIGHT[pillar.status];
   const tone = DUOTONE[pillar.status];
   const fillPct = pillar.score ?? 0;
@@ -169,7 +200,12 @@ function Pillar({ pillar, index }: { pillar: PillarScore; index: number }) {
   const idxLabel = `P.${String(index + 1).padStart(2, '0')}`;
 
   return (
-    <article className="group relative flex flex-col items-center text-center">
+    <button
+      type="button"
+      onClick={onSelect}
+      aria-label={`Open ${pillar.label} pillar details`}
+      className="group relative flex flex-col items-center text-center cursor-pointer rounded-[36px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#c9a24a]/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white motion-safe:transition-transform hover:-translate-y-0.5"
+    >
       {/* Mono channel label above */}
       <div
         className="mb-2 text-[9px] uppercase font-semibold tabular-nums"
@@ -373,7 +409,7 @@ function Pillar({ pillar, index }: { pillar: PillarScore; index: number }) {
         <span className="opacity-50">/</span>{' '}
         {String(pillar.total).padStart(2, '0')}
       </p>
-    </article>
+    </button>
   );
 }
 
