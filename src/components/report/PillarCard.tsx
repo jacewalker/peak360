@@ -1,100 +1,155 @@
 'use client';
 
 import type { PillarDefinition, PillarStatus } from '@/lib/pillars/types';
-import { TRAFFIC_LIGHT_HEX, TRAFFIC_LIGHT_TEXT, STATUS_LABEL } from '@/lib/pillars/colors';
+import type { ReportMarker } from '@/lib/pdf/types';
+import type { RatingTier } from '@/types/normative';
+import { TRAFFIC_LIGHT_HEX } from '@/lib/pillars/colors';
 
 /**
- * Phase 8 — PillarCard.
+ * Phase 8 — PillarCard (Option 2 visual — see mockups/pillar-options.html
+ * lines 162-245).
  *
- * Single-button presentational card. Whole surface opens the modal.
- * Uses ONLY the traffic-light palette (TRAFFIC_LIGHT_HEX / TRAFFIC_LIGHT_TEXT)
- * for status colour. The 5-tier marker palette is reserved for the modal and
- * the detailed-marker disclosure (D-11).
+ * Whoop/Oura aesthetic: conic-gradient ring gauge driven by the pillar
+ * score, mono "P · NN" eyebrow, small status label, and a worst-tier-first
+ * top-3 contributor list.
+ *
+ * D-11 anti-pattern: the ring accent uses ONLY the traffic-light palette
+ * (TRAFFIC_LIGHT_HEX). The 5-tier marker palette (TIER_DOT below) is
+ * reserved for the contributor chips — it lives at the marker layer, not
+ * the pillar layer.
  */
 
 interface PillarCardProps {
   pillar: PillarDefinition;
   score: number | null;
   status: PillarStatus;
+  markers: ReportMarker[];
   onOpen: () => void;
 }
 
-// `#94a3b8` literal: pending-state dot colour. Mirrors the slate-400 tone used
-// by TRAFFIC_LIGHT_TEXT.pending (#64748b is the pending text/foreground; the
-// dot is one shade lighter so the dot vs text shapes read distinctly).
-const PENDING_DOT = '#94a3b8';
+const STATUS_LABEL: Record<PillarStatus, string> = {
+  green: 'Strong',
+  amber: 'Needs focus',
+  red: 'Priority',
+  pending: 'Awaiting data',
+};
 
-export default function PillarCard({ pillar, score, status, onOpen }: PillarCardProps) {
+const STATUS_LABEL_TEXT: Record<PillarStatus, string> = {
+  green: 'text-emerald-700',
+  amber: 'text-amber-700',
+  red: 'text-red-700',
+  pending: 'text-slate-500',
+};
+
+const TIER_DOT: Record<RatingTier | 'null', string> = {
+  poor: 'bg-red-500',
+  cautious: 'bg-amber-500',
+  normal: 'bg-slate-400',
+  great: 'bg-blue-500',
+  elite: 'bg-emerald-500',
+  null: 'bg-slate-300',
+};
+
+const TIER_RANK: Record<RatingTier, number> = {
+  poor: 0,
+  cautious: 1,
+  normal: 2,
+  great: 3,
+  elite: 4,
+};
+
+/**
+ * Worst-tier-first top-3 contributors. Mirrors the same selection logic
+ * used by `PillarsDisplay` so the Section 11 form preview, the portal
+ * report, and the PDF all surface the same three markers per pillar.
+ */
+function getTopContributors(markers: ReportMarker[]): ReportMarker[] {
+  return [...markers]
+    .sort((a, b) => {
+      const ra = a.tier ? TIER_RANK[a.tier] : 99;
+      const rb = b.tier ? TIER_RANK[b.tier] : 99;
+      return ra - rb;
+    })
+    .slice(0, 3);
+}
+
+export default function PillarCard({
+  pillar,
+  score,
+  status,
+  markers,
+  onOpen,
+}: PillarCardProps) {
   const isPending = status === 'pending';
-  const pillBg = isPending ? 'transparent' : TRAFFIC_LIGHT_HEX[status];
-  const pillText = TRAFFIC_LIGHT_TEXT[status];
-  const dotColor = isPending ? PENDING_DOT : TRAFFIC_LIGHT_TEXT[status];
+  const accent = TRAFFIC_LIGHT_HEX[status];
+  const pct = score ?? 0;
+  const eyebrow = `P · ${String(pillar.sortOrder).padStart(2, '0')}`;
+  const top = getTopContributors(markers);
 
-  const borderClass = isPending ? 'border border-dashed border-border' : 'border border-border';
+  const borderClass = isPending
+    ? 'border border-dashed border-slate-300'
+    : 'border border-slate-200';
 
   return (
     <button
       type="button"
       onClick={onOpen}
       aria-label={`Open detailed view for ${pillar.label}`}
-      className={`group flex flex-col items-stretch text-left bg-white rounded-2xl ${borderClass}
-        min-h-[96px] md:min-h-[160px] p-4 md:p-6
-        shadow-[0_1px_2px_rgba(15,36,64,0.04),0_4px_12px_rgba(15,36,64,0.06)]
-        focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(245,166,35,0.25)]
-        motion-safe:md:hover:-translate-y-0.5 transition-transform duration-150`}
+      className={`group flex w-full flex-col items-center text-center
+                  bg-white rounded-2xl ${borderClass} p-5
+                  hover:border-gold-dark/50 hover:shadow-md
+                  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-dark/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white
+                  motion-safe:transition-all duration-200 cursor-pointer`}
     >
-      {/* 1. Pillar label heading */}
-      <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
-        {pillar.label}
-      </h3>
-
-      {/* 2. Score numeral */}
-      <div
-        className="text-navy font-semibold leading-none mt-2"
-        style={{ fontSize: 'clamp(36px, 4vw, 40px)', fontVariantNumeric: 'tabular-nums' }}
-      >
-        {score === null ? '—' : score}
-        <span className="text-sm font-normal text-muted ml-1 align-baseline">/100</span>
-      </div>
-
-      {/* 3. Status pill */}
-      <div className="mt-3">
-        <span
-          className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold"
-          style={{
-            backgroundColor: pillBg,
-            color: pillText,
-            border: isPending ? '1px solid #e2e8f0' : undefined,
-          }}
-        >
-          <span
-            aria-hidden="true"
-            className="inline-block w-2 h-2 rounded-full"
-            style={{ backgroundColor: dotColor }}
-          />
-          {STATUS_LABEL[status]}
-        </span>
-      </div>
-
-      {/* 4. Short summary paragraph */}
-      <p className="mt-3 text-sm text-muted leading-[1.5]">
-        {pillar.shortSummary}
+      {/* 1. Mono eyebrow — "P · 01" */}
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 self-start">
+        {eyebrow}
       </p>
 
-      {/* 5. Drill-down row pinned to bottom */}
-      <div className="mt-auto pt-3 flex items-center justify-end text-navy/70 group-hover:text-gold transition-colors">
-        <span className="md:hidden text-xs text-muted mr-2">Tap for breakdown</span>
-        <svg
-          width="16"
-          height="16"
-          viewBox="0 0 16 16"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          aria-hidden="true"
-        >
-          <path d="M6 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
+      {/* 2. Ring gauge — conic-gradient driven by score % */}
+      <div
+        className="size-28 rounded-full grid place-items-center my-3 motion-safe:transition-[background] duration-500"
+        style={{
+          background: `conic-gradient(${accent} ${pct}%, #e2e8f0 0)`,
+        }}
+        aria-hidden
+      >
+        <div className="size-[88px] rounded-full bg-white grid place-items-center">
+          <span className="font-mono text-2xl font-bold tabular-nums text-navy">
+            {isPending || score === null ? '—' : score}
+          </span>
+        </div>
+      </div>
+
+      {/* 3. Pillar name + status label */}
+      <h3 className="text-sm font-semibold text-navy">{pillar.label}</h3>
+      <span
+        className={`mt-1 text-[10px] font-semibold uppercase tracking-wider ${STATUS_LABEL_TEXT[status]}`}
+      >
+        {STATUS_LABEL[status]}
+      </span>
+
+      {/* 4. Top-3 contributor chips */}
+      <div className="mt-3 w-full space-y-1.5 text-left">
+        {top.length === 0 ? (
+          <div className="flex items-center gap-2 text-[11px]">
+            <span className="size-1.5 rounded-full bg-slate-300" aria-hidden />
+            <span className="flex-1 text-slate-500">Awaiting data</span>
+          </div>
+        ) : (
+          top.map((m) => (
+            <div key={m.key} className="flex items-center gap-2 text-[11px]">
+              <span
+                className={`size-1.5 rounded-full ${TIER_DOT[(m.tier ?? 'null') as keyof typeof TIER_DOT]}`}
+                aria-hidden
+              />
+              <span className="flex-1 text-slate-700 truncate">{m.label}</span>
+              <span className="font-mono text-slate-500">
+                {m.tier ?? 'pending'}
+              </span>
+            </div>
+          ))
+        )}
       </div>
     </button>
   );
