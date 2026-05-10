@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { type PillarScore } from '@/lib/pillars/mapping';
+import { markerToPillar, type PillarScore } from '@/lib/pillars/mapping';
 import type { PillarKey, PillarStatus } from '@/lib/pillars/types';
 import type { ReportMarker } from '@/lib/pdf/types';
+import type { RatingTier } from '@/types/normative';
 import PillarsDisplayModal from '@/components/report/PillarsDisplayModal';
 
 interface Props {
@@ -11,74 +12,18 @@ interface Props {
   markers?: ReportMarker[];
 }
 
-type StatusClasses = {
-  ring: string;
-  /** Capsule background — vibrant tint of the status hue. */
-  bg: string;
-  border: string;
-  /** Liquid fill column gradient — multi-stop vibrant. */
-  fill: string;
-  /** Outer halo behind the capsule. */
-  halo: string;
-  /** Inner radial sheen overlay (top-left highlight blob). */
-  sheen: string;
-  /** Status pill chip below the capsule. */
-  pill: string;
-  /** Status label text colour (used on light surfaces). */
-  label: string;
-  /** Drop-shadow glow on the capsule when active. */
-  shadow: string;
+const STATUS_RING_HEX: Record<PillarStatus, string> = {
+  green: '#10b981',
+  amber: '#f59e0b',
+  red: '#ef4444',
+  pending: '#cbd5e1',
 };
 
-const STATUS: Record<PillarStatus, StatusClasses> = {
-  green: {
-    ring: 'focus-visible:ring-emerald-500/60',
-    bg: 'bg-gradient-to-br from-emerald-100 via-emerald-200 to-emerald-300',
-    border: 'border-emerald-700/20',
-    fill: 'bg-gradient-to-b from-emerald-400 via-emerald-600 to-emerald-800',
-    halo: 'bg-emerald-400/60',
-    sheen:
-      'bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.55),transparent_55%)]',
-    pill: 'bg-emerald-500/90 text-white ring-1 ring-emerald-700/30 shadow-emerald-500/30',
-    label: 'text-emerald-900',
-    shadow: 'shadow-emerald-500/40',
-  },
-  amber: {
-    ring: 'focus-visible:ring-amber-500/60',
-    bg: 'bg-gradient-to-br from-amber-100 via-amber-200 to-amber-300',
-    border: 'border-amber-700/20',
-    fill: 'bg-gradient-to-b from-amber-400 via-amber-600 to-amber-800',
-    halo: 'bg-amber-400/60',
-    sheen:
-      'bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.55),transparent_55%)]',
-    pill: 'bg-amber-500/90 text-white ring-1 ring-amber-700/30 shadow-amber-500/30',
-    label: 'text-amber-900',
-    shadow: 'shadow-amber-500/40',
-  },
-  red: {
-    ring: 'focus-visible:ring-red-500/60',
-    bg: 'bg-gradient-to-br from-red-100 via-red-200 to-red-300',
-    border: 'border-red-700/20',
-    fill: 'bg-gradient-to-b from-red-400 via-red-600 to-red-800',
-    halo: 'bg-red-400/60',
-    sheen:
-      'bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.55),transparent_55%)]',
-    pill: 'bg-red-500/90 text-white ring-1 ring-red-700/30 shadow-red-500/30',
-    label: 'text-red-900',
-    shadow: 'shadow-red-500/40',
-  },
-  pending: {
-    ring: 'focus-visible:ring-slate-400/60',
-    bg: 'bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300',
-    border: 'border-slate-400/30',
-    fill: '',
-    halo: 'bg-slate-400/30',
-    sheen:
-      'bg-[radial-gradient(circle_at_30%_20%,rgba(255,255,255,0.45),transparent_55%)]',
-    pill: 'bg-slate-300 text-slate-700 ring-1 ring-slate-400/30',
-    label: 'text-slate-600',
-    shadow: 'shadow-slate-400/20',
-  },
+const STATUS_LABEL_TEXT: Record<PillarStatus, string> = {
+  green: 'text-emerald-700',
+  amber: 'text-amber-700',
+  red: 'text-red-700',
+  pending: 'text-slate-500',
 };
 
 const STATUS_LABEL: Record<PillarStatus, string> = {
@@ -87,6 +32,41 @@ const STATUS_LABEL: Record<PillarStatus, string> = {
   red: 'Priority',
   pending: 'Awaiting data',
 };
+
+const TIER_DOT: Record<RatingTier | 'null', string> = {
+  poor: 'bg-red-500',
+  cautious: 'bg-amber-500',
+  normal: 'bg-slate-400',
+  great: 'bg-blue-500',
+  elite: 'bg-emerald-500',
+  null: 'bg-slate-300',
+};
+
+const TIER_RANK: Record<RatingTier, number> = {
+  poor: 0,
+  cautious: 1,
+  normal: 2,
+  great: 3,
+  elite: 4,
+};
+
+function getTopContributors(
+  pillarKey: PillarKey,
+  markers: ReportMarker[] | undefined,
+): ReportMarker[] {
+  if (!markers) return [];
+  return markers
+    .filter((m) => {
+      const cls = markerToPillar(m);
+      return cls.pillar === pillarKey && !cls.supporting;
+    })
+    .sort((a, b) => {
+      const ra = a.tier ? TIER_RANK[a.tier] : 99;
+      const rb = b.tier ? TIER_RANK[b.tier] : 99;
+      return ra - rb;
+    })
+    .slice(0, 3);
+}
 
 export default function PillarsDisplay({ pillars, markers }: Props) {
   const [selectedKey, setSelectedKey] = useState<PillarKey | null>(null);
@@ -113,10 +93,16 @@ export default function PillarsDisplay({ pillars, markers }: Props) {
         </p>
       </header>
 
-      {/* Pillars row */}
-      <div className="grid grid-cols-5 gap-3 sm:gap-5 px-2 sm:px-4 pb-10">
-        {pillars.map((p) => (
-          <Pillar key={p.key} pillar={p} onSelect={() => setSelectedKey(p.key)} />
+      {/* Pillars row — Option 2 ring gauges + top-3 contributor chips */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-5 gap-3 sm:gap-4 px-2 sm:px-4 pb-10">
+        {pillars.map((p, i) => (
+          <Pillar
+            key={p.key}
+            pillar={p}
+            markers={markers}
+            onSelect={() => setSelectedKey(p.key)}
+            index={i}
+          />
         ))}
       </div>
 
@@ -134,106 +120,81 @@ export default function PillarsDisplay({ pillars, markers }: Props) {
 
 function Pillar({
   pillar,
+  markers,
   onSelect,
+  index,
 }: {
   pillar: PillarScore;
+  markers: ReportMarker[] | undefined;
   onSelect: () => void;
+  index: number;
 }) {
-  const cls = STATUS[pillar.status];
+  const accent = STATUS_RING_HEX[pillar.status];
+  const pct = pillar.score ?? 0;
   const isPending = pillar.status === 'pending';
-  const fillPct = pillar.score ?? 0;
-  const scoreOnFill = !isPending && fillPct >= 55;
+  const labelClass = STATUS_LABEL_TEXT[pillar.status];
+  const top = getTopContributors(pillar.key, markers);
+  const eyebrow = `P · ${String(index + 1).padStart(2, '0')}`;
 
   return (
     <button
       type="button"
       onClick={onSelect}
       aria-label={`Open ${pillar.label} pillar details`}
-      className={`group flex w-full flex-col items-center text-center outline-none cursor-pointer
-                  rounded-[2rem] focus-visible:ring-2 focus-visible:ring-offset-4 focus-visible:ring-offset-white
-                  motion-safe:transition-all duration-300
-                  hover:-translate-y-1 ${cls.ring}`}
+      className="group flex w-full flex-col items-center text-center
+                 bg-white rounded-2xl border border-slate-200 p-5
+                 hover:border-gold-dark/50 hover:shadow-md
+                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-dark/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white
+                 motion-safe:transition-all duration-200 cursor-pointer"
     >
-      {/* Capsule with halo */}
-      <div className="relative w-full">
-        {/* Soft outer halo glow */}
-        <div
-          aria-hidden
-          className={`pointer-events-none absolute -inset-2 rounded-[3rem] blur-2xl opacity-70
-                      motion-safe:transition-opacity duration-300
-                      group-hover:opacity-100 ${cls.halo}`}
-        />
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 self-start">
+        {eyebrow}
+      </p>
 
-        {/* Capsule */}
-        <div
-          className={`relative h-60 sm:h-64 w-full overflow-hidden rounded-[2rem] border
-                      shadow-2xl ${cls.bg} ${cls.border} ${cls.shadow}
-                      motion-safe:transition-shadow duration-300
-                      group-hover:shadow-2xl`}
-          aria-label={`${pillar.label} score ${isPending ? 'pending' : pillar.score}`}
-        >
-          {/* Liquid fill column */}
-          {!isPending && (
-            <div
-              className={`absolute inset-x-0 bottom-0 motion-safe:transition-[height] motion-safe:duration-1000 motion-safe:ease-out ${cls.fill}`}
-              style={{ height: `${fillPct}%` }}
-            >
-              {/* Meniscus shimmer */}
-              <div
-                aria-hidden
-                className="absolute inset-x-3 top-0 h-px bg-gradient-to-r from-transparent via-white/80 to-transparent"
-              />
-              {/* Subtle shimmer overlay on the fill */}
-              <div
-                aria-hidden
-                className="pointer-events-none absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-white/15 to-transparent"
-              />
-            </div>
-          )}
-
-          {/* Inner sheen — radial highlight (the "bubble" cue) */}
-          <div
-            aria-hidden
-            className={`pointer-events-none absolute inset-0 ${cls.sheen}`}
-          />
-
-          {/* Centred score */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-            <span
-              className={`font-mono text-4xl sm:text-5xl font-bold tabular-nums leading-none
-                          drop-shadow-md ${scoreOnFill ? 'text-white' : cls.label}`}
-            >
-              {isPending ? '—' : pillar.score}
-            </span>
-          </div>
-
-          {/* Bottom inner shadow for orb depth */}
-          <div
-            aria-hidden
-            className="pointer-events-none absolute inset-x-0 bottom-0 h-1/4 bg-gradient-to-t from-black/15 to-transparent"
-          />
+      {/* Ring gauge — conic-gradient driven by pillar score */}
+      <div
+        className="size-28 rounded-full grid place-items-center my-3 motion-safe:transition-[background] duration-500"
+        style={{
+          background: `conic-gradient(${accent} ${pct}%, #e2e8f0 0)`,
+        }}
+        aria-hidden
+      >
+        <div className="size-[88px] rounded-full bg-white grid place-items-center">
+          <span className="font-mono text-2xl font-bold tabular-nums text-navy">
+            {isPending || pillar.score == null ? '—' : pillar.score}
+          </span>
         </div>
       </div>
 
-      {/* Status pill */}
+      <h3 className="text-sm font-semibold text-navy">{pillar.label}</h3>
       <span
-        className={`mt-4 inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider shadow-md ${cls.pill}`}
+        className={`mt-1 text-[10px] font-semibold uppercase tracking-wider ${labelClass}`}
       >
-        <span className="size-1.5 rounded-full bg-white/90" aria-hidden />
         {STATUS_LABEL[pillar.status]}
       </span>
 
-      {/* Pillar name */}
-      <p className="mt-2 text-sm font-semibold leading-tight text-navy">
-        {pillar.label}
-      </p>
-
-      {/* Rated count */}
-      <p className="mt-0.5 font-mono text-[10px] tabular-nums tracking-wider text-muted">
-        {String(pillar.rated).padStart(2, '0')}
-        <span className="mx-0.5 opacity-50">/</span>
-        {String(pillar.total).padStart(2, '0')}
-      </p>
+      {/* Top contributor chips */}
+      <div className="mt-3 w-full space-y-1.5 text-left">
+        {top.length === 0 ? (
+          <div className="flex items-center gap-2 text-[11px]">
+            <span className="size-1.5 rounded-full bg-slate-300" aria-hidden />
+            <span className="flex-1 text-slate-500">Awaiting data</span>
+          </div>
+        ) : (
+          top.map((m) => (
+            <div key={m.key} className="flex items-center gap-2 text-[11px]">
+              <span
+                className={`size-1.5 rounded-full ${TIER_DOT[(m.tier ?? 'null') as keyof typeof TIER_DOT]}`}
+                aria-hidden
+              />
+              <span className="flex-1 text-slate-700 truncate">{m.label}</span>
+              <span className="font-mono text-slate-500">
+                {m.tier ?? 'pending'}
+              </span>
+            </div>
+          ))
+        )}
+      </div>
     </button>
   );
 }
