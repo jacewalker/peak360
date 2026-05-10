@@ -50,11 +50,7 @@ export default function PillarsGrid({
 
   return (
     <>
-      {/*
-        With five children at md:grid-cols-3, the grid naturally wraps to
-        a 3 + 2 layout (D-22). Definitions arrive pre-sorted by sortOrder.
-      */}
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 md:gap-6">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-5 md:gap-4">
         {definitions.map((def) => {
           const result = scores[def.pillarKey];
           const group = grouped[def.pillarKey];
