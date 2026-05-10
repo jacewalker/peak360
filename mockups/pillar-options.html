@@ -1,0 +1,496 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Peak360 — Pillar style comparison</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,typography"></script>
+<style>
+  body { font-family: ui-sans-serif, system-ui, -apple-system, "Inter", sans-serif; }
+  .mono { font-family: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace; }
+  :root {
+    --navy: #1a365d;
+    --navy-dark: #0f2440;
+    --gold: #F5A623;
+    --gold-dark: #c9a24a;
+  }
+  .text-navy { color: var(--navy); }
+  .text-gold-dark { color: var(--gold-dark); }
+  .border-gold-dark { border-color: var(--gold-dark); }
+  .atmos {
+    background:
+      radial-gradient(ellipse 70% 60% at 50% 0%, rgba(245,166,35,0.06), transparent 70%),
+      radial-gradient(ellipse 50% 80% at 50% 100%, rgba(26,54,93,0.04), transparent 70%);
+  }
+  .spark { stroke-linecap: round; stroke-linejoin: round; fill: none; }
+  .tier-poor      { background:#ef4444; }
+  .tier-cautious  { background:#f59e0b; }
+  .tier-normal    { background:#94a3b8; }
+  .tier-great     { background:#3b82f6; }
+  .tier-elite     { background:#10b981; }
+  .ring-gauge {
+    background: conic-gradient(var(--accent) calc(var(--pct) * 1%), #e2e8f0 0);
+  }
+</style>
+</head>
+<body class="bg-slate-50 text-slate-900">
+
+<header class="max-w-7xl mx-auto px-6 pt-10 pb-6">
+  <div class="flex items-center gap-3 mb-2">
+    <span class="mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">Peak360 · Pillar Comparison</span>
+    <span class="h-px w-10 bg-gold-dark/40"></span>
+  </div>
+  <h1 class="text-3xl font-semibold tracking-tight text-navy">Three directions for the five-pillar visual</h1>
+  <p class="mt-2 max-w-2xl text-slate-600 text-sm leading-relaxed">
+    Same data in three different presentations, plus the proposed side-drawer drill-down pattern.
+    Click any pillar to see the drawer.
+  </p>
+</header>
+
+<!-- ───────────────────── OPTION 1 — Tier bars ───────────────────── -->
+<section class="atmos border-y border-slate-200/70">
+<div class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between mb-6">
+    <div>
+      <p class="mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">Option 1</p>
+      <h2 class="text-2xl font-semibold text-navy mt-1">Horizontal tier bars</h2>
+      <p class="text-sm text-slate-600 mt-1 max-w-xl">Mirrors your 5-tier rating engine 1:1. Most clinically credible. Scannable, on-brand for a longevity report.</p>
+    </div>
+    <span class="mono text-[10px] uppercase tracking-wider text-slate-500">5 / 5 pillars</span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+    <button data-name="Cardiometabolic" data-score="73" data-status="green" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-start justify-between">
+        <div>
+          <p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Pillar 1</p>
+          <h3 class="text-base font-semibold text-navy mt-1">Cardiometabolic</h3>
+        </div>
+        <span class="mono text-3xl font-bold tabular-nums text-emerald-700">73</span>
+      </div>
+      <div class="mt-4">
+        <div class="relative h-2 rounded-full overflow-hidden flex">
+          <div class="flex-1 tier-poor"></div><div class="flex-1 tier-cautious"></div><div class="flex-1 tier-normal"></div><div class="flex-1 tier-great"></div><div class="flex-1 tier-elite"></div>
+          <div class="absolute top-1/2 -translate-y-1/2 size-4 rounded-full bg-white ring-2 ring-navy shadow" style="left: calc(73% - 8px);"></div>
+        </div>
+        <div class="mt-1.5 flex justify-between mono text-[9px] uppercase tracking-wider text-slate-400">
+          <span>Poor</span><span>Cautious</span><span>Normal</span><span>Great</span><span>Elite</span>
+        </div>
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <span class="size-1.5 rounded-full bg-emerald-500"></span>
+        <span class="text-xs font-semibold text-emerald-700">Strong</span>
+        <span class="ml-auto mono text-[10px] tabular-nums text-slate-400">12 / 14 markers</span>
+      </div>
+    </button>
+
+    <button data-name="Aerobic Fitness" data-score="80" data-status="green" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-start justify-between">
+        <div><p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Pillar 2</p><h3 class="text-base font-semibold text-navy mt-1">Aerobic Fitness</h3></div>
+        <span class="mono text-3xl font-bold tabular-nums text-emerald-700">80</span>
+      </div>
+      <div class="mt-4">
+        <div class="relative h-2 rounded-full overflow-hidden flex">
+          <div class="flex-1 tier-poor"></div><div class="flex-1 tier-cautious"></div><div class="flex-1 tier-normal"></div><div class="flex-1 tier-great"></div><div class="flex-1 tier-elite"></div>
+          <div class="absolute top-1/2 -translate-y-1/2 size-4 rounded-full bg-white ring-2 ring-navy shadow" style="left: calc(80% - 8px);"></div>
+        </div>
+        <div class="mt-1.5 flex justify-between mono text-[9px] uppercase tracking-wider text-slate-400"><span>Poor</span><span>Cautious</span><span>Normal</span><span>Great</span><span>Elite</span></div>
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <span class="size-1.5 rounded-full bg-emerald-500"></span><span class="text-xs font-semibold text-emerald-700">Strong</span>
+        <span class="ml-auto mono text-[10px] tabular-nums text-slate-400">3 / 3 markers</span>
+      </div>
+    </button>
+
+    <button data-name="Body Composition" data-score="80" data-status="green" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-start justify-between">
+        <div><p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Pillar 3</p><h3 class="text-base font-semibold text-navy mt-1">Body Composition</h3></div>
+        <span class="mono text-3xl font-bold tabular-nums text-emerald-700">80</span>
+      </div>
+      <div class="mt-4">
+        <div class="relative h-2 rounded-full overflow-hidden flex">
+          <div class="flex-1 tier-poor"></div><div class="flex-1 tier-cautious"></div><div class="flex-1 tier-normal"></div><div class="flex-1 tier-great"></div><div class="flex-1 tier-elite"></div>
+          <div class="absolute top-1/2 -translate-y-1/2 size-4 rounded-full bg-white ring-2 ring-navy shadow" style="left: calc(80% - 8px);"></div>
+        </div>
+        <div class="mt-1.5 flex justify-between mono text-[9px] uppercase tracking-wider text-slate-400"><span>Poor</span><span>Cautious</span><span>Normal</span><span>Great</span><span>Elite</span></div>
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <span class="size-1.5 rounded-full bg-emerald-500"></span><span class="text-xs font-semibold text-emerald-700">Strong</span>
+        <span class="ml-auto mono text-[10px] tabular-nums text-slate-400">3 / 3 markers</span>
+      </div>
+    </button>
+
+    <button data-name="Strength" data-score="76" data-status="green" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-start justify-between">
+        <div><p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Pillar 4</p><h3 class="text-base font-semibold text-navy mt-1">Strength</h3></div>
+        <span class="mono text-3xl font-bold tabular-nums text-emerald-700">76</span>
+      </div>
+      <div class="mt-4">
+        <div class="relative h-2 rounded-full overflow-hidden flex">
+          <div class="flex-1 tier-poor"></div><div class="flex-1 tier-cautious"></div><div class="flex-1 tier-normal"></div><div class="flex-1 tier-great"></div><div class="flex-1 tier-elite"></div>
+          <div class="absolute top-1/2 -translate-y-1/2 size-4 rounded-full bg-white ring-2 ring-navy shadow" style="left: calc(76% - 8px);"></div>
+        </div>
+        <div class="mt-1.5 flex justify-between mono text-[9px] uppercase tracking-wider text-slate-400"><span>Poor</span><span>Cautious</span><span>Normal</span><span>Great</span><span>Elite</span></div>
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <span class="size-1.5 rounded-full bg-emerald-500"></span><span class="text-xs font-semibold text-emerald-700">Strong</span>
+        <span class="ml-auto mono text-[10px] tabular-nums text-slate-400">9 / 9 markers</span>
+      </div>
+    </button>
+
+    <button data-name="Balance" data-score="40" data-status="amber" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-start justify-between">
+        <div><p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Pillar 5</p><h3 class="text-base font-semibold text-navy mt-1">Balance</h3></div>
+        <span class="mono text-3xl font-bold tabular-nums text-amber-700">40</span>
+      </div>
+      <div class="mt-4">
+        <div class="relative h-2 rounded-full overflow-hidden flex">
+          <div class="flex-1 tier-poor"></div><div class="flex-1 tier-cautious"></div><div class="flex-1 tier-normal"></div><div class="flex-1 tier-great"></div><div class="flex-1 tier-elite"></div>
+          <div class="absolute top-1/2 -translate-y-1/2 size-4 rounded-full bg-white ring-2 ring-navy shadow" style="left: calc(40% - 8px);"></div>
+        </div>
+        <div class="mt-1.5 flex justify-between mono text-[9px] uppercase tracking-wider text-slate-400"><span>Poor</span><span>Cautious</span><span>Normal</span><span>Great</span><span>Elite</span></div>
+      </div>
+      <div class="mt-3 flex items-center gap-2">
+        <span class="size-1.5 rounded-full bg-amber-500"></span><span class="text-xs font-semibold text-amber-700">Needs focus</span>
+        <span class="ml-auto mono text-[10px] tabular-nums text-slate-400">2 / 2 markers</span>
+      </div>
+    </button>
+  </div>
+</div>
+</section>
+
+<!-- ───────────────────── OPTION 2 — Rings + contributor chips ───────────────────── -->
+<section class="atmos border-b border-slate-200/70">
+<div class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between mb-6">
+    <div>
+      <p class="mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">Option 2</p>
+      <h2 class="text-2xl font-semibold text-navy mt-1">Rings + contributor chips</h2>
+      <p class="text-sm text-slate-600 mt-1 max-w-xl">Whoop / Oura aesthetic. Most informative at-a-glance — top contributing markers visible without drilling in.</p>
+    </div>
+    <span class="mono text-[10px] uppercase tracking-wider text-slate-500">5 / 5 pillars</span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+    <button data-name="Cardiometabolic" data-score="73" data-status="green" class="js-open group bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all flex flex-col items-center text-center">
+      <p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 self-start">P · 01</p>
+      <div class="ring-gauge size-28 rounded-full grid place-items-center my-3" style="--accent:#10b981;--pct:73;">
+        <div class="size-[88px] rounded-full bg-white grid place-items-center"><span class="mono text-2xl font-bold tabular-nums text-navy">73</span></div>
+      </div>
+      <h3 class="text-sm font-semibold text-navy">Cardiometabolic</h3>
+      <span class="mt-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Strong</span>
+      <div class="mt-3 w-full space-y-1.5 text-left">
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-emerald-500"></span><span class="flex-1 text-slate-700">HDL</span><span class="mono text-slate-500">elite</span></div>
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-amber-500"></span><span class="flex-1 text-slate-700">ALT</span><span class="mono text-slate-500">cautious</span></div>
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-red-500"></span><span class="flex-1 text-slate-700">Iron</span><span class="mono text-slate-500">poor</span></div>
+      </div>
+    </button>
+
+    <button data-name="Aerobic Fitness" data-score="80" data-status="green" class="js-open group bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all flex flex-col items-center text-center">
+      <p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 self-start">P · 02</p>
+      <div class="ring-gauge size-28 rounded-full grid place-items-center my-3" style="--accent:#10b981;--pct:80;">
+        <div class="size-[88px] rounded-full bg-white grid place-items-center"><span class="mono text-2xl font-bold tabular-nums text-navy">80</span></div>
+      </div>
+      <h3 class="text-sm font-semibold text-navy">Aerobic Fitness</h3>
+      <span class="mt-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Strong</span>
+      <div class="mt-3 w-full space-y-1.5 text-left">
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-emerald-500"></span><span class="flex-1 text-slate-700">VO₂max</span><span class="mono text-slate-500">elite</span></div>
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-blue-500"></span><span class="flex-1 text-slate-700">Resting HR</span><span class="mono text-slate-500">great</span></div>
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-slate-400"></span><span class="flex-1 text-slate-700">BP</span><span class="mono text-slate-500">normal</span></div>
+      </div>
+    </button>
+
+    <button data-name="Body Composition" data-score="80" data-status="green" class="js-open group bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all flex flex-col items-center text-center">
+      <p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 self-start">P · 03</p>
+      <div class="ring-gauge size-28 rounded-full grid place-items-center my-3" style="--accent:#10b981;--pct:80;">
+        <div class="size-[88px] rounded-full bg-white grid place-items-center"><span class="mono text-2xl font-bold tabular-nums text-navy">80</span></div>
+      </div>
+      <h3 class="text-sm font-semibold text-navy">Body Composition</h3>
+      <span class="mt-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Strong</span>
+      <div class="mt-3 w-full space-y-1.5 text-left">
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-emerald-500"></span><span class="flex-1 text-slate-700">Body Fat %</span><span class="mono text-slate-500">elite</span></div>
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-blue-500"></span><span class="flex-1 text-slate-700">Lean Mass</span><span class="mono text-slate-500">great</span></div>
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-slate-400"></span><span class="flex-1 text-slate-700">W/H Ratio</span><span class="mono text-slate-500">normal</span></div>
+      </div>
+    </button>
+
+    <button data-name="Strength" data-score="76" data-status="green" class="js-open group bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all flex flex-col items-center text-center">
+      <p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 self-start">P · 04</p>
+      <div class="ring-gauge size-28 rounded-full grid place-items-center my-3" style="--accent:#10b981;--pct:76;">
+        <div class="size-[88px] rounded-full bg-white grid place-items-center"><span class="mono text-2xl font-bold tabular-nums text-navy">76</span></div>
+      </div>
+      <h3 class="text-sm font-semibold text-navy">Strength</h3>
+      <span class="mt-1 text-[10px] font-semibold uppercase tracking-wider text-emerald-700">Strong</span>
+      <div class="mt-3 w-full space-y-1.5 text-left">
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-emerald-500"></span><span class="flex-1 text-slate-700">Grip (R)</span><span class="mono text-slate-500">elite</span></div>
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-blue-500"></span><span class="flex-1 text-slate-700">Push-ups</span><span class="mono text-slate-500">great</span></div>
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-amber-500"></span><span class="flex-1 text-slate-700">Plank</span><span class="mono text-slate-500">cautious</span></div>
+      </div>
+    </button>
+
+    <button data-name="Balance" data-score="40" data-status="amber" class="js-open group bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all flex flex-col items-center text-center">
+      <p class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 self-start">P · 05</p>
+      <div class="ring-gauge size-28 rounded-full grid place-items-center my-3" style="--accent:#f59e0b;--pct:40;">
+        <div class="size-[88px] rounded-full bg-white grid place-items-center"><span class="mono text-2xl font-bold tabular-nums text-navy">40</span></div>
+      </div>
+      <h3 class="text-sm font-semibold text-navy">Balance</h3>
+      <span class="mt-1 text-[10px] font-semibold uppercase tracking-wider text-amber-700">Needs focus</span>
+      <div class="mt-3 w-full space-y-1.5 text-left">
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-red-500"></span><span class="flex-1 text-slate-700">SLB Left</span><span class="mono text-slate-500">poor</span></div>
+        <div class="flex items-center gap-2 text-[11px]"><span class="size-1.5 rounded-full bg-amber-500"></span><span class="flex-1 text-slate-700">SLB Right</span><span class="mono text-slate-500">cautious</span></div>
+      </div>
+    </button>
+  </div>
+</div>
+</section>
+
+<!-- ───────────────────── OPTION 3 — Tile + sparkline grid ───────────────────── -->
+<section class="atmos border-b border-slate-200/70">
+<div class="max-w-7xl mx-auto px-6 py-10">
+  <div class="flex items-baseline justify-between mb-6">
+    <div>
+      <p class="mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">Option 3</p>
+      <h2 class="text-2xl font-semibold text-navy mt-1">Tile + sparkline grid</h2>
+      <p class="text-sm text-slate-600 mt-1 max-w-xl">Garmin / Apple Health summary feel. Larger editorial tiles with score, mini bar, sparkline, and chip strip.</p>
+    </div>
+    <span class="mono text-[10px] uppercase tracking-wider text-slate-500">5 / 5 pillars</span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-5 gap-3">
+    <button data-name="Cardiometabolic" data-score="73" data-status="green" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-center gap-2 mb-2"><span class="size-2 rounded-full bg-emerald-500"></span><span class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Cardiometabolic</span></div>
+      <div class="flex items-baseline justify-between"><span class="mono text-4xl font-bold tabular-nums text-navy">73</span><span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">Strong</span></div>
+      <svg viewBox="0 0 120 32" class="mt-2 w-full h-8"><polyline class="spark" stroke="#10b981" stroke-width="2" points="0,22 15,18 30,20 45,14 60,15 75,10 90,12 105,8 120,9" /></svg>
+      <div class="mt-2 flex flex-wrap gap-1">
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">HDL</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">ALT</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-800">Iron</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">+11</span>
+      </div>
+    </button>
+
+    <button data-name="Aerobic Fitness" data-score="80" data-status="green" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-center gap-2 mb-2"><span class="size-2 rounded-full bg-emerald-500"></span><span class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Aerobic Fitness</span></div>
+      <div class="flex items-baseline justify-between"><span class="mono text-4xl font-bold tabular-nums text-navy">80</span><span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">Strong</span></div>
+      <svg viewBox="0 0 120 32" class="mt-2 w-full h-8"><polyline class="spark" stroke="#10b981" stroke-width="2" points="0,18 15,15 30,12 45,14 60,9 75,7 90,9 105,6 120,5" /></svg>
+      <div class="mt-2 flex flex-wrap gap-1">
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">VO₂max</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">RHR</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">BP</span>
+      </div>
+    </button>
+
+    <button data-name="Body Composition" data-score="80" data-status="green" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-center gap-2 mb-2"><span class="size-2 rounded-full bg-emerald-500"></span><span class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Body Composition</span></div>
+      <div class="flex items-baseline justify-between"><span class="mono text-4xl font-bold tabular-nums text-navy">80</span><span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">Strong</span></div>
+      <svg viewBox="0 0 120 32" class="mt-2 w-full h-8"><polyline class="spark" stroke="#10b981" stroke-width="2" points="0,16 15,18 30,15 45,12 60,12 75,10 90,11 105,9 120,7" /></svg>
+      <div class="mt-2 flex flex-wrap gap-1">
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Body Fat</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">Lean</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">W/H</span>
+      </div>
+    </button>
+
+    <button data-name="Strength" data-score="76" data-status="green" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-center gap-2 mb-2"><span class="size-2 rounded-full bg-emerald-500"></span><span class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Strength</span></div>
+      <div class="flex items-baseline justify-between"><span class="mono text-4xl font-bold tabular-nums text-navy">76</span><span class="text-[11px] font-semibold uppercase tracking-wider text-emerald-700">Strong</span></div>
+      <svg viewBox="0 0 120 32" class="mt-2 w-full h-8"><polyline class="spark" stroke="#10b981" stroke-width="2" points="0,20 15,16 30,17 45,14 60,12 75,13 90,10 105,11 120,9" /></svg>
+      <div class="mt-2 flex flex-wrap gap-1">
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-800">Grip R</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-blue-100 text-blue-800">Push-up</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">Plank</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">+6</span>
+      </div>
+    </button>
+
+    <button data-name="Balance" data-score="40" data-status="amber" class="js-open group text-left bg-white rounded-2xl border border-slate-200 p-5 hover:border-gold-dark/50 hover:shadow-md transition-all">
+      <div class="flex items-center gap-2 mb-2"><span class="size-2 rounded-full bg-amber-500"></span><span class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Balance</span></div>
+      <div class="flex items-baseline justify-between"><span class="mono text-4xl font-bold tabular-nums text-navy">40</span><span class="text-[11px] font-semibold uppercase tracking-wider text-amber-700">Needs focus</span></div>
+      <svg viewBox="0 0 120 32" class="mt-2 w-full h-8"><polyline class="spark" stroke="#f59e0b" stroke-width="2" points="0,12 15,15 30,18 45,16 60,20 75,22 90,21 105,24 120,23" /></svg>
+      <div class="mt-2 flex flex-wrap gap-1">
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-800">SLB L</span>
+        <span class="text-[10px] px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">SLB R</span>
+      </div>
+    </button>
+  </div>
+</div>
+</section>
+
+<!-- ───────────────────── DRAWER (shared) ───────────────────── -->
+<div id="drawer-backdrop" class="fixed inset-0 bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity z-40"></div>
+<aside id="drawer" class="fixed top-0 right-0 h-full w-full md:w-[520px] bg-white shadow-2xl z-50 translate-x-full transition-transform duration-300 overflow-y-auto">
+  <div id="drawer-hero" class="px-6 pt-6 pb-5 border-b border-slate-200">
+    <div class="flex items-center justify-between mb-4">
+      <span class="mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">Pillar · Detail</span>
+      <button id="drawer-close" class="size-8 grid place-items-center rounded-full hover:bg-slate-100 text-slate-500" aria-label="Close">
+        <svg viewBox="0 0 14 14" class="size-3.5"><path d="M1 1l12 12M13 1L1 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" fill="none"/></svg>
+      </button>
+    </div>
+    <h2 id="drawer-title" class="text-2xl font-semibold tracking-tight text-navy">Cardiometabolic</h2>
+    <p class="text-sm text-slate-600 mt-1">Lipids, glucose, inflammation</p>
+    <div class="mt-5 flex items-end gap-4">
+      <span id="drawer-score" class="mono text-6xl font-bold tabular-nums text-emerald-700 leading-none">73</span>
+      <div class="pb-1">
+        <span id="drawer-status-pill" class="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider bg-emerald-500 text-white">
+          <span class="size-1.5 rounded-full bg-white/90"></span>
+          <span id="drawer-status-label">Strong</span>
+        </span>
+        <p class="mono text-[10px] uppercase tracking-wider text-slate-500 mt-1.5">Composite index · /100</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="px-6 py-5 border-b border-slate-200">
+    <div class="flex items-baseline justify-between mb-2">
+      <span class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500">Score breakdown</span>
+      <span class="mono text-[10px] uppercase tracking-wider text-slate-500">14 markers</span>
+    </div>
+    <div class="flex h-2 w-full overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+      <div class="tier-poor" style="width:21%"></div>
+      <div class="tier-cautious" style="width:21%"></div>
+      <div class="tier-normal" style="width:36%"></div>
+      <div class="tier-great" style="width:14%"></div>
+      <div class="tier-elite" style="width:8%"></div>
+    </div>
+    <div class="mt-2 flex flex-wrap gap-x-4 gap-y-1 mono text-[10px] uppercase tracking-wider text-slate-500">
+      <span class="inline-flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-red-500"></span>Poor · 3</span>
+      <span class="inline-flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-amber-500"></span>Cautious · 3</span>
+      <span class="inline-flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-slate-400"></span>Normal · 5</span>
+      <span class="inline-flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-blue-500"></span>Great · 2</span>
+      <span class="inline-flex items-center gap-1.5"><span class="size-1.5 rounded-full bg-emerald-500"></span>Elite · 1</span>
+    </div>
+  </div>
+
+  <div class="px-6 py-5">
+    <h3 class="mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 mb-3">Contributing markers</h3>
+    <div class="space-y-4">
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="size-2 rounded-full bg-red-500"></span>
+          <span class="mono text-[10px] font-semibold uppercase tracking-wider text-navy">Poor · 3</span>
+        </div>
+        <ul class="rounded-xl bg-slate-50 ring-1 ring-slate-200 divide-y divide-slate-200">
+          <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div class="flex items-center gap-3 min-w-0"><span class="block h-6 w-1 rounded-full bg-red-500"></span><span class="text-sm text-navy truncate">Serum Iron</span></div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="mono text-sm tabular-nums text-navy">22.9 <span class="text-slate-500 text-xs">ug/dL</span></span>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-red-500 text-white">Poor</span>
+            </div>
+          </li>
+          <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div class="flex items-center gap-3 min-w-0"><span class="block h-6 w-1 rounded-full bg-red-500"></span><span class="text-sm text-navy truncate">Total Testosterone</span></div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="mono text-sm tabular-nums text-navy">20.6 <span class="text-slate-500 text-xs">ng/dL</span></span>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-red-500 text-white">Poor</span>
+            </div>
+          </li>
+          <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div class="flex items-center gap-3 min-w-0"><span class="block h-6 w-1 rounded-full bg-red-500"></span><span class="text-sm text-navy truncate">DHEAS</span></div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="mono text-sm tabular-nums text-navy">0.4 <span class="text-slate-500 text-xs">ng/mL</span></span>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-red-500 text-white">Poor</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="size-2 rounded-full bg-amber-500"></span>
+          <span class="mono text-[10px] font-semibold uppercase tracking-wider text-navy">Cautious · 3</span>
+        </div>
+        <ul class="rounded-xl bg-slate-50 ring-1 ring-slate-200 divide-y divide-slate-200">
+          <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div class="flex items-center gap-3 min-w-0"><span class="block h-6 w-1 rounded-full bg-amber-500"></span><span class="text-sm text-navy truncate">ALT</span></div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="mono text-sm tabular-nums text-navy">52 <span class="text-slate-500 text-xs">U/L</span></span>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-amber-500 text-white">Cautious</span>
+            </div>
+          </li>
+          <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div class="flex items-center gap-3 min-w-0"><span class="block h-6 w-1 rounded-full bg-amber-500"></span><span class="text-sm text-navy truncate">AST</span></div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="mono text-sm tabular-nums text-navy">36 <span class="text-slate-500 text-xs">U/L</span></span>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-amber-500 text-white">Cautious</span>
+            </div>
+          </li>
+          <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div class="flex items-center gap-3 min-w-0"><span class="block h-6 w-1 rounded-full bg-amber-500"></span><span class="text-sm text-navy truncate">BP (Systolic)</span></div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="mono text-sm tabular-nums text-navy">130 <span class="text-slate-500 text-xs">mmHg</span></span>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-amber-500 text-white">Cautious</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+      <div>
+        <div class="flex items-center gap-2 mb-2">
+          <span class="size-2 rounded-full bg-slate-400"></span>
+          <span class="mono text-[10px] font-semibold uppercase tracking-wider text-navy">Normal · 5</span>
+        </div>
+        <ul class="rounded-xl bg-slate-50 ring-1 ring-slate-200 divide-y divide-slate-200">
+          <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div class="flex items-center gap-3 min-w-0"><span class="block h-6 w-1 rounded-full bg-slate-400"></span><span class="text-sm text-navy truncate">HDL Cholesterol</span></div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="mono text-sm tabular-nums text-navy">1.2 <span class="text-slate-500 text-xs">mmol/L</span></span>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-slate-400 text-white">Normal</span>
+            </div>
+          </li>
+          <li class="flex items-center justify-between gap-3 px-4 py-2.5">
+            <div class="flex items-center gap-3 min-w-0"><span class="block h-6 w-1 rounded-full bg-slate-400"></span><span class="text-sm text-navy truncate">Triglycerides</span></div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              <span class="mono text-sm tabular-nums text-navy">1.1 <span class="text-slate-500 text-xs">mmol/L</span></span>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider bg-slate-400 text-white">Normal</span>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</aside>
+
+<script>
+  (function() {
+    const TONES = {
+      green: { score: 'text-emerald-700', chip: 'bg-emerald-500', label: 'Strong' },
+      amber: { score: 'text-amber-700',   chip: 'bg-amber-500',   label: 'Needs focus' },
+      red:   { score: 'text-red-700',     chip: 'bg-red-500',     label: 'Priority' },
+    };
+
+    const drawer = document.getElementById('drawer');
+    const backdrop = document.getElementById('drawer-backdrop');
+    const titleEl = document.getElementById('drawer-title');
+    const scoreEl = document.getElementById('drawer-score');
+    const statusPill = document.getElementById('drawer-status-pill');
+    const statusLabel = document.getElementById('drawer-status-label');
+    const closeBtn = document.getElementById('drawer-close');
+
+    function openDrawer(name, score, status) {
+      const t = TONES[status] || TONES.green;
+      titleEl.textContent = name;
+      scoreEl.textContent = String(score);
+      scoreEl.className = 'mono text-6xl font-bold tabular-nums leading-none ' + t.score;
+      statusPill.className = 'inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[10px] font-semibold uppercase tracking-wider text-white ' + t.chip;
+      statusLabel.textContent = t.label;
+      drawer.classList.remove('translate-x-full');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      backdrop.classList.add('opacity-100');
+    }
+    function closeDrawer() {
+      drawer.classList.add('translate-x-full');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      backdrop.classList.remove('opacity-100');
+    }
+
+    document.querySelectorAll('.js-open').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        openDrawer(btn.dataset.name, btn.dataset.score, btn.dataset.status);
+      });
+    });
+    backdrop.addEventListener('click', closeDrawer);
+    closeBtn.addEventListener('click', closeDrawer);
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+  })();
+</script>
+
+</body>
+</html>
