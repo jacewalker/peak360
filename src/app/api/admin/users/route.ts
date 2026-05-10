@@ -56,22 +56,23 @@ export async function GET() {
           'last_active'
         ),
       coachCount:
-        sql<number>`(SELECT COUNT(*) FROM ${assessments} WHERE ${assessments.coachId} = ${user.id})`.as(
+        sql<number>`(SELECT COUNT(*) FROM ${assessments} WHERE ${assessments.coachId} = "user"."id")`.as(
           'coach_count'
         ),
       clientCount:
-        sql<number>`(SELECT COUNT(*) FROM ${assessments} WHERE ${assessments.clientId} = ${user.id})`.as(
+        sql<number>`(SELECT COUNT(*) FROM ${assessments} WHERE ${assessments.clientId} = "user"."id")`.as(
           'client_count'
         ),
       // 260510-osn: coachId of the client's most-recent assessment.
-      // Correlated subquery — works on both Postgres and SQLite paths.
+      // NOTE: must qualify outer-table column as "user"."id" — drizzle's
+      // ${user.id} expands to bare "id" which collides with assessments.id
+      // inside the correlated subquery and silently always resolves false.
       coachId:
-        sql<string | null>`(SELECT ${assessments.coachId} FROM ${assessments} WHERE ${assessments.clientId} = ${user.id} AND ${assessments.coachId} IS NOT NULL ORDER BY ${assessments.createdAt} DESC LIMIT 1)`.as(
+        sql<string | null>`(SELECT ${assessments.coachId} FROM ${assessments} WHERE ${assessments.clientId} = "user"."id" AND ${assessments.coachId} IS NOT NULL ORDER BY ${assessments.createdAt} DESC LIMIT 1)`.as(
           'coach_id'
         ),
-      // 260510-osn: display name of that coach via nested correlated subquery.
       coachName:
-        sql<string | null>`(SELECT u2.name FROM ${user} u2 WHERE u2.id = (SELECT ${assessments.coachId} FROM ${assessments} WHERE ${assessments.clientId} = ${user.id} AND ${assessments.coachId} IS NOT NULL ORDER BY ${assessments.createdAt} DESC LIMIT 1))`.as(
+        sql<string | null>`(SELECT u2.name FROM ${user} u2 WHERE u2.id = (SELECT ${assessments.coachId} FROM ${assessments} WHERE ${assessments.clientId} = "user"."id" AND ${assessments.coachId} IS NOT NULL ORDER BY ${assessments.createdAt} DESC LIMIT 1))`.as(
           'coach_name'
         ),
     })
