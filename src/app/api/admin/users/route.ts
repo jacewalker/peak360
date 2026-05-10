@@ -12,13 +12,35 @@ import { requireAdmin } from '@/lib/auth-helpers';
  *
  * Response shape:
  *   { success: true, data: Array<{ id, email, name, role, banned, banReason,
- *       banExpires, createdAt, lastActive, coachCount, clientCount }> }
+ *       banExpires, createdAt, lastActive, coachCount, clientCount,
+ *       coachId, coachName }> }
+ *
+ * Additive fields (260510-osn):
+ *   - coachId:   id of the coach assigned via the user's MOST RECENT
+ *                assessment (assessments.coachId, ordered by created_at desc).
+ *                Populated only when role === 'client'; otherwise null.
+ *   - coachName: display name of that coach (joined from user table by id).
+ *                Populated only when role === 'client'; otherwise null.
  */
 export async function GET() {
   const [, errorRes] = await requireAdmin();
   if (errorRes) return errorRes;
 
-  const rows = await db
+  const rows: Array<{
+    id: string;
+    email: string;
+    name: string;
+    role: 'admin' | 'coach' | 'client';
+    banned: boolean | null;
+    banReason: string | null;
+    banExpires: number | null;
+    createdAt: string;
+    lastActive: string | null;
+    coachCount: number;
+    clientCount: number;
+    coachId: string | null;
+    coachName: string | null;
+  }> = await db
     .select({
       id: user.id,
       email: user.email,
@@ -41,9 +63,25 @@ export async function GET() {
         sql<number>`(SELECT COUNT(*) FROM ${assessments} WHERE ${assessments.clientId} = ${user.id})`.as(
           'client_count'
         ),
+      // 260510-osn: coachId of the client's most-recent assessment.
+      // Correlated subquery — works on both Postgres and SQLite paths.
+      coachId:
+        sql<string | null>`(SELECT ${assessments.coachId} FROM ${assessments} WHERE ${assessments.clientId} = ${user.id} AND ${assessments.coachId} IS NOT NULL ORDER BY ${assessments.createdAt} DESC LIMIT 1)`.as(
+          'coach_id'
+        ),
+      // 260510-osn: display name of that coach via nested correlated subquery.
+      coachName:
+        sql<string | null>`(SELECT u2.name FROM ${user} u2 WHERE u2.id = (SELECT ${assessments.coachId} FROM ${assessments} WHERE ${assessments.clientId} = ${user.id} AND ${assessments.coachId} IS NOT NULL ORDER BY ${assessments.createdAt} DESC LIMIT 1))`.as(
+          'coach_name'
+        ),
     })
     .from(user)
     .orderBy(desc(user.createdAt));
 
-  return NextResponse.json({ success: true, data: rows });
+  // Defensive post-process: only `client` rows ever surface a coach.
+  const data = rows.map((r) =>
+    r.role === 'client' ? r : { ...r, coachId: null, coachName: null }
+  );
+
+  return NextResponse.json({ success: true, data });
 }
