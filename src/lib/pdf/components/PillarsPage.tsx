@@ -210,10 +210,8 @@ export default function PillarsPage({
   const heading = pageCopy?.heading ?? 'The Peak Living Pillars';
   const intro = pageCopy?.intro ?? '';
   const sorted = [...definitions].sort((a, b) => a.sortOrder - b.sortOrder);
-  const row1 = sorted.slice(0, 3);
-  const row2 = sorted.slice(3, 5);
 
-  const renderCard = (d: PillarDefinition, width: string) => {
+  const renderCard = (d: PillarDefinition) => {
     const r = scores[d.pillarKey];
     const isPending = r.status === 'pending';
     const top = getTopContributors(d.pillarKey, markers);
@@ -223,12 +221,13 @@ export default function PillarsPage({
       <View
         key={d.pillarKey}
         style={{
-          width,
+          flex: 1,
+          minWidth: 0,
           borderWidth: isPending ? 1 : 0.5,
           borderStyle: isPending ? 'dashed' : 'solid',
           borderColor: COLORS.border,
           borderRadius: 8,
-          padding: 10,
+          padding: 6,
           backgroundColor: COLORS.white,
           alignItems: 'center',
         }}
@@ -247,14 +246,14 @@ export default function PillarsPage({
         </Text>
 
         {/* 2. Ring gauge */}
-        <View style={{ marginTop: 6, marginBottom: 6 }}>
-          <RingGauge score={r.score} status={r.status} size={64} />
+        <View style={{ marginTop: 4, marginBottom: 4 }}>
+          <RingGauge score={r.score} status={r.status} size={48} />
         </View>
 
         {/* 3. Pillar name + status label */}
         <Text
           style={{
-            fontSize: 9,
+            fontSize: 8,
             fontFamily: FONT.bold,
             color: COLORS.navy,
             textAlign: 'center',
@@ -371,13 +370,9 @@ export default function PillarsPage({
         ) : null}
       </View>
 
-      {/* Row 1 — 3 cards */}
-      <View style={{ flexDirection: 'row', gap: 8 }}>
-        {row1.map((d) => renderCard(d, '32%'))}
-      </View>
-      {/* Row 2 — 2 cards */}
-      <View style={{ flexDirection: 'row', gap: 8, marginTop: 8 }}>
-        {row2.map((d) => renderCard(d, '48%'))}
+      {/* Single row — 5 cards (Option 2 layout, force 5-across) */}
+      <View style={{ flexDirection: 'row', gap: 4 }}>
+        {sorted.slice(0, 5).map((d) => renderCard(d))}
       </View>
 
       <Text
