@@ -1,43 +1,178 @@
-import { Page, View, Text } from '@react-pdf/renderer';
+import { Page, View, Text, Svg, Circle } from '@react-pdf/renderer';
 import {
   COLORS,
+  TIER_COLORS_PDF,
   TRAFFIC_LIGHT_HEX,
-  TRAFFIC_LIGHT_TEXT,
-  STATUS_LABEL,
 } from '@/lib/pdf/colors';
 import { FONT } from '@/lib/pdf/fonts';
 import { styles } from '@/lib/pdf/styles';
 import { computeAllPillarScores } from '@/lib/pillars/mapping';
+import { markerToPillar } from '@/lib/pillars/mapping';
 import type {
   PillarDefinition,
   PillarPageCopy,
   PillarPrescription,
   PillarKey,
+  PillarStatus,
 } from '@/lib/pillars/types';
 import type { ReportMarker } from '@/lib/pdf/types';
+import type { RatingTier } from '@/types/normative';
 
 /**
- * Phase 8 — D-26 Pillars page.
+ * Phase 8 — D-26 Pillars page (Option 2 visual — see
+ * mockups/pillar-options.html lines 162-245).
  *
- * Single A4 mirror of the portal's Peak Living module:
- *   - Heading from pageCopy.heading (admin-editable; defensive fallback)
- *   - 3-2 grid of 5 pillar cards in sortOrder
- *   - Per-card status badge sourced from TRAFFIC_LIGHT_HEX (D-28 SSOT —
- *     no inline traffic-light hex anywhere in this file)
- *   - Optional Recommended next steps block per card (omitted when no
- *     prescription summary exists)
- *   - Footnote pointing back to the portal
+ * Single A4 mirror of the portal's Peak Living module. Each card mimics
+ * the portal Option 2 design:
+ *   - Mono "P · NN" eyebrow keyed to sortOrder
+ *   - SVG ring gauge driven by the pillar score (no conic-gradient — we
+ *     use stroke-dasharray on a Circle rotated -90° so the arc starts at
+ *     12-o'clock)
+ *   - Pillar name + uppercase status label coloured by traffic-light state
+ *   - Top-3 worst-tier-first contributor rows (dot + label + tier name)
+ *
+ * D-11 anti-pattern: ring accent uses ONLY the traffic-light palette
+ * (TRAFFIC_LIGHT_HEX). The 5-tier marker palette (TIER_COLORS_PDF) is
+ * reserved for the contributor chips — it lives at the marker layer, not
+ * the pillar layer.
+ *
+ * Defensive: any computeScore edge case yields '—' rather than throwing —
+ * never hard-fail PDF generation.
  *
  * Inserted BEFORE TierSummary by Peak360Report.tsx (D-26, D-27 — existing
  * blocks unchanged in shape and order).
- *
- * Pitfall A5 mitigation: per-card prescription summary truncated to
- * ~140 characters so a long admin summary cannot push the page past A4.
  */
 
-function truncate(s: string, max = 140): string {
-  if (s.length <= max) return s;
-  return s.slice(0, max - 1).trimEnd() + '…';
+// Worst-tier-first ranking for contributor chip selection
+const TIER_RANK: Record<RatingTier, number> = {
+  poor: 0,
+  cautious: 1,
+  normal: 2,
+  great: 3,
+  elite: 4,
+};
+
+// Status labels match the portal Option 2 wording (PillarsDisplay.tsx)
+const STATUS_LABEL: Record<PillarStatus, string> = {
+  green: 'Strong',
+  amber: 'Needs focus',
+  red: 'Priority',
+  pending: 'Awaiting data',
+};
+
+const STATUS_TEXT: Record<PillarStatus, string> = {
+  green: '#047857', // emerald-700
+  amber: '#b45309', // amber-700
+  red: '#b91c1c', // red-700
+  pending: COLORS.textSecondary,
+};
+
+const PENDING_RING = '#cbd5e1'; // slate-300
+
+function getTopContributors(
+  pillarKey: PillarKey,
+  markers: ReportMarker[],
+): ReportMarker[] {
+  return markers
+    .filter((m) => {
+      const cls = markerToPillar(m);
+      return cls.pillar === pillarKey && !cls.supporting;
+    })
+    .slice() // copy before sort
+    .sort((a, b) => {
+      const ra = a.tier ? TIER_RANK[a.tier] : 99;
+      const rb = b.tier ? TIER_RANK[b.tier] : 99;
+      return ra - rb;
+    })
+    .slice(0, 3);
+}
+
+interface RingGaugeProps {
+  score: number | null;
+  status: PillarStatus;
+  size?: number;
+}
+
+/**
+ * Ring gauge built with @react-pdf/renderer's Svg + Circle. We use
+ * `strokeDasharray` on the progress circle to draw an arc whose length
+ * is `pct%` of the circumference; rotating the circle by -90° starts
+ * the arc at 12-o'clock (mirroring the portal conic-gradient).
+ *
+ * Because @react-pdf/renderer's SVG <Text> rendering is unreliable, the
+ * centre numeric is laid out as a positioned <Text> overlay inside a
+ * wrapping <View> rather than as an SVG element.
+ */
+function RingGauge({ score, status, size = 60 }: RingGaugeProps) {
+  const isPending = status === 'pending';
+  const pct = isPending || score === null ? 0 : Math.max(0, Math.min(100, score));
+  const accent = isPending ? PENDING_RING : TRAFFIC_LIGHT_HEX[status];
+
+  const strokeWidth = 6;
+  const r = (size - strokeWidth) / 2;
+  const cx = size / 2;
+  const cy = size / 2;
+  const circumference = 2 * Math.PI * r;
+  const arcLen = (pct / 100) * circumference;
+
+  return (
+    <View
+      style={{
+        width: size,
+        height: size,
+        position: 'relative',
+        alignItems: 'center',
+        justifyContent: 'center',
+      }}
+    >
+      <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
+        {/* Track */}
+        <Circle
+          cx={cx}
+          cy={cy}
+          r={r}
+          stroke={COLORS.border}
+          strokeWidth={strokeWidth}
+          fill="none"
+        />
+        {/* Progress arc — rotated -90° so it starts at 12-o'clock */}
+        {pct > 0 ? (
+          <Circle
+            cx={cx}
+            cy={cy}
+            r={r}
+            stroke={accent}
+            strokeWidth={strokeWidth}
+            fill="none"
+            strokeDasharray={`${arcLen} ${circumference}`}
+            strokeLinecap="round"
+            transform={`rotate(-90 ${cx} ${cy})`}
+          />
+        ) : null}
+      </Svg>
+      <View
+        style={{
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          width: size,
+          height: size,
+          alignItems: 'center',
+          justifyContent: 'center',
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 14,
+            fontFamily: FONT.bold,
+            color: COLORS.navy,
+          }}
+        >
+          {isPending || score === null ? '—' : `${score}`}
+        </Text>
+      </View>
+    </View>
+  );
 }
 
 export interface PillarsPageProps {
@@ -50,22 +185,40 @@ export interface PillarsPageProps {
 export default function PillarsPage({
   definitions,
   pageCopy,
-  prescriptions,
+  // prescriptions is intentionally unused now: per Option 2 the card has
+  // no prescription summary block. Recommendations live in the portal
+  // drawer (Section 7) and any future dedicated PDF page.
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  prescriptions: _prescriptions,
   markers,
 }: PillarsPageProps) {
-  const scores = computeAllPillarScores(markers);
+  // Defensive: never throw in PDF generation
+  let scores: ReturnType<typeof computeAllPillarScores>;
+  try {
+    scores = computeAllPillarScores(markers);
+  } catch {
+    // Synthesise an all-pending result so each card simply shows "—"
+    scores = {
+      cardiometabolic: { score: null, status: 'pending', contributingCount: 0, tierCounts: { elite: 0, great: 0, normal: 0, cautious: 0, poor: 0 } },
+      bodyComposition: { score: null, status: 'pending', contributingCount: 0, tierCounts: { elite: 0, great: 0, normal: 0, cautious: 0, poor: 0 } },
+      strength: { score: null, status: 'pending', contributingCount: 0, tierCounts: { elite: 0, great: 0, normal: 0, cautious: 0, poor: 0 } },
+      balance: { score: null, status: 'pending', contributingCount: 0, tierCounts: { elite: 0, great: 0, normal: 0, cautious: 0, poor: 0 } },
+      vo2: { score: null, status: 'pending', contributingCount: 0, tierCounts: { elite: 0, great: 0, normal: 0, cautious: 0, poor: 0 } },
+    };
+  }
+
   const heading = pageCopy?.heading ?? 'The Peak Living Pillars';
   const intro = pageCopy?.intro ?? '';
   const sorted = [...definitions].sort((a, b) => a.sortOrder - b.sortOrder);
   const row1 = sorted.slice(0, 3);
   const row2 = sorted.slice(3, 5);
-  const findRx = (k: PillarKey) =>
-    prescriptions.find((p) => p.pillarKey === k) ?? null;
 
   const renderCard = (d: PillarDefinition, width: string) => {
     const r = scores[d.pillarKey];
-    const rx = findRx(d.pillarKey);
     const isPending = r.status === 'pending';
+    const top = getTopContributors(d.pillarKey, markers);
+    const eyebrow = `P · ${String(d.sortOrder).padStart(2, '0')}`;
+
     return (
       <View
         key={d.pillarKey}
@@ -73,91 +226,127 @@ export default function PillarsPage({
           width,
           borderWidth: isPending ? 1 : 0.5,
           borderStyle: isPending ? 'dashed' : 'solid',
-          borderColor: isPending ? COLORS.border : COLORS.border,
-          borderRadius: 6,
+          borderColor: COLORS.border,
+          borderRadius: 8,
           padding: 10,
           backgroundColor: COLORS.white,
+          alignItems: 'center',
         }}
       >
-        <Text style={{ fontSize: 10, fontFamily: FONT.bold, color: COLORS.navy }}>
+        {/* 1. Mono eyebrow — left-aligned via self-start equivalent */}
+        <Text
+          style={{
+            fontSize: 7,
+            fontFamily: FONT.bold,
+            color: COLORS.textSecondary,
+            letterSpacing: 0.6,
+            alignSelf: 'flex-start',
+          }}
+        >
+          {eyebrow.toUpperCase()}
+        </Text>
+
+        {/* 2. Ring gauge */}
+        <View style={{ marginTop: 6, marginBottom: 6 }}>
+          <RingGauge score={r.score} status={r.status} size={64} />
+        </View>
+
+        {/* 3. Pillar name + status label */}
+        <Text
+          style={{
+            fontSize: 9,
+            fontFamily: FONT.bold,
+            color: COLORS.navy,
+            textAlign: 'center',
+          }}
+        >
           {d.label}
         </Text>
         <Text
           style={{
-            fontSize: 22,
+            marginTop: 2,
+            fontSize: 7,
             fontFamily: FONT.bold,
-            color: COLORS.navy,
-            marginTop: 4,
-            lineHeight: 1,
+            color: STATUS_TEXT[r.status],
+            letterSpacing: 0.6,
+            textAlign: 'center',
           }}
         >
-          {r.score === null ? '—' : r.score}
-          <Text
-            style={{
-              fontSize: 9,
-              fontFamily: FONT.regular,
-              color: COLORS.textSecondary,
-            }}
-          >
-            {' '}/100
-          </Text>
+          {STATUS_LABEL[r.status].toUpperCase()}
         </Text>
+
+        {/* 4. Top-3 contributor rows */}
         <View
           style={{
-            marginTop: 4,
-            paddingHorizontal: 6,
-            paddingVertical: 2,
-            backgroundColor: isPending ? COLORS.white : TRAFFIC_LIGHT_HEX[r.status],
-            borderWidth: isPending ? 0.5 : 0,
-            borderColor: COLORS.border,
-            alignSelf: 'flex-start',
-            borderRadius: 8,
+            marginTop: 8,
+            width: '100%',
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
-          <Text
-            style={{
-              fontSize: 8,
-              color: TRAFFIC_LIGHT_TEXT[r.status],
-              fontFamily: FONT.bold,
-            }}
-          >
-            {STATUS_LABEL[r.status]}
-          </Text>
-        </View>
-        <Text
-          style={{
-            fontSize: 8,
-            color: COLORS.textSecondary,
-            marginTop: 6,
-            lineHeight: 1.4,
-          }}
-        >
-          {d.shortSummary}
-        </Text>
-        {rx?.summary ? (
-          <View
-            style={{
-              marginTop: 6,
-              paddingTop: 4,
-              borderTopWidth: 0.5,
-              borderTopColor: COLORS.border,
-            }}
-          >
-            <Text style={{ fontSize: 8, fontFamily: FONT.bold, color: COLORS.navy }}>
-              Recommended next steps
-            </Text>
-            <Text
-              style={{
-                fontSize: 8,
-                marginTop: 2,
-                color: COLORS.textPrimary,
-                lineHeight: 1.35,
-              }}
+          {top.length === 0 ? (
+            <View
+              style={{ flexDirection: 'row', alignItems: 'center', gap: 4 }}
             >
-              {truncate(rx.summary, 140)}
-            </Text>
-          </View>
-        ) : null}
+              <View
+                style={{
+                  width: 4,
+                  height: 4,
+                  borderRadius: 2,
+                  backgroundColor: PENDING_RING,
+                }}
+              />
+              <Text
+                style={{ fontSize: 7, color: COLORS.textSecondary, flex: 1 }}
+              >
+                Awaiting data
+              </Text>
+            </View>
+          ) : (
+            top.map((m) => {
+              const dotColor = m.tier ? TIER_COLORS_PDF[m.tier] : PENDING_RING;
+              const tierName = m.tier ?? 'pending';
+              return (
+                <View
+                  key={m.key}
+                  style={{
+                    flexDirection: 'row',
+                    alignItems: 'center',
+                    gap: 4,
+                    marginBottom: 2,
+                  }}
+                >
+                  <View
+                    style={{
+                      width: 4,
+                      height: 4,
+                      borderRadius: 2,
+                      backgroundColor: dotColor,
+                    }}
+                  />
+                  <Text
+                    style={{
+                      fontSize: 7,
+                      color: COLORS.textPrimary,
+                      flex: 1,
+                    }}
+                  >
+                    {m.label}
+                  </Text>
+                  <Text
+                    style={{
+                      fontSize: 7,
+                      fontFamily: FONT.bold,
+                      color: COLORS.textSecondary,
+                    }}
+                  >
+                    {tierName}
+                  </Text>
+                </View>
+              );
+            })
+          )}
+        </View>
       </View>
     );
   };
