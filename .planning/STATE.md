@@ -106,9 +106,10 @@ Recent decisions affecting current work:
 | 260506-snj | Promote v2 landing to / and add password gate | 2026-05-06 | 8720867 | [260506-snj-promote-v2-landing-to-and-add-password-g](./quick/260506-snj-promote-v2-landing-to-and-add-password-g/) |
 | 260509-ody | Make Section 11 pillars clickable with marker breakdown modal | 2026-05-09 | f5474f8 | [260509-ody-pillar-clickable-modal-with-marker-breakdown](./quick/260509-ody-pillar-clickable-modal-with-marker-breakdown/) |
 | 260510-nqt | Pillar redesign Option 2 (rings + chips + side drawer) on portal + PDF + Section 11 | 2026-05-10 | 52f4eb2 | [260510-nqt-replace-pillarsdisplay-tsx-with-option-2](./quick/260510-nqt-replace-pillarsdisplay-tsx-with-option-2/) |
+| 260510-osn | Merge admin invitations + users into one People page grouped by coach | 2026-05-10 | 2d980ad | [260510-osn-merge-admin-invitations-users-into-one-p](./quick/260510-osn-merge-admin-invitations-users-into-one-p/) |
 
 ## Session Continuity
 
-Last session: 2026-05-10T07:40:00.000Z
-Stopped at: Quick task 260510-nqt complete (pillar redesign Option 2 across portal + PDF + Section 11). Next: admin merge of invitations + users page.
+Last session: 2026-05-10T08:05:00.000Z
+Stopped at: Two quick tasks complete (260510-nqt pillar Option 2, 260510-osn admin People page merge). Phase 08 still has 2 pending UAT items.
 Resume file: .planning/phases/08-client-report-design-refresh/08-UI-SPEC.md
