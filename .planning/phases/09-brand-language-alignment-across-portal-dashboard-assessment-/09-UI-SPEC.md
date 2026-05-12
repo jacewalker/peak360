@@ -1,11 +1,12 @@
 ---
 phase: 9
 slug: brand-language-alignment-across-portal-dashboard-assessment-
-status: draft
+status: approved
 shadcn_initialized: false
 preset: none
 created: 2026-05-12
 revised: 2026-05-12
+reviewed_at: 2026-05-12T00:00:00Z
 ---
 
 # Phase 9 — UI Design Contract
