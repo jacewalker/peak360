@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 export type ToastVariant = 'success' | 'error';
@@ -22,10 +22,17 @@ type ToastProps = {
  * - role="status" for success, role="alert" for error (a11y)
  */
 export default function Toast({ variant, message, onDismiss }: ToastProps) {
+  // Capture onDismiss in a ref so parent re-renders that recreate the
+  // callback don't tear down and reset the 3-second timer (#WR-08).
+  const onDismissRef = useRef(onDismiss);
   useEffect(() => {
-    const t = setTimeout(onDismiss, 3000);
-    return () => clearTimeout(t);
+    onDismissRef.current = onDismiss;
   }, [onDismiss]);
+
+  useEffect(() => {
+    const t = setTimeout(() => onDismissRef.current(), 3000);
+    return () => clearTimeout(t);
+  }, []);
 
   const borderColor = variant === 'success' ? 'border-l-4 border-gold-brand' : 'border-l-4 border-danger';
   const role = variant === 'success' ? 'status' : 'alert';
