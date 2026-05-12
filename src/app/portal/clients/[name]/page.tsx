@@ -28,16 +28,23 @@ export interface AssessmentTimeline {
 // Rating-tier marker pill colours — preserved verbatim per Phase 9 UI-SPEC §Color
 // "Rating tier palette preserved verbatim".
 const TIER_PILL: Record<RatingTier, string> = {
-  elite: 'bg-emerald-50 text-emerald-700',
-  great: 'bg-blue-50 text-blue-700',
-  normal: 'bg-gray-100 text-gray-600',
-  cautious: 'bg-amber-50 text-amber-700',
-  poor: 'bg-red-50 text-red-700',
+  elite: 'bg-emerald-500/10 text-emerald-300',
+  great: 'bg-blue-500/10 text-blue-300',
+  normal: 'bg-gray-500/10 text-text-dim',
+  cautious: 'bg-amber-500/10 text-amber-300',
+  poor: 'bg-red-500/10 text-red-300',
 };
 
 export default function ClientDetailPage() {
   const params = useParams();
-  const clientName = decodeURIComponent(params.name as string);
+  const rawName = params.name as string;
+  let clientName: string;
+  try {
+    clientName = decodeURIComponent(rawName);
+  } catch {
+    // Malformed %-sequence — fall back to raw segment rather than crashing
+    clientName = rawName;
+  }
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [timelines, setTimelines] = useState<AssessmentTimeline[]>([]);
   const [loading, setLoading] = useState(true);
@@ -140,7 +147,7 @@ export default function ClientDetailPage() {
           </MonoEyebrow>
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-full bg-bg-2 border border-line flex items-center justify-center text-[20px] font-medium text-text">
-              {clientName[0].toUpperCase()}
+              {(clientName || 'U')[0].toUpperCase()}
             </div>
             <div>
               <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">{clientName}</h1>
