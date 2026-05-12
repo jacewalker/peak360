@@ -3,15 +3,15 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: executing
-stopped_at: Phase 08 UI-SPEC approved
-last_updated: "2026-05-09T02:41:43.285Z"
+stopped_at: Phase 9 context gathered
+last_updated: "2026-05-12T06:19:38.452Z"
 last_activity: 2026-05-09 -- Phase 08 execution started
 progress:
-  total_phases: 7
-  completed_phases: 6
+  total_phases: 8
+  completed_phases: 7
   total_plans: 34
-  completed_plans: 29
-  percent: 85
+  completed_plans: 34
+  percent: 100
 ---
 
 # Project State
@@ -89,6 +89,7 @@ Recent decisions affecting current work:
 
 - 2026-05-05: Phase 7 added — Multi-tenant auth UX (completes deferred client/coach UX from milestone v3.0). Slot 6 already used by 06-routing-infrastructure-design-system; this phase numbered 7 to avoid collision.
 - 2026-05-07: Phase 8 added — Client report design refresh. User-driven design change for the final report (Section 11) as it appears in the /portal client area. Context to be captured via discuss-phase.
+- 2026-05-10: Phase 9 added — Brand-language alignment across portal, dashboard, assessment, and client surfaces. Promote landing-page design system (dark atmosphere, gold-dark #c9a24a, Inter Tight + JetBrains Mono, mono eyebrows, radial-gradient sections) to globals + Tailwind config; redesign login/reset-password/sidebar/dashboard/assessment-form/clients/admin pages to match. Locked: dark across all surfaces; 2 fat plans (09-01 foundations+auth, 09-02 working surfaces).
 
 ### Pending Todos
 
@@ -110,6 +111,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-10T08:05:00.000Z
-Stopped at: Two quick tasks complete (260510-nqt pillar Option 2, 260510-osn admin People page merge). Phase 08 still has 2 pending UAT items.
-Resume file: .planning/phases/08-client-report-design-refresh/08-UI-SPEC.md
+Last session: 2026-05-12T06:19:38.448Z
+Stopped at: Phase 9 context gathered
+Resume file: .planning/phases/09-brand-language-alignment-across-portal-dashboard-assessment-/09-CONTEXT.md
