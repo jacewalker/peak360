@@ -218,22 +218,22 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
 
   return (
     <div className="flex flex-col h-full bg-bg-3">
-      {/* Panel header — dark navy matching sidebar */}
-      <div className="flex-shrink-0 px-5 py-4 border-b border-white/10" style={{ backgroundColor: '#0f2440' }}>
+      {/* Panel header — dark surface matching sidebar */}
+      <div className="flex-shrink-0 px-5 py-4 border-b border-line bg-bg-2">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex items-center gap-2 mb-1.5">
               {isDbOverride ? (
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-gold-brand/20 text-gold-brand border border-gold/30">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-gold-brand/20 text-gold-brand border border-gold-brand/30">
                   DB Override
                 </span>
               ) : (
-                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-bg-3/10 text-white/40 border border-white/10">
+                <span className="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded-full bg-bg-3 text-text-faint border border-line">
                   Hardcoded
                 </span>
               )}
               {saveSuccess ? (
-                <span className="flex items-center gap-1 text-[10px] text-emerald-400">
+                <span className="flex items-center gap-1 text-[10px] text-status-good">
                   <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
                   </svg>
@@ -246,10 +246,10 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
                 </span>
               )}
             </div>
-            <h2 className="text-[1.1rem] font-black text-white tracking-tight leading-tight">
+            <h2 className="text-[1.1rem] font-black text-text tracking-tight leading-tight">
               {markerDef?.label || markerKey}
             </h2>
-            <p className="text-[11px] text-white/35 mt-0.5 leading-tight">
+            <p className="text-[11px] text-text-faint mt-0.5 leading-tight">
               {markerDef?.category}
               {markerDef?.subcategory ? ` · ${markerDef.subcategory}` : ''}
               {unit ? ` · ${unit}` : ''}
@@ -257,7 +257,7 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
           </div>
           <button
             onClick={handleClose}
-            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-white/30 hover:text-white hover:bg-bg-3/10 transition-colors"
+            className="flex-shrink-0 w-8 h-8 flex items-center justify-center rounded-lg text-text-faint hover:text-text hover:bg-line transition-colors"
             aria-label="Close panel"
           >
             <svg className="w-4.5 h-4.5" style={{ width: 18, height: 18 }} fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
@@ -288,7 +288,7 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
                       if (g !== 'all' && hasAgeVariants && ageGroups.length > 0) setActiveAgeGroup(ageGroups[0]);
                     }}
                     className={`flex-1 text-xs font-bold py-2.5 border-b-2 transition-all ${
-                      activeGender === g ? 'border-gold text-text' : 'border-transparent text-text-dim hover:text-text'
+                      activeGender === g ? 'border-gold-brand text-text' : 'border-transparent text-text-dim hover:text-text'
                     }`}
                   >
                     {g === 'all' ? 'All' : g === 'male' ? 'Male' : 'Female'}
@@ -357,8 +357,8 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
                             value={currentVariantTiers[tier]?.min ?? ''}
                             onChange={e => handleTierChange(tier, 'min', e.target.value)}
                             className={`w-full px-2 py-1.5 border rounded-lg text-sm text-center tabular-nums bg-bg-3 font-mono ${
-                              hasMinErr ? 'border-red-400 ring-1 ring-red-200' : 'border-line'
-                            } focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/20`}
+                              hasMinErr ? 'border-danger/40 ring-1 ring-danger/20' : 'border-line'
+                            } focus:outline-none focus:border-gold-brand focus:ring-1 focus:ring-gold-brand/20`}
                           />
                         </div>
                         <span className="text-text-dim/30 text-sm mt-4 flex-shrink-0">→</span>
@@ -370,8 +370,8 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
                             value={currentVariantTiers[tier]?.max ?? ''}
                             onChange={e => handleTierChange(tier, 'max', e.target.value)}
                             className={`w-full px-2 py-1.5 border rounded-lg text-sm text-center tabular-nums bg-bg-3 font-mono ${
-                              hasMaxErr ? 'border-red-400 ring-1 ring-red-200' : 'border-line'
-                            } focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/20`}
+                              hasMaxErr ? 'border-danger/40 ring-1 ring-danger/20' : 'border-line'
+                            } focus:outline-none focus:border-gold-brand focus:ring-1 focus:ring-gold-brand/20`}
                           />
                         </div>
                       </div>
@@ -392,7 +392,7 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
                 {currentValidationErrors.length > 0 && (
                   <div className="pt-1 space-y-1.5">
                     {currentValidationErrors.map((err, i) => (
-                      <p key={i} className="text-xs text-red-500 flex items-start gap-1.5">
+                      <p key={i} className="text-xs text-danger flex items-start gap-1.5">
                         <svg className="w-3.5 h-3.5 flex-shrink-0 mt-px" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                           <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m9-.75a9 9 0 11-18 0 9 9 0 0118 0zm-9 3.75h.008v.008H12v-.008z" />
                         </svg>
@@ -427,7 +427,7 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
 
             {/* Error */}
             {error && (
-              <div className="mx-4 mb-4 p-3 bg-red-50 text-red-600 rounded-xl text-sm border border-red-200">
+              <div className="mx-4 mb-4 p-3 bg-danger/10 text-danger rounded-xl text-sm border border-danger/30">
                 {error}
               </div>
             )}
@@ -440,7 +440,7 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
         <div className="flex-shrink-0 border-t border-line bg-bg-2 px-4 py-3 flex items-center justify-between gap-3">
           <button
             onClick={handleReset}
-            className="text-xs font-bold text-red-500 hover:text-red-700 px-3 py-2 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+            className="text-xs font-bold text-danger hover:text-danger px-3 py-2 border border-danger/40 rounded-lg hover:bg-danger/10 transition-colors"
           >
             Reset to defaults
           </button>
@@ -449,10 +449,10 @@ export default function NormativeEditPanel({ markerKey, onClose, onSaved }: Prop
             disabled={(!isDirty && !saveSuccess) || isSaving || allValidationErrors.length > 0}
             className={`text-sm font-bold px-5 py-2 rounded-lg transition-all duration-200 ${
               saveSuccess
-                ? 'bg-emerald-500 text-white shadow-sm cursor-default'
+                ? 'bg-status-good text-bg shadow-sm cursor-default'
                 : isDirty && !isSaving && allValidationErrors.length === 0
-                  ? 'bg-gold-brand text-white hover:bg-gold-brand-dark shadow-sm hover:shadow-md'
-                  : 'bg-gold-brand/25 text-white/50 cursor-not-allowed'
+                  ? 'bg-gold-brand text-bg hover:bg-champagne shadow-sm hover:shadow-md'
+                  : 'bg-gold-brand/25 text-text-faint cursor-not-allowed'
             }`}
           >
             {isSaving ? 'Saving…' : saveSuccess ? '✓ Saved' : 'Save Changes'}
