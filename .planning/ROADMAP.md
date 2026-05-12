@@ -80,7 +80,6 @@ Plans:
   2. An audit log records who accessed what assessment data and when, viewable by admins
   3. Automated SQLite backups run on a schedule with point-in-time recovery capability
   4. The application continues to function correctly with encrypted data (read, write, display in reports)
-**Plans**: 3 plans
 
 Plans:
 - [x] 04-01-PLAN.md — Encryption at rest: AES-256-GCM crypto module, schema additions, route integration, migration script (SECU-01)
@@ -150,3 +149,14 @@ Plans:
 - [x] 08-03-PLAN.md — Portal: hand-rolled Dialog + PillarsGrid/Card/Modal + Detailed marker results disclosure + ReportShell + extend SSR report page with pillar/page-copy/prescriptions/markers data load (preserves Phase 7 BL-05) (REQ-08-01, REQ-08-02, REQ-08-09; D-01..D-03, D-21..D-25, D-29)
 - [x] 08-04-PLAN.md — Admin authoring: /api/admin/pillars + /api/admin/assessments/[id]/prescriptions + /portal/admin/pillars + /portal/admin/assessments/[id]/prescriptions + RBAC regression tests (REQ-08-06, REQ-08-07, REQ-08-08; D-12, D-15, D-16, D-19, D-20, D-30)
 - [x] 08-05-PLAN.md — PDF mirror: extend ReportData + loadReportData + new PillarsPage component + insert before TierSummary in Peak360Report (REQ-08-03, REQ-08-10; D-01, D-26..D-28)
+
+### Phase 9: Brand-language alignment across portal, dashboard, assessment, and client surfaces
+
+**Goal:** Promote the landing-page brand language (dark `#0a0a0b` canvas, cream `#ece5d3` text, gold-brand `#c9a24a` accents, Inter Tight + JetBrains Mono) into every authenticated surface (login, reset-password, sidebar, portal dashboard, assessments list, clients list, client detail, admin pages, and all 11 assessment-section forms) via additive token migration, route-segment theme gating, and in-place restyle — with Phase 8 report card (`/portal/assessment/[id]/report`) and Phase 5 PDF preserved verbatim.
+**Requirements**: UI-SPEC-AC-1 through UI-SPEC-AC-10 (implicit, locked via the 10-item Acceptance Heuristics in 09-UI-SPEC.md and decisions D-01..D-18 in 09-CONTEXT.md)
+**Depends on:** Phase 8
+**Plans:** 2 plans
+
+Plans:
+- [ ] 09-01-PLAN.md — Foundations + auth surfaces: globals.css token additions, font rebind (Inter Tight + JetBrains Mono), theme-dark wrappers on portal/login/reset-password layouts (incl. NEW reset-password/layout.tsx), restyle Sidebar/Header/ProgressBar/NavigationButtons, MonoEyebrow primitive, ship /login + /reset-password (UI-SPEC-AC-1..UI-SPEC-AC-10)
+- [ ] 09-02-PLAN.md — Working surfaces: form-component sweep (all 11 sections inherit), SectionHeader mono eyebrow + Section 11 page-level injection, Dialog + Toast + MetricChart restyle, every /portal page (dashboard, clients, clients/[name], assessments, every admin/*), Phase 8 report-frame inner light wrapper (D-09 contract) (UI-SPEC-AC-1..UI-SPEC-AC-10)
