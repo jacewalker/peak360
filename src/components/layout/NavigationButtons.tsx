@@ -11,6 +11,46 @@ interface NavigationButtonsProps {
   onCancel?: () => void;
   isSaving?: boolean;
   lastSaved?: string | null;
+  isDirty?: boolean;
+}
+
+function SaveStatus({
+  isSaving,
+  lastSaved,
+  isDirty,
+}: {
+  isSaving?: boolean;
+  lastSaved?: string | null;
+  isDirty?: boolean;
+}) {
+  if (isSaving) {
+    return (
+      <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim flex items-center gap-2">
+        <span
+          className="w-1.5 h-1.5 rounded-full bg-gold-brand"
+          style={{ animation: 'pulse-gold 2s ease-out infinite' }}
+        />
+        Saving…
+      </span>
+    );
+  }
+  if (lastSaved) {
+    return (
+      <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim flex items-center gap-2">
+        <span className="w-1.5 h-1.5 rounded-full bg-status-good" />
+        Saved · {lastSaved}
+      </span>
+    );
+  }
+  // Derived proxy state per RESEARCH §Assumption A5: dirty + never saved.
+  if (isDirty) {
+    return (
+      <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-danger flex items-center gap-2">
+        Unsaved changes
+      </span>
+    );
+  }
+  return null;
 }
 
 export default function NavigationButtons({
@@ -22,25 +62,21 @@ export default function NavigationButtons({
   onCancel,
   isSaving,
   lastSaved,
+  isDirty,
 }: NavigationButtonsProps) {
   const isLastSection = currentSection === VISIBLE_SECTIONS[VISIBLE_SECTIONS.length - 1];
+  const isFirstSection = currentSection === VISIBLE_SECTIONS[0];
+  const prevLabel = isFirstSection
+    ? 'Back to dashboard'
+    : `Back to section ${VISIBLE_SECTIONS.indexOf(currentSection)}`;
+  const nextLabel = isLastSection ? 'Complete assessment' : 'Save & continue';
 
   return (
-    <div className="bg-white border-t border-border px-4 sm:px-6 py-3 sm:py-4 no-print shadow-[0_-1px_3px_rgba(0,0,0,0.05)]">
+    <div className="bg-bg-2 border-t border-line px-4 sm:px-6 py-3 sm:py-4 no-print">
       <div className="max-w-6xl mx-auto">
-        {/* Save status - visible on mobile too */}
-        <div className="text-xs text-muted flex items-center justify-center gap-2 mb-2 sm:hidden">
-          {isSaving ? (
-            <>
-              <span className="w-3 h-3 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-              <span className="text-gold font-medium">Saving...</span>
-            </>
-          ) : lastSaved ? (
-            <>
-              <span className="w-1.5 h-1.5 rounded-full bg-rating-elite" />
-              <span>Saved at {lastSaved}</span>
-            </>
-          ) : null}
+        {/* Save status — visible on mobile too */}
+        <div className="flex items-center justify-center gap-2 mb-2 sm:hidden">
+          <SaveStatus isSaving={isSaving} lastSaved={lastSaved} isDirty={isDirty} />
         </div>
 
         <div className="flex items-center justify-between gap-2">
@@ -48,34 +84,24 @@ export default function NavigationButtons({
           <div className="flex items-center gap-2">
             <button
               onClick={onPrev}
-              disabled={currentSection === VISIBLE_SECTIONS[0]}
-              className="px-4 sm:px-6 py-3 sm:py-2.5 rounded-lg font-medium transition-all disabled:opacity-30 disabled:cursor-not-allowed bg-surface-alt text-navy hover:bg-border hover:shadow-sm text-sm sm:text-base"
+              disabled={isFirstSection && !onCancel}
+              className="px-4 sm:px-6 py-3 sm:py-2.5 rounded-lg text-[13px] font-medium tracking-[0.02em] transition-all disabled:opacity-40 disabled:cursor-not-allowed bg-transparent border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand"
             >
-              {'\u2190'} <span className="hidden sm:inline">Previous</span><span className="sm:hidden">Prev</span>
+              {prevLabel}
             </button>
             {onCancel && (
               <button
                 onClick={onCancel}
-                className="hidden sm:block px-4 py-2.5 rounded-lg font-medium text-sm text-muted hover:text-red-600 hover:bg-red-50 transition-all"
+                className="hidden sm:block px-4 py-2.5 rounded-lg text-[13px] font-medium tracking-[0.02em] text-text-dim hover:text-danger hover:bg-line transition-all"
               >
-                Cancel & Discard
+                Cancel & discard
               </button>
             )}
           </div>
 
-          {/* Center: Save status - desktop only */}
-          <div className="text-xs text-muted hidden sm:flex items-center gap-2">
-            {isSaving ? (
-              <>
-                <span className="w-3 h-3 border-2 border-gold border-t-transparent rounded-full animate-spin" />
-                <span className="text-gold font-medium">Saving...</span>
-              </>
-            ) : lastSaved ? (
-              <>
-                <span className="w-1.5 h-1.5 rounded-full bg-rating-elite" />
-                <span>Saved at {lastSaved}</span>
-              </>
-            ) : null}
+          {/* Center: Save status — desktop only */}
+          <div className="hidden sm:flex items-center gap-2">
+            <SaveStatus isSaving={isSaving} lastSaved={lastSaved} isDirty={isDirty} />
           </div>
 
           {/* Right: Save & Exit + Next/Complete */}
@@ -83,20 +109,16 @@ export default function NavigationButtons({
             {onSaveExit && (
               <button
                 onClick={onSaveExit}
-                className="hidden sm:block px-4 py-2.5 rounded-lg font-medium text-sm bg-surface-alt text-navy hover:bg-border hover:shadow-sm transition-all"
+                className="hidden sm:block px-4 py-2.5 rounded-lg text-[13px] font-medium tracking-[0.02em] bg-transparent border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-all"
               >
-                Save & Exit
+                Save & exit
               </button>
             )}
             <button
               onClick={isLastSection && onComplete ? onComplete : onNext}
-              className={`px-4 sm:px-6 py-3 sm:py-2.5 rounded-lg font-medium transition-all hover:shadow-md hover:-translate-y-px text-sm sm:text-base ${
-                isLastSection
-                  ? 'bg-gold text-navy hover:bg-gold-light'
-                  : 'bg-navy text-white hover:bg-navy-light'
-              }`}
+              className="px-4 sm:px-6 py-3 sm:py-2.5 rounded-lg text-[13px] font-medium tracking-[0.02em] transition-all bg-gold-brand text-bg hover:bg-champagne disabled:opacity-40 disabled:cursor-not-allowed"
             >
-              {isLastSection ? 'Complete' : <>Next {'\u2192'}</>}
+              {nextLabel}
             </button>
           </div>
         </div>
