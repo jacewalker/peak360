@@ -5,6 +5,7 @@ status: draft
 shadcn_initialized: false
 preset: none
 created: 2026-05-12
+revised: 2026-05-12
 ---
 
 # Phase 9 — UI Design Contract
@@ -14,6 +15,8 @@ created: 2026-05-12
 This phase **propagates an existing design** (the landing page) outward. The landing page itself is the visual source of truth — Phase 9 does not re-design it. Phase 8's pillar contract (light surfaces, navy + gold) is the **report-shell convention** and is preserved: the printed/PDF report and the client-facing pillar report continue to use the Phase 8 light palette. Every other authenticated surface adopts the dark brand language defined below.
 
 **Roadmap lock (from STATE.md 2026-05-10):** "dark across all surfaces; 2 fat plans (09-01 foundations+auth, 09-02 working surfaces)."
+
+**Revision 2026-05-12:** Collapsed typography from 8 distinct sizes to exactly 4 (11 / 13 / 20 / 40). Removed `4xl: 96px` from the spacing scale (the scale is now strictly {4, 8, 16, 24, 32, 48, 64}). Added a11y line for icon-only buttons. Tightened ambiguous CTA labels ("Back" → "Back to dashboard" / "Back to section {n-1}").
 
 ---
 
@@ -26,7 +29,7 @@ This phase **propagates an existing design** (the landing page) outward. The lan
 | Component library | none — hand-rolled primitives consistent with `src/components/forms/*`, `src/components/layout/*`, and the Phase 8 `Dialog` primitive. **No new npm dependencies.** |
 | Icon library | inline SVG, stroke-width 1.8 (sidebar / nav) and 2 (inline UI), 20px or 16px box, `currentColor`. Existing sidebar SVGs are kept; no `lucide-react` / `heroicons` install. |
 | Font (sans) | **Inter Tight** (300 / 400 / 500 / 600) — loaded via Google Fonts in `src/app/layout.tsx` (already linked for landing). Promote to `--font-sans` for the whole app. |
-| Font (mono) | **JetBrains Mono** (400 / 500) — loaded via Google Fonts in `src/app/layout.tsx`. Used for eyebrows, numeric readouts, and small caps metadata labels. |
+| Font (mono) | **JetBrains Mono** (400 / 500) — loaded via Google Fonts in `src/app/layout.tsx`. Used for eyebrows, inline numeric readouts, and small caps metadata labels. |
 | Font (legacy `--font-sans` "Inter") | **Retired** from authenticated surfaces. Keep the Tailwind variable name `--font-sans` but point it at `Inter Tight`. Section 11 / portal report (Phase 8 contract) and the PDF (Phase 5 contract) stay on their existing typography — both are exempt from the font swap because their printed outputs are locked. |
 | Existing landing CSS scope | `.v2-root` selector in `src/app/landing.css` remains the ONLY consumer of the `--v2-*` token names. This phase promotes the same hex values into `@theme inline` under stable token names (see Color) so the rest of the app uses Tailwind utilities, not `.v2-root`-scoped classes. |
 
@@ -39,7 +42,7 @@ This phase **propagates an existing design** (the landing page) outward. The lan
 
 ## Spacing Scale
 
-Tailwind's default 4px scale is the source of truth. Declared values for this phase:
+Tailwind's default 4px scale is the source of truth. The Phase 9 scale is strictly the canonical set: **{4, 8, 16, 24, 32, 48, 64}** — no values outside this set are introduced as spacing tokens.
 
 | Token | Value | Tailwind | Usage in this phase |
 |-------|-------|----------|---------------------|
@@ -49,42 +52,36 @@ Tailwind's default 4px scale is the source of truth. Declared values for this ph
 | lg | 24px | `6` | Card padding (desktop), gap between cards in dashboard grid, form-section spacing |
 | xl | 32px | `8` | Page heading bottom margin, sidebar to main-content gap |
 | 2xl | 48px | `12` | Major section breaks on dashboard / clients / admin pages |
-| 3xl | 64px | `16` | Page-level top/bottom padding on portal shell |
-| 4xl | 96px | `24` | Hero-style page intros (login, reset-password, "empty dashboard" first-run); roadmap-locked landing-style breathing room |
+| 3xl | 64px | `16` | Page-level top/bottom padding on portal shell, **AND** hero-style page intros (login, reset-password, "empty dashboard" first-run). The roadmap-locked landing-style breathing room is delivered by `3xl` plus the layout-level fixed dimensions below — not by a separate spacing token. |
 
-**Exceptions:**
-- **Sidebar collapsed-rail width**: 56px (Tailwind `lg:pl-56` — preserved from existing implementation). Not a spacing token; it's the rail's fixed dimension.
-- **Touch targets**: Any tappable icon-only button (sidebar mobile toggle, dialog close, "delete" icon in admin tables) must be **44 × 44px** minimum hit area, even if the visual icon is 16-20px. Padding fills to 44px.
-- **Mono-eyebrow line decoration**: `28px × 1px` gold line (matches `.v2-root .eyebrow-line` from `landing.css`). Decorative; not a spacing token.
+**Layout fixed dimensions** (declared inline in the Layout contract, NOT spacing tokens):
+- **Sidebar collapsed-rail width**: 56px (Tailwind `lg:pl-56` — preserved from existing implementation). The rail's fixed dimension.
+- **Hero outer margin (landing parity)**: 96px top padding inside the portal shell on hero pages (login, reset-password, dashboard hero, admin landing). Applied as an inline layout dimension via `pt-24` on the hero wrapper only; not part of the spacing token scale.
 - **Container max-width**: 1280px for the portal main area (matches landing `--max`). Section 11 report keeps its own existing max-width.
 - **Container side padding**: `clamp(20px, 4vw, 56px)` (matches landing `--pad`) on the portal main area outer container. Inner cards use the token scale above.
 - **Form-field row height**: 48px on the assessment form (Section 1–11) to align with the dark theme's heavier visual weight. Mobile keeps 48px; do not shrink.
 - **Sidebar nav item**: 44px tap height, 12px horizontal padding, 8px gap icon→label — matches the existing implementation, do not change.
+- **Touch targets**: Any tappable icon-only button (sidebar mobile toggle, dialog close, "delete" icon in admin tables) must be **44 × 44px** minimum hit area, even if the visual icon is 16-20px. Padding fills to 44px.
+- **Mono-eyebrow line decoration**: `28px × 1px` gold line (matches `.v2-root .eyebrow-line` from `landing.css`). Decorative; not a spacing token.
 
 ---
 
 ## Typography
 
-Four roles + mono utility row. Two weights for sans (400 regular, 500 medium); mono uses 400/500. Body line-height 1.55; heading line-height 1.0–1.05; mono line-height 1.4.
+**Exactly 4 sans roles. Exactly 2 weights (400 regular, 500 medium).** Mono is a family swap, not a new size: every mono use re-uses one of the 4 declared sizes. Body line-height 1.55; heading line-height 1.0–1.15; mono line-height 1.4.
 
 | Role | Size | Weight | Line Height | Family | Usage |
 |------|------|--------|-------------|--------|-------|
-| Body | 15px | 400 | 1.55 | Inter Tight | Default running text in cards, descriptions, form helper text. Slightly tighter than Phase 8's 16px because dark surfaces read denser; mirrors landing `.section-sub` / `.t-quote` body sizing. |
-| Label | 13px | 500 | 1.4 | Inter Tight | Field labels, button labels, table column headers, sidebar nav items, primary/secondary CTA copy. Letter-spacing `0.02em` for buttons (matches landing `.btn`). |
+| Eyebrow / Meta | 11px | 500 (mono) / 400 (faint meta) | 1.4 | JetBrains Mono | Mono eyebrow labels above page heroes (uppercase 0.18em, gold-brand) AND meta labels / role chips / sidebar role tags (uppercase 0.16em, `--color-text-faint`). One size, two visual modes distinguished by colour and letter-spacing — visually indistinguishable as a "size" in the typographic system, so they share the role. |
+| Label | 13px | 500 | 1.4 | Inter Tight (sans) OR JetBrains Mono (numeric / status) | Field labels, button labels, table column headers, sidebar nav items, primary/secondary CTA copy (sans, letter-spacing 0.02em on buttons — matches landing `.btn`). Inline numeric readouts, table-cell numbers, status chip text, and auto-save indicator (mono, `font-variant-numeric: tabular-nums`, letter-spacing 0). One role, two families. |
 | Heading | 20px | 500 | 1.15 | Inter Tight | Card titles, modal headings, section labels inside dashboard widgets, assessment-section heading. Letter-spacing `-0.015em`. |
-| Display | 40px | 500 | 1.0 | Inter Tight | Page hero titles on dashboard, clients, admin landing, and the first frame of the assessment flow. Letter-spacing `-0.03em`. Mobile (< 640px) downscales to 32px. |
+| Display | 40px | 500 | 1.0 | Inter Tight (sans) OR JetBrains Mono (large numerics) | Page hero titles on dashboard, clients, admin landing, and the first frame of the assessment flow (sans, letter-spacing `-0.03em`). Mobile (< 640px) downscales to 32px. **Also used for large numeric moments** (dashboard "12 active assessments" hero counter, assessment progress percentage "46%", admin row counts): same 40px size, mono family, `font-variant-numeric: tabular-nums`, line-height 0.95, letter-spacing 0. The previous draft's 48px numeric carry-over from `.hero-meta-num` is consolidated into the 40px Display role (Display covers both display sans and display mono). Mobile downscales numeric Display to 32px. |
 
-**Mono utility row** (single role, used wherever the landing page uses `.eyebrow` / `.link-mono` / `.hero-meta-label`):
+**That's the entire scale: 11, 13, 20, 40. Four sizes. No exceptions.**
 
-| Use | Size | Weight | Letter Spacing | Transform | Color |
-|-----|------|--------|----------------|-----------|-------|
-| Eyebrow | 11px | 500 | 0.18em | uppercase | `--color-gold-brand` (see Color) |
-| Meta label | 10px | 400 | 0.16em | uppercase | `--color-text-faint` |
-| Numeric readout | 14px | 500 | 0 | none | `--color-text-strong`; `font-variant-numeric: tabular-nums` |
+**Form-field input typography**: 13px / 400 / line-height 1.4 (uses the Label size, regular weight). Placeholders at `--color-text-faint`. Input height 48px (spacing exception above). This applies across all 11 assessment sections; form components in `src/components/forms/` keep their API but switch text/bg tokens.
 
-**Numeric exception**: large numerals (dashboard "12 active assessments" hero counter; assessment progress percentage; admin table row counts) use **48px / weight 500 / line-height 0.95 / `font-variant-numeric: tabular-nums`**. Mobile downscales to 36px. This is a deliberate carry-over from landing's `.hero-meta-num` / `.age-value` pattern.
-
-**Form-field input typography**: 15px / 400 / line-height 1.4 (matches Body). Placeholders at `--color-text-faint`. Input height 48px (spacing exception above). This applies across all 11 assessment sections; form components in `src/components/forms/` keep their API but switch text/bg tokens.
+**Body running text** (descriptions inside cards, modal body, form helper text): uses the **Label size (13px, weight 400, line-height 1.55)**. The dark canvas reads denser than the Phase 8 light surfaces, and 13px Inter Tight at 400/1.55 on cream against `#131316` is the equivalent reading density of 15px Inter at 400/1.5 on light. Helper / error text uses the same Label size, distinguished by colour (`--color-text-dim` for helper, `--color-danger` for error) — not by size.
 
 **Section 11 report and the Phase 8 portal report**: governed by their existing contracts. Untouched.
 
@@ -121,7 +118,7 @@ The 60 / 30 / 10 split for this phase. All hex values are promoted from `src/app
 - The vertical 1px gold accent on focused form fields (replaces the existing gold-tinted ring)
 - Active sidebar nav item: 2px left border, gold; label colour stays cream
 - Primary CTA fill (filled button: gold-brand bg, `#0a0a0b` text — "ink on gold", matches landing `.btn-gold`)
-- Number-strong moments: large counters in dashboard hero ("12"), progress percentage in the assessment form ("46%")
+- Number-strong moments: large counters in dashboard hero ("12"), progress percentage in the assessment form ("46%") — rendered at Display size (40px) in mono family
 - Mono `link-mono` hover state (text colour transitions from `--color-text-faint` to gold)
 - Status pulse / dot animations (e.g. "live" indicator on the assessment auto-save status — `box-shadow 0 0 0 0 rgba(201,162,74,0.6)` pulse)
 - Underline accent under the sidebar logo on hover
@@ -146,14 +143,14 @@ Phase 9 changes appearance, not information architecture. **Copy is not re-autho
 
 | Surface | Element | Copy |
 |---------|---------|------|
-| Sidebar (collapsed rail, top) | Logo eyebrow (mono, 10px) | **PEAK360 / PORTAL** |
-| Sidebar (logged-in user section) | User role chip (mono, 9px, uppercase) | **{role}** — one of `COACH`, `ADMIN`, `CLIENT`, exactly that copy |
+| Sidebar (collapsed rail, top) | Logo eyebrow (mono, 11px) | **PEAK360 / PORTAL** |
+| Sidebar (logged-in user section) | User role chip (mono, 11px, uppercase) | **{role}** — one of `COACH`, `ADMIN`, `CLIENT`, exactly that copy |
 | Login page hero | Mono eyebrow above the form card | **PEAK360 · ACCESS** |
 | Login page footer line (replaces existing "Authorised access only…") | Mono footer | **AUTHORISED ACCESS ONLY · ACTIVITY MONITORED** (uppercase, letter-spacing 0.16em, gold-brand) |
 | Reset-password page hero | Mono eyebrow | **PEAK360 · RECOVERY** |
 | Dashboard hero (replaces unstyled "Dashboard" h1) | Mono eyebrow | **YOUR PORTAL · {ROLE}** |
 | Dashboard hero | Display title (preserves existing intent) | **Welcome back, {first_name}.** (was "Dashboard"; planner may keep "Dashboard" if `first_name` is unavailable) |
-| Dashboard hero | Subtitle (mono row beneath title) | **{today_date_iso} · {n} ACTIVE · {m} COMPLETED** (mono, 10px, uppercase) |
+| Dashboard hero | Subtitle (mono row beneath title) | **{today_date_iso} · {n} ACTIVE · {m} COMPLETED** (mono, 11px, uppercase) |
 | Clients page hero | Mono eyebrow | **PEOPLE · CLIENTS** |
 | Assessments page hero | Mono eyebrow | **PORTAL · ASSESSMENTS** |
 | Admin landing hero | Mono eyebrow | **ADMIN · CONTROL** |
@@ -183,14 +180,15 @@ Phase 9 changes appearance, not information architecture. **Copy is not re-autho
 
 ### Primary CTAs (button labels — preserve existing intent, change visuals only)
 
-| Surface | CTA label (unchanged) | Visual treatment |
-|---------|----------------------|-------------------|
-| Login | **Sign In** | gold-brand fill, ink text, 13px / 500 / 0.04em |
+| Surface | CTA label | Visual treatment |
+|---------|-----------|-------------------|
+| Login | **Sign In** | gold-brand fill, ink text, 13px / 500 / 0.04em — idiomatic two-word auth label, kept as-is |
 | Login (magic link row) | **Email me a sign-in link** | ghost button: transparent bg, `--color-line-2` border, cream text, hover border + text gold-brand |
 | Reset-password | **Reset password** | gold-brand fill |
 | Dashboard hero | **Start new assessment** | gold-brand fill |
 | Assessment form footer | **Save & continue** (existing) | gold-brand fill |
-| Assessment form footer | **Back** | ghost button |
+| Assessment form footer (section ≥ 2) | **Back to section {n-1}** | ghost button — replaces bare "Back" so the destination is explicit |
+| Assessment form footer (section 1, when entered from dashboard) | **Back to dashboard** | ghost button — replaces bare "Back" |
 | Admin save buttons | **Save changes** / **Save plan** (existing from Phase 8) | gold-brand fill on dark; Phase 8 light-surface saves on the report-edit pages stay navy-filled |
 
 ### Destructive actions
@@ -247,6 +245,7 @@ Breakpoints follow Tailwind's defaults: `sm 640`, `md 768`, `lg 1024`, `xl 1280`
 - Sidebar mobile sheet: `Esc` closes, focus trap when open, focus returns to hamburger on close (existing implementation, restyled).
 - Form fields: tab order matches DOM, no `tabindex` overrides, placeholders never replace labels.
 - Buttons disabled state: 40% alpha, `cursor: not-allowed`, no hover transitions.
+- **Icon-only interactive elements carry an `aria-label` matching the action label from the Copywriting contract** (e.g., `aria-label="Close"` on dialog close, `aria-label="Open navigation"` on the mobile hamburger, `aria-label="Delete user"` on the admin row delete icon, `aria-label="Save & continue"` on icon-only nav buttons if any). Icon-only buttons MUST NEVER appear without `aria-label`.
 
 **Reduced motion:** at `prefers-reduced-motion: reduce`, replace all transforms with instant state changes. Sidebar slide → instant. Auto-save pulse dot → static dot at peak colour. Page transitions → no fade.
 
@@ -263,16 +262,16 @@ No new components are introduced. Every existing component is restyled in place.
 | `globals.css` | `src/app/globals.css` | **Token additions** | Add `--color-bg`, `--color-bg-2`, `--color-bg-3`, `--color-text`, `--color-text-dim`, `--color-text-faint`, `--color-gold-brand`, `--color-champagne`, `--color-line`, `--color-line-2`, `--color-danger`, `--color-status-good`. Add `--font-mono` mapped to `"JetBrains Mono"`. Repoint `--font-sans` to `"Inter Tight"`. Move the global `body` background from `--color-background` to `--color-bg` **gated** on a route check (see "Token application" below). Preserve every existing `--color-*` token unchanged. |
 | `layout.tsx` | `src/app/layout.tsx` | **Font wiring** | Keep the existing Google Fonts `<link>` for Inter Tight + JetBrains Mono (already loaded for landing). Update the `body` className to include the mono variable. The page-level theme decision is made by the route segment, not the root layout. |
 | Token application boundary | new file `src/app/portal/layout.tsx` (existing) + `src/app/login/layout.tsx` (existing) + `src/app/reset-password/layout.tsx` (NEW) + `src/app/assessment/[id]/layout.tsx` (existing) | **Theme wrapping** | Each of these layouts wraps its children in `<div className="theme-dark">` (a class to be added in `globals.css` that sets `background: var(--color-bg); color: var(--color-text);`). The root `<body>` no longer hard-sets the light background — it inherits from the segment layout. This isolates the Phase 8 report route, which keeps a light wrapper. |
-| `Sidebar` | `src/components/layout/Sidebar.tsx` | **Restyle in place** | Background `bg-2`, border-right `--color-line`, nav items mono `link-mono` styling on inactive (uppercase 11px gold-brand on hover), active state gold-brand left border 2px + label cream weight 500. Logo block uses the landing's existing 64px height. User block bottom: avatar + name (sans 13px) + role chip (mono 9px gold-brand). No layout changes. |
-| `Header` | `src/components/layout/Header.tsx` | **Restyle in place** | Inside the assessment form, becomes a thin top bar (`bg-2`, 56px height, 1px bottom border `--color-line`). Logo left, client name + section indicator right (mono eyebrow "CLIENT · {name}" plus sans 15px). |
-| `ProgressBar` | `src/components/layout/ProgressBar.tsx` | **Restyle in place** | 4px track height, `--color-line` background, gold-brand fill, mono percentage label right-aligned ("46%" sans 48px on desktop hero variant; mono 10px inline variant in sticky bar). |
-| `NavigationButtons` | `src/components/layout/NavigationButtons.tsx` | **Restyle in place** | Back = ghost button, Save & continue = gold-brand fill button. Both use the Button visual contract from Color §Gold-brand reserved-for list. |
-| `FormField` / `SelectField` / `RadioGroup` / `SliderField` / `SignaturePad` / `FileUploadZone` | `src/components/forms/*` | **Restyle in place** | Input bg `--color-bg-3`, border `--color-line`, text cream, placeholder faint, focus ring gold-brand 2px @ 45%. Labels 13px / 500 / cream. Helper / error text 13px / 400 / `--color-text-dim` (helper) or `--color-danger` (error). Radio + checkbox accent `--color-gold-brand`. Slider thumb gold-brand (existing thumb implementation works as-is once `--color-gold` swap is gated). |
-| `Section1`…`Section11` | `src/components/sections/Section{N}.tsx` | **Restyle in place** | Section heading uses the Heading role (20px / 500 / cream / `-0.015em`). Each section gets a mono eyebrow above the heading ("SECTION {N} / 11 · {LABEL}"). No information architecture change. |
-| Phase 8 `Dialog` | `src/components/ui/Dialog.tsx` | **Token swap only** | Panel bg switches from white to `--color-bg-3`, scrim bg `rgba(10, 10, 11, 0.7)`. Used only by destructive confirmations + assessment-form modals. The Phase 8 portal report keeps its own light dialog scope inside the report route. |
-| Toast (existing pattern from Phase 7) | inline | **Restyle in place** | Panel bg `--color-bg-3`, border `--color-line-2`, mono eyebrow `SAVED` / `ERROR` / `INFO` (uppercase 10px), body 13px / 400. Live "saving…" toast has gold pulse dot. |
+| `Sidebar` | `src/components/layout/Sidebar.tsx` | **Restyle in place** | Background `bg-2`, border-right `--color-line`, nav items mono 11px on inactive (uppercase 0.18em gold-brand on hover), active state gold-brand left border 2px + label cream weight 500 at Label (13px) size. Logo block uses the landing's existing 64px height. User block bottom: avatar + name (sans 13px) + role chip (mono 11px gold-brand). Mobile hamburger carries `aria-label="Open navigation"`. No layout changes. |
+| `Header` | `src/components/layout/Header.tsx` | **Restyle in place** | Inside the assessment form, becomes a thin top bar (`bg-2`, 56px height, 1px bottom border `--color-line`). Logo left, client name + section indicator right (mono eyebrow "CLIENT · {name}" 11px plus sans Label 13px). |
+| `ProgressBar` | `src/components/layout/ProgressBar.tsx` | **Restyle in place** | 4px track height, `--color-line` background, gold-brand fill, mono percentage label right-aligned ("46%" mono Display 40px on desktop hero variant; mono 11px Eyebrow inline variant in sticky bar). |
+| `NavigationButtons` | `src/components/layout/NavigationButtons.tsx` | **Restyle in place** | Back-to-{previous-context} = ghost button (label decided by route: "Back to section {n-1}" or "Back to dashboard"), Save & continue = gold-brand fill button. Both use the Button visual contract from Color §Gold-brand reserved-for list. |
+| `FormField` / `SelectField` / `RadioGroup` / `SliderField` / `SignaturePad` / `FileUploadZone` | `src/components/forms/*` | **Restyle in place** | Input bg `--color-bg-3`, border `--color-line`, text cream, placeholder faint, focus ring gold-brand 2px @ 45%. Labels Label size (13px / 500 / cream). Helper / error text Label size (13px / 400) coloured via `--color-text-dim` (helper) or `--color-danger` (error). Radio + checkbox accent `--color-gold-brand`. Slider thumb gold-brand (existing thumb implementation works as-is once `--color-gold` swap is gated). |
+| `Section1`…`Section11` | `src/components/sections/Section{N}.tsx` | **Restyle in place** | Section heading uses the Heading role (20px / 500 / cream / `-0.015em`). Each section gets a mono eyebrow (11px) above the heading ("SECTION {N} / 11 · {LABEL}"). No information architecture change. |
+| Phase 8 `Dialog` | `src/components/ui/Dialog.tsx` | **Token swap only** | Panel bg switches from white to `--color-bg-3`, scrim bg `rgba(10, 10, 11, 0.7)`. Used only by destructive confirmations + assessment-form modals. The Phase 8 portal report keeps its own light dialog scope inside the report route. Close icon carries `aria-label="Close"`. |
+| Toast (existing pattern from Phase 7) | inline | **Restyle in place** | Panel bg `--color-bg-3`, border `--color-line-2`, mono eyebrow 11px `SAVED` / `ERROR` / `INFO` (uppercase), body Label size 13px / 400. Live "saving…" toast has gold pulse dot. Dismiss icon carries `aria-label="Dismiss notification"`. |
 | `AdminPanel` | `src/components/layout/AdminPanel.tsx` | **Restyle in place** | Switch the assessment-form admin-only sidebar panel to dark tokens. |
-| Recharts (`src/components/charts/*`) | client-trend charts in `/portal/page.tsx` | **Restyle in place** | Axis text mono 10px `--color-text-faint`, grid lines `--color-line`, default series stroke gold-brand, secondary stroke champagne, tooltip bg `--color-bg-3` with `--color-line-2` border. |
+| Recharts (`src/components/charts/*`) | client-trend charts in `/portal/page.tsx` | **Restyle in place** | Axis text mono 11px `--color-text-faint`, grid lines `--color-line`, default series stroke gold-brand, secondary stroke champagne, tooltip bg `--color-bg-3` with `--color-line-2` border. |
 | Phase 8 `PillarCard` / `PillarsGrid` / `PillarModal` / `DetailedMarkerResultsDisclosure` / PDF `PillarsPage` | `src/components/report/*`, `src/lib/pdf/*` | **UNCHANGED** | Phase 8 contract is sovereign inside the report route + PDF. |
 
 ---
@@ -311,6 +310,9 @@ A surface is "Phase-9 aligned" iff:
 5. No `--color-navy` or `--color-gold` (legacy bright gold) is used. (The report route is exempt and lives at `/portal/assessment/[id]/report`.)
 6. Focus ring on any interactive element resolves to gold-brand @ 45%.
 7. Font-family on body resolves to Inter Tight. Font-family on every mono element (eyebrow, meta, numeric readout) resolves to JetBrains Mono.
+8. **Typography scale audit:** every computed `font-size` on a rendered Phase-9 surface resolves to exactly one of `11px`, `13px`, `20px`, `40px` (or their mobile downscales `32px` for Display). No other sizes appear.
+9. **Spacing scale audit:** every `padding` / `margin` / `gap` value used as a token resolves to one of `4`, `8`, `16`, `24`, `32`, `48`, `64`. The `96px` hero top-padding is the only non-token spacing value and appears only on hero wrappers (login, reset-password, dashboard hero, admin landing).
+10. Every icon-only interactive element on the page has an `aria-label`.
 
 ---
 
