@@ -66,9 +66,11 @@ export default function NavigationButtons({
 }: NavigationButtonsProps) {
   const isLastSection = currentSection === VISIBLE_SECTIONS[VISIBLE_SECTIONS.length - 1];
   const isFirstSection = currentSection === VISIBLE_SECTIONS[0];
-  const prevLabel = isFirstSection
+  const prevIdx = VISIBLE_SECTIONS.indexOf(currentSection) - 1;
+  const prevSection = prevIdx >= 0 ? VISIBLE_SECTIONS[prevIdx] : null;
+  const prevLabel = isFirstSection || prevSection === null
     ? 'Back to dashboard'
-    : `Back to section ${VISIBLE_SECTIONS.indexOf(currentSection)}`;
+    : `Back to section ${prevSection}`;
   const nextLabel = isLastSection ? 'Complete assessment' : 'Save & continue';
 
   return (
