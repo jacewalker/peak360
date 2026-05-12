@@ -27,9 +27,9 @@ export default function Header() {
       <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
         <Link href="/portal" className="flex items-center gap-3 group">
           <Image
-            src="/logo.png"
+            src="/landing/peak360-logo.png"
             alt="Peak360 Logo"
-            width={48}
+            width={107}
             height={32}
             className="group-hover:scale-105 transition-transform"
           />
