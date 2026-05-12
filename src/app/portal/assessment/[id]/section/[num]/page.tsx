@@ -17,6 +17,7 @@ import Section7 from '@/components/sections/Section7';
 import Section8 from '@/components/sections/Section8';
 import Section9 from '@/components/sections/Section9';
 import Section11 from '@/components/sections/Section11';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 const sectionComponents: Record<number, React.ComponentType<SectionProps>> = {
   1: Section1,
@@ -172,8 +173,8 @@ export default function SectionPage() {
     return (
       <div className="flex-1 flex items-center justify-center py-20">
         <div className="text-center space-y-3">
-          <div className="w-8 h-8 border-2 border-navy border-t-transparent rounded-full animate-spin mx-auto" />
-          <p className="text-sm text-muted">Loading section...</p>
+          <div className="w-8 h-8 border-2 border-gold-brand border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">Loading…</p>
         </div>
       </div>
     );
@@ -187,6 +188,9 @@ export default function SectionPage() {
           <ProgressBar currentSection={num} assessmentId={id} completedSections={store.completedSections} />
         </div>
         <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+          <MonoEyebrow variant="hero" as="div" className="mb-3">
+            SECTION 11 / 11 · LONGEVITY ANALYSIS
+          </MonoEyebrow>
           <Section11 assessmentId={id} />
         </main>
         <div className="no-print">
