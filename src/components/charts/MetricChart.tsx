@@ -53,6 +53,8 @@ export interface ChartPoint {
 }
 
 export default function MetricChart({ label, unit, data }: { label: string; unit: string; data: ChartPoint[] }) {
+  // Defensive guard for future callers (all current callers gate on >= 2 points).
+  if (data.length === 0) return null;
   const latest = data[data.length - 1];
   const first = data[0];
   const prev = data.length >= 2 ? data[data.length - 2] : null;
