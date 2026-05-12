@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 Phase: 09 — COMPLETE
 Plan: 2 of 2
 Status: Phase 09 complete
-Last activity: 2026-05-12 -- Phase 09 marked complete
+Last activity: 2026-05-12 -- Completed quick task 260512-ru4: Swap portal logo to landing brand mark
 
 Progress: [██████████] 100%
 
@@ -111,6 +111,7 @@ Recent decisions affecting current work:
 | 260509-ody | Make Section 11 pillars clickable with marker breakdown modal | 2026-05-09 | f5474f8 | [260509-ody-pillar-clickable-modal-with-marker-breakdown](./quick/260509-ody-pillar-clickable-modal-with-marker-breakdown/) |
 | 260510-nqt | Pillar redesign Option 2 (rings + chips + side drawer) on portal + PDF + Section 11 | 2026-05-10 | 52f4eb2 | [260510-nqt-replace-pillarsdisplay-tsx-with-option-2](./quick/260510-nqt-replace-pillarsdisplay-tsx-with-option-2/) |
 | 260510-osn | Merge admin invitations + users into one People page grouped by coach | 2026-05-10 | 2d980ad | [260510-osn-merge-admin-invitations-users-into-one-p](./quick/260510-osn-merge-admin-invitations-users-into-one-p/) |
+| 260512-ru4 | Swap portal logo to landing brand mark | 2026-05-12 | be64239 | [260512-ru4-swap-portal-logo-to-landing-brand-mark](./quick/260512-ru4-swap-portal-logo-to-landing-brand-mark/) |
 
 ## Session Continuity
 
