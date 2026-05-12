@@ -13,7 +13,10 @@ interface ProgressBarProps {
 export default function ProgressBar({ currentSection, assessmentId, completedSections = [] }: ProgressBarProps) {
   const visibleCompleted = completedSections.filter((s) => VISIBLE_SECTIONS.includes(s));
   const completedCount = visibleCompleted.length;
-  const progress = (completedCount / (VISIBLE_SECTIONS.length - 1)) * 100; // Section 11 is a report
+  // Section 11 is a report — divide by visible-1, but guard against
+  // mis-configured HIDDEN_SECTIONS (denom=0 → NaN) and clamp to 100%.
+  const denom = Math.max(1, VISIBLE_SECTIONS.length - 1);
+  const progress = Math.min(100, (completedCount / denom) * 100);
 
   return (
     <div className="bg-bg-2 border-b border-line px-4 sm:px-6 py-3">
