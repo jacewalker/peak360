@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useCallback } from 'react';
 import type { SectionProps } from '@/app/portal/assessment/[id]/section/[num]/page';
 import SectionHeader from '@/components/ui/SectionHeader';
 import FormField from '@/components/forms/FormField';
@@ -8,21 +8,24 @@ import FormRow from '@/components/forms/FormRow';
 import SelectField from '@/components/forms/SelectField';
 
 export default function Section1({ data, onChange }: SectionProps) {
-  const calculateAge = (dob: string) => {
-    if (!dob) return;
-    const birth = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birth.getFullYear();
-    const m = today.getMonth() - birth.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
-    onChange('clientAge', age);
-  };
+  const calculateAge = useCallback(
+    (dob: string) => {
+      if (!dob) return;
+      const birth = new Date(dob);
+      const today = new Date();
+      let age = today.getFullYear() - birth.getFullYear();
+      const m = today.getMonth() - birth.getMonth();
+      if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+      onChange('clientAge', age);
+    },
+    [onChange],
+  );
 
   useEffect(() => {
     if (data.clientDOB && !data.clientAge) {
       calculateAge(data.clientDOB as string);
     }
-  }, [data.clientDOB]);
+  }, [data.clientDOB, data.clientAge, calculateAge]);
 
   return (
     <div className="space-y-6">
