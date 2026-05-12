@@ -163,10 +163,11 @@ Plans:
 
 ### Phase 10: Section 11 + PDF brand language alignment
 
-**Goal:** [To be planned]
-**Requirements**: TBD
+**Goal:** Retokenize Section 11 (in-app longevity report) and the PDF renderer (src/lib/pdf/) to the Phase 9 brand system — eliminate residual blue/yellow/white legacy palette. Section 11 must render correctly on the dark portal canvas; PDF must align with the Phase 8 print-safe variant of the same system (cream/navy/gold-brand). Acceptance: zero hardcoded hex literals or `text-white`/`bg-white`/legacy `gold` (yellow) tokens in Section 11; PDF visual diff against Phase 8 confirms consistent brand language; existing data display unchanged.
+**Requirements**: REQ-9.1 (brand consistency across portal surfaces), inherited from Phase 9
 **Depends on:** Phase 9
-**Plans:** 0 plans
+**Plans:** 2 plans
 
 Plans:
-- [ ] TBD (run /gsd-plan-phase 10 to break down)
+- [ ] 10-01-PLAN.md — Section 11 in-app retokenization: light card surface, Phase 8 brand vocabulary, eliminate legacy navy/gold/white literals, add print-safe alias tokens to globals.css
+- [ ] 10-02-PLAN.md — PDF renderer brand alignment: shift COLORS.gold + COLORS.goldDark to gold-brand/champagne, route stray hex literals (MarkerTable/MarkerRow/ConsentStatus) through tokens, preserve Phase 8 sovereign palettes
