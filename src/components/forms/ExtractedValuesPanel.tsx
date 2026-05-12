@@ -16,29 +16,29 @@ const CONFIDENCE_CONFIG = {
   high: {
     label: 'High confidence',
     tag: 'HIGH',
-    tagClass: 'bg-emerald-100 text-emerald-700 border-emerald-200',
-    cardClass: 'border-emerald-200 bg-emerald-50/40',
-    cardEditingClass: 'border-emerald-300 bg-emerald-50/60 ring-2 ring-emerald-200',
-    dotClass: 'bg-emerald-500',
-    iconClass: 'text-emerald-500',
+    tagClass: 'bg-status-good/10 text-status-good border-status-good/30',
+    cardClass: 'border-status-good/30 bg-status-good/[0.04]',
+    cardEditingClass: 'border-status-good/50 bg-status-good/[0.08] ring-2 ring-status-good/20',
+    dotClass: 'bg-status-good',
+    iconClass: 'text-status-good',
   },
   medium: {
     label: 'Medium confidence',
     tag: 'MED',
-    tagClass: 'bg-amber-100 text-amber-700 border-amber-200',
-    cardClass: 'border-amber-200 bg-amber-50/40',
-    cardEditingClass: 'border-amber-300 bg-amber-50/60 ring-2 ring-amber-200',
-    dotClass: 'bg-amber-500',
-    iconClass: 'text-amber-500',
+    tagClass: 'bg-gold-brand/10 text-gold-brand border-gold-brand/30',
+    cardClass: 'border-gold-brand/30 bg-gold-brand/[0.04]',
+    cardEditingClass: 'border-gold-brand/50 bg-gold-brand/[0.08] ring-2 ring-gold-brand/20',
+    dotClass: 'bg-gold-brand',
+    iconClass: 'text-gold-brand',
   },
   low: {
     label: 'Low confidence',
     tag: 'LOW',
-    tagClass: 'bg-red-100 text-red-700 border-red-200',
-    cardClass: 'border-red-200 bg-red-50/40',
-    cardEditingClass: 'border-red-300 bg-red-50/60 ring-2 ring-red-200',
-    dotClass: 'bg-red-500',
-    iconClass: 'text-red-500',
+    tagClass: 'bg-danger/10 text-danger border-danger/30',
+    cardClass: 'border-danger/30 bg-danger/[0.04]',
+    cardEditingClass: 'border-danger/50 bg-danger/[0.08] ring-2 ring-danger/20',
+    dotClass: 'bg-danger',
+    iconClass: 'text-danger',
   },
 } as const;
 
@@ -111,7 +111,7 @@ function EditableValue({
           if (e.key === 'Enter') commit();
           if (e.key === 'Escape') { setDraft(String(value)); setEditing(false); }
         }}
-        className="w-16 text-xs font-bold text-navy tabular-nums bg-white border border-navy/30 rounded px-1.5 py-0.5 text-right focus:outline-none focus:border-gold focus:ring-1 focus:ring-gold/30"
+        className="w-16 text-[13px] font-medium text-text tabular-nums bg-bg-3 border border-line-2 rounded px-1.5 py-0.5 text-right focus:outline-none focus:border-gold-brand"
       />
     );
   }
@@ -120,11 +120,11 @@ function EditableValue({
     <button
       onClick={() => { setDraft(String(value)); setEditing(true); }}
       className={`
-        text-xs font-bold tabular-nums text-right cursor-text
+        text-[13px] font-medium tabular-nums text-right cursor-text
         border-b border-dashed transition-colors
         ${isOverridden
-          ? 'text-gold-dark border-gold/50 hover:border-gold'
-          : 'text-navy border-transparent hover:border-navy/30'
+          ? 'text-gold-brand border-gold-brand/50 hover:border-gold-brand'
+          : 'text-text border-transparent hover:border-line-2'
         }
       `}
       title="Click to edit"
@@ -169,21 +169,21 @@ export default function ExtractedValuesPanel({ fields, onAcceptAll, onDismiss }:
   };
 
   return (
-    <div className="rounded-xl border border-navy/15 bg-white shadow-sm overflow-hidden">
+    <div className="rounded-xl border border-line bg-bg-3 shadow-sm overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-4 py-3 bg-navy/[0.03] border-b border-navy/10">
+      <div className="flex items-center justify-between px-4 py-3 bg-bg-2 border-b border-line">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-navy/10 flex items-center justify-center">
-            <svg className="w-4 h-4 text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <div className="w-8 h-8 rounded-lg bg-gold-brand/10 flex items-center justify-center">
+            <svg className="w-4 h-4 text-gold-brand" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
             </svg>
           </div>
           <div>
-            <h4 className="font-semibold text-navy text-sm">Extracted Values</h4>
-            <p className="text-[11px] text-muted">
+            <h4 className="font-medium text-text text-[13px]">Extracted Values</h4>
+            <p className="text-[11px] text-text-dim">
               {sorted.length} field{sorted.length !== 1 ? 's' : ''} found
               {overrideCount > 0 && (
-                <span className="text-gold-dark font-medium"> &middot; {overrideCount} edited</span>
+                <span className="text-gold-brand font-medium"> &middot; {overrideCount} edited</span>
               )}
             </p>
           </div>
@@ -191,13 +191,13 @@ export default function ExtractedValuesPanel({ fields, onAcceptAll, onDismiss }:
         <div className="flex items-center gap-2">
           <button
             onClick={onDismiss}
-            className="px-3 py-1.5 text-xs font-medium text-muted hover:text-navy hover:bg-surface-alt rounded-lg transition-colors"
+            className="px-3 py-1.5 text-[13px] font-medium text-text-dim hover:text-text hover:bg-bg-3 rounded-lg transition-colors"
           >
             Dismiss
           </button>
           <button
             onClick={handleAcceptAll}
-            className="px-4 py-1.5 bg-navy text-white text-xs font-semibold rounded-lg hover:bg-navy-light transition-all hover:shadow-md"
+            className="px-4 py-1.5 bg-gold-brand text-bg text-[13px] font-medium rounded-lg hover:bg-champagne transition-all"
           >
             Accept All
           </button>
@@ -205,7 +205,7 @@ export default function ExtractedValuesPanel({ fields, onAcceptAll, onDismiss }:
       </div>
 
       {/* Confidence legend + edit hint */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-navy/5 bg-surface-alt/30">
+      <div className="flex items-center justify-between px-4 py-2 border-b border-line bg-bg-2/30">
         <div className="flex gap-4">
           {(['high', 'medium', 'low'] as const).map((level) => {
             const config = CONFIDENCE_CONFIG[level];
@@ -213,14 +213,14 @@ export default function ExtractedValuesPanel({ fields, onAcceptAll, onDismiss }:
             return (
               <div key={level} className="flex items-center gap-1.5 text-[11px]">
                 <span className={`w-2 h-2 rounded-full ${config.dotClass}`} />
-                <span className="text-muted font-medium">
+                <span className="text-text-dim font-medium">
                   {config.label} ({count})
                 </span>
               </div>
             );
           })}
         </div>
-        <span className="text-[10px] text-muted/60 hidden sm:block">Click any value to edit</span>
+        <span className="text-[11px] text-text-faint hidden sm:block">Click any value to edit</span>
       </div>
 
       {/* Field cards grouped by confidence */}
@@ -247,13 +247,13 @@ export default function ExtractedValuesPanel({ fields, onAcceptAll, onDismiss }:
                     >
                       <div className="flex items-center gap-1.5 min-w-0">
                         {isOverridden ? (
-                          <svg className="w-4 h-4 text-gold-dark shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                          <svg className="w-4 h-4 text-gold-brand shrink-0" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L6.832 19.82a4.5 4.5 0 01-1.897 1.13l-2.685.8.8-2.685a4.5 4.5 0 011.13-1.897L16.863 4.487z" />
                           </svg>
                         ) : (
                           <ConfidenceIcon confidence={level} />
                         )}
-                        <span className="text-xs text-muted truncate">{key}</span>
+                        <span className="text-[11px] text-text-dim truncate">{key}</span>
                       </div>
                       <div className="flex items-center gap-1.5 ml-2 shrink-0">
                         <EditableValue
@@ -263,11 +263,11 @@ export default function ExtractedValuesPanel({ fields, onAcceptAll, onDismiss }:
                           onOverride={handleOverride}
                         />
                         {isOverridden ? (
-                          <span className="text-[8px] font-bold px-1 py-0.5 rounded border bg-gold/10 text-gold-dark border-gold/30">
+                          <span className="text-[11px] font-medium px-1 py-0.5 rounded border bg-gold-brand/10 text-gold-brand border-gold-brand/30 font-mono">
                             EDIT
                           </span>
                         ) : (
-                          <span className={`text-[8px] font-bold px-1 py-0.5 rounded border ${config.tagClass}`}>
+                          <span className={`text-[11px] font-medium px-1 py-0.5 rounded border ${config.tagClass} font-mono`}>
                             {config.tag}
                           </span>
                         )}

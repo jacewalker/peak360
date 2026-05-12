@@ -24,10 +24,10 @@ export default function SliderField({
   return (
     <div className={`space-y-2 ${className}`}>
       <div className="flex items-center justify-between">
-        <label htmlFor={id} className="text-sm font-medium text-navy">
+        <label htmlFor={id} className="text-[13px] font-medium text-text">
           {label}
         </label>
-        <span className="text-lg font-bold text-gold">{value}</span>
+        <span className="font-mono text-[20px] font-medium text-gold-brand" style={{ fontVariantNumeric: 'tabular-nums' }}>{value}</span>
       </div>
       <input
         id={id}
@@ -37,9 +37,9 @@ export default function SliderField({
         step={step}
         value={value}
         onChange={(e) => onChange(Number(e.target.value))}
-        className="w-full h-2 bg-surface-alt rounded-lg appearance-none cursor-pointer accent-gold"
+        className="w-full h-2 bg-line rounded-lg appearance-none cursor-pointer accent-gold-brand"
       />
-      <div className="flex justify-between text-xs text-muted">
+      <div className="flex justify-between text-[11px] text-text-dim">
         <span>{min}</span>
         <span>{max}</span>
       </div>

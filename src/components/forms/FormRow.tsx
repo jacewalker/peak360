@@ -13,5 +13,5 @@ export default function FormRow({ children, columns = 2 }: FormRowProps) {
       ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
       : 'grid-cols-1 sm:grid-cols-2';
 
-  return <div className={`grid ${gridClass} gap-4`}>{children}</div>;
+  return <div className={`grid ${gridClass} gap-4 text-text`}>{children}</div>;
 }

@@ -81,7 +81,8 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
     const pos = getPos(e);
     ctx.lineWidth = 2;
     ctx.lineCap = 'round';
-    ctx.strokeStyle = '#1a365d';
+    // Cream literal (matches --color-text) — Canvas 2D API requires a literal hex
+    ctx.strokeStyle = '#ece5d3';
     ctx.lineTo(pos.x, pos.y);
     ctx.stroke();
     setHasDrawn(true);
@@ -109,7 +110,8 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     const scale = canvasRef.current.width / canvasRef.current.getBoundingClientRect().width;
     ctx.font = `italic ${28 * scale}px Georgia, serif`;
-    ctx.fillStyle = '#1a365d';
+    // Cream literal (matches --color-text) — Canvas 2D API requires a literal hex
+    ctx.fillStyle = '#ece5d3';
     ctx.textAlign = 'center';
     ctx.fillText(nameValue, canvasRef.current.width / 2, canvasRef.current.height / 2 + 10);
     setHasDrawn(true);
@@ -118,8 +120,8 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
 
   return (
     <div className="space-y-2">
-      <label className="block text-sm font-medium text-navy">{label}</label>
-      <div ref={containerRef} className="border border-border rounded-lg overflow-hidden bg-white">
+      <label className="block text-[13px] font-medium text-text">{label}</label>
+      <div ref={containerRef} className="border border-line rounded-lg overflow-hidden bg-bg-3">
         <canvas
           ref={canvasRef}
           className="w-full h-[150px] sm:h-[120px] cursor-crosshair touch-none"
@@ -136,7 +138,8 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
         <button
           type="button"
           onClick={clear}
-          className="px-3 py-2 sm:py-1 text-xs text-muted hover:text-red-600 border border-border rounded transition-colors min-h-[44px] sm:min-h-0"
+          aria-label="Clear signature"
+          className="px-3 py-2 sm:py-1 text-[13px] text-text-dim hover:text-danger border border-line rounded transition-colors min-h-[44px] sm:min-h-0"
         >
           Clear
         </button>
@@ -144,7 +147,8 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
           <button
             type="button"
             onClick={autoSign}
-            className="px-3 py-2 sm:py-1 text-xs text-navy hover:text-gold border border-border rounded transition-colors min-h-[44px] sm:min-h-0"
+            aria-label="Auto-sign from name"
+            className="px-3 py-2 sm:py-1 text-[13px] text-text hover:text-gold-brand border border-line rounded transition-colors min-h-[44px] sm:min-h-0"
           >
             Auto-sign from name
           </button>

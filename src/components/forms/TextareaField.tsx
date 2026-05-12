@@ -23,9 +23,9 @@ export default function TextareaField({
 }: TextareaFieldProps) {
   return (
     <div className={`space-y-1.5 ${className}`}>
-      <label htmlFor={id} className="block text-sm font-medium text-navy">
+      <label htmlFor={id} className="block text-[13px] font-medium text-text">
         {label}
-        {required && <span className="text-red-500 ml-1">*</span>}
+        {required && <span className="text-danger ml-1">*</span>}
       </label>
       <textarea
         id={id}
@@ -34,7 +34,7 @@ export default function TextareaField({
         placeholder={placeholder}
         rows={rows}
         required={required}
-        className="w-full px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gold/50 focus:border-gold transition-colors resize-vertical"
+        className="w-full px-4 py-3 bg-bg-3 border border-line rounded-lg text-[13px] text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors resize-vertical"
       />
     </div>
   );
