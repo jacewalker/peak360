@@ -158,5 +158,5 @@ Plans:
 **Plans:** 2 plans
 
 Plans:
-- [ ] 09-01-PLAN.md — Foundations + auth surfaces: globals.css token additions, font rebind (Inter Tight + JetBrains Mono), theme-dark wrappers on portal/login/reset-password layouts (incl. NEW reset-password/layout.tsx), restyle Sidebar/Header/ProgressBar/NavigationButtons, MonoEyebrow primitive, ship /login + /reset-password (UI-SPEC-AC-1..UI-SPEC-AC-10)
+- [x] 09-01-PLAN.md — Foundations + auth surfaces: globals.css token additions, font rebind (Inter Tight + JetBrains Mono), theme-dark wrappers on portal/login/reset-password layouts (incl. NEW reset-password/layout.tsx), restyle Sidebar/Header/ProgressBar/NavigationButtons, MonoEyebrow primitive, ship /login + /reset-password (UI-SPEC-AC-1..UI-SPEC-AC-10)
 - [ ] 09-02-PLAN.md — Working surfaces: form-component sweep (all 11 sections inherit), SectionHeader mono eyebrow + Section 11 page-level injection, Dialog + Toast + MetricChart restyle, every /portal page (dashboard, clients, clients/[name], assessments, every admin/*), Phase 8 report-frame inner light wrapper (D-09 contract) (UI-SPEC-AC-1..UI-SPEC-AC-10)
