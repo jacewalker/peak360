@@ -18,9 +18,9 @@ interface ValdResultCardProps {
 }
 
 const CATEGORY_STYLES = {
-  Strength: 'bg-navy text-white',
-  Balance: 'bg-emerald-700 text-white',
-  Jump: 'bg-red-400 text-white',
+  Strength: 'bg-gold-brand/15 text-gold-brand border border-gold-brand/30',
+  Balance: 'bg-status-good/15 text-status-good border border-status-good/30',
+  Jump: 'bg-bg-2 text-text border border-line-2',
 } as const;
 
 function AsymmetryGraph({ left, right }: { left: number; right: number }) {
@@ -113,55 +113,55 @@ export default function ValdResultCard({
   };
 
   return (
-    <div className="bg-gradient-to-br from-white to-slate-50/80 rounded-2xl border border-slate-200/80 shadow-[0_1px_3px_rgba(0,0,0,0.04),0_4px_12px_rgba(0,0,0,0.03)] px-5 py-3.5 space-y-2.5 transition-all hover:shadow-[0_2px_8px_rgba(0,0,0,0.06),0_8px_24px_rgba(0,0,0,0.04)] h-full flex flex-col justify-between">
+    <div className="bg-bg-3 rounded-2xl border border-line px-5 py-3.5 space-y-2.5 transition-colors hover:border-gold-brand/30 h-full flex flex-col justify-between">
       {/* Header */}
       <div className="flex items-start justify-between gap-3">
         <div className="space-y-1">
-          <h4 className="text-base font-bold text-slate-900 tracking-tight leading-tight">{title}</h4>
+          <h4 className="text-base font-bold text-text tracking-tight leading-tight">{title}</h4>
           <div className="flex items-center gap-2">
             <span className={`text-[11px] font-semibold uppercase tracking-wider px-2.5 py-0.5 rounded-md ${CATEGORY_STYLES[category]}`}>
               {category}
             </span>
             {subtitle && (
-              <span className="text-xs text-slate-400 font-medium">&middot; {subtitle}</span>
+              <span className="text-xs text-text-faint font-medium">&middot; {subtitle}</span>
             )}
           </div>
         </div>
         {isForceDecks && (
-          <div className="flex items-center gap-1.5 border border-slate-300 rounded-full px-3 py-1 shrink-0 bg-white">
+          <div className="flex items-center gap-1.5 border border-line-2 rounded-full px-3 py-1 shrink-0 bg-bg-2">
             <img src="/images/forcedecks.png" alt="" width={20} height={14} className="object-contain" />
-            <span className="text-xs font-bold text-navy tracking-tight">ForceDecks</span>
+            <span className="font-mono text-[11px] font-medium text-text uppercase tracking-[0.16em]">ForceDecks</span>
           </div>
         )}
       </div>
 
       {/* Metric label */}
-      <p className="text-xs font-bold text-navy tracking-tight">{metric}</p>
+      <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">{metric}</p>
 
       {/* Values */}
       {hasLR && hasSingle ? (
         /* Combined: overall max force + L/R split (e.g., IMTP) */
         <div className="space-y-4">
           <div className="flex items-baseline gap-1.5">
-            <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 tabular-nums leading-none">
+            <span className="text-3xl sm:text-4xl font-extrabold text-text tabular-nums leading-none">
               {formatVal(singleValue!)}
             </span>
-            <span className="text-base font-medium text-slate-400">{unit}</span>
+            <span className="text-base font-medium text-text-faint">{unit}</span>
           </div>
           <div className="flex items-end justify-between gap-4">
             <div className="flex items-end gap-6 sm:gap-8 min-w-0">
               <div>
                 <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-0.5">Left</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums leading-none">{formatVal(left!)}</span>
-                  <span className="text-sm font-medium text-slate-400">{unit}</span>
+                  <span className="text-2xl sm:text-3xl font-extrabold text-text tabular-nums leading-none">{formatVal(left!)}</span>
+                  <span className="text-sm font-medium text-text-faint">{unit}</span>
                 </div>
               </div>
               <div>
                 <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-0.5">Right</p>
                 <div className="flex items-baseline gap-1">
-                  <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums leading-none">{formatVal(right!)}</span>
-                  <span className="text-sm font-medium text-slate-400">{unit}</span>
+                  <span className="text-2xl sm:text-3xl font-extrabold text-text tabular-nums leading-none">{formatVal(right!)}</span>
+                  <span className="text-sm font-medium text-text-faint">{unit}</span>
                 </div>
               </div>
             </div>
@@ -177,20 +177,20 @@ export default function ValdResultCard({
             <div>
               <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-0.5">Left</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums leading-none">
+                <span className="text-2xl sm:text-3xl font-extrabold text-text tabular-nums leading-none">
                   {formatVal(left!)}
                 </span>
-                <span className="text-sm font-medium text-slate-400">{unit}</span>
+                <span className="text-sm font-medium text-text-faint">{unit}</span>
               </div>
             </div>
             {/* Right */}
             <div>
               <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-0.5">Right</p>
               <div className="flex items-baseline gap-1">
-                <span className="text-2xl sm:text-3xl font-extrabold text-slate-900 tabular-nums leading-none">
+                <span className="text-2xl sm:text-3xl font-extrabold text-text tabular-nums leading-none">
                   {formatVal(right!)}
                 </span>
-                <span className="text-sm font-medium text-slate-400">{unit}</span>
+                <span className="text-sm font-medium text-text-faint">{unit}</span>
               </div>
             </div>
           </div>
@@ -203,17 +203,17 @@ export default function ValdResultCard({
         <div className="flex items-end justify-between gap-4">
           <div className="flex items-end gap-4">
             <div className="flex items-baseline gap-1.5">
-              <span className="text-3xl sm:text-4xl font-extrabold text-slate-900 tabular-nums leading-none">
+              <span className="text-3xl sm:text-4xl font-extrabold text-text tabular-nums leading-none">
                 {formatVal(singleValue!)}
               </span>
-              <span className="text-base font-medium text-slate-400">{unit}</span>
+              <span className="text-base font-medium text-text-faint">{unit}</span>
             </div>
             {secondaryValue != null && secondaryValue !== 0 && (
               <div className="pb-1">
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider font-medium">{secondaryLabel}</p>
+                <p className="text-[10px] text-text-faint uppercase tracking-wider font-medium">{secondaryLabel}</p>
                 <div className="flex items-baseline gap-0.5">
-                  <span className="text-lg font-bold text-slate-700 tabular-nums">{formatVal(secondaryValue)}</span>
-                  <span className="text-xs text-slate-400">{secondaryUnit}</span>
+                  <span className="text-lg font-bold text-text tabular-nums">{formatVal(secondaryValue)}</span>
+                  <span className="text-xs text-text-faint">{secondaryUnit}</span>
                 </div>
               </div>
             )}
@@ -222,15 +222,15 @@ export default function ValdResultCard({
       ) : null}
 
       {/* Description + Date */}
-      <div className="flex items-end justify-between gap-4 pt-1 border-t border-slate-100">
-        <p className="text-sm text-slate-500 leading-relaxed">
+      <div className="flex items-end justify-between gap-4 pt-1 border-t border-line">
+        <p className="text-sm text-text-dim leading-relaxed">
           {hasLR
             ? generateDescription(metric, unit, left!, right!, lowerIsBetter)
             : '\u00A0'
           }
         </p>
         {formattedDate && (
-          <div className="flex items-center gap-1.5 shrink-0 text-xs text-slate-400">
+          <div className="flex items-center gap-1.5 shrink-0 text-xs text-text-faint">
             <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="1.5">
               <rect x="2" y="3" width="12" height="11" rx="2" />
               <path d="M2 7h12M5 1v4M11 1v4" strokeLinecap="round" />

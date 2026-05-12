@@ -10,9 +10,9 @@ import type { ReactNode } from 'react';
 function TestRow({ num, title, inputs, result }: { num: number; title: string; inputs: ReactNode; result: ReactNode }) {
   return (
     <section>
-      <h3 className="text-sm font-semibold text-navy uppercase tracking-wide mb-2">{num}. {title}</h3>
+      <h3 className="font-mono text-[11px] font-medium text-gold-brand uppercase tracking-[0.18em] mb-2">{num}. {title}</h3>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
-        <div className="bg-white rounded-xl border border-border px-5 py-3.5 space-y-3">
+        <div className="bg-bg-3 rounded-xl border border-line px-5 py-3.5 space-y-3">
           {inputs}
         </div>
         <div className="min-w-0">{result}</div>

@@ -237,10 +237,10 @@ export default function Section11({ assessmentId }: Section11Props) {
     return (
       <div className="flex items-center justify-center py-20">
         <div className="text-center space-y-4">
-          <div className="w-10 h-10 border-3 border-gold border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-10 h-10 border-3 border-gold-brand border-t-transparent rounded-full animate-spin mx-auto" />
           <div>
-            <p className="text-navy font-semibold">Generating Report</p>
-            <p className="text-sm text-muted mt-1">Analyzing assessment data...</p>
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">Generating report…</p>
+            <p className="text-[13px] text-text-dim mt-1">Analyzing assessment data…</p>
           </div>
         </div>
       </div>

@@ -15,8 +15,8 @@ export default function Section4({ data, onChange }: SectionProps) {
         description="Please read the consent agreement and provide signatures."
       />
 
-      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
-        <div className="bg-surface-alt rounded-lg p-4 text-sm text-foreground space-y-3 max-h-64 overflow-y-auto">
+      <div className="bg-bg-3 rounded-xl border border-line p-4 sm:p-6 space-y-6">
+        <div className="bg-bg-2 rounded-lg p-4 text-[13px] text-text space-y-3 max-h-64 overflow-y-auto leading-[1.55]">
           <h4 className="font-semibold">Consent Agreement</h4>
           <p>
             I understand that the assessment I am about to undergo is designed to evaluate my
@@ -49,17 +49,17 @@ export default function Section4({ data, onChange }: SectionProps) {
             type="checkbox"
             checked={!!data.consentAgree}
             onChange={(e) => onChange('consentAgree', e.target.checked)}
-            className="mt-1 w-4 h-4 text-gold focus:ring-gold border-border rounded"
+            className="mt-1 w-4 h-4 accent-gold-brand border-line rounded"
           />
-          <span className="text-sm text-foreground">
+          <span className="text-[13px] text-text leading-[1.55]">
             I have read and understood the above consent agreement and privacy notice. I agree to
             proceed with the assessment.
           </span>
         </label>
       </div>
 
-      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
-        <h3 className="text-lg font-semibold text-navy">Client Signature</h3>
+      <div className="bg-bg-3 rounded-xl border border-line p-4 sm:p-6 space-y-6">
+        <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Client Signature</h3>
         <FormRow>
           <FormField
             id="clientSignatureName"
@@ -85,8 +85,8 @@ export default function Section4({ data, onChange }: SectionProps) {
         />
       </div>
 
-      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
-        <h3 className="text-lg font-semibold text-navy">Coach / Administrator Signature</h3>
+      <div className="bg-bg-3 rounded-xl border border-line p-4 sm:p-6 space-y-6">
+        <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Coach / Administrator Signature</h3>
         <FormRow>
           <FormField
             id="coachSignatureName"

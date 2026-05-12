@@ -32,7 +32,7 @@ export default function Section1({ data, onChange }: SectionProps) {
         description="Basic client details and emergency contact information."
       />
 
-      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
+      <div className="bg-bg-3 rounded-xl border border-line p-4 sm:p-6 space-y-6">
         <FormRow>
           <FormField
             id="clientName"
@@ -104,8 +104,8 @@ export default function Section1({ data, onChange }: SectionProps) {
         </FormRow>
       </div>
 
-      <div className="bg-white rounded-xl border border-border p-4 sm:p-6 space-y-6">
-        <h3 className="text-lg font-semibold text-navy">Emergency Contact</h3>
+      <div className="bg-bg-3 rounded-xl border border-line p-4 sm:p-6 space-y-6">
+        <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Emergency Contact</h3>
         <FormRow>
           <FormField
             id="emergencyContactName"
