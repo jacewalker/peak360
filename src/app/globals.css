@@ -81,7 +81,14 @@ body {
   100% { box-shadow: 0 0 0 12px rgba(201, 162, 74, 0); }
 }
 
+.animate-pulse-gold {
+  animation: pulse-gold 2s ease-out infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
+  /* Class-based guard so future migrations from inline style to class
+     (or shorthand animation-name) keep respecting prefers-reduced-motion. */
+  .animate-pulse-gold,
   [style*="pulse-gold"] {
     animation: none !important;
   }
