@@ -286,7 +286,7 @@ export default function AdminPrescriptionsForm({
                       })
                     }
                     disabled={isSaving}
-                    className="px-4 py-2 rounded-lg border border-red-300 text-red-600 text-[13px] font-semibold hover:bg-red-50 disabled:opacity-50 transition-colors"
+                    className="px-4 py-2 rounded-lg border border-danger/40 text-danger text-[13px] font-semibold hover:bg-danger/10 disabled:opacity-50 transition-colors"
                   >
                     Clear this plan
                   </button>
@@ -297,7 +297,7 @@ export default function AdminPrescriptionsForm({
                   type="button"
                   onClick={() => handleSave(def.pillarKey)}
                   disabled={isSaving || draft.summary.trim().length === 0}
-                  className="px-4 py-2 rounded-lg bg-gold-brand text-white text-[13px] font-semibold hover:bg-gold-brand/90 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 rounded-lg bg-gold-brand text-bg text-[13px] font-semibold hover:bg-champagne disabled:opacity-50 transition-colors"
                 >
                   {isSaving ? 'Saving…' : 'Save plan'}
                 </button>
@@ -338,7 +338,7 @@ export default function AdminPrescriptionsForm({
                 onClick={handleConfirmDelete}
                 disabled={deleting}
                 data-autofocus
-                className="px-4 py-2 rounded-lg bg-red-600 text-white text-[13px] font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 rounded-lg bg-danger text-bg text-[13px] font-semibold hover:opacity-90 disabled:opacity-50 transition-colors"
               >
                 {deleting ? 'Clearing…' : 'Yes, clear'}
               </button>
