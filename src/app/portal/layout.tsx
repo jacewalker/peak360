@@ -17,9 +17,9 @@ export default async function PortalLayout({
   }
 
   return (
-    <>
+    <div className="theme-dark">
       <Sidebar />
       <div className="lg:pl-56">{children}</div>
-    </>
+    </div>
   );
 }
