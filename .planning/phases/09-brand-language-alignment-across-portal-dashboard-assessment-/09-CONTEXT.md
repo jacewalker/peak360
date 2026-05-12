@@ -13,7 +13,7 @@ Promote the landing-page brand language (`src/app/landing.css` / `.v2-root` toke
 **In scope (per `09-UI-SPEC.md`):**
 - Add new tokens to `src/app/globals.css` (`--color-bg/-2/-3`, `--color-text/-dim/-faint`, `--color-gold-brand`, `--color-champagne`, `--color-line/-2`, `--color-danger`, `--color-status-good`, `--font-mono`); rebind `--font-sans` to Inter Tight.
 - Wire JetBrains Mono + Inter Tight into `src/app/layout.tsx` body className.
-- Gate the dark canvas at the **route-segment layout level** (`src/app/portal/layout.tsx`, `src/app/login/layout.tsx`, NEW `src/app/reset-password/layout.tsx`, `src/app/assessment/[id]/layout.tsx`) by wrapping children in a `theme-dark` class. Root `<body>` no longer hard-sets the light background.
+- Gate the dark canvas at the **route-segment layout level** by wrapping children in a `theme-dark` class. Root `<body>` no longer hard-sets the light background. Confirmed segments (per 09-RESEARCH.md, which verified the route tree): `src/app/portal/layout.tsx` (covers dashboard, clients, assessments, admin, AND the nested `/portal/assessment/[id]/**` route — including the Phase 8 report, which then applies its own inner light wrapper), `src/app/login/layout.tsx`, and NEW `src/app/reset-password/layout.tsx`. The assessment form route is nested under `/portal` and inherits — no separate assessment-segment wrapper is required.
 - Restyle in place: `Sidebar`, `Header`, `ProgressBar`, `NavigationButtons`, all `src/components/forms/*`, all `src/components/sections/Section{1..11}.tsx`, Phase 8 `Dialog` (token swap only), Toast pattern, `AdminPanel`, Recharts chart styles.
 - Apply Phase 9 visual contract to: `/login`, `/reset-password`, `/portal` (dashboard), `/portal/clients`, `/portal/clients/[name]`, `/portal/assessments`, `/portal/admin` and all `/portal/admin/*` sub-pages (pillars, users, invitations, audit-logs, normative, assessments/[id]/prescriptions), and `/assessment/[id]/section/[1..11]`.
 - Add the new Phase-9-introduced mono-eyebrow / hero / empty-state / error / loading copy specified in `09-UI-SPEC.md` §Copywriting Contract.
@@ -44,14 +44,14 @@ Promote the landing-page brand language (`src/app/landing.css` / `.v2-root` toke
 - **D-04:** **Promote, do not consume.** Do not import from `landing.css` or use `.v2-root` selectors outside the landing route. Copy the hex values (already enumerated in `09-UI-SPEC.md` §Token-Naming Map) into `globals.css` under the stable `--color-*` / `--font-*` names. The rest of the app uses Tailwind utilities driven by `@theme inline`, never `.v2-root`-scoped classes.
 
 ### Theme Gating Boundary
-- **D-05:** Body background gating lives at the **route-segment layout** layer, not the root layout. Each of `src/app/portal/layout.tsx`, `src/app/login/layout.tsx`, `src/app/reset-password/layout.tsx` (NEW), and `src/app/assessment/[id]/layout.tsx` wraps its children in `<div className="theme-dark">`. The root `<body>` becomes theme-neutral (no hard-coded light background). This isolates the Phase 8 report route (`/portal/assessment/[id]/report`) which keeps its own light wrapper inside the portal segment — the report's page-level component sets its own light frame inside the dark portal wrapper.
+- **D-05:** Body background gating lives at the **route-segment layout** layer, not the root layout. Confirmed by 09-RESEARCH.md: the assessment form lives at `src/app/portal/assessment/[id]/**` (nested under `/portal`), NOT at a root `/assessment/[id]/**` route. Therefore the `theme-dark` wrappers go on **three** layouts only: `src/app/portal/layout.tsx` (covers dashboard, clients, assessments, admin, AND the nested assessment form + report routes), `src/app/login/layout.tsx`, and `src/app/reset-password/layout.tsx` (NEW). The root `<body>` becomes theme-neutral. The Phase 8 report (`/portal/assessment/[id]/report`) keeps its own light wrapper inside the dark portal segment — the report's page-level component sets its own light frame inside the dark portal wrapper.
 - **D-06:** The new `src/app/reset-password/layout.tsx` is the only NEW file in the layout boundary. Pattern-match it against `src/app/login/layout.tsx` so the two centred-hero surfaces share the same hero scaffold (mono eyebrow + 40px display title + 360px-max card).
 
 ### Sequencing Within 09-01 (Foundations)
 - **D-07:** Inside 09-01, land the foundations in this order so each step compiles cleanly against the prior:
   1. Add new tokens to `globals.css` + rebind `--font-sans` + add `theme-dark` utility class.
   2. Wire fonts in `src/app/layout.tsx` body className (Inter Tight + JetBrains Mono variables).
-  3. Add `theme-dark` wrappers to the four segment layouts + create `reset-password/layout.tsx`.
+  3. Add `theme-dark` wrappers to the three segment layouts (portal, login, reset-password) + create NEW `reset-password/layout.tsx`. (See D-05 — `src/app/assessment/[id]/layout.tsx` does NOT exist; the assessment form is nested under `/portal` and inherits the portal wrapper.)
   4. Restyle shared chrome (`Sidebar` → `Header` → `ProgressBar` → `NavigationButtons`).
   5. Restyle `/login` page + `/reset-password` page (centred hero variant + new mono eyebrow copy).
 
@@ -134,8 +134,9 @@ None. The two todos surfaced by `gsd-sdk todo.match-phase 9` are functional auth
 ### Existing implementation files Phase 9 will edit
 - `src/app/globals.css` — Token additions.
 - `src/app/layout.tsx` — Font wiring.
-- `src/app/portal/layout.tsx`, `src/app/login/layout.tsx`, `src/app/assessment/[id]/layout.tsx` — Add `theme-dark` wrapper.
+- `src/app/portal/layout.tsx`, `src/app/login/layout.tsx` — Add `theme-dark` wrapper.
 - `src/app/reset-password/layout.tsx` — NEW (pattern-match `src/app/login/layout.tsx`).
+- Note: `src/app/portal/assessment/[id]/**` inherits from `src/app/portal/layout.tsx` and needs no own wrapper.
 - `src/components/layout/Sidebar.tsx`, `Header.tsx`, `ProgressBar.tsx`, `NavigationButtons.tsx`, `AdminPanel.tsx`, `AppShell.tsx` — Restyle in place.
 - `src/components/forms/*` — Restyle in place (centralised; sections inherit).
 - `src/components/sections/Section{1..11}.tsx` — Mono-eyebrow injection per section heading.
