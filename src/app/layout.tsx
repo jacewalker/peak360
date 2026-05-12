@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import './globals.css';
 import './landing.css';
-import { inter } from '@/lib/fonts';
+import { inter, jetbrainsMono } from '@/lib/fonts';
 
 export const metadata: Metadata = {
   title: 'Peak360 — Discover Your True Health Age',
@@ -25,7 +25,7 @@ export default function RootLayout({
           href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap"
         />
       </head>
-      <body className={`${inter.variable} antialiased min-h-screen bg-background font-sans`}>
+      <body className={`${inter.variable} ${jetbrainsMono.variable} antialiased min-h-screen font-sans`}>
         {children}
       </body>
     </html>
