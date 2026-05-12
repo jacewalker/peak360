@@ -41,14 +41,25 @@ export default function SectionPage() {
   const router = useRouter();
   const params = useParams();
   const id = params.id as string;
-  const num = parseInt(params.num as string) as SectionNumber;
+  const parsedNum = parseInt(params.num as string, 10);
+  const isValidNum =
+    Number.isFinite(parsedNum) && VISIBLE_SECTIONS.includes(parsedNum);
+  const num = parsedNum as SectionNumber;
 
   const store = useAssessmentStore();
   const [loaded, setLoaded] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Redirect to section 1 if `num` is invalid (NaN, out-of-range, or hidden).
+  useEffect(() => {
+    if (!isValidNum) {
+      router.replace(`/portal/assessment/${id}/section/1`);
+    }
+  }, [isValidNum, id, router]);
+
   // Load section data from API + completed sections
   useEffect(() => {
+    if (!isValidNum) return;
     store.setAssessmentId(id);
     store.setCurrentSection(num);
 
@@ -169,7 +180,7 @@ export default function SectionPage() {
     }
   }, [router, store]);
 
-  if (!loaded) {
+  if (!isValidNum || !loaded) {
     return (
       <div className="flex-1 flex items-center justify-center py-20">
         <div className="text-center space-y-3">
