@@ -4,49 +4,32 @@ import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 function ResetPasswordShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
-      {/* Background gradient */}
-      <div className="absolute inset-0 bg-gradient-to-br from-[#0f2440] via-[#1a365d] to-[#2d5986]" />
-
-      {/* Subtle decorative elements (verbatim from /login) */}
-      <div
-        className="absolute top-0 right-0 w-[600px] h-[600px] opacity-[0.04]"
-        style={{
-          background: 'radial-gradient(circle at 60% 40%, #F5A623 0%, transparent 50%)',
-        }}
-      />
-      <div
-        className="absolute bottom-0 left-0 w-[400px] h-[400px] opacity-[0.03]"
-        style={{
-          background: 'radial-gradient(circle at 40% 60%, #F5A623 0%, transparent 50%)',
-        }}
-      />
-
-      <div className="relative z-10 w-full max-w-sm mx-4">
-        {/* Logo + branding (verbatim from /login lines ~128-138) */}
+    <div className="min-h-screen flex flex-col items-center pt-24 pb-12 px-4">
+      <div className="w-full max-w-[360px]">
+        {/* Hero — mono eyebrow above Display title */}
         <div className="text-center mb-8">
-          <img
-            src="/logo.png"
-            alt="Peak360"
-            className="h-21 w-auto mx-auto mb-4 drop-shadow-[0_2px_8px_rgba(255,255,255,0.15)]"
-          />
-          <div className="h-[2px] w-12 bg-[#F5A623] mx-auto rounded-full mb-3" />
-          <p className="text-xs tracking-[0.25em] uppercase text-white/40 font-medium">
-            Longevity Assessment Platform
-          </p>
+          <div className="mb-3">
+            <MonoEyebrow variant="hero">PEAK360 · RECOVERY</MonoEyebrow>
+          </div>
+          <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">
+            Recovery
+          </h1>
         </div>
 
-        {/* Glass card */}
-        <div className="bg-white/[0.07] backdrop-blur-xl rounded-2xl border border-white/10 p-8 shadow-2xl">
+        {/* Form card */}
+        <div className="bg-bg-3 border border-line p-6 sm:p-8 rounded-lg">
           {children}
         </div>
 
-        {/* Footer (verbatim from /login) */}
-        <p className="text-center text-white/20 text-[10px] mt-6 tracking-wide">
-          Authorised access only. All activity is monitored.
+        {/* Footer — mono uppercase */}
+        <p className="text-center mt-6">
+          <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-gold-brand">
+            AUTHORISED ACCESS ONLY · ACTIVITY MONITORED
+          </span>
         </p>
       </div>
     </div>
@@ -56,16 +39,16 @@ function ResetPasswordShell({ children }: { children: React.ReactNode }) {
 function InvalidLinkState() {
   return (
     <ResetPasswordShell>
-      <h2 className="text-white text-lg font-semibold mb-1 text-center">Invalid reset link</h2>
-      <p className="text-white/40 text-xs text-center mb-6">
+      <h2 className="text-text text-[20px] font-medium leading-tight mb-2 text-center">Invalid reset link</h2>
+      <p className="text-text-dim text-[13px] text-center mb-6">
         This link is missing or invalid. Request a new password reset from the sign-in page.
       </p>
       <div className="text-center">
         <Link
           href="/login"
-          className="text-white/40 text-xs hover:text-white/60 transition-colors"
+          className="text-[13px] text-text-dim hover:text-gold-brand transition-colors"
         >
-          <span className="text-[#F5A623]/70 hover:text-[#F5A623]">Back to sign in</span>
+          Back to sign in
         </Link>
       </div>
     </ResetPasswordShell>
@@ -114,10 +97,13 @@ function ResetPasswordForm({ token }: { token: string }) {
     }
   };
 
+  const inputClasses =
+    'w-full px-4 py-3 bg-bg-3 border border-line text-text placeholder:text-text-faint text-[13px] focus:outline-none focus:border-gold-brand transition-all rounded-md';
+
   return (
     <ResetPasswordShell>
-      <h2 className="text-white text-lg font-semibold mb-1 text-center">Set a new password</h2>
-      <p className="text-white/40 text-xs text-center mb-6">
+      <h2 className="text-text text-[20px] font-medium leading-tight mb-2 text-center">Set a new password</h2>
+      <p className="text-text-dim text-[13px] text-center mb-6">
         Choose a strong password to secure your account.
       </p>
 
@@ -132,7 +118,7 @@ function ResetPasswordForm({ token }: { token: string }) {
             required
             minLength={8}
             disabled={!!success}
-            className="w-full bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/25 transition-all"
+            className={inputClasses}
           />
         </div>
         <div>
@@ -144,12 +130,12 @@ function ResetPasswordForm({ token }: { token: string }) {
             required
             minLength={8}
             disabled={!!success}
-            className="w-full bg-white/[0.06] border border-white/10 rounded-xl px-4 py-3 text-white placeholder-white/30 text-sm focus:outline-none focus:border-[#F5A623]/50 focus:ring-1 focus:ring-[#F5A623]/25 transition-all"
+            className={inputClasses}
           />
         </div>
 
         {error && (
-          <div className="flex items-center gap-2 text-red-400 text-xs mt-3">
+          <div className="flex items-center gap-2 text-danger text-[13px]">
             <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
@@ -162,7 +148,7 @@ function ResetPasswordForm({ token }: { token: string }) {
         )}
 
         {success && (
-          <div className="flex items-center gap-2 text-green-400 text-xs mt-3">
+          <div className="flex items-center gap-2 text-status-good text-[13px]">
             <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
               <path
                 fillRule="evenodd"
@@ -177,15 +163,15 @@ function ResetPasswordForm({ token }: { token: string }) {
         <button
           type="submit"
           disabled={loading || !!success || !password || !confirm}
-          className="w-full py-3 bg-[#F5A623] text-[#1a365d] rounded-xl font-semibold text-sm hover:bg-[#F5A623]/90 disabled:opacity-40 disabled:cursor-not-allowed transition-all active:scale-[0.98]"
+          className="w-full py-3 bg-gold-brand text-bg rounded-md text-[13px] font-medium tracking-[0.02em] hover:bg-champagne transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
         >
           {loading ? (
             <span className="flex items-center justify-center gap-2">
-              <span className="w-4 h-4 border-2 border-[#1a365d]/30 border-t-[#1a365d] rounded-full animate-spin" />
-              Setting password...
+              <span className="w-4 h-4 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
+              Setting password…
             </span>
           ) : (
-            'Set new password'
+            'Reset password'
           )}
         </button>
       </form>
@@ -193,9 +179,9 @@ function ResetPasswordForm({ token }: { token: string }) {
       <div className="mt-4 text-center">
         <Link
           href="/login"
-          className="text-white/40 text-xs hover:text-white/60 transition-colors"
+          className="text-[13px] text-text-dim hover:text-gold-brand transition-colors"
         >
-          <span className="text-[#F5A623]/70 hover:text-[#F5A623]">Back to sign in</span>
+          Back to sign in
         </Link>
       </div>
     </ResetPasswordShell>
