@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 /* eslint-disable react/no-unescaped-entities */
 import { REPORT_MARKERS, REPORT_CATEGORIES } from '@/lib/report-markers';
 import { TIER_LABELS } from '@/types/normative';
@@ -34,11 +34,11 @@ const TIER_HEX: Record<string, string> = {
 };
 
 const TIER_PILL: Record<string, string> = {
-  elite: 'bg-emerald-50 text-emerald-700',
-  great: 'bg-blue-50 text-blue-700',
-  normal: 'bg-gray-100 text-gray-600',
-  cautious: 'bg-amber-50 text-amber-700',
-  poor: 'bg-red-50 text-red-700',
+  elite: 'bg-emerald-500/10 text-emerald-300',
+  great: 'bg-blue-500/10 text-blue-300',
+  normal: 'bg-gray-500/10 text-text-dim',
+  cautious: 'bg-amber-500/10 text-amber-300',
+  poor: 'bg-red-500/10 text-red-300',
 };
 
 const TIER_ACCENT: Record<string, string> = {
@@ -121,11 +121,12 @@ function AiAssessmentPanel({ clientName, timelines }: { clientName: string; time
     }
   };
 
-  const hasTriggered = useState(false);
-  if (!hasTriggered[0] && !assessment && !loading && !error) {
-    hasTriggered[1](true);
-    generate();
-  }
+  useEffect(() => {
+    if (!assessment && !loading && !error) {
+      generate();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // run once on mount
 
   if (loading) {
     return (
