@@ -167,7 +167,7 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
               onChange={(e) =>
                 setPageCopyDraft((p) => ({ ...p, intro: e.target.value }))
               }
-              className={INPUT_CLASS}
+              className={TEXTAREA_CLASS}
               disabled={savingKey === 'pageCopy'}
             />
           </div>
@@ -229,7 +229,7 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
                   onChange={(e) =>
                     updateDraft(draft.pillarKey, { shortSummary: e.target.value })
                   }
-                  className={INPUT_CLASS}
+                  className={TEXTAREA_CLASS}
                   disabled={isSaving}
                 />
               </div>
@@ -248,7 +248,7 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
                   onChange={(e) =>
                     updateDraft(draft.pillarKey, { plainMeaning: e.target.value })
                   }
-                  className={INPUT_CLASS}
+                  className={TEXTAREA_CLASS}
                   disabled={isSaving}
                 />
               </div>
