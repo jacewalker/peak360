@@ -10,6 +10,7 @@ import { REPORT_MARKERS } from '@/lib/report-markers';
 import { getPeak360Rating } from '@/lib/normative/ratings';
 import type { RatingTier } from '@/types/normative';
 import type { ChartPoint } from '@/components/charts/MetricChart';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 const MetricChart = dynamic(() => import('@/components/charts/MetricChart'), { ssr: false });
 
@@ -23,6 +24,8 @@ export default function DashboardPage() {
   const [showWelcome, setShowWelcome] = useState(false);
   const { data: sessionData } = authClient.useSession();
   const userRole = sessionData?.user?.role;
+  const firstName = (sessionData?.user?.name || '').split(' ')[0] || '';
+  const todayIso = useMemo(() => new Date().toISOString().slice(0, 10), []);
 
   // Admin-only grouping by coach (D-15, D-16)
   const grouped = useMemo(() => {
@@ -99,6 +102,7 @@ export default function DashboardPage() {
   const totalCount = assessments.length;
   const completedCount = assessments.filter((a) => a.status === 'completed').length;
   const incompleteCount = totalCount - completedCount;
+  const activeCount = incompleteCount;
 
   // Unique clients
   const clientNames = useMemo(() => {
@@ -146,43 +150,56 @@ export default function DashboardPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-6 h-6 border-2 border-navy border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <span className="text-sm text-muted">Loading dashboard...</span>
+          <div className="w-6 h-6 border-2 border-gold-brand border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">Loading…</span>
         </div>
       </div>
     );
   }
 
+  const roleLabel = (userRole || 'coach').toUpperCase();
+  const displayTitle = firstName ? `Welcome back, ${firstName}.` : 'Dashboard';
+
+  // Empty-state for coach with zero assessments
+  const isEmptyCoach = (userRole === 'coach' || userRole === 'admin') && totalCount === 0;
+  const isEmptyClient = userRole === 'client' && totalCount === 0;
+
   return (
     <div className="min-h-screen">
-      {/* Page header */}
-      <div className="py-8 sm:py-12 text-white" style={{ backgroundColor: '#0f2440' }}>
-        <div className="max-w-5xl mx-auto pl-14 pr-4 sm:px-6 lg:px-6">
-          <div className="flex items-center justify-between gap-4">
+      {/* Page hero */}
+      <header className="pt-24 pb-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <div className="flex items-start justify-between gap-4 flex-wrap">
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">Dashboard</h2>
-              <p className="text-white/50 mt-1 text-sm">
-                Your longevity assessment overview
+              <MonoEyebrow variant="hero" as="div" className="mb-3">
+                YOUR PORTAL · {roleLabel}
+              </MonoEyebrow>
+              <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">
+                {displayTitle}
+              </h1>
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">
+                {todayIso} · {activeCount} ACTIVE · {completedCount} COMPLETED
               </p>
             </div>
             {(userRole === 'coach' || userRole === 'admin') && (
               <button
                 onClick={createAssessment}
-                className="px-6 py-2.5 bg-gold text-navy font-bold rounded-lg hover:bg-gold-light transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 text-sm whitespace-nowrap"
+                aria-label="Start new assessment"
+                className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-6 py-3 rounded-lg transition-colors whitespace-nowrap"
               >
-                + New Assessment
+                Start new assessment
               </button>
             )}
           </div>
         </div>
-      </div>
+      </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {/* First-login welcome banner for clients (D-04) */}
         {showWelcome && (
-          <div className="bg-navy/5 border border-navy/10 rounded-xl p-6 mb-6">
-            <h3 className="text-2xl font-bold text-navy">Welcome to Peak360!</h3>
-            <p className="text-gray-600 mt-2">
+          <div className="bg-bg-3 border border-line rounded-xl p-6 mb-6">
+            <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Welcome to Peak360.</h3>
+            <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">
               Your coach has set up your health assessment. You can view your results and track your progress here.
             </p>
             <button
@@ -190,102 +207,58 @@ export default function DashboardPage() {
                 localStorage.setItem('peak360_welcomed', 'true');
                 setShowWelcome(false);
               }}
-              className="mt-4 bg-navy text-white py-2.5 px-6 rounded-md font-medium hover:bg-navy/90 transition-all text-sm"
+              className="mt-4 bg-gold-brand text-bg hover:bg-champagne py-2.5 px-6 rounded-md text-[13px] font-medium tracking-[0.02em] transition-colors"
             >
-              View My Assessments
+              View my assessments
             </button>
           </div>
         )}
 
-        {/* Stat cards */}
+        {/* Counter strip — gold-brand mono Display for the active count */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-8">
-          {/* Total Assessments */}
           <Link
             href="/portal/assessments"
-            className="bg-white rounded-xl border border-border p-3.5 sm:p-5 hover:shadow-md hover:border-gold/30 transition-all group"
+            aria-label={`View all ${totalCount} assessments`}
+            className="bg-bg-3 rounded-xl border border-line p-5 hover:border-gold-brand/40 transition-colors group block"
           >
-            <div className="flex items-center gap-2.5 sm:gap-3 sm:mb-3">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-navy/5 flex items-center justify-center group-hover:bg-navy/10 transition-colors shrink-0">
-                <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 002.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 00-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 00.75-.75 2.25 2.25 0 00-.1-.664m-5.8 0A2.251 2.251 0 0113.5 2.25H15a2.25 2.25 0 012.15 1.586m-5.8 0c-.376.023-.75.05-1.124.08C9.095 4.01 8.25 4.973 8.25 6.108V8.25m0 0H4.875c-.621 0-1.125.504-1.125 1.125v11.25c0 .621.504 1.125 1.125 1.125h9.75c.621 0 1.125-.504 1.125-1.125V9.375c0-.621-.504-1.125-1.125-1.125H8.25zM6.75 12h.008v.008H6.75V12zm0 3h.008v.008H6.75V15zm0 3h.008v.008H6.75V18z" />
-                </svg>
-              </div>
-              <div className="sm:hidden">
-                <p className="text-xl font-bold text-navy leading-tight">{totalCount}</p>
-                <p className="text-[10px] text-muted font-medium">Total</p>
-              </div>
-            </div>
-            <p className="hidden sm:block text-3xl font-bold text-navy">{totalCount}</p>
-            <p className="hidden sm:block text-xs text-muted font-medium mt-1">Total Assessments</p>
+            <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Total</p>
+            <p className="font-mono text-[40px] font-medium text-text leading-none mt-2" style={{ fontVariantNumeric: 'tabular-nums' }}>{totalCount}</p>
+            <p className="text-[13px] text-text-dim mt-2">Assessments</p>
           </Link>
 
-          {/* Incomplete */}
           <Link
             href="/portal/assessments"
-            className="bg-white rounded-xl border border-border p-3.5 sm:p-5 hover:shadow-md hover:border-gold/30 transition-all group"
+            aria-label={`View ${activeCount} active assessments`}
+            className="bg-bg-3 rounded-xl border border-line p-5 hover:border-gold-brand/40 transition-colors group block"
           >
-            <div className="flex items-center gap-2.5 sm:gap-3 sm:mb-3">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-gold/10 flex items-center justify-center group-hover:bg-gold/15 transition-colors shrink-0">
-                <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-gold-dark" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="sm:hidden">
-                <p className="text-xl font-bold text-gold-dark leading-tight">{incompleteCount}</p>
-                <p className="text-[10px] text-muted font-medium">Incomplete</p>
-              </div>
-            </div>
-            <p className="hidden sm:block text-3xl font-bold text-gold-dark">{incompleteCount}</p>
-            <p className="hidden sm:block text-xs text-muted font-medium mt-1">Incomplete</p>
+            <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Active</p>
+            <p className="font-mono text-[40px] font-medium text-gold-brand leading-none mt-2" style={{ fontVariantNumeric: 'tabular-nums' }}>{activeCount}</p>
+            <p className="text-[13px] text-text-dim mt-2">In progress</p>
           </Link>
 
-          {/* Completed */}
-          <div className="bg-white rounded-xl border border-border p-3.5 sm:p-5">
-            <div className="flex items-center gap-2.5 sm:gap-3 sm:mb-3">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-emerald-50 flex items-center justify-center shrink-0">
-                <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-              </div>
-              <div className="sm:hidden">
-                <p className="text-xl font-bold text-emerald-600 leading-tight">{completedCount}</p>
-                <p className="text-[10px] text-muted font-medium">Completed</p>
-              </div>
-            </div>
-            <p className="hidden sm:block text-3xl font-bold text-emerald-600">{completedCount}</p>
-            <p className="hidden sm:block text-xs text-muted font-medium mt-1">Completed</p>
+          <div className="bg-bg-3 rounded-xl border border-line p-5">
+            <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Completed</p>
+            <p className="font-mono text-[40px] font-medium text-status-good leading-none mt-2" style={{ fontVariantNumeric: 'tabular-nums' }}>{completedCount}</p>
+            <p className="text-[13px] text-text-dim mt-2">Finished</p>
           </div>
 
-          {/* Clients */}
           <Link
             href="/portal/clients"
-            className="bg-white rounded-xl border border-border p-3.5 sm:p-5 hover:shadow-md hover:border-gold/30 transition-all group"
+            aria-label={`View ${clientNames.size} clients`}
+            className="bg-bg-3 rounded-xl border border-line p-5 hover:border-gold-brand/40 transition-colors group block"
           >
-            <div className="flex items-center gap-2.5 sm:gap-3 sm:mb-3">
-              <div className="w-8 h-8 sm:w-9 sm:h-9 rounded-lg bg-navy/5 flex items-center justify-center group-hover:bg-navy/10 transition-colors shrink-0">
-                <svg className="w-4 h-4 sm:w-4.5 sm:h-4.5 text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-                </svg>
-              </div>
-              <div className="sm:hidden">
-                <p className="text-xl font-bold text-navy leading-tight">{clientNames.size}</p>
-                <p className="text-[10px] text-muted font-medium">Clients</p>
-              </div>
-            </div>
-            <p className="hidden sm:block text-3xl font-bold text-navy">{clientNames.size}</p>
-            <p className="hidden sm:block text-xs text-muted font-medium mt-1">Clients</p>
+            <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Clients</p>
+            <p className="font-mono text-[40px] font-medium text-text leading-none mt-2" style={{ fontVariantNumeric: 'tabular-nums' }}>{clientNames.size}</p>
+            <p className="text-[13px] text-text-dim mt-2">Unique</p>
           </Link>
         </div>
 
         {/* Invite Client — coach/admin only */}
         {(userRole === 'coach' || userRole === 'admin') && (
-          <div className="bg-white rounded-xl border border-border p-5 mb-6">
-            <div className="flex items-center gap-2 mb-3">
-              <svg className="w-4 h-4 text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M21.75 6.75v10.5a2.25 2.25 0 01-2.25 2.25h-15a2.25 2.25 0 01-2.25-2.25V6.75m19.5 0A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25m19.5 0v.243a2.25 2.25 0 01-1.07 1.916l-7.5 4.615a2.25 2.25 0 01-2.36 0L3.32 8.91a2.25 2.25 0 01-1.07-1.916V6.75" />
-              </svg>
-              <h3 className="text-sm font-semibold text-navy">Invite Client</h3>
-            </div>
+          <div className="bg-bg-3 rounded-xl border border-line p-5 mb-6">
+            <MonoEyebrow variant="meta" as="div" className="mb-3">
+              INVITE · CLIENT
+            </MonoEyebrow>
             <form onSubmit={handleInvite} className="flex gap-2">
               <input
                 type="email"
@@ -293,37 +266,54 @@ export default function DashboardPage() {
                 onChange={(e) => setInviteEmail(e.target.value)}
                 placeholder="Client email address"
                 required
-                className="flex-1 px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/25"
+                className="flex-1 h-12 px-4 bg-bg-3 border border-line rounded-md text-[13px] text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors"
               />
               <button
                 type="submit"
                 disabled={inviteLoading || !inviteEmail.trim()}
-                className="bg-gold text-navy px-4 py-2 rounded-md font-medium hover:bg-gold/90 text-sm disabled:opacity-40 disabled:cursor-not-allowed transition-all whitespace-nowrap"
+                className="bg-gold-brand text-bg hover:bg-champagne px-4 rounded-md text-[13px] font-medium tracking-[0.02em] disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
               >
-                {inviteLoading ? 'Sending...' : 'Send Invite'}
+                {inviteLoading ? 'Sending…' : 'Send invite'}
               </button>
             </form>
             {inviteMessage && (
-              <p className={`text-xs mt-2 ${inviteMessage.type === 'success' ? 'text-emerald-600' : 'text-red-500'}`}>
+              <p className={`text-[13px] mt-2 ${inviteMessage.type === 'success' ? 'text-status-good' : 'text-danger'}`}>
                 {inviteMessage.text}
               </p>
             )}
           </div>
         )}
 
+        {/* Empty states */}
+        {isEmptyCoach && (
+          <div className="bg-bg-3 rounded-xl border border-line p-12 text-center">
+            <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Nothing here yet.</h3>
+            <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Create your first assessment to start tracking a client.</p>
+            <button
+              onClick={createAssessment}
+              className="mt-6 bg-gold-brand text-bg hover:bg-champagne py-3 px-6 rounded-lg text-[13px] font-medium tracking-[0.02em] transition-colors"
+            >
+              Start new assessment
+            </button>
+          </div>
+        )}
+
+        {isEmptyClient && (
+          <div className="bg-bg-3 rounded-xl border border-line p-12 text-center">
+            <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Your first report will appear here.</h3>
+            <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Your coach will let you know when it is ready.</p>
+          </div>
+        )}
+
+        {!isEmptyCoach && !isEmptyClient && (
         <div className="grid md:grid-cols-5 gap-6">
           {/* Action Items — wider column */}
           <div className="md:col-span-3">
-            <div className="bg-white rounded-xl border border-border">
-              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <svg className="w-4 h-4 text-gold" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-                  </svg>
-                  <h3 className="text-sm font-semibold text-navy">Action Items</h3>
-                </div>
+            <div className="bg-bg-3 rounded-xl border border-line">
+              <div className="px-5 py-4 border-b border-line flex items-center justify-between">
+                <MonoEyebrow variant="meta" as="div">ACTION · ITEMS</MonoEyebrow>
                 {actionItems.length > 0 && (
-                  <span className="text-xs font-medium text-gold bg-gold/10 px-2 py-0.5 rounded-full">
+                  <span className="font-mono text-[11px] font-medium text-gold-brand bg-gold-brand/10 px-2 py-0.5 rounded-full" style={{ fontVariantNumeric: 'tabular-nums' }}>
                     {actionItems.length}
                   </span>
                 )}
@@ -331,31 +321,26 @@ export default function DashboardPage() {
 
               {actionItems.length === 0 ? (
                 <div className="px-5 py-10 text-center">
-                  <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-3">
-                    <svg className="w-5 h-5 text-emerald-500" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                  </div>
-                  <p className="text-sm text-muted">All clear — no action items</p>
+                  <p className="text-[13px] text-text-dim">All clear — no action items.</p>
                 </div>
               ) : (
-                <div className="divide-y divide-border">
+                <div className="divide-y divide-line">
                   {actionItems.map((item, i) => (
                     <Link
                       key={i}
                       href={item.href}
-                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-surface-alt transition-colors group"
+                      className="flex items-center gap-3 px-5 py-3.5 hover:bg-bg-2 transition-colors group"
                     >
                       <div className={`w-2 h-2 rounded-full shrink-0 ${
-                        item.type === 'stuck' ? 'bg-red-400' : 'bg-gold'
+                        item.type === 'stuck' ? 'bg-danger' : 'bg-gold-brand'
                       }`} />
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-navy truncate group-hover:text-navy-light transition-colors">
+                        <p className="text-[13px] font-medium text-text truncate">
                           {item.label}
                         </p>
-                        <p className="text-xs text-muted mt-0.5">{item.detail}</p>
+                        <p className="text-[13px] text-text-dim mt-0.5">{item.detail}</p>
                       </div>
-                      <svg className="w-4 h-4 text-muted/50 group-hover:text-navy shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <svg className="w-4 h-4 text-text-faint group-hover:text-gold-brand shrink-0 transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                       </svg>
                     </Link>
@@ -367,12 +352,12 @@ export default function DashboardPage() {
 
           {/* Recent Assessments — narrower column */}
           <div className="md:col-span-2">
-            <div className="bg-white rounded-xl border border-border">
-              <div className="px-5 py-4 border-b border-border flex items-center justify-between">
-                <h3 className="text-sm font-semibold text-navy">Recent Assessments</h3>
+            <div className="bg-bg-3 rounded-xl border border-line">
+              <div className="px-5 py-4 border-b border-line flex items-center justify-between">
+                <MonoEyebrow variant="meta" as="div">RECENT · ASSESSMENTS</MonoEyebrow>
                 <Link
                   href="/portal/assessments"
-                  className="text-xs text-muted hover:text-navy font-medium transition-colors"
+                  className="text-[13px] text-text-dim hover:text-text font-medium transition-colors"
                 >
                   View all
                 </Link>
@@ -382,79 +367,79 @@ export default function DashboardPage() {
                 <div className="text-center py-12 px-5">
                   {userRole === 'client' ? (
                     <>
-                      <h3 className="text-lg font-semibold text-navy mb-2">No assessments yet</h3>
-                      <p className="text-sm text-muted">Your coach will set up your first assessment. You&apos;ll see it here when it&apos;s ready.</p>
+                      <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Your first report will appear here.</h3>
+                      <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Your coach will let you know when it is ready.</p>
                     </>
                   ) : userRole === 'admin' ? (
                     <>
-                      <h3 className="text-lg font-semibold text-navy mb-2">No assessments in the system yet</h3>
-                      <p className="text-sm text-muted mb-4">Once coaches start creating assessments, you&apos;ll see them grouped here.</p>
-                      <button onClick={createAssessment} className="text-sm font-semibold text-gold hover:text-gold-dark">Create assessment</button>
+                      <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">No assessments yet.</h3>
+                      <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Once coaches start creating assessments, you&apos;ll see them grouped here.</p>
+                      <button onClick={createAssessment} className="mt-4 text-[13px] font-medium text-gold-brand hover:text-champagne">Start new assessment</button>
                     </>
                   ) : (
                     <>
-                      <h3 className="text-lg font-semibold text-navy mb-2">Start your first assessment</h3>
-                      <p className="text-sm text-muted mb-4">Create an assessment to begin tracking a client&apos;s longevity profile.</p>
-                      <button onClick={createAssessment} className="text-sm font-semibold text-gold hover:text-gold-dark">Create assessment</button>
+                      <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Nothing here yet.</h3>
+                      <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Create your first assessment to start tracking a client.</p>
+                      <button onClick={createAssessment} className="mt-4 text-[13px] font-medium text-gold-brand hover:text-champagne">Start new assessment</button>
                     </>
                   )}
                 </div>
               ) : userRole === 'admin' && grouped ? (
-                <div className="divide-y divide-border">
+                <div className="divide-y divide-line">
                   {/* Pinned first, gold left border */}
                   {grouped.myClients.length > 0 && (
-                    <div className="border-l-4 border-gold">
-                      <div className="px-5 py-3 flex items-center justify-between bg-surface-alt/50">
-                        <h4 className="text-xl font-semibold text-navy">My clients (you)</h4>
-                        <span className="text-xs text-muted">
+                    <div className="border-l-4 border-gold-brand">
+                      <div className="px-5 py-3 flex items-center justify-between bg-bg-2/50">
+                        <h4 className="text-[20px] font-medium text-text">My clients (you)</h4>
+                        <span className="text-[13px] text-text-dim">
                           {new Set(grouped.myClients.map((a) => a.clientName || a.id)).size} client
                           {new Set(grouped.myClients.map((a) => a.clientName || a.id)).size === 1 ? '' : 's'}
                           {' · '}
                           {grouped.myClients.length} assessment{grouped.myClients.length === 1 ? '' : 's'}
                         </span>
                       </div>
-                      <div className="divide-y divide-border">
+                      <div className="divide-y divide-line">
                         {grouped.myClients.map((a) => (
                           <AssessmentRow key={a.id} a={a} />
                         ))}
                       </div>
                     </div>
                   )}
-                  {/* Other coaches — navy left border */}
+                  {/* Other coaches — line-2 left border */}
                   {grouped.byCoach.map((g, idx) => (
-                    <div key={idx} className="border-l-4 border-navy">
-                      <div className="px-5 py-3 flex items-center justify-between bg-surface-alt/50">
-                        <h4 className="text-xl font-semibold text-navy">{g.name}</h4>
-                        <span className="text-xs text-muted">
+                    <div key={idx} className="border-l-4 border-line-2">
+                      <div className="px-5 py-3 flex items-center justify-between bg-bg-2/50">
+                        <h4 className="text-[20px] font-medium text-text">{g.name}</h4>
+                        <span className="text-[13px] text-text-dim">
                           {new Set(g.rows.map((a) => a.clientName || a.id)).size} client
                           {new Set(g.rows.map((a) => a.clientName || a.id)).size === 1 ? '' : 's'}
                           {' · '}
                           {g.rows.length} assessment{g.rows.length === 1 ? '' : 's'}
                         </span>
                       </div>
-                      <div className="divide-y divide-border">
+                      <div className="divide-y divide-line">
                         {g.rows.map((a) => (
                           <AssessmentRow key={a.id} a={a} />
                         ))}
                       </div>
                     </div>
                   ))}
-                  {/* Unassigned — slate left border */}
+                  {/* Unassigned — faint left border */}
                   {grouped.unassigned.length > 0 && (
-                    <div className="border-l-4 border-slate-300">
-                      <div className="px-5 py-3 bg-surface-alt/50">
+                    <div className="border-l-4 border-line">
+                      <div className="px-5 py-3 bg-bg-2/50">
                         <div className="flex items-center justify-between">
-                          <h4 className="text-xl font-semibold text-navy">Unassigned</h4>
-                          <span className="text-xs text-muted">
+                          <h4 className="text-[20px] font-medium text-text">Unassigned</h4>
+                          <span className="text-[13px] text-text-dim">
                             {new Set(grouped.unassigned.map((a) => a.clientName || a.id)).size} client
                             {new Set(grouped.unassigned.map((a) => a.clientName || a.id)).size === 1 ? '' : 's'}
                             {' · '}
                             {grouped.unassigned.length} assessment{grouped.unassigned.length === 1 ? '' : 's'}
                           </span>
                         </div>
-                        <p className="text-xs text-muted mt-1">Legacy assessments without an owner.</p>
+                        <p className="text-[13px] text-text-dim mt-1">Legacy assessments without an owner.</p>
                       </div>
-                      <div className="divide-y divide-border">
+                      <div className="divide-y divide-line">
                         {grouped.unassigned.map((a) => (
                           <AssessmentRow key={a.id} a={a} />
                         ))}
@@ -463,7 +448,7 @@ export default function DashboardPage() {
                   )}
                 </div>
               ) : (
-                <div className="divide-y divide-border">
+                <div className="divide-y divide-line">
                   {assessments.slice(0, 5).map((a) => (
                     <AssessmentRow key={a.id} a={a} />
                   ))}
@@ -472,6 +457,7 @@ export default function DashboardPage() {
             </div>
           </div>
         </div>
+        )}
 
         {/* Client trends section — D-28 (gated to ≥ 2 completed assessments) */}
         {userRole === 'client' && (
@@ -489,27 +475,27 @@ function AssessmentRow({ a }: { a: Assessment }) {
   return (
     <Link
       href={`/portal/assessment/${a.id}/section/${a.currentSection}`}
-      className="flex items-center gap-3 px-5 py-3.5 hover:bg-surface-alt transition-colors group"
+      className="flex items-center gap-3 px-5 py-3.5 hover:bg-bg-2 transition-colors group"
     >
-      <div className="w-8 h-8 rounded-full bg-navy/5 flex items-center justify-center text-navy font-semibold text-xs group-hover:bg-gold/10 transition-colors shrink-0">
+      <div className="w-8 h-8 rounded-full bg-bg-2 flex items-center justify-center text-text font-medium text-[13px] group-hover:bg-gold-brand/10 transition-colors shrink-0">
         {(a.clientName || 'U')[0].toUpperCase()}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-navy truncate">
+        <p className="text-[13px] font-medium text-text truncate">
           {a.clientName || 'Unnamed Client'}
         </p>
-        <p className="text-xs text-muted mt-0.5">
+        <p className="text-[13px] text-text-dim mt-0.5">
           {a.assessmentDate || a.createdAt.split('T')[0]}
         </p>
       </div>
       <span
-        className={`text-[10px] font-semibold px-2 py-0.5 rounded-full shrink-0 ${
+        className={`font-mono text-[11px] font-medium px-2 py-0.5 rounded-full shrink-0 uppercase tracking-[0.16em] ${
           a.status === 'completed'
-            ? 'bg-emerald-50 text-emerald-600'
-            : 'bg-gold/10 text-gold-dark'
+            ? 'bg-status-good/10 text-status-good'
+            : 'bg-gold-brand/10 text-gold-brand'
         }`}
       >
-        {a.status === 'completed' ? 'Done' : `${a.currentSection}/11`}
+        {a.status === 'completed' ? 'DONE' : `${a.currentSection}/11`}
       </span>
     </Link>
   );
@@ -556,8 +542,6 @@ function ClientTrendsSection({
     async function loadTrends() {
       setTrendsLoading(true);
       try {
-        // Fetch section data for each completed assessment in parallel.
-        // API already scopes to the calling client — no client-side filter needed (D-28, T-07-18 mitigation).
         const sectionsNeeded = [...new Set(REPORT_MARKERS.map((m) => m.section))];
         const sectionsToFetch = [1, ...sectionsNeeded];
 
@@ -619,7 +603,6 @@ function ClientTrendsSection({
 
         if (cancelled) return;
 
-        // Build per-marker series — only include markers with ≥ 2 points
         const series: { testKey: string; label: string; unit: string; data: ChartPoint[] }[] = [];
         for (const m of REPORT_MARKERS) {
           const points: MarkerPoint[] = [];
@@ -654,21 +637,22 @@ function ClientTrendsSection({
   if (completedCount < 2) {
     return (
       <div className="mt-8">
-        <p className="text-sm text-muted">Complete more assessments to see trends over time.</p>
+        <p className="text-[13px] text-text-dim">Complete more assessments to see trends over time.</p>
       </div>
     );
   }
 
   return (
     <div className="mt-8">
-      <h3 className="text-xl font-semibold text-navy mb-4">Your trends over time</h3>
+      <MonoEyebrow variant="hero" as="div" className="mb-3">CLIENT · TRENDS</MonoEyebrow>
+      <h3 className="text-[20px] font-medium text-text tracking-[-0.015em] mb-4">Your trends over time</h3>
       {trendsLoading ? (
         <div className="text-center py-8">
-          <div className="w-5 h-5 border-2 border-navy border-t-transparent rounded-full animate-spin mx-auto mb-2" />
-          <p className="text-xs text-muted">Loading trends...</p>
+          <div className="w-5 h-5 border-2 border-gold-brand border-t-transparent rounded-full animate-spin mx-auto mb-2" />
+          <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">Loading…</p>
         </div>
       ) : chartData.length === 0 ? (
-        <p className="text-sm text-muted">No trended metrics yet across your assessments.</p>
+        <p className="text-[13px] text-text-dim">No trended metrics yet across your assessments.</p>
       ) : (
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
           {chartData.map((c) => (

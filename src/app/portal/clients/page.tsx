@@ -3,6 +3,7 @@
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 interface Client {
   name: string;
@@ -63,7 +64,6 @@ export default function ClientsPage() {
     fetchData();
   }, [fetchData]);
 
-  // Clear selection when search changes
   useEffect(() => {
     setSelectedNames(new Set());
   }, [search]);
@@ -78,7 +78,6 @@ export default function ClientsPage() {
     );
   }, [clients, search]);
 
-  // Indeterminate state for select-all checkbox
   useEffect(() => {
     if (selectAllRef.current) {
       const allSelected = selectedNames.size === filtered.length && filtered.length > 0;
@@ -109,7 +108,6 @@ export default function ClientsPage() {
   };
 
   const handleBulkDelete = async () => {
-    // Map selected client names to their assessment IDs
     const ids = rawAssessments
       .filter((a) => selectedNames.has(a.clientName || 'Unnamed Client'))
       .map((a) => a.id);
@@ -130,67 +128,67 @@ export default function ClientsPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header banner */}
-      <div className="py-10 sm:py-14 text-white" style={{ backgroundColor: '#0f2440' }}>
-        <div className="max-w-4xl mx-auto pl-14 pr-4 sm:px-6 lg:px-6">
-          <h2 className="text-3xl sm:text-4xl font-bold tracking-tight">Clients</h2>
-          <p className="text-white/60 mt-2 text-base">
-            All clients from your assessments
+      {/* Hero */}
+      <header className="pt-24 pb-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <MonoEyebrow variant="hero" as="div" className="mb-3">
+            PEOPLE · CLIENTS
+          </MonoEyebrow>
+          <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">
+            Clients
+          </h1>
+          <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">
+            {clients.length} TOTAL · {clients.reduce((sum, c) => sum + c.assessmentCount, 0)} ASSESSMENTS
           </p>
         </div>
-      </div>
+      </header>
 
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8 sm:py-10">
         {loading ? (
-          <div className="text-center text-muted py-12">
-            <div className="w-6 h-6 border-2 border-navy border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-            Loading clients...
+          <div className="text-center py-12">
+            <div className="w-6 h-6 border-2 border-gold-brand border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+            <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">Loading…</p>
           </div>
         ) : clients.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="w-16 h-16 rounded-full bg-surface-alt flex items-center justify-center mx-auto mb-4">
-              <svg className="w-7 h-7 text-muted" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M15 19.128a9.38 9.38 0 002.625.372 9.337 9.337 0 004.121-.952 4.125 4.125 0 00-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 018.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0111.964-3.07M12 6.375a3.375 3.375 0 11-6.75 0 3.375 3.375 0 016.75 0zm8.25 2.25a2.625 2.625 0 11-5.25 0 2.625 2.625 0 015.25 0z" />
-              </svg>
-            </div>
-            <p className="text-lg text-foreground mb-1">No clients yet</p>
-            <p className="text-sm text-muted">
-              Clients will appear here once you create assessments.
-            </p>
+          <div className="bg-bg-3 rounded-xl border border-line p-12 text-center">
+            <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">No clients yet.</h3>
+            <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Invite a client by email to begin.</p>
           </div>
         ) : (
-          <div className="space-y-5">
-            {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <div className="bg-white rounded-xl border border-border p-4 text-center">
-                <p className="text-2xl font-bold text-navy">{clients.length}</p>
-                <p className="text-xs text-muted font-medium mt-0.5">Total Clients</p>
+          <div className="space-y-6">
+            {/* Stats — mono counters */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="bg-bg-3 rounded-xl border border-line p-5">
+                <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Total clients</p>
+                <p className="font-mono text-[40px] font-medium text-text leading-none mt-2" style={{ fontVariantNumeric: 'tabular-nums' }}>{clients.length}</p>
               </div>
-              <div className="bg-white rounded-xl border border-border p-4 text-center">
-                <p className="text-2xl font-bold text-gold">
+              <div className="bg-bg-3 rounded-xl border border-line p-5">
+                <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Total assessments</p>
+                <p className="font-mono text-[40px] font-medium text-gold-brand leading-none mt-2" style={{ fontVariantNumeric: 'tabular-nums' }}>
                   {clients.reduce((sum, c) => sum + c.assessmentCount, 0)}
                 </p>
-                <p className="text-xs text-muted font-medium mt-0.5">Total Assessments</p>
               </div>
             </div>
 
             {/* Select / Bulk actions toolbar */}
             <div className="flex items-center gap-2 flex-wrap">
-              <label className="flex items-center gap-2 cursor-pointer text-sm text-muted">
+              <label className="flex items-center gap-2 cursor-pointer text-[13px] text-text-dim">
                 <input
                   ref={selectAllRef}
                   type="checkbox"
-                  className="w-4 h-4 rounded border-border text-navy accent-navy"
+                  className="w-4 h-4 rounded border-line accent-gold-brand"
                   onChange={toggleSelectAll}
+                  aria-label="Select all clients"
                 />
                 Select all
               </label>
               {selectedNames.size > 0 && (
                 <>
-                  <div className="w-px h-5 bg-border" />
+                  <div className="w-px h-5 bg-line" />
                   <button
                     onClick={() => setShowDeleteModal(true)}
-                    className="px-4 py-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors"
+                    aria-label={`Delete ${selectedNames.size} selected clients`}
+                    className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg bg-danger text-bg hover:opacity-90 transition-colors"
                   >
                     Delete {selectedNames.size} selected
                   </button>
@@ -200,60 +198,61 @@ export default function ClientsPage() {
 
             {/* Search */}
             <div className="relative">
-              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted pointer-events-none" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-faint pointer-events-none" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
               </svg>
               <input
                 type="text"
-                placeholder="Search by name or email..."
+                placeholder="Search by name or email…"
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full pl-9 pr-4 py-2.5 rounded-lg border border-border bg-white text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/10 transition-all"
+                className="w-full h-12 pl-9 pr-4 rounded-lg border border-line bg-bg-3 text-[13px] text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors"
               />
             </div>
 
-            {/* Client list */}
+            {/* Client grid */}
             {filtered.length === 0 ? (
               <div className="text-center py-10">
-                <p className="text-sm text-muted">No clients match &quot;{search}&quot;</p>
+                <p className="text-[13px] text-text-dim">No clients match &quot;{search}&quot;.</p>
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
                 {filtered.map((c) => (
                   <Link
                     key={c.name}
                     href={`/portal/clients/${encodeURIComponent(c.name)}`}
-                    className="block bg-white rounded-xl border border-border p-4 sm:p-5 hover:shadow-md hover:border-gold/30 transition-all"
+                    className="block bg-bg-3 rounded-xl border border-line p-6 hover:border-gold-brand/40 transition-colors"
                   >
-                  <div className="flex items-center gap-3 sm:gap-4">
-                    <div onClick={(e) => e.preventDefault()} className="shrink-0">
-                      <input
-                        type="checkbox"
-                        className="w-4 h-4 rounded border-border text-navy accent-navy"
-                        checked={selectedNames.has(c.name)}
-                        onChange={() => toggleSelectOne(c.name)}
-                      />
-                    </div>
-                    <div className="w-10 h-10 rounded-full bg-navy/5 flex items-center justify-center text-navy font-bold text-sm shrink-0">
-                      {c.name[0].toUpperCase()}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <div className="font-medium text-navy truncate">{c.name}</div>
-                      <div className="text-sm text-muted flex items-center gap-2 flex-wrap">
+                    <div className="flex items-start gap-3 mb-4">
+                      <div onClick={(e) => e.preventDefault()} className="shrink-0">
+                        <input
+                          type="checkbox"
+                          className="w-4 h-4 rounded border-line accent-gold-brand"
+                          checked={selectedNames.has(c.name)}
+                          onChange={() => toggleSelectOne(c.name)}
+                          aria-label={`Select ${c.name}`}
+                        />
+                      </div>
+                      <div className="w-10 h-10 rounded-full bg-bg-2 flex items-center justify-center text-text font-medium text-[13px] shrink-0">
+                        {c.name[0].toUpperCase()}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="text-[20px] font-medium text-text tracking-[-0.015em] truncate">{c.name}</h3>
                         {c.email && (
-                          <>
-                            <span className="truncate">{c.email}</span>
-                            <span className="text-border">&bull;</span>
-                          </>
+                          <p className="text-[13px] text-text-dim truncate mt-0.5">{c.email}</p>
                         )}
-                        <span>
-                          {c.assessmentCount} assessment{c.assessmentCount !== 1 ? 's' : ''}
-                        </span>
-                        <span className="text-border">&bull;</span>
-                        <span>Last: {c.lastAssessment}</span>
                       </div>
                     </div>
-                  </div>
+
+                    <div className="flex items-end justify-between">
+                      <div>
+                        <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Assessments</p>
+                        <p className="font-mono text-[40px] font-medium text-gold-brand leading-none mt-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
+                          {c.assessmentCount}
+                        </p>
+                      </div>
+                      <p className="text-[13px] text-text-dim">Last: {c.lastAssessment}</p>
+                    </div>
                   </Link>
                 ))}
               </div>

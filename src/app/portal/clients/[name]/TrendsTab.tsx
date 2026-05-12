@@ -7,6 +7,7 @@ import { TIER_LABELS } from '@/types/normative';
 import type { RatingTier } from '@/types/normative';
 import type { AssessmentTimeline } from './page';
 import MetricChart, { type ChartPoint } from '@/components/charts/MetricChart';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 interface TrendsTabProps {
   timelines: AssessmentTimeline[];
@@ -23,6 +24,7 @@ interface AiAssessment {
   categoryInsights: Record<string, string>;
 }
 
+// Rating-tier marker palette — preserved verbatim per Phase 9 UI-SPEC §Color.
 const TIER_HEX: Record<string, string> = {
   elite: '#10b981',
   great: '#3b82f6',
@@ -48,10 +50,10 @@ const TIER_ACCENT: Record<string, string> = {
 };
 
 const TRAJECTORY_ICON: Record<string, { color: string; label: string; arrow: string }> = {
-  improving: { color: 'text-emerald-600', label: 'Improving', arrow: '\u2191' },
-  stable: { color: 'text-blue-600', label: 'Stable', arrow: '\u2192' },
-  declining: { color: 'text-red-500', label: 'Declining', arrow: '\u2193' },
-  mixed: { color: 'text-amber-600', label: 'Mixed', arrow: '\u2194' },
+  improving: { color: 'text-status-good', label: 'Improving', arrow: '↑' },
+  stable: { color: 'text-text-dim', label: 'Stable', arrow: '→' },
+  declining: { color: 'text-danger', label: 'Declining', arrow: '↓' },
+  mixed: { color: 'text-gold-brand', label: 'Mixed', arrow: '↔' },
 };
 
 function getCacheKey(clientName: string) {
@@ -119,7 +121,6 @@ function AiAssessmentPanel({ clientName, timelines }: { clientName: string; time
     }
   };
 
-  // Auto-generate on mount if no cached result
   const hasTriggered = useState(false);
   if (!hasTriggered[0] && !assessment && !loading && !error) {
     hasTriggered[1](true);
@@ -128,18 +129,18 @@ function AiAssessmentPanel({ clientName, timelines }: { clientName: string; time
 
   if (loading) {
     return (
-      <div className="bg-gradient-to-br from-navy-dark to-navy rounded-xl p-8 mb-8 text-center">
-        <div className="w-6 h-6 border-2 border-white/20 border-t-gold rounded-full animate-spin mx-auto mb-3" />
-        <p className="text-sm text-white/50">Analyzing {timelines.length} assessments...</p>
+      <div className="bg-bg-3 border border-line rounded-xl p-8 mb-8 text-center">
+        <div className="w-6 h-6 border-2 border-line border-t-gold-brand rounded-full animate-spin mx-auto mb-3" />
+        <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">Analyzing {timelines.length} assessments…</p>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl border border-red-200 p-5 mb-8">
-        <p className="text-sm text-red-600 mb-2">Failed to generate AI assessment: {error}</p>
-        <button onClick={generate} className="text-sm font-medium text-navy hover:text-gold transition-colors">
+      <div className="bg-bg-3 rounded-xl border border-danger/40 p-5 mb-8">
+        <p className="text-[13px] text-danger mb-2">Failed to generate AI assessment: {error}</p>
+        <button onClick={generate} className="text-[13px] font-medium text-text hover:text-gold-brand transition-colors">
           Try again
         </button>
       </div>
@@ -149,41 +150,41 @@ function AiAssessmentPanel({ clientName, timelines }: { clientName: string; time
   if (!assessment) return null;
 
   const traj = TRAJECTORY_ICON[assessment.trajectory] || TRAJECTORY_ICON.stable;
-  const scoreColor = assessment.overallScore >= 75 ? 'text-emerald-500' : assessment.overallScore >= 50 ? 'text-gold' : 'text-red-500';
-  const scoreRing = assessment.overallScore >= 75 ? 'border-emerald-500' : assessment.overallScore >= 50 ? 'border-gold' : 'border-red-500';
+  const scoreColor = assessment.overallScore >= 75 ? 'text-status-good' : assessment.overallScore >= 50 ? 'text-gold-brand' : 'text-danger';
+  const scoreRing = assessment.overallScore >= 75 ? 'border-status-good' : assessment.overallScore >= 50 ? 'border-gold-brand' : 'border-danger';
 
   return (
     <div className="mb-8 space-y-4">
       {/* Score + Summary */}
-      <div className="bg-white rounded-xl border border-border p-4 sm:p-6">
+      <div className="bg-bg-3 rounded-xl border border-line p-6">
         <div className="flex items-start gap-6">
           {/* Score circle */}
           <div className="shrink-0">
             <div className={`w-20 h-20 rounded-full border-4 ${scoreRing} flex items-center justify-center`}>
               <div className="text-center">
-                <p className={`text-2xl font-bold ${scoreColor}`}>{assessment.overallScore}</p>
-                <p className="text-[8px] text-muted uppercase font-medium tracking-wider">Score</p>
+                <p className={`font-mono text-[20px] font-medium ${scoreColor}`} style={{ fontVariantNumeric: 'tabular-nums' }}>{assessment.overallScore}</p>
+                <p className="font-mono text-[11px] text-text-faint uppercase font-medium tracking-[0.16em]">Score</p>
               </div>
             </div>
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-sm font-semibold text-navy">AI Health Assessment</h3>
-              <span className={`text-xs font-medium ${traj.color} flex items-center gap-1`}>
-                <span>{traj.arrow}</span> {traj.label}
+            <div className="flex items-center gap-2 mb-2 flex-wrap">
+              <MonoEyebrow variant="meta" as="span">AI · HEALTH ASSESSMENT</MonoEyebrow>
+              <span className={`font-mono text-[11px] uppercase tracking-[0.16em] ${traj.color} flex items-center gap-1`}>
+                <span>{traj.arrow}</span> {traj.label.toUpperCase()}
               </span>
               {fromCache && (
-                <span className="text-[10px] text-muted bg-surface-alt px-2 py-0.5 rounded-full">Cached</span>
+                <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-faint bg-bg-2 px-2 py-0.5 rounded-full">Cached</span>
               )}
             </div>
-            <p className="text-sm text-foreground leading-relaxed">{assessment.summary}</p>
+            <p className="text-[13px] text-text leading-[1.55]">{assessment.summary}</p>
           </div>
 
           <button
             onClick={generate}
-            className="shrink-0 p-2 rounded-lg text-muted hover:text-navy hover:bg-surface-alt transition-colors"
-            title="Regenerate"
+            aria-label="Regenerate AI assessment"
+            className="shrink-0 p-2 rounded-lg text-text-dim hover:text-gold-brand hover:bg-bg-2 transition-colors"
           >
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M16.023 9.348h4.992v-.001M2.985 19.644v-4.992m0 0h4.992m-4.993 0l3.181 3.183a8.25 8.25 0 0013.803-3.7M4.031 9.865a8.25 8.25 0 0113.803-3.7l3.181 3.182" />
@@ -194,41 +195,27 @@ function AiAssessmentPanel({ clientName, timelines }: { clientName: string; time
 
       {/* Strengths + Concerns */}
       <div className="grid sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl border border-border p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded-full bg-emerald-50 flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-            </div>
-            <h4 className="text-xs font-semibold text-navy uppercase tracking-wider">Strengths</h4>
-          </div>
+        <div className="bg-bg-3 rounded-xl border border-line p-5">
+          <MonoEyebrow variant="hero" as="div" className="mb-3">STRENGTHS</MonoEyebrow>
           <ul className="space-y-2">
             {assessment.strengths.map((s, i) => (
-              <li key={i} className="text-sm text-foreground flex items-start gap-2">
-                <span className="text-emerald-400 mt-1 shrink-0">&bull;</span>
+              <li key={i} className="text-[13px] text-text flex items-start gap-2 leading-[1.55]">
+                <span className="text-status-good mt-1 shrink-0">&bull;</span>
                 {s}
               </li>
             ))}
           </ul>
         </div>
 
-        <div className="bg-white rounded-xl border border-border p-5">
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-6 h-6 rounded-full bg-amber-50 flex items-center justify-center">
-              <svg className="w-3.5 h-3.5 text-amber-600" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z" />
-              </svg>
-            </div>
-            <h4 className="text-xs font-semibold text-navy uppercase tracking-wider">Areas of Concern</h4>
-          </div>
+        <div className="bg-bg-3 rounded-xl border border-line p-5">
+          <MonoEyebrow variant="hero" as="div" className="mb-3">AREAS OF CONCERN</MonoEyebrow>
           <ul className="space-y-2">
             {assessment.concerns.length === 0 ? (
-              <li className="text-sm text-muted">No significant concerns identified</li>
+              <li className="text-[13px] text-text-dim">No significant concerns identified.</li>
             ) : (
               assessment.concerns.map((c, i) => (
-                <li key={i} className="text-sm text-foreground flex items-start gap-2">
-                  <span className="text-amber-400 mt-1 shrink-0">&bull;</span>
+                <li key={i} className="text-[13px] text-text flex items-start gap-2 leading-[1.55]">
+                  <span className="text-gold-brand mt-1 shrink-0">&bull;</span>
                   {c}
                 </li>
               ))
@@ -238,19 +225,12 @@ function AiAssessmentPanel({ clientName, timelines }: { clientName: string; time
       </div>
 
       {/* Recommendations */}
-      <div className="bg-white rounded-xl border border-border p-5">
-        <div className="flex items-center gap-2 mb-3">
-          <div className="w-6 h-6 rounded-full bg-navy/5 flex items-center justify-center">
-            <svg className="w-3.5 h-3.5 text-navy" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
-            </svg>
-          </div>
-          <h4 className="text-xs font-semibold text-navy uppercase tracking-wider">Recommendations</h4>
-        </div>
+      <div className="bg-bg-3 rounded-xl border border-line p-5">
+        <MonoEyebrow variant="hero" as="div" className="mb-3">RECOMMENDATIONS</MonoEyebrow>
         <ol className="space-y-2">
           {assessment.recommendations.map((r, i) => (
-            <li key={i} className="text-sm text-foreground flex items-start gap-3">
-              <span className="w-5 h-5 rounded-full bg-gold/10 text-gold-dark text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">
+            <li key={i} className="text-[13px] text-text flex items-start gap-3 leading-[1.55]">
+              <span className="w-5 h-5 rounded-full bg-gold-brand/10 text-gold-brand font-mono text-[11px] font-medium flex items-center justify-center shrink-0 mt-0.5" style={{ fontVariantNumeric: 'tabular-nums' }}>
                 {i + 1}
               </span>
               {r}
@@ -261,13 +241,13 @@ function AiAssessmentPanel({ clientName, timelines }: { clientName: string; time
 
       {/* Category insights */}
       {Object.keys(assessment.categoryInsights).length > 0 && (
-        <div className="bg-white rounded-xl border border-border p-5">
-          <h4 className="text-xs font-semibold text-navy uppercase tracking-wider mb-3">Category Insights</h4>
+        <div className="bg-bg-3 rounded-xl border border-line p-5">
+          <MonoEyebrow variant="hero" as="div" className="mb-3">CATEGORY INSIGHTS</MonoEyebrow>
           <div className="grid sm:grid-cols-2 gap-3">
             {Object.entries(assessment.categoryInsights).map(([cat, insight]) => (
-              <div key={cat} className="bg-surface-alt rounded-lg p-3">
-                <p className="text-xs font-medium text-navy mb-1">{cat}</p>
-                <p className="text-xs text-muted leading-relaxed">{insight}</p>
+              <div key={cat} className="bg-bg-2 rounded-lg p-3">
+                <p className="text-[13px] font-medium text-text mb-1">{cat}</p>
+                <p className="text-[13px] text-text-dim leading-[1.55]">{insight}</p>
               </div>
             ))}
           </div>
@@ -280,7 +260,6 @@ function AiAssessmentPanel({ clientName, timelines }: { clientName: string; time
 export default function TrendsTab({ timelines, clientName }: TrendsTabProps) {
   const [activeCategory, setActiveCategory] = useState(REPORT_CATEGORIES[0]);
 
-  // Build time series for each marker that has 2+ data points
   const chartData = useMemo(() => {
     const result: { testKey: string; label: string; unit: string; data: ChartPoint[] }[] = [];
 
@@ -311,7 +290,6 @@ export default function TrendsTab({ timelines, clientName }: TrendsTabProps) {
     return result;
   }, [timelines, activeCategory]);
 
-  // Also collect single-point metrics
   const singlePoints = useMemo(() => {
     const result: { label: string; value: number; unit: string; tier: RatingTier | null }[] = [];
     const categoryMarkers = REPORT_MARKERS.filter((m) => m.category === activeCategory);
@@ -336,7 +314,6 @@ export default function TrendsTab({ timelines, clientName }: TrendsTabProps) {
 
   return (
     <div>
-      {/* AI Assessment */}
       <AiAssessmentPanel clientName={clientName} timelines={timelines} />
 
       {/* Category tabs */}
@@ -345,10 +322,10 @@ export default function TrendsTab({ timelines, clientName }: TrendsTabProps) {
           <button
             key={cat}
             onClick={() => setActiveCategory(cat)}
-            className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
+            className={`px-3 py-1.5 rounded-lg text-[13px] font-medium tracking-[0.02em] transition-colors ${
               activeCategory === cat
-                ? 'bg-navy text-white'
-                : 'bg-surface-alt text-muted hover:text-navy hover:bg-navy/5'
+                ? 'bg-gold-brand text-bg'
+                : 'bg-bg-2 text-text-dim hover:text-text hover:bg-line'
             }`}
           >
             {cat}
@@ -358,11 +335,10 @@ export default function TrendsTab({ timelines, clientName }: TrendsTabProps) {
 
       {chartData.length === 0 && singlePoints.length === 0 ? (
         <div className="text-center py-12">
-          <p className="text-sm text-muted">No recorded metrics in this category across assessments.</p>
+          <p className="text-[13px] text-text-dim">No recorded metrics in this category across assessments.</p>
         </div>
       ) : (
         <>
-          {/* Charts grid */}
           {chartData.length > 0 && (
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 mb-8">
               {chartData.map((chart) => (
@@ -376,25 +352,24 @@ export default function TrendsTab({ timelines, clientName }: TrendsTabProps) {
             </div>
           )}
 
-          {/* Single-point metrics */}
           {singlePoints.length > 0 && (
             <div>
-              <p className="text-[10px] font-semibold text-muted/60 mb-3 uppercase tracking-[0.1em]">
+              <p className="font-mono text-[11px] font-medium text-text-faint mb-3 uppercase tracking-[0.18em]">
                 Single measurement — need 2+ for trends
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
                 {singlePoints.map((sp) => (
                   <div
                     key={sp.label}
-                    className={`bg-white rounded-xl border border-border border-l-[3px] ${sp.tier ? TIER_ACCENT[sp.tier].replace('border-t-', 'border-l-') : 'border-l-border'} p-3.5 shadow-sm`}
+                    className={`bg-bg-3 rounded-xl border border-line border-l-[3px] ${sp.tier ? TIER_ACCENT[sp.tier].replace('border-t-', 'border-l-') : 'border-l-line'} p-3.5`}
                   >
-                    <p className="text-[10px] text-muted/70 font-semibold uppercase tracking-[0.06em] mb-1.5">{sp.label}</p>
+                    <p className="font-mono text-[11px] text-text-faint font-medium uppercase tracking-[0.18em] mb-1.5">{sp.label}</p>
                     <div className="flex items-baseline gap-1.5">
-                      <span className="text-xl font-bold text-navy tracking-tight">{sp.value}</span>
-                      <span className="text-[10px] text-muted font-medium">{sp.unit}</span>
+                      <span className="font-mono text-[20px] font-medium text-text tracking-tight" style={{ fontVariantNumeric: 'tabular-nums' }}>{sp.value}</span>
+                      <span className="text-[11px] text-text-dim font-medium">{sp.unit}</span>
                     </div>
                     {sp.tier && (
-                      <span className={`text-[9px] font-semibold px-2 py-[3px] rounded-md mt-2 inline-flex items-center gap-1 ${TIER_PILL[sp.tier]}`}>
+                      <span className={`text-[11px] font-medium px-2 py-[3px] rounded-md mt-2 inline-flex items-center gap-1 ${TIER_PILL[sp.tier]}`}>
                         <span className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: TIER_HEX[sp.tier] }} />
                         {TIER_LABELS[sp.tier]}
                       </span>

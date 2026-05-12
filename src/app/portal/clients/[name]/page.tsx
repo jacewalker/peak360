@@ -1,14 +1,15 @@
 'use client';
 
-import { useEffect, useState, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import type { Assessment } from '@/types/assessment';
-import { REPORT_MARKERS, REPORT_CATEGORIES } from '@/lib/report-markers';
+import { REPORT_MARKERS } from '@/lib/report-markers';
 import { getPeak360Rating } from '@/lib/normative/ratings';
 import type { RatingTier } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 const TrendsTab = dynamic(() => import('./TrendsTab'), { ssr: false });
 
@@ -24,6 +25,8 @@ export interface AssessmentTimeline {
   markers: Record<string, MarkerTimeline>;
 }
 
+// Rating-tier marker pill colours — preserved verbatim per Phase 9 UI-SPEC §Color
+// "Rating tier palette preserved verbatim".
 const TIER_PILL: Record<RatingTier, string> = {
   elite: 'bg-emerald-50 text-emerald-700',
   great: 'bg-blue-50 text-blue-700',
@@ -52,13 +55,11 @@ export default function ClientDetailPage() {
 
         setAssessments(clientAssessments);
 
-        // Fetch section data for each assessment in parallel
         const sectionsNeeded = [...new Set(REPORT_MARKERS.map((m) => m.section))];
         const timelineResults: AssessmentTimeline[] = await Promise.all(
           clientAssessments.map(async (a) => {
             const sectionData: Record<number, Record<string, unknown>> = {};
 
-            // Fetch section 1 (for age/gender) + measurement sections
             const sectionsToFetch = [1, ...sectionsNeeded];
             const results = await Promise.all(
               sectionsToFetch.map((s) =>
@@ -116,8 +117,8 @@ export default function ClientDetailPage() {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
-          <div className="w-6 h-6 border-2 border-navy border-t-transparent rounded-full animate-spin mx-auto mb-3" />
-          <span className="text-sm text-muted">Loading client data...</span>
+          <div className="w-6 h-6 border-2 border-gold-brand border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">Loading…</span>
         </div>
       </div>
     );
@@ -125,52 +126,53 @@ export default function ClientDetailPage() {
 
   return (
     <div className="min-h-screen">
-      {/* Header */}
-      <div className="bg-gradient-to-b from-navy-dark to-navy py-8 sm:py-10 text-white">
-        <div className="max-w-5xl mx-auto pl-14 pr-4 sm:px-6 lg:px-6">
-          <Link href="/portal/clients" className="inline-flex items-center gap-1.5 text-white/40 hover:text-white/70 text-sm mb-4 transition-colors">
+      {/* Hero */}
+      <header className="pt-24 pb-8">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <Link href="/portal/clients" className="inline-flex items-center gap-1.5 text-text-faint hover:text-text text-[13px] mb-4 transition-colors">
             <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
-            Back to Clients
+            Back to clients
           </Link>
+          <MonoEyebrow variant="hero" as="div" className="mb-3">
+            CLIENT · {clientName.toUpperCase()}
+          </MonoEyebrow>
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-white/10 border border-white/10 flex items-center justify-center text-2xl font-bold text-white/80">
+            <div className="w-14 h-14 rounded-full bg-bg-2 border border-line flex items-center justify-center text-[20px] font-medium text-text">
               {clientName[0].toUpperCase()}
             </div>
             <div>
-              <h2 className="text-2xl sm:text-3xl font-bold tracking-tight">{clientName}</h2>
-              <div className="text-white/40 text-sm flex items-center gap-2 mt-0.5">
-                {clientEmail && <span>{clientEmail}</span>}
-                {clientEmail && clientGender && <span>&bull;</span>}
-                {clientGender && <span className="capitalize">{clientGender}</span>}
-                <span>&bull;</span>
-                <span>{assessments.length} assessment{assessments.length !== 1 ? 's' : ''}</span>
-              </div>
+              <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">{clientName}</h1>
+              <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">
+                {clientEmail && <>{clientEmail.toUpperCase()} · </>}
+                {clientGender && <>{clientGender.toUpperCase()} · </>}
+                {assessments.length} ASSESSMENT{assessments.length !== 1 ? 'S' : ''}
+              </p>
             </div>
           </div>
         </div>
-      </div>
+      </header>
 
       {/* Tabs */}
-      <div className="border-b border-border bg-white sticky top-0 z-10">
+      <div className="border-b border-line bg-bg-2 sticky top-0 z-10">
         <div className="max-w-5xl mx-auto px-4 sm:px-6 flex gap-6">
           <button
             onClick={() => setTab('assessments')}
-            className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`py-3 text-[13px] font-medium tracking-[0.02em] border-b-2 transition-colors ${
               tab === 'assessments'
-                ? 'border-gold text-navy'
-                : 'border-transparent text-muted hover:text-navy'
+                ? 'border-gold-brand text-text'
+                : 'border-transparent text-text-dim hover:text-text'
             }`}
           >
             Assessments
           </button>
           <button
             onClick={() => setTab('trends')}
-            className={`py-3 text-sm font-medium border-b-2 transition-colors ${
+            className={`py-3 text-[13px] font-medium tracking-[0.02em] border-b-2 transition-colors ${
               tab === 'trends'
-                ? 'border-gold text-navy'
-                : 'border-transparent text-muted hover:text-navy'
+                ? 'border-gold-brand text-text'
+                : 'border-transparent text-text-dim hover:text-text'
             }`}
           >
             Trends &amp; Analytics
@@ -180,10 +182,9 @@ export default function ClientDetailPage() {
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
         {tab === 'assessments' ? (
-          /* Assessments Tab */
           assessments.length === 0 ? (
             <div className="text-center py-16">
-              <p className="text-muted">No assessments found for this client.</p>
+              <p className="text-[13px] text-text-dim">No assessments found for this client.</p>
             </div>
           ) : (
             <div className="space-y-4">
@@ -199,22 +200,22 @@ export default function ClientDetailPage() {
                   <Link
                     key={a.id}
                     href={`/portal/assessment/${a.id}/section/${a.currentSection}`}
-                    className="block bg-white rounded-xl border border-border p-5 hover:shadow-md hover:border-gold/30 transition-all group"
+                    className="block bg-bg-3 rounded-xl border border-line p-6 hover:border-gold-brand/40 transition-colors group"
                   >
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center gap-3">
-                        <span className="text-sm font-semibold text-navy">
+                        <span className="text-[13px] font-medium text-text">
                           {a.assessmentDate || a.createdAt.split('T')[0]}
                         </span>
-                        <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full ${
+                        <span className={`font-mono text-[11px] font-medium uppercase tracking-[0.16em] px-2 py-0.5 rounded-full ${
                           a.status === 'completed'
-                            ? 'bg-emerald-50 text-emerald-600'
-                            : 'bg-gold/10 text-gold-dark'
+                            ? 'bg-status-good/10 text-status-good'
+                            : 'bg-gold-brand/10 text-gold-brand'
                         }`}>
-                          {a.status === 'completed' ? 'Completed' : `Section ${a.currentSection}/11`}
+                          {a.status === 'completed' ? 'COMPLETED' : `SECTION ${a.currentSection}/11`}
                         </span>
                       </div>
-                      <svg className="w-4 h-4 text-muted/40 group-hover:text-navy transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <svg className="w-4 h-4 text-text-faint group-hover:text-gold-brand transition-colors" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                       </svg>
                     </div>
@@ -222,7 +223,7 @@ export default function ClientDetailPage() {
                       <div className="flex items-center gap-1.5 flex-wrap">
                         {(['elite', 'great', 'normal', 'cautious', 'poor'] as RatingTier[]).map((tier) =>
                           tierCounts[tier] ? (
-                            <span key={tier} className={`text-[10px] font-medium px-2 py-0.5 rounded-full ${TIER_PILL[tier]}`}>
+                            <span key={tier} className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${TIER_PILL[tier]}`}>
                               {tierCounts[tier]} {TIER_LABELS[tier]}
                             </span>
                           ) : null
@@ -235,16 +236,10 @@ export default function ClientDetailPage() {
             </div>
           )
         ) : (
-          /* Trends Tab */
           timelines.length < 2 ? (
-            <div className="text-center py-16">
-              <div className="w-12 h-12 rounded-full bg-surface-alt flex items-center justify-center mx-auto mb-4">
-                <svg className="w-6 h-6 text-muted" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 13.125C3 12.504 3.504 12 4.125 12h2.25c.621 0 1.125.504 1.125 1.125v6.75C7.5 20.496 6.996 21 6.375 21h-2.25A1.125 1.125 0 013 19.875v-6.75zM9.75 8.625c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125v11.25c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V8.625zM16.5 4.125c0-.621.504-1.125 1.125-1.125h2.25C20.496 3 21 3.504 21 4.125v15.75c0 .621-.504 1.125-1.125 1.125h-2.25a1.125 1.125 0 01-1.125-1.125V4.125z" />
-                </svg>
-              </div>
-              <p className="text-navy font-medium mb-1">Not enough data for trends</p>
-              <p className="text-sm text-muted">
+            <div className="bg-bg-3 rounded-xl border border-line p-12 text-center">
+              <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Not enough data for trends.</h3>
+              <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">
                 Trends will appear once this client has two or more assessments with recorded metrics.
               </p>
             </div>
