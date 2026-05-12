@@ -25,7 +25,7 @@ export default function Header() {
   return (
     <header className="bg-bg-2 border-b border-line text-text h-14">
       <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
-        <Link href="/portal" className="flex items-center gap-3 group">
+        <Link href="/portal" className="flex items-center group">
           <Image
             src="/landing/peak360-logo.png"
             alt="Peak360 Logo"
@@ -33,10 +33,6 @@ export default function Header() {
             height={32}
             className="group-hover:scale-105 transition-transform"
           />
-          <div>
-            <h1 className="text-xl font-bold tracking-tight">PEAK<span className="text-gold-brand">360</span></h1>
-            <p className="text-[11px] text-text-dim tracking-widest uppercase">Longevity Assessment</p>
-          </div>
         </Link>
 
         <div className="flex items-center gap-4">

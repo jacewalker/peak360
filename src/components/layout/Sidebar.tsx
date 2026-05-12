@@ -115,7 +115,7 @@ export default function Sidebar() {
         <div className="mb-2">
           <MonoEyebrow variant="hero">PEAK360 / PORTAL</MonoEyebrow>
         </div>
-        <Link href="/portal" className="flex items-center gap-3 group">
+        <Link href="/portal" className="flex items-center group">
           <Image
             src="/landing/peak360-logo.png"
             alt="Peak360 Logo"
@@ -123,14 +123,6 @@ export default function Sidebar() {
             height={28}
             className="group-hover:scale-105 transition-transform"
           />
-          <div>
-            <h1 className="text-[20px] font-medium tracking-tight text-text">
-              PEAK<span className="text-gold-brand">360</span>
-            </h1>
-            <p className="text-[9px] text-text-faint tracking-[0.2em] uppercase">
-              Longevity
-            </p>
-          </div>
         </Link>
       </div>
 
