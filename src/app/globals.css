@@ -18,7 +18,7 @@
   --color-rating-normal: #6b7280;
   --color-rating-cautious: #f59e0b;
   --color-rating-poor: #ef4444;
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Inter Tight", system-ui, -apple-system, sans-serif;
 
   /* Landing page fonts */
   --font-heading: var(--font-heading);  /* Montserrat via next/font CSS var */
@@ -30,31 +30,80 @@
   --color-gold-100: #fdefc5;
   --color-gradient-start: #0f2440;
   --color-gradient-end: #1a365d;
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Phase 9 Brand Language Tokens (additive — UI-SPEC §Token-Naming Map)
+     Promoted from src/app/landing.css (.v2-root) under stable token names.
+     Legacy --color-navy* / --color-gold* / --color-background / --color-foreground
+     / --color-surface* / --color-border / --color-muted / rating tiers / gradient
+     tokens above are preserved verbatim for Phase 5 PDF + Phase 8 report.
+     ────────────────────────────────────────────────────────────────────── */
+  --color-bg: #0a0a0b;
+  --color-bg-2: #0e0e10;
+  --color-bg-3: #131316;
+
+  --color-text: #ece5d3;
+  --color-text-dim: rgba(236, 229, 211, 0.62);
+  --color-text-faint: rgba(236, 229, 211, 0.38);
+
+  --color-gold-brand: #c9a24a;
+  --color-champagne: #e8d6a8;
+
+  --color-line: rgba(232, 214, 168, 0.10);
+  --color-line-2: rgba(232, 214, 168, 0.20);
+
+  --color-danger: #d97557;
+  --color-status-good: #7fb37f;
+
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 
 body {
-  background: var(--color-background);
+  /* Phase 9: body background removed — theme is segment-gated via .theme-dark
+     wrappers on src/app/portal/layout.tsx, src/app/login/layout.tsx, and
+     src/app/reset-password/layout.tsx. Legacy color + font-family kept as fallback. */
   color: var(--color-foreground);
   font-family: var(--font-sans);
 }
 
-/* Input focus ring */
-input:focus, select:focus, textarea:focus {
-  outline: none;
-  box-shadow: 0 0 0 2px rgba(245, 166, 35, 0.25);
-  border-color: var(--color-gold);
+/* Phase 9: Dark canvas utility — applied at route-segment layouts (portal, login,
+   reset-password). The landing route + Phase 8 report card keep their own surfaces. */
+.theme-dark {
+  background: var(--color-bg);
+  color: var(--color-text);
+  min-height: 100vh;
+  font-family: var(--font-sans);
 }
 
-/* Slider thumb styling */
+/* Phase 9: Pulse-gold keyframes (from landing.css :233-236) for auto-save dot. */
+@keyframes pulse-gold {
+  0% { box-shadow: 0 0 0 0 rgba(201, 162, 74, 0.6); }
+  100% { box-shadow: 0 0 0 12px rgba(201, 162, 74, 0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [style*="pulse-gold"] {
+    animation: none !important;
+  }
+}
+
+/* Input focus ring — Phase 9 gold-brand @ 45% (replaces legacy bright-gold ring) */
+input:focus, select:focus, textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(201, 162, 74, 0.45);
+  border-color: var(--color-gold-brand);
+}
+
+/* Slider thumb styling — Phase 9 gold-brand with bg-3 border (replaces white border) */
 input[type="range"]::-webkit-slider-thumb {
   -webkit-appearance: none;
   appearance: none;
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--color-gold);
+  background: var(--color-gold-brand);
   cursor: pointer;
-  border: 2px solid white;
+  border: 2px solid var(--color-bg-3);
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
@@ -62,9 +111,9 @@ input[type="range"]::-moz-range-thumb {
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--color-gold);
+  background: var(--color-gold-brand);
   cursor: pointer;
-  border: 2px solid white;
+  border: 2px solid var(--color-bg-3);
   box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 
