@@ -136,10 +136,10 @@ export default function Dialog({
   // Panel chrome from mode
   const panelClass =
     mode === 'centered'
-      ? 'max-w-[640px] w-full mx-4 rounded-2xl bg-white p-6 md:p-8 max-h-[90vh] overflow-y-auto'
+      ? 'max-w-[640px] w-full mx-4 rounded-2xl bg-bg-3 border border-line-2 p-6 md:p-8 max-h-[90vh] overflow-y-auto'
       : mode === 'bottom-sheet'
-      ? 'w-full rounded-t-2xl bg-white p-6 max-h-[90vh] overflow-y-auto'
-      : 'w-full md:max-w-[640px] md:mx-4 md:rounded-2xl rounded-t-2xl bg-white p-6 md:p-8 max-h-[90vh] overflow-y-auto';
+      ? 'w-full rounded-t-2xl bg-bg-3 border-t border-line-2 p-6 max-h-[90vh] overflow-y-auto'
+      : 'w-full md:max-w-[640px] md:mx-4 md:rounded-2xl rounded-t-2xl bg-bg-3 border border-line-2 p-6 md:p-8 max-h-[90vh] overflow-y-auto';
 
   // Drag handle: only for auto + bottom-sheet modes, mobile only (hidden md+)
   const showDragHandle = mode !== 'centered';
@@ -149,7 +149,7 @@ export default function Dialog({
       role="dialog"
       aria-modal="true"
       aria-label={ariaLabel}
-      className={`fixed inset-0 z-50 bg-black/50 motion-safe:transition-opacity ${overlayLayoutClass}`}
+      className={`fixed inset-0 z-50 bg-[rgba(10,10,11,0.7)] motion-safe:transition-opacity ${overlayLayoutClass}`}
       onClick={onClose}
     >
       <div
@@ -161,7 +161,7 @@ export default function Dialog({
         {showDragHandle && (
           <div
             aria-hidden="true"
-            className="md:hidden mx-auto mb-3 h-1 w-9 rounded-full bg-gray-300"
+            className="md:hidden mx-auto mb-3 h-1 w-9 rounded-full bg-line-2"
           />
         )}
         {children}
