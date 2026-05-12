@@ -139,7 +139,7 @@ export default function MetricChart({ label, unit, data }: { label: string; unit
                 if (!active || !payload?.[0]) return null;
                 const p = payload[0].payload as ChartPoint;
                 return (
-                  <div className="bg-bg-3 text-text text-xs rounded-lg px-3.5 py-2.5 shadow-xl border border-line-2">
+                  <div className="bg-bg-3 text-text text-[11px] rounded-lg px-3.5 py-2.5 shadow-xl border border-line-2">
                     <p className="font-medium text-[13px]">{p.value} <span className="font-normal text-text-dim">{unit}</span></p>
                     <p className="text-text-faint mt-0.5">{p.date}</p>
                     {p.tier && (

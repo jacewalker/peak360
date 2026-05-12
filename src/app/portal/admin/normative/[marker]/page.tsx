@@ -308,11 +308,11 @@ export default function MarkerEditorPage({
     return (
       <div className="max-w-6xl mx-auto p-6">
         <div className="animate-pulse space-y-4">
-          <div className="h-8 bg-gray-200 rounded w-48" />
-          <div className="h-4 bg-gray-200 rounded w-32" />
+          <div className="h-8 bg-line rounded w-48" />
+          <div className="h-4 bg-line rounded w-32" />
           <div className="grid grid-cols-5 gap-3">
             {Array.from({ length: 5 }).map((_, i) => (
-              <div key={i} className="h-32 bg-gray-200 rounded" />
+              <div key={i} className="h-32 bg-line rounded" />
             ))}
           </div>
         </div>
@@ -325,7 +325,7 @@ export default function MarkerEditorPage({
       {/* Back link */}
       <a
         href="/portal/admin/normative"
-        className="inline-flex items-center gap-1 text-sm text-text-dim hover:text-text mb-4"
+        className="inline-flex items-center gap-1 text-[13px] text-text-dim hover:text-text mb-4"
       >
         <svg
           className="w-4 h-4"
@@ -342,15 +342,15 @@ export default function MarkerEditorPage({
       {/* Marker header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-text">{markerDef?.label || marker}</h1>
+          <h1 className="text-[40px] font-bold text-text">{markerDef?.label || marker}</h1>
           {isDirty && <span className="w-2 h-2 rounded-full bg-gold-brand" title="Unsaved changes" />}
         </div>
-        <p className="text-sm text-text-dim">
+        <p className="text-[13px] text-text-dim">
           {markerDef?.category}
           {markerDef?.subcategory ? ` > ${markerDef.subcategory}` : ''}
         </p>
         {unit && (
-          <span className="text-xs px-2 py-1 rounded bg-gray-100 text-text-dim font-bold mt-1 inline-block">
+          <span className="text-[11px] px-2 py-1 rounded bg-bg-3 text-text-dim font-bold mt-1 inline-block">
             {unit}
           </span>
         )}
@@ -368,7 +368,7 @@ export default function MarkerEditorPage({
                   setActiveAgeGroup(ageGroups[0]);
                 }
               }}
-              className={`text-sm font-bold px-4 py-2 rounded-t-lg ${
+              className={`text-[13px] font-bold px-4 py-2 rounded-t-lg ${
                 activeGender === g
                   ? 'border-b-2 border-gold text-text'
                   : 'text-text-dim hover:text-text'
@@ -385,7 +385,7 @@ export default function MarkerEditorPage({
         <select
           value={activeAgeGroup || ''}
           onChange={(e) => setActiveAgeGroup(e.target.value)}
-          className="mb-4 px-3 py-2 border border-line rounded-lg text-sm"
+          className="mb-4 px-3 py-2 border border-line rounded-lg text-[13px]"
         >
           {ageGroups.map((ag) => (
             <option key={ag} value={ag}>
@@ -397,7 +397,7 @@ export default function MarkerEditorPage({
 
       {/* No data message for "All" tab on gendered markers */}
       {hasGenderVariants && activeGender === 'all' && !editTiers.unisex && (
-        <div className="p-4 bg-gray-50 rounded-lg text-sm text-text-dim mb-6">
+        <div className="p-4 bg-bg-3 rounded-lg text-[13px] text-text-dim mb-6">
           This marker has gender-specific ranges. Select the Male or Female tab to edit.
         </div>
       )}
@@ -408,31 +408,31 @@ export default function MarkerEditorPage({
           {TIER_ORDER.map((tier) => (
             <div key={tier} className="space-y-2">
               <div
-                className="text-xs font-bold uppercase tracking-wide text-center pb-1 border-t-4"
+                className="text-[11px] font-bold uppercase tracking-wide text-center pb-1 border-t-4"
                 style={{ borderColor: TIER_HEX[tier] }}
               >
                 {tier}
               </div>
               <div>
-                <label className="text-xs text-text-dim">Min</label>
+                <label className="text-[11px] text-text-dim">Min</label>
                 <input
                   type="number"
                   step="any"
                   value={currentVariantTiers[tier]?.min ?? ''}
                   onChange={(e) => handleTierChange(tier, 'min', e.target.value)}
-                  className={`w-full px-2 py-2 border rounded text-sm text-center tabular-nums ${
+                  className={`w-full px-2 py-2 border rounded text-[13px] text-center tabular-nums ${
                     hasValidationError(tier, 'min') ? 'border-red-500' : 'border-line'
                   } focus:border-gold focus:ring-2 focus:ring-gold/25 outline-none`}
                 />
               </div>
               <div>
-                <label className="text-xs text-text-dim">Max</label>
+                <label className="text-[11px] text-text-dim">Max</label>
                 <input
                   type="number"
                   step="any"
                   value={currentVariantTiers[tier]?.max ?? ''}
                   onChange={(e) => handleTierChange(tier, 'max', e.target.value)}
-                  className={`w-full px-2 py-2 border rounded text-sm text-center tabular-nums ${
+                  className={`w-full px-2 py-2 border rounded text-[13px] text-center tabular-nums ${
                     hasValidationError(tier, 'max') ? 'border-red-500' : 'border-line'
                   } focus:border-gold focus:ring-2 focus:ring-gold/25 outline-none`}
                 />
@@ -444,7 +444,7 @@ export default function MarkerEditorPage({
 
       {/* Validation errors */}
       {currentValidationErrors.length > 0 && (
-        <div className="text-xs text-red-500 space-y-1 mb-4">
+        <div className="text-[11px] text-red-500 space-y-1 mb-4">
           {currentValidationErrors.map((err, i) => (
             <p key={i}>{err}</p>
           ))}
@@ -453,9 +453,9 @@ export default function MarkerEditorPage({
 
       {/* Severity weight slider */}
       <div className="mb-6 p-4 border border-line rounded-lg">
-        <h3 className="text-sm font-bold text-text mb-2">Red Flag Severity</h3>
+        <h3 className="text-[13px] font-bold text-text mb-2">Red Flag Severity</h3>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-text-dim">Low (0)</span>
+          <span className="text-[11px] text-text-dim">Low (0)</span>
           <input
             type="range"
             min="0"
@@ -468,12 +468,12 @@ export default function MarkerEditorPage({
             }}
             className="flex-1 accent-gold"
           />
-          <span className="text-xs text-text-dim">Critical (10)</span>
-          <span className="text-xl font-bold text-text tabular-nums w-8 text-center">
+          <span className="text-[11px] text-text-dim">Critical (10)</span>
+          <span className="text-[20px] font-bold text-text tabular-nums w-8 text-center">
             {severityWeight}
           </span>
         </div>
-        <p className="text-xs text-text-dim mt-1">
+        <p className="text-[11px] text-text-dim mt-1">
           Controls how prominently this marker&apos;s referral flag appears in reports (0 = subtle,
           10 = critical)
         </p>
@@ -483,14 +483,14 @@ export default function MarkerEditorPage({
       <div className="flex justify-between items-center p-4 border-t border-line">
         <button
           onClick={handleReset}
-          className="text-sm font-bold text-red-500 hover:text-red-700 px-4 py-2 border border-red-200 rounded-lg hover:bg-red-50"
+          className="text-[13px] font-bold text-red-500 hover:text-red-700 px-4 py-2 border border-red-200 rounded-lg hover:bg-red-50"
         >
           Reset to Defaults
         </button>
         <button
           onClick={handleSave}
           disabled={!isDirty || isSaving || allValidationErrors.length > 0}
-          className={`text-sm font-bold px-6 py-2.5 rounded-lg ${
+          className={`text-[13px] font-bold px-6 py-2.5 rounded-lg ${
             isDirty && !isSaving && allValidationErrors.length === 0
               ? 'bg-gold-brand text-white hover:bg-gold-brand/90'
               : 'bg-gold-brand/50 text-white opacity-50 cursor-not-allowed'
@@ -502,7 +502,7 @@ export default function MarkerEditorPage({
 
       {/* Error banner */}
       {error && (
-        <div className="mt-2 p-3 bg-red-50 text-red-600 rounded-lg text-sm">{error}</div>
+        <div className="mt-2 p-3 bg-red-50 text-red-600 rounded-lg text-[13px]">{error}</div>
       )}
     </div>
   );

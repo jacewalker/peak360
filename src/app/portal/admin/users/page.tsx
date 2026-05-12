@@ -308,7 +308,7 @@ export default function AdminPeoplePage() {
             </button>
             {inviteMessage && (
               <p
-                className={`text-sm ${
+                className={`text-[13px] ${
                   inviteMessage.type === 'success'
                     ? 'text-status-good'
                     : 'text-danger'
@@ -513,7 +513,7 @@ function UserTable({
     <>
       {/* Desktop table */}
       <div className="hidden md:block bg-bg-3 rounded-2xl border border-line overflow-hidden">
-        <table className="w-full text-sm">
+        <table className="w-full text-[13px]">
           <thead className="bg-bg-2 border-b border-line">
             <tr>
               <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
@@ -575,7 +575,7 @@ function UserTable({
                     <td className="px-4 py-3">
                       {u.banned === true ? <StatusPill status="banned" /> : null}
                     </td>
-                    <td className="px-4 py-3 text-text-dim text-xs">
+                    <td className="px-4 py-3 text-text-dim text-[11px]">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
@@ -697,7 +697,7 @@ function InviteTable({ invites }: { invites: Invitation[] }) {
     <>
       {/* Desktop */}
       <div className="hidden md:block bg-bg-3 rounded-2xl border border-line overflow-hidden">
-        <table className="w-full text-sm">
+        <table className="w-full text-[13px]">
           <thead className="bg-bg-2 border-b border-line">
             <tr>
               <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
@@ -726,7 +726,7 @@ function InviteTable({ invites }: { invites: Invitation[] }) {
                 <td className="px-4 py-3 text-text">{inv.email}</td>
                 <td className="px-4 py-3 text-text-dim">{inv.name}</td>
                 <td className="px-4 py-3 text-text-dim">{inv.role}</td>
-                <td className="px-4 py-3 text-text-dim text-xs">
+                <td className="px-4 py-3 text-text-dim text-[11px]">
                   {new Date(inv.createdAt).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3">
@@ -743,7 +743,7 @@ function InviteTable({ invites }: { invites: Invitation[] }) {
         {invites.map((inv) => (
           <li
             key={inv.id}
-            className="bg-bg-3 rounded-xl border border-line p-3 text-sm flex flex-col gap-1"
+            className="bg-bg-3 rounded-xl border border-line p-3 text-[13px] flex flex-col gap-1"
           >
             <div className="flex items-center justify-between gap-2">
               <span className="font-medium text-text break-all">{inv.email}</span>

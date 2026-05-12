@@ -219,8 +219,8 @@ export default function AuditLogsPage() {
                     <tr key={log.id} className="hover:bg-bg-2-alt/50 transition-colors">
                       <td className="px-4 py-3 text-[13px] text-text whitespace-nowrap">{formatDate(log.createdAt)}</td>
                       <td className="px-4 py-3 text-[13px] text-text">{truncate(log.userId, 12)}</td>
-                      <td className="px-4 py-3 text-sm">
-                        <span className={`inline-block px-2 py-0.5 text-xs font-semibold rounded-full border ${ACTION_BADGE_COLORS[log.action] ?? 'bg-gray-50 text-gray-600 border-gray-200'}`}>
+                      <td className="px-4 py-3 text-[13px]">
+                        <span className={`inline-block px-2 py-0.5 text-[11px] font-semibold rounded-full border ${ACTION_BADGE_COLORS[log.action] ?? 'bg-bg-3 text-text-dim border-line'}`}>
                           {log.action}
                         </span>
                       </td>

@@ -124,7 +124,7 @@ export default function Sidebar() {
             className="group-hover:scale-105 transition-transform"
           />
           <div>
-            <h1 className="text-lg font-bold tracking-tight text-text">
+            <h1 className="text-[20px] font-medium tracking-tight text-text">
               PEAK<span className="text-gold-brand">360</span>
             </h1>
             <p className="text-[9px] text-text-faint tracking-[0.2em] uppercase">
@@ -143,7 +143,7 @@ export default function Sidebar() {
               key={item.label}
               href={item.href}
               className={`
-                flex items-center gap-3 pl-[10px] pr-3 py-2.5 text-sm transition-all duration-150
+                flex items-center gap-3 pl-[10px] pr-3 py-2 text-[13px] transition-all duration-150
                 ${
                   active
                     ? 'border-l-2 border-gold-brand text-text font-medium'
@@ -170,7 +170,7 @@ export default function Sidebar() {
             <Link
               href="/portal/admin"
               className={`
-                flex items-center gap-3 pl-[10px] pr-3 py-2.5 text-sm transition-all duration-150
+                flex items-center gap-3 pl-[10px] pr-3 py-2 text-[13px] transition-all duration-150
                 ${
                   pathname.startsWith('/portal/admin')
                     ? 'border-l-2 border-gold-brand text-text font-medium'
@@ -219,7 +219,7 @@ export default function Sidebar() {
               }
               window.location.href = '/login';
             }}
-            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm text-text-dim hover:text-text hover:bg-line transition-all w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] text-text-dim hover:text-text hover:bg-line transition-all w-full"
           >
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0013.5 3h-6a2.25 2.25 0 00-2.25 2.25v13.5A2.25 2.25 0 007.5 21h6a2.25 2.25 0 002.25-2.25V15m3 0l3-3m0 0l-3-3m3 3H9" />

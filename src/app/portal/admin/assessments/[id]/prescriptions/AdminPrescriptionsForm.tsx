@@ -12,7 +12,7 @@ import type {
 type ToastState = { variant: ToastVariant; message: string } | null;
 
 const INPUT_CLASS =
-  'w-full px-3 py-2.5 rounded-lg border border-line bg-bg-3 text-sm text-foreground placeholder:text-text-dim focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/10 transition-all disabled:opacity-50';
+  'w-full px-3 py-2.5 rounded-lg border border-line bg-bg-3 text-[13px] text-text placeholder:text-text-dim focus:outline-none focus:border-gold-brand/50 focus:ring-2 focus:ring-gold-brand/10 transition-all disabled:opacity-50';
 
 const ANTI_CLAIMS_GUIDANCE =
   'Use plain English. Avoid medical claims, diagnoses, or longevity guarantees.';
@@ -205,10 +205,10 @@ export default function AdminPrescriptionsForm({
             key={def.pillarKey}
             className="bg-bg-3 rounded-2xl border border-line p-6 shadow-sm"
           >
-            <h2 className="text-base font-semibold text-text mb-1">
+            <h2 className="text-[20px] font-semibold text-text mb-1">
               {def.label}
             </h2>
-            <p className="text-xs text-text-dim mb-4">{def.shortSummary}</p>
+            <p className="text-[11px] text-text-dim mb-4">{def.shortSummary}</p>
 
             {!exists ? (
               <p className="text-[12px] text-text-dim italic mb-4">{EMPTY_HINT}</p>
@@ -218,7 +218,7 @@ export default function AdminPrescriptionsForm({
               <div>
                 <label
                   htmlFor={`summary-${def.pillarKey}`}
-                  className="block text-xs font-semibold text-text mb-1.5"
+                  className="block text-[11px] font-semibold text-text mb-1.5"
                 >
                   Summary (required)
                 </label>
@@ -240,7 +240,7 @@ export default function AdminPrescriptionsForm({
               <div>
                 <label
                   htmlFor={`bullets-${def.pillarKey}`}
-                  className="block text-xs font-semibold text-text mb-1.5"
+                  className="block text-[11px] font-semibold text-text mb-1.5"
                 >
                   Action items (optional, one per line)
                 </label>
@@ -259,7 +259,7 @@ export default function AdminPrescriptionsForm({
               <div>
                 <label
                   htmlFor={`href-${def.pillarKey}`}
-                  className="block text-xs font-semibold text-text mb-1.5"
+                  className="block text-[11px] font-semibold text-text mb-1.5"
                 >
                   Full-plan link (optional URL)
                 </label>
@@ -286,7 +286,7 @@ export default function AdminPrescriptionsForm({
                       })
                     }
                     disabled={isSaving}
-                    className="px-4 py-2 rounded-lg border border-red-300 text-red-600 text-sm font-semibold hover:bg-red-50 disabled:opacity-50 transition-colors"
+                    className="px-4 py-2 rounded-lg border border-red-300 text-red-600 text-[13px] font-semibold hover:bg-red-50 disabled:opacity-50 transition-colors"
                   >
                     Clear this plan
                   </button>
@@ -297,7 +297,7 @@ export default function AdminPrescriptionsForm({
                   type="button"
                   onClick={() => handleSave(def.pillarKey)}
                   disabled={isSaving || draft.summary.trim().length === 0}
-                  className="px-4 py-2 rounded-lg bg-gold-brand-brand text-white text-sm font-semibold hover:bg-gold-brand-brand/90 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 rounded-lg bg-gold-brand text-white text-[13px] font-semibold hover:bg-gold-brand/90 disabled:opacity-50 transition-colors"
                 >
                   {isSaving ? 'Saving…' : 'Save plan'}
                 </button>
@@ -317,10 +317,10 @@ export default function AdminPrescriptionsForm({
       >
         {pendingDelete ? (
           <div className="flex flex-col gap-4">
-            <h3 className="text-base font-semibold text-text">
+            <h3 className="text-[20px] font-semibold text-text">
               Clear plan
             </h3>
-            <p className="text-sm text-foreground">
+            <p className="text-[13px] text-text">
               Clear the {pendingDelete.pillarLabel} plan for {clientName}? They&apos;ll
               see the &quot;check back soon&quot; placeholder until you write a new one.
             </p>
@@ -329,7 +329,7 @@ export default function AdminPrescriptionsForm({
                 type="button"
                 onClick={() => setPendingDelete(null)}
                 disabled={deleting}
-                className="px-4 py-2 rounded-lg border border-line text-text text-sm font-semibold hover:bg-bg-2 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 rounded-lg border border-line text-text text-[13px] font-semibold hover:bg-bg-2 disabled:opacity-50 transition-colors"
               >
                 Keep current plan
               </button>
@@ -338,7 +338,7 @@ export default function AdminPrescriptionsForm({
                 onClick={handleConfirmDelete}
                 disabled={deleting}
                 data-autofocus
-                className="px-4 py-2 rounded-lg bg-red-600 text-white text-sm font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors"
+                className="px-4 py-2 rounded-lg bg-red-600 text-white text-[13px] font-semibold hover:bg-red-700 disabled:opacity-50 transition-colors"
               >
                 {deleting ? 'Clearing…' : 'Yes, clear'}
               </button>
