@@ -100,25 +100,34 @@ export default async function ReportPage({
 
   return (
     <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
+      {/* Outer chrome — sits on the dark portal frame.
+          Phase 9 D-09 frame edge: dark-token header + gold-brand download CTA.
+          Phase 8 sovereign content (ReportShell + everything under src/components/report/*)
+          is wrapped in an inner light card below — its navy + bright gold palette
+          stays untouched on the cream card surface. */}
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-lg font-semibold text-navy">
+        <h1 className="text-[20px] font-medium text-text tracking-[-0.015em]">
           Assessment · {dateLabel}
         </h1>
         <a
           href={`/api/assessments/${id}/pdf`}
           download
-          className="px-4 py-2 bg-gold text-navy font-semibold rounded-lg hover:bg-gold/90 text-sm"
+          aria-label="Download report PDF"
+          className="px-4 py-2 bg-gold-brand text-bg hover:bg-champagne rounded-lg text-[13px] font-medium tracking-[0.02em] transition-colors"
         >
           Download PDF
         </a>
       </div>
-      <ReportShell
-        assessmentId={id}
-        definitions={definitions}
-        pageCopy={pageCopy}
-        prescriptions={prescriptions}
-        markers={reportData.markers}
-      />
+      {/* Inner light wrapper preserves Phase 8 contract — D-09 frame edge only. */}
+      <div className="bg-white rounded-2xl p-6 sm:p-8 my-6 shadow-sm">
+        <ReportShell
+          assessmentId={id}
+          definitions={definitions}
+          pageCopy={pageCopy}
+          prescriptions={prescriptions}
+          markers={reportData.markers}
+        />
+      </div>
     </main>
   );
 }
