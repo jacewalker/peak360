@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 import { SECTION_TITLES, VISIBLE_SECTIONS, type SectionNumber } from '@/types/assessment';
 
 interface ProgressBarProps {
@@ -15,19 +16,19 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
   const progress = (completedCount / (VISIBLE_SECTIONS.length - 1)) * 100; // Section 11 is a report
 
   return (
-    <div className="bg-white border-b border-border px-4 sm:px-6 py-3 shadow-sm">
+    <div className="bg-bg-2 border-b border-line px-4 sm:px-6 py-3">
       <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-semibold text-navy">
+          <MonoEyebrow variant="hero">
             Section {VISIBLE_SECTIONS.indexOf(currentSection) + 1} of {VISIBLE_SECTIONS.length}
-          </span>
-          <span className="text-sm font-medium text-muted hidden sm:block">
+          </MonoEyebrow>
+          <span className="text-[13px] font-medium text-text-dim hidden sm:block">
             {SECTION_TITLES[currentSection as SectionNumber]}
           </span>
         </div>
-        <div className="w-full bg-surface-alt rounded-full h-1.5 overflow-hidden">
+        <div className="w-full bg-line h-1 overflow-hidden">
           <div
-            className="bg-gradient-to-r from-gold-dark to-gold h-full rounded-full transition-all duration-500 ease-out"
+            className="bg-gold-brand h-full transition-all duration-500 ease-out"
             style={{ width: `${progress}%` }}
           />
         </div>
@@ -45,10 +46,10 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
                   group relative w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shrink-0
                   text-[10px] sm:text-xs font-semibold transition-all duration-300 hover:scale-110
                   ${isCurrent
-                    ? 'bg-gold text-navy shadow-[0_0_0_3px_rgba(245,166,35,0.2)] scale-110'
+                    ? 'bg-gold-brand text-bg scale-110'
                     : isCompleted
-                      ? 'bg-navy text-white shadow-sm'
-                      : 'bg-transparent text-muted border-2 border-gray-300 hover:border-navy/40'
+                      ? 'bg-bg-3 text-text border border-line-2'
+                      : 'bg-transparent text-text-dim border border-line hover:border-gold-brand'
                   }
                 `}
               >
@@ -63,7 +64,7 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
             );
           })}
         </div>
-        <p className="text-xs text-muted mt-1.5 sm:hidden text-center">
+        <p className="text-[13px] text-text-dim mt-1.5 sm:hidden text-center">
           {SECTION_TITLES[currentSection as SectionNumber]}
         </p>
       </div>
