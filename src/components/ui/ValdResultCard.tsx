@@ -1,5 +1,7 @@
 'use client';
 
+import Image from 'next/image';
+
 interface ValdResultCardProps {
   title: string;
   category: 'Strength' | 'Balance' | 'Jump';
@@ -36,11 +38,11 @@ function AsymmetryGraph({ left, right }: { left: number; right: number }) {
   return (
     <svg viewBox="0 0 120 56" className="w-[120px] h-[56px]" aria-hidden>
       {/* Upper dashed line */}
-      <line x1="8" y1="10" x2="112" y2="10" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4 3" />
+      <line x1="8" y1="10" x2="112" y2="10" stroke="var(--color-line-2)" strokeWidth="1.5" strokeDasharray="4 3" />
       {/* Lower dashed line */}
-      <line x1="8" y1="38" x2="112" y2="38" stroke="#cbd5e1" strokeWidth="1.5" strokeDasharray="4 3" />
+      <line x1="8" y1="38" x2="112" y2="38" stroke="var(--color-line-2)" strokeWidth="1.5" strokeDasharray="4 3" />
       {/* Baseline */}
-      <line x1="8" y1="50" x2="112" y2="50" stroke="#94a3b8" strokeWidth="2" />
+      <line x1="8" y1="50" x2="112" y2="50" stroke="var(--color-text-faint)" strokeWidth="2" />
       {/* Left dot (blue) */}
       <circle cx={52} cy={leftY} r="5" fill="#3b82f6" />
       {/* Right dot (orange) */}
@@ -129,7 +131,7 @@ export default function ValdResultCard({
         </div>
         {isForceDecks && (
           <div className="flex items-center gap-1.5 border border-line-2 rounded-full px-3 py-1 shrink-0 bg-bg-2">
-            <img src="/images/forcedecks.png" alt="" width={20} height={14} className="object-contain" />
+            <Image src="/images/forcedecks.png" alt="" width={20} height={14} className="object-contain" />
             <span className="font-mono text-[11px] font-medium text-text uppercase tracking-[0.16em]">ForceDecks</span>
           </div>
         )}
