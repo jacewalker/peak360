@@ -117,9 +117,9 @@ export default function Sidebar() {
         </div>
         <Link href="/portal" className="flex items-center gap-3 group">
           <Image
-            src="/logo.png"
+            src="/landing/peak360-logo.png"
             alt="Peak360 Logo"
-            width={40}
+            width={94}
             height={28}
             className="group-hover:scale-105 transition-transform"
           />
