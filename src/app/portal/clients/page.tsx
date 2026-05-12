@@ -35,8 +35,12 @@ export default function ClientsPage() {
         const existing = byClient.get(name);
         if (existing) {
           existing.assessmentCount++;
-          if (a.assessmentDate > existing.lastAssessment || a.createdAt > existing.lastAssessment) {
-            existing.lastAssessment = a.assessmentDate || a.createdAt.split('T')[0];
+          // Normalise both sides to YYYY-MM-DD before comparison so a full ISO
+          // timestamp on createdAt cannot lexicographically beat a same-day
+          // date-only stored value.
+          const candidate = a.assessmentDate || a.createdAt.split('T')[0];
+          if (candidate > existing.lastAssessment) {
+            existing.lastAssessment = candidate;
           }
           if (!existing.email && a.clientEmail) existing.email = a.clientEmail;
           if (!existing.gender && a.clientGender) existing.gender = a.clientGender;
@@ -234,7 +238,7 @@ export default function ClientsPage() {
                         />
                       </div>
                       <div className="w-10 h-10 rounded-full bg-bg-2 flex items-center justify-center text-text font-medium text-[13px] shrink-0">
-                        {c.name[0].toUpperCase()}
+                        {(c.name || 'U')[0].toUpperCase()}
                       </div>
                       <div className="min-w-0 flex-1">
                         <h3 className="text-[20px] font-medium text-text tracking-[-0.015em] truncate">{c.name}</h3>
