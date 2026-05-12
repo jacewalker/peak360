@@ -65,8 +65,17 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
 
   const startDraw = (e: React.MouseEvent | React.TouchEvent) => {
     e.preventDefault();
-    const ctx = canvasRef.current?.getContext('2d');
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    // On first stroke, paint an opaque dark background so the exported
+    // PNG carries its own contrast layer — cream strokes remain visible
+    // when the dataURL is rendered on light surfaces (e.g., PDF/print).
+    if (!hasDrawn) {
+      ctx.fillStyle = '#131316'; // --color-bg-3
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
     const pos = getPos(e);
     ctx.beginPath();
     ctx.moveTo(pos.x, pos.y);
@@ -108,6 +117,10 @@ export default function SignaturePad({ label, value, onChange, nameValue }: Sign
     const ctx = canvasRef.current.getContext('2d');
     if (!ctx) return;
     ctx.clearRect(0, 0, canvasRef.current.width, canvasRef.current.height);
+    // Paint opaque dark background so exported PNG carries its own contrast
+    // (cream stroke + dark fill survives rendering on light surfaces).
+    ctx.fillStyle = '#131316'; // --color-bg-3
+    ctx.fillRect(0, 0, canvasRef.current.width, canvasRef.current.height);
     const scale = canvasRef.current.width / canvasRef.current.getBoundingClientRect().width;
     ctx.font = `italic ${28 * scale}px Georgia, serif`;
     // Cream literal (matches --color-text) — Canvas 2D API requires a literal hex
