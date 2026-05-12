@@ -8,6 +8,7 @@ import {
   getPillarPageCopy,
 } from '@/lib/pillars/queries';
 import AdminPillarsForm from './AdminPillarsForm';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 /**
  * Phase 8 — Admin SSR-gated authoring shell for pillar definitions and page copy.
@@ -27,54 +28,34 @@ export default async function AdminPillarsPage() {
   ]);
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero header — mirrors the /portal/admin/users shell */}
-      <div
-        className="relative overflow-hidden"
-        style={{
-          backgroundColor: '#0f2440',
-          backgroundImage: `radial-gradient(circle, rgba(245,166,35,0.07) 1px, transparent 1px)`,
-          backgroundSize: '28px 28px',
-        }}
-      >
-        <div className="relative px-8 py-14 max-w-6xl">
-          <div className="flex items-center gap-1.5 mb-5">
-            <Link
-              href="/portal/admin"
-              className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 hover:text-gold/70 transition-colors"
-            >
-              Administration
-            </Link>
-            <svg
-              className="w-3 h-3 text-white/20"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M8.25 4.5l7.5 7.5-7.5 7.5"
-              />
+    <div className="min-h-screen">
+      {/* Hero */}
+      <header className="pt-24 pb-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <Link
+            href="/portal/admin"
+            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-text-faint hover:text-gold-brand mb-4 transition-colors"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold/70">
-              Pillar definitions
-            </span>
-          </div>
-          <h1 className="text-[2.75rem] font-semibold text-white tracking-tight leading-none mb-3">
+            ADMIN
+          </Link>
+          <MonoEyebrow variant="hero" as="div" className="mb-3">
+            ADMIN · PILLARS
+          </MonoEyebrow>
+          <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">
             Pillar definitions
           </h1>
-          <p className="text-white/40 text-sm max-w-2xl leading-relaxed">
+          <p className="mt-3 text-[13px] text-text-dim leading-[1.55] max-w-2xl">
             Edit the global pillar names, summaries, and explanations shown to every client.
           </p>
         </div>
-        <div className="h-px w-full bg-gradient-to-r from-gold/60 via-gold/20 to-transparent" />
-      </div>
+      </header>
 
-      <div className="px-8 py-10 max-w-3xl">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 pb-12">
         <AdminPillarsForm definitions={definitions} pageCopy={pageCopy} />
-      </div>
+      </main>
     </div>
   );
 }

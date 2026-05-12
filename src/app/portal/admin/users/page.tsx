@@ -7,6 +7,7 @@ import { authClient } from '@/lib/auth-client';
 import RolePill from '@/components/ui/RolePill';
 import StatusPill from '@/components/ui/StatusPill';
 import Toast, { type ToastVariant } from '@/components/ui/Toast';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 type Role = 'admin' | 'coach' | 'client';
 
@@ -229,68 +230,46 @@ export default function AdminPeoplePage() {
   if (isPending || userRole !== 'admin') return null;
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Header — frontend-design vibe: gold mono eyebrow + navy heading.
-          UI-SPEC 2-weight contract: font-semibold only. */}
-      <div
-        className="relative overflow-hidden"
-        style={{
-          backgroundColor: '#0f2440',
-          backgroundImage: `radial-gradient(circle, rgba(245,166,35,0.07) 1px, transparent 1px)`,
-          backgroundSize: '28px 28px',
-        }}
-      >
-        <div className="relative px-8 py-14">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-1.5 mb-5">
-            <Link
-              href="/portal/admin"
-              className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30 hover:text-gold/70 transition-colors"
-            >
-              Administration
-            </Link>
-            <svg
-              className="w-3 h-3 text-white/20"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    <div className="min-h-screen">
+      {/* Hero */}
+      <header className="pt-24 pb-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <Link
+            href="/portal/admin"
+            className="inline-flex items-center gap-1.5 font-mono text-[11px] uppercase tracking-[0.18em] text-text-faint hover:text-gold-brand mb-4 transition-colors"
+          >
+            <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
             </svg>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold/70">
-              People
-            </span>
-          </div>
-
-          <h1 className="text-[2.75rem] font-semibold text-white tracking-tight leading-none mb-3">
+            ADMIN
+          </Link>
+          <MonoEyebrow variant="hero" as="div" className="mb-3">
+            ADMIN · USERS
+          </MonoEyebrow>
+          <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">
             People
           </h1>
-          <p className="text-white/40 text-sm max-w-md leading-relaxed">
-            Manage everyone with portal access — admins, coaches, clients, and
-            pending invitations.
+          <p className="mt-3 text-[13px] text-text-dim leading-[1.55] max-w-2xl">
+            Manage everyone with portal access — admins, coaches, clients, and pending invitations.
           </p>
         </div>
-
-        {/* Gold accent line */}
-        <div className="h-px w-full bg-gradient-to-r from-gold/60 via-gold/20 to-transparent" />
-      </div>
+      </header>
 
       {/* Body */}
-      <div className="px-8 py-10 max-w-6xl space-y-10">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 pb-12 space-y-10">
         {/* Invite form (anchor target #invite). */}
         <section
           id="invite"
-          className="bg-surface rounded-2xl border border-border p-6 scroll-mt-24"
+          className="bg-bg-3 rounded-2xl border border-line p-6 scroll-mt-24"
         >
           <div className="mb-4">
-            <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">
+            <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-gold-brand">
               Onboarding
             </p>
-            <h2 className="text-xl font-semibold text-navy mt-1">
+            <h2 className="text-[20px] font-medium text-text mt-1 tracking-[-0.015em]">
               Send an invitation
             </h2>
-            <p className="text-sm text-muted mt-1">
+            <p className="text-[13px] text-text-dim mt-1">
               Recipients receive a magic-link sign-in. Admin can invite any role.
             </p>
           </div>
@@ -301,20 +280,20 @@ export default function AdminPeoplePage() {
               onChange={(e) => setInviteEmail(e.target.value)}
               placeholder="Email address"
               required
-              className="px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/25"
+              className="h-12 px-4 border border-line rounded-md text-[13px] bg-bg-3 text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors"
             />
             <input
               type="text"
               value={inviteName}
               onChange={(e) => setInviteName(e.target.value)}
               placeholder="Full name (optional)"
-              className="px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:border-gold/50 focus:ring-1 focus:ring-gold/25"
+              className="h-12 px-4 border border-line rounded-md text-[13px] bg-bg-3 text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors"
             />
-            <label className="text-xs text-muted">Role</label>
+            <label className="text-[11px] text-text-dim">Role</label>
             <select
               value={inviteRole}
               onChange={(e) => setInviteRole(e.target.value as InviteRole)}
-              className="px-3 py-2 border border-border rounded-md text-sm focus:outline-none focus:border-gold/50"
+              className="h-12 px-4 border border-line rounded-md text-[13px] bg-bg-3 text-text focus:outline-none focus:border-gold-brand transition-colors"
             >
               <option value="client">Client</option>
               <option value="coach">Coach</option>
@@ -323,7 +302,7 @@ export default function AdminPeoplePage() {
             <button
               type="submit"
               disabled={inviteLoading || !inviteEmail.trim()}
-              className="bg-gold text-navy px-4 py-2 rounded-md font-semibold hover:bg-gold/90 text-sm disabled:opacity-40 w-fit"
+              className="bg-gold-brand text-bg hover:bg-champagne px-4 py-2 rounded-md text-[13px] font-medium tracking-[0.02em] disabled:opacity-40 w-fit transition-colors"
             >
               {inviteLoading ? 'Sending…' : 'Send invitation'}
             </button>
@@ -331,8 +310,8 @@ export default function AdminPeoplePage() {
               <p
                 className={`text-sm ${
                   inviteMessage.type === 'success'
-                    ? 'text-green-700'
-                    : 'text-red-700'
+                    ? 'text-status-good'
+                    : 'text-danger'
                 }`}
               >
                 {inviteMessage.text}
@@ -373,7 +352,7 @@ export default function AdminPeoplePage() {
                 title={`${coach.name}'s clients`}
                 count={clients.length}
                 subtitle={
-                  <span className="text-xs text-muted flex items-center gap-2">
+                  <span className="text-[11px] text-text-dim flex items-center gap-2 whitespace-nowrap">
                     <RolePill role="coach" />
                     {coach.email}
                   </span>
@@ -437,7 +416,7 @@ export default function AdminPeoplePage() {
           count={groups.pendingInvites.length}
         >
           {listLoading ? (
-            <p className="text-sm text-muted px-4 py-3">Loading…</p>
+            <p className="text-[13px] text-text-dim px-4 py-3">Loading…</p>
           ) : groups.pendingInvites.length === 0 ? (
             <EmptyRow text="No pending invitations." />
           ) : (
@@ -476,15 +455,15 @@ function GroupSection({
     <section className="space-y-3">
       <div className="flex items-baseline justify-between gap-4">
         <div>
-          <p className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">
+          <p className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-gold-brand">
             {eyebrow}
           </p>
           {title ? (
-            <h2 className="text-xl font-semibold text-navy mt-1">{title}</h2>
+            <h2 className="text-[20px] font-medium text-text mt-1 tracking-[-0.015em]">{title}</h2>
           ) : null}
           {subtitle ? <div className="mt-1">{subtitle}</div> : null}
         </div>
-        <span className="text-xs text-muted whitespace-nowrap">
+        <span className="text-[11px] text-text-dim whitespace-nowrap">
           {count} {count === 1 ? 'person' : 'people'}
         </span>
       </div>
@@ -495,7 +474,7 @@ function GroupSection({
 
 function EmptyRow({ text }: { text: string }) {
   return (
-    <div className="bg-surface rounded-2xl border border-border px-4 py-6 text-sm text-muted text-center">
+    <div className="bg-bg-3 rounded-2xl border border-line px-4 py-6 text-[13px] text-text-dim text-center">
       {text}
     </div>
   );
@@ -503,13 +482,13 @@ function EmptyRow({ text }: { text: string }) {
 
 function SkeletonTable({ rows }: { rows: number }) {
   return (
-    <div className="bg-surface rounded-2xl border border-border overflow-hidden">
-      <div className="divide-y divide-border">
+    <div className="bg-bg-3 rounded-2xl border border-line overflow-hidden">
+      <div className="divide-y divide-line">
         {Array.from({ length: rows }).map((_, i) => (
           <div key={i} className="px-4 py-3 flex items-center gap-3">
-            <div className="h-4 w-32 rounded bg-border/60 animate-pulse" />
-            <div className="h-4 w-48 rounded bg-border/60 animate-pulse" />
-            <div className="h-4 w-16 rounded bg-border/60 animate-pulse ml-auto" />
+            <div className="h-4 w-32 rounded bg-line animate-pulse" />
+            <div className="h-4 w-48 rounded bg-line animate-pulse" />
+            <div className="h-4 w-16 rounded bg-line animate-pulse ml-auto" />
           </div>
         ))}
       </div>
@@ -533,29 +512,29 @@ function UserTable({
   return (
     <>
       {/* Desktop table */}
-      <div className="hidden md:block bg-surface rounded-2xl border border-border overflow-hidden">
+      <div className="hidden md:block bg-bg-3 rounded-2xl border border-line overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-surface-alt border-b border-border">
+          <thead className="bg-bg-2 border-b border-line">
             <tr>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Name
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Email
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Role
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Status
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Joined
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Last active
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Assessments
               </th>
             </tr>
@@ -570,14 +549,14 @@ function UserTable({
               const isOpen = openUserId === u.id;
               return (
                 <Fragment key={u.id}>
-                  <tr className="border-b border-border last:border-0 hover:bg-surface-alt transition-colors">
+                  <tr className="border-b border-line last:border-0 hover:bg-bg-2 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1">
-                        <span className="text-navy font-medium">{u.name}</span>
+                        <span className="text-text font-medium">{u.name}</span>
                         <RolePill role={u.role} />
                       </div>
                     </td>
-                    <td className="px-4 py-3 text-muted">{u.email}</td>
+                    <td className="px-4 py-3 text-text-dim">{u.email}</td>
                     <td className="px-4 py-3">
                       <select
                         value={u.role}
@@ -586,7 +565,7 @@ function UserTable({
                         onChange={(e) =>
                           onRoleChange(u.id, u.name, e.target.value as Role)
                         }
-                        className="text-sm border border-border rounded-md px-2 py-1 bg-white text-navy disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="text-[13px] border border-line rounded-md px-2 py-1 bg-bg-3 text-text disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-gold-brand transition-colors"
                       >
                         <option value="admin">admin</option>
                         <option value="coach">coach</option>
@@ -596,16 +575,16 @@ function UserTable({
                     <td className="px-4 py-3">
                       {u.banned === true ? <StatusPill status="banned" /> : null}
                     </td>
-                    <td className="px-4 py-3 text-muted text-xs">
+                    <td className="px-4 py-3 text-text-dim text-xs">
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     <td className="px-4 py-3">
                       {u.lastActive ? (
-                        <span className="text-muted text-xs">
+                        <span className="text-text-dim text-[11px]">
                           {new Date(u.lastActive).toLocaleDateString()}
                         </span>
                       ) : (
-                        <span className="text-xs text-muted italic">
+                        <span className="text-[11px] text-text-dim italic">
                           Never signed in
                         </span>
                       )}
@@ -614,7 +593,7 @@ function UserTable({
                       <button
                         type="button"
                         onClick={() => onToggleOpen(u.id)}
-                        className="text-xs text-navy hover:text-gold transition-colors underline-offset-2 hover:underline"
+                        className="text-[11px] text-text hover:text-gold-brand transition-colors underline-offset-2 hover:underline"
                       >
                         View {totalAssessments} assessment
                         {totalAssessments === 1 ? '' : 's'}
@@ -622,18 +601,18 @@ function UserTable({
                     </td>
                   </tr>
                   {isOpen ? (
-                    <tr className="bg-surface-alt/40 border-b border-border last:border-0">
-                      <td colSpan={7} className="px-4 py-3 text-xs text-muted">
+                    <tr className="bg-bg-2/50 border-b border-line last:border-0">
+                      <td colSpan={7} className="px-4 py-3 text-[11px] text-text-dim">
                         <div className="flex flex-col gap-1">
                           <span>
                             As coach:{' '}
-                            <span className="text-navy font-medium">
+                            <span className="text-text font-medium">
                               {u.coachCount}
                             </span>
                           </span>
                           <span>
                             As client:{' '}
-                            <span className="text-navy font-medium">
+                            <span className="text-text font-medium">
                               {u.clientCount}
                             </span>
                           </span>
@@ -657,18 +636,18 @@ function UserTable({
             ? "You can't change the role of the only admin. Promote another user to admin first."
             : undefined;
           return (
-            <div key={u.id} className="bg-surface rounded-xl border border-border p-4">
+            <div key={u.id} className="bg-bg-3 rounded-xl border border-line p-4">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex flex-col">
-                  <span className="text-navy font-medium text-sm">{u.name}</span>
-                  <span className="text-muted text-xs flex items-center gap-2">
+                  <span className="text-text font-medium text-[13px]">{u.name}</span>
+                  <span className="text-text-dim text-[11px] flex items-center gap-2">
                     {u.email}
                     {u.banned === true ? <StatusPill status="banned" /> : null}
                   </span>
                 </div>
                 <RolePill role={u.role} />
               </div>
-              <div className="flex flex-col gap-2 text-xs text-muted">
+              <div className="flex flex-col gap-2 text-[11px] text-text-dim">
                 <div className="flex items-center justify-between">
                   <span>Role</span>
                   <select
@@ -678,7 +657,7 @@ function UserTable({
                     onChange={(e) =>
                       onRoleChange(u.id, u.name, e.target.value as Role)
                     }
-                    className="text-xs border border-border rounded-md px-2 py-1 bg-white text-navy disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="text-[11px] border border-line rounded-md px-2 py-1 bg-bg-3 text-text disabled:opacity-50 disabled:cursor-not-allowed focus:outline-none focus:border-gold-brand transition-colors"
                   >
                     <option value="admin">admin</option>
                     <option value="coach">coach</option>
@@ -717,23 +696,23 @@ function InviteTable({ invites }: { invites: Invitation[] }) {
   return (
     <>
       {/* Desktop */}
-      <div className="hidden md:block bg-surface rounded-2xl border border-border overflow-hidden">
+      <div className="hidden md:block bg-bg-3 rounded-2xl border border-line overflow-hidden">
         <table className="w-full text-sm">
-          <thead className="bg-surface-alt border-b border-border">
+          <thead className="bg-bg-2 border-b border-line">
             <tr>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Email
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Name
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Role
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Sent
               </th>
-              <th className="text-left text-[11px] font-semibold uppercase tracking-wide text-muted px-4 py-3">
+              <th className="text-left font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint px-4 py-3">
                 Status
               </th>
             </tr>
@@ -742,12 +721,12 @@ function InviteTable({ invites }: { invites: Invitation[] }) {
             {invites.map((inv) => (
               <tr
                 key={inv.id}
-                className="border-b border-border last:border-0 hover:bg-surface-alt transition-colors"
+                className="border-b border-line last:border-0 hover:bg-bg-2 transition-colors"
               >
-                <td className="px-4 py-3 text-navy">{inv.email}</td>
-                <td className="px-4 py-3 text-muted">{inv.name}</td>
-                <td className="px-4 py-3 text-muted">{inv.role}</td>
-                <td className="px-4 py-3 text-muted text-xs">
+                <td className="px-4 py-3 text-text">{inv.email}</td>
+                <td className="px-4 py-3 text-text-dim">{inv.name}</td>
+                <td className="px-4 py-3 text-text-dim">{inv.role}</td>
+                <td className="px-4 py-3 text-text-dim text-xs">
                   {new Date(inv.createdAt).toLocaleDateString()}
                 </td>
                 <td className="px-4 py-3">
@@ -764,13 +743,13 @@ function InviteTable({ invites }: { invites: Invitation[] }) {
         {invites.map((inv) => (
           <li
             key={inv.id}
-            className="bg-surface rounded-xl border border-border p-3 text-sm flex flex-col gap-1"
+            className="bg-bg-3 rounded-xl border border-line p-3 text-sm flex flex-col gap-1"
           >
             <div className="flex items-center justify-between gap-2">
-              <span className="font-medium text-navy break-all">{inv.email}</span>
+              <span className="font-medium text-text break-all">{inv.email}</span>
               <StatusPill status="pending" />
             </div>
-            <div className="text-xs text-muted">
+            <div className="text-[11px] text-text-dim">
               {inv.name} · {inv.role} ·{' '}
               {new Date(inv.createdAt).toLocaleDateString()}
             </div>

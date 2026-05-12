@@ -12,7 +12,7 @@ import type {
 type ToastState = { variant: ToastVariant; message: string } | null;
 
 const INPUT_CLASS =
-  'w-full px-3 py-2.5 rounded-lg border border-border bg-white text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/10 transition-all disabled:opacity-50';
+  'w-full px-3 py-2.5 rounded-lg border border-line bg-bg-3 text-sm text-foreground placeholder:text-text-dim focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/10 transition-all disabled:opacity-50';
 
 const ANTI_CLAIMS_GUIDANCE =
   'Use plain English. Avoid medical claims, diagnoses, or longevity guarantees.';
@@ -203,26 +203,26 @@ export default function AdminPrescriptionsForm({
         return (
           <section
             key={def.pillarKey}
-            className="bg-surface rounded-2xl border border-border p-6 shadow-sm"
+            className="bg-bg-3 rounded-2xl border border-line p-6 shadow-sm"
           >
-            <h2 className="text-base font-semibold text-navy mb-1">
+            <h2 className="text-base font-semibold text-text mb-1">
               {def.label}
             </h2>
-            <p className="text-xs text-muted mb-4">{def.shortSummary}</p>
+            <p className="text-xs text-text-dim mb-4">{def.shortSummary}</p>
 
             {!exists ? (
-              <p className="text-[12px] text-muted italic mb-4">{EMPTY_HINT}</p>
+              <p className="text-[12px] text-text-dim italic mb-4">{EMPTY_HINT}</p>
             ) : null}
 
             <div className="flex flex-col gap-4">
               <div>
                 <label
                   htmlFor={`summary-${def.pillarKey}`}
-                  className="block text-xs font-semibold text-navy mb-1.5"
+                  className="block text-xs font-semibold text-text mb-1.5"
                 >
                   Summary (required)
                 </label>
-                <p className="text-[11px] text-muted mb-1.5">
+                <p className="text-[11px] text-text-dim mb-1.5">
                   {ANTI_CLAIMS_GUIDANCE}
                 </p>
                 <textarea
@@ -240,7 +240,7 @@ export default function AdminPrescriptionsForm({
               <div>
                 <label
                   htmlFor={`bullets-${def.pillarKey}`}
-                  className="block text-xs font-semibold text-navy mb-1.5"
+                  className="block text-xs font-semibold text-text mb-1.5"
                 >
                   Action items (optional, one per line)
                 </label>
@@ -259,7 +259,7 @@ export default function AdminPrescriptionsForm({
               <div>
                 <label
                   htmlFor={`href-${def.pillarKey}`}
-                  className="block text-xs font-semibold text-navy mb-1.5"
+                  className="block text-xs font-semibold text-text mb-1.5"
                 >
                   Full-plan link (optional URL)
                 </label>
@@ -297,7 +297,7 @@ export default function AdminPrescriptionsForm({
                   type="button"
                   onClick={() => handleSave(def.pillarKey)}
                   disabled={isSaving || draft.summary.trim().length === 0}
-                  className="px-4 py-2 rounded-lg bg-navy text-white text-sm font-semibold hover:bg-navy/90 disabled:opacity-50 transition-colors"
+                  className="px-4 py-2 rounded-lg bg-gold-brand-brand text-white text-sm font-semibold hover:bg-gold-brand-brand/90 disabled:opacity-50 transition-colors"
                 >
                   {isSaving ? 'Saving…' : 'Save plan'}
                 </button>
@@ -317,7 +317,7 @@ export default function AdminPrescriptionsForm({
       >
         {pendingDelete ? (
           <div className="flex flex-col gap-4">
-            <h3 className="text-base font-semibold text-navy">
+            <h3 className="text-base font-semibold text-text">
               Clear plan
             </h3>
             <p className="text-sm text-foreground">
@@ -329,7 +329,7 @@ export default function AdminPrescriptionsForm({
                 type="button"
                 onClick={() => setPendingDelete(null)}
                 disabled={deleting}
-                className="px-4 py-2 rounded-lg border border-border text-navy text-sm font-semibold hover:bg-surface-alt disabled:opacity-50 transition-colors"
+                className="px-4 py-2 rounded-lg border border-line text-text text-sm font-semibold hover:bg-bg-2 disabled:opacity-50 transition-colors"
               >
                 Keep current plan
               </button>

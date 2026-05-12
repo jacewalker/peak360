@@ -11,7 +11,10 @@ import type {
 type ToastState = { variant: ToastVariant; message: string } | null;
 
 const INPUT_CLASS =
-  'w-full px-3 py-2.5 rounded-lg border border-border bg-white text-sm text-foreground placeholder:text-muted focus:outline-none focus:border-gold/50 focus:ring-2 focus:ring-gold/10 transition-all disabled:opacity-50';
+  'w-full h-12 px-4 rounded-lg border border-line bg-bg-3 text-[13px] text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors disabled:opacity-50';
+
+const TEXTAREA_CLASS =
+  'w-full px-4 py-3 rounded-lg border border-line bg-bg-3 text-[13px] text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors disabled:opacity-50 resize-vertical';
 
 const ANTI_CLAIMS_GUIDANCE =
   'Use plain English. Avoid medical claims, diagnoses, or longevity guarantees.';
@@ -125,16 +128,16 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
   return (
     <div className="flex flex-col gap-8">
       {/* Page copy editor — top of page so it bookends the heading clients see */}
-      <section className="bg-surface rounded-2xl border border-border p-6 shadow-sm">
-        <h2 className="text-base font-semibold text-navy mb-1">Page heading + intro</h2>
-        <p className="text-xs text-muted mb-4">
+      <section className="bg-bg-3 rounded-2xl border border-line p-6">
+        <h2 className="text-[20px] font-medium text-text tracking-[-0.015em] mb-1">Page heading + intro</h2>
+        <p className="text-[13px] text-text-dim mb-4 leading-[1.55]">
           Hero copy shown above the five pillar cards on every client report.
         </p>
         <div className="flex flex-col gap-4">
           <div>
             <label
               htmlFor="page-heading"
-              className="block text-xs font-semibold text-navy mb-1.5"
+              className="block text-[13px] font-medium text-text mb-1.5"
             >
               Heading
             </label>
@@ -152,11 +155,11 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
           <div>
             <label
               htmlFor="page-intro"
-              className="block text-xs font-semibold text-navy mb-1.5"
+              className="block text-[13px] font-medium text-text mb-1.5"
             >
               Intro
             </label>
-            <p className="text-[11px] text-muted mb-1.5">{ANTI_CLAIMS_GUIDANCE}</p>
+            <p className="text-[11px] text-text-dim mb-1.5">{ANTI_CLAIMS_GUIDANCE}</p>
             <textarea
               id="page-intro"
               rows={3}
@@ -173,7 +176,7 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
               type="button"
               onClick={handleSavePageCopy}
               disabled={savingKey === 'pageCopy'}
-              className="px-4 py-2 rounded-lg bg-navy text-white text-sm font-semibold hover:bg-navy/90 disabled:opacity-50 transition-colors"
+              className="px-4 py-2 rounded-lg bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] disabled:opacity-50 transition-colors"
             >
               {savingKey === 'pageCopy' ? 'Saving…' : 'Save changes'}
             </button>
@@ -187,16 +190,16 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
         return (
           <section
             key={draft.pillarKey}
-            className="bg-surface rounded-2xl border border-border p-6 shadow-sm"
+            className="bg-bg-3 rounded-2xl border border-line p-6"
           >
-            <h2 className="text-base font-semibold text-navy mb-4">
+            <h2 className="text-[20px] font-medium text-text tracking-[-0.015em] mb-4">
               {draft.label || draft.pillarKey}
             </h2>
             <div className="flex flex-col gap-4">
               <div>
                 <label
                   htmlFor={`label-${draft.pillarKey}`}
-                  className="block text-xs font-semibold text-navy mb-1.5"
+                  className="block text-[13px] font-medium text-text mb-1.5"
                 >
                   Label
                 </label>
@@ -214,11 +217,11 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
               <div>
                 <label
                   htmlFor={`short-${draft.pillarKey}`}
-                  className="block text-xs font-semibold text-navy mb-1.5"
+                  className="block text-[13px] font-medium text-text mb-1.5"
                 >
                   Short summary
                 </label>
-                <p className="text-[11px] text-muted mb-1.5">{ANTI_CLAIMS_GUIDANCE}</p>
+                <p className="text-[11px] text-text-dim mb-1.5">{ANTI_CLAIMS_GUIDANCE}</p>
                 <textarea
                   id={`short-${draft.pillarKey}`}
                   rows={2}
@@ -233,11 +236,11 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
               <div>
                 <label
                   htmlFor={`plain-${draft.pillarKey}`}
-                  className="block text-xs font-semibold text-navy mb-1.5"
+                  className="block text-[13px] font-medium text-text mb-1.5"
                 >
                   Plain meaning
                 </label>
-                <p className="text-[11px] text-muted mb-1.5">{ANTI_CLAIMS_GUIDANCE}</p>
+                <p className="text-[11px] text-text-dim mb-1.5">{ANTI_CLAIMS_GUIDANCE}</p>
                 <textarea
                   id={`plain-${draft.pillarKey}`}
                   rows={4}
@@ -253,7 +256,7 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
                 <div>
                   <label
                     htmlFor={`sort-${draft.pillarKey}`}
-                    className="block text-xs font-semibold text-navy mb-1.5"
+                    className="block text-[13px] font-medium text-text mb-1.5"
                   >
                     Sort order
                   </label>
@@ -278,7 +281,7 @@ export default function AdminPillarsForm({ definitions, pageCopy }: Props) {
                     type="button"
                     onClick={() => handleSaveDefinition(draft)}
                     disabled={isSaving}
-                    className="px-4 py-2 rounded-lg bg-navy text-white text-sm font-semibold hover:bg-navy/90 disabled:opacity-50 transition-colors"
+                    className="px-4 py-2 rounded-lg bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] disabled:opacity-50 transition-colors"
                   >
                     {isSaving ? 'Saving…' : 'Save changes'}
                   </button>

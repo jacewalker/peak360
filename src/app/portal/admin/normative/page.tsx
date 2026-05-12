@@ -10,20 +10,20 @@ type FilterMode = 'all' | 'db_overrides' | 'hardcoded';
 function StatusPill({ hasNorms, isDbOverride }: { hasNorms: boolean; isDbOverride: boolean }) {
   if (isDbOverride) {
     return (
-      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-gold/12 text-gold-dark border border-gold/25 uppercase tracking-wide">
+      <span className="font-mono text-[11px] font-medium px-2 py-0.5 rounded-full bg-gold-brand/10 text-gold-brand border border-gold-brand/30 uppercase tracking-[0.16em]">
         DB
       </span>
     );
   }
   if (hasNorms) {
     return (
-      <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-surface-alt text-muted border border-border uppercase tracking-wide">
+      <span className="font-mono text-[11px] font-medium px-2 py-0.5 rounded-full bg-bg-2 text-text-dim border border-line uppercase tracking-[0.16em]">
         HC
       </span>
     );
   }
   return (
-    <span className="text-[10px] font-black px-2 py-0.5 rounded-full bg-red-50 text-red-400 border border-red-100 uppercase tracking-wide">
+    <span className="font-mono text-[11px] font-medium px-2 py-0.5 rounded-full bg-danger/10 text-danger border border-danger/30 uppercase tracking-[0.16em]">
       —
     </span>
   );
@@ -34,10 +34,10 @@ function LoadingSkeleton() {
     <div className="p-6 space-y-8">
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i}>
-          <div className="animate-pulse h-5 bg-border rounded w-40 mb-3" />
+          <div className="animate-pulse h-5 bg-line rounded w-40 mb-3" />
           <div className="space-y-1.5">
             {Array.from({ length: 5 }).map((_, j) => (
-              <div key={j} className="animate-pulse h-11 bg-border/50 rounded-xl" />
+              <div key={j} className="animate-pulse h-11 bg-line rounded-xl" />
             ))}
           </div>
         </div>
@@ -94,6 +94,7 @@ export default function NormativeBrowserPage() {
         title="Normative Ranges"
         breadcrumb="Normative Ranges"
         description="Manage rating thresholds for biomarkers and fitness tests. DB overrides take precedence over hardcoded defaults."
+        eyebrow="ADMIN · NORMATIVE"
       />
 
       {/* Split-panel content area — min-h-0 is critical: lets flex children shrink below content size so overflow-y-auto activates */}
@@ -101,17 +102,17 @@ export default function NormativeBrowserPage() {
 
         {/* ── LEFT: Marker list (scrolls independently) ── */}
         <div
-          className="overflow-y-auto min-h-0 bg-background flex-shrink-0"
+          className="overflow-y-auto min-h-0 bg-bg flex-shrink-0"
           style={{
             width: panelVisible ? '50%' : '100%',
             transition: 'width 300ms cubic-bezier(0.4, 0, 0.2, 1)',
           }}
         >
           {/* Sticky search + filter bar */}
-          <div className="sticky top-0 z-10 bg-background border-b border-border px-6 py-3 flex gap-3">
+          <div className="sticky top-0 z-10 bg-bg border-b border-line px-6 py-3 flex gap-3">
             <div className="relative flex-1">
               <svg
-                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted/40 pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-faint pointer-events-none"
                 fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
               >
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -121,13 +122,13 @@ export default function NormativeBrowserPage() {
                 placeholder="Search markers…"
                 value={searchQuery}
                 onChange={e => setSearchQuery(e.target.value)}
-                className="w-full pl-9 pr-3 py-2 border border-border rounded-xl text-sm bg-surface focus:border-gold outline-none"
+                className="w-full pl-9 pr-3 py-2 border border-line rounded-xl text-[13px] bg-bg-3 text-text placeholder:text-text-faint focus:border-gold-brand outline-none transition-colors"
               />
             </div>
             <select
               value={filterMode}
               onChange={e => setFilterMode(e.target.value as FilterMode)}
-              className="px-3 py-2 border border-border rounded-xl text-sm bg-surface text-navy font-medium"
+              className="px-3 py-2 border border-line rounded-xl text-[13px] bg-bg-3 text-text font-medium focus:outline-none focus:border-gold-brand transition-colors"
             >
               <option value="all">All</option>
               <option value="db_overrides">DB Overrides</option>
@@ -140,7 +141,7 @@ export default function NormativeBrowserPage() {
             {loading && <LoadingSkeleton />}
 
             {error && (
-              <div className="p-4 bg-red-50 text-red-600 rounded-xl text-sm border border-red-200">{error}</div>
+              <div className="p-4 bg-danger/10 text-danger rounded-xl text-[13px] border border-danger/30">{error}</div>
             )}
 
             {!loading && !error && REPORT_CATEGORIES.map(cat => {
@@ -152,11 +153,11 @@ export default function NormativeBrowserPage() {
                 <section key={cat} className="mb-7">
                   {/* Category header */}
                   <div className="flex items-center gap-3 mb-2.5">
-                    <h2 className="text-sm font-black text-navy uppercase tracking-wide">{cat}</h2>
-                    <div className="flex-1 h-px bg-border" />
-                    <span className="text-[10px] text-muted tabular-nums">{markers.length}</span>
+                    <h2 className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">{cat}</h2>
+                    <div className="flex-1 h-px bg-line" />
+                    <span className="font-mono text-[11px] text-text-dim tabular-nums">{markers.length}</span>
                     {dbCount > 0 && (
-                      <span className="text-[10px] font-bold text-gold">{dbCount} DB</span>
+                      <span className="font-mono text-[11px] font-medium text-gold-brand">{dbCount} DB</span>
                     )}
                   </div>
 
@@ -170,19 +171,19 @@ export default function NormativeBrowserPage() {
                           onClick={() => isSelected ? closePanel() : openPanel(m.testKey)}
                           className={`w-full flex items-center justify-between px-3.5 py-2.5 rounded-xl border text-left transition-all duration-150 group ${
                             isSelected
-                              ? 'border-gold/50 bg-gold/6 shadow-sm shadow-gold/10'
-                              : 'border-border bg-surface hover:border-gold/30 hover:bg-surface'
+                              ? 'border-gold-brand/50 bg-gold-brand/10 shadow-sm'
+                              : 'border-line bg-bg-3 hover:border-gold-brand/30 hover:bg-bg-2'
                           }`}
                         >
                           <div className="flex items-center gap-2.5 min-w-0">
                             {/* Selected indicator */}
                             <span
                               className={`flex-shrink-0 w-1 h-5 rounded-full transition-all duration-150 ${
-                                isSelected ? 'bg-gold' : 'bg-transparent group-hover:bg-border'
+                                isSelected ? 'bg-gold-brand' : 'bg-transparent group-hover:bg-line'
                               }`}
                             />
                             <span className={`text-sm font-semibold truncate transition-colors ${
-                              isSelected ? 'text-gold-dark' : 'text-navy group-hover:text-navy'
+                              isSelected ? 'text-gold-brand' : 'text-text group-hover:text-text'
                             }`}>
                               {m.label}
                             </span>
@@ -192,7 +193,7 @@ export default function NormativeBrowserPage() {
                             {/* Chevron */}
                             <svg
                               className={`w-4 h-4 transition-all duration-150 ${
-                                isSelected ? 'text-gold rotate-90' : 'text-muted/30 group-hover:text-muted/60'
+                                isSelected ? 'text-gold-brand rotate-90' : 'text-text-faint group-hover:text-text-dim'
                               }`}
                               fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor"
                             >
@@ -209,19 +210,19 @@ export default function NormativeBrowserPage() {
 
             {!loading && !error && filteredMarkers.length === 0 && (
               <div className="text-center py-14">
-                <div className="w-11 h-11 rounded-2xl bg-border/50 flex items-center justify-center mx-auto mb-3">
-                  <svg className="w-5 h-5 text-muted/40" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+                <div className="w-11 h-11 rounded-2xl bg-line flex items-center justify-center mx-auto mb-3">
+                  <svg className="w-5 h-5 text-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
                   </svg>
                 </div>
-                <h3 className="text-base font-bold text-navy mb-1">No markers found</h3>
-                <p className="text-sm text-muted">
+                <h3 className="text-[20px] font-medium text-text mb-1 tracking-[-0.015em]">No markers found</h3>
+                <p className="text-[13px] text-text-dim">
                   {searchQuery ? `No results for "${searchQuery}"` : 'No DB overrides yet — all markers use hardcoded defaults.'}
                 </p>
               </div>
             )}
 
-            <p className="text-[10px] text-muted/50 mt-8 pb-6">
+            <p className="font-mono text-[11px] text-text-faint mt-8 pb-6">
               Ranges are versioned automatically. Existing assessments keep the ranges they were created with.
             </p>
           </div>
@@ -229,7 +230,7 @@ export default function NormativeBrowserPage() {
 
         {/* ── RIGHT: Edit panel (fixed height, internal scroll handled by NormativeEditPanel) ── */}
         <div
-          className="flex-shrink-0 min-h-0 overflow-hidden border-l border-border"
+          className="flex-shrink-0 min-h-0 overflow-hidden border-l border-line"
           style={{
             width: panelVisible ? '50%' : '0%',
             opacity: panelVisible ? 1 : 0,

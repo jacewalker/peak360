@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 const ADMIN_SECTIONS = [
   {
@@ -55,79 +56,49 @@ const ADMIN_SECTIONS = [
 
 export default function AdminHomePage() {
   return (
-    <div className="min-h-screen bg-background">
-      {/* Hero Header */}
-      <div
-        className="relative overflow-hidden"
-        style={{
-          backgroundColor: '#0f2440',
-          backgroundImage: `radial-gradient(circle, rgba(245,166,35,0.07) 1px, transparent 1px)`,
-          backgroundSize: '28px 28px',
-        }}
-      >
-        <div className="relative px-8 py-14">
-          {/* Breadcrumb */}
-          <div className="flex items-center gap-1.5 mb-5">
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-white/30">
-              Peak360
-            </span>
-            <svg
-              className="w-3 h-3 text-white/20"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth={2}
-              stroke="currentColor"
-            >
-              <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-            </svg>
-            <span className="text-[10px] font-bold uppercase tracking-[0.2em] text-gold/70">
-              Administration
-            </span>
-          </div>
-
-          <h1 className="text-[2.75rem] font-semibold text-white tracking-tight leading-none mb-3">
+    <div className="min-h-screen">
+      {/* Hero */}
+      <header className="pt-24 pb-12">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6">
+          <MonoEyebrow variant="hero" as="div" className="mb-3">
+            ADMIN · CONTROL
+          </MonoEyebrow>
+          <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">
             Administration
           </h1>
-          <p className="text-white/40 text-sm max-w-md leading-relaxed">
+          <p className="mt-3 text-[13px] text-text-dim leading-[1.55] max-w-2xl">
             Configure normative data, manage system settings, and control platform behaviour.
           </p>
         </div>
+      </header>
 
-        {/* Gold accent line */}
-        <div className="h-px w-full bg-gradient-to-r from-gold/60 via-gold/20 to-transparent" />
-      </div>
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
+        <MonoEyebrow variant="meta" as="div" className="mb-6">
+          ADMIN · SECTIONS
+        </MonoEyebrow>
 
-      {/* Card Grid */}
-      <div className="px-8 py-10">
-        <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-muted mb-6">
-          Admin Sections
-        </p>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-4xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {ADMIN_SECTIONS.map((section) => (
             <Link
               key={section.href}
               href={section.href}
-              className="group relative bg-surface rounded-2xl border border-border p-6 shadow-sm hover:shadow-lg hover:border-gold/40 transition-all duration-200 flex flex-col gap-5"
+              className="group relative bg-bg-3 rounded-2xl border border-line p-6 hover:border-gold-brand/40 transition-colors duration-200 flex flex-col gap-5"
             >
-              {/* Icon + stat */}
               <div className="flex items-start justify-between">
-                <div className="w-12 h-12 rounded-xl bg-navy/5 border border-navy/10 flex items-center justify-center text-navy/60 group-hover:bg-gold/8 group-hover:border-gold/20 group-hover:text-gold transition-all duration-200">
+                <div className="w-12 h-12 rounded-xl bg-bg-2 border border-line flex items-center justify-center text-text-dim group-hover:bg-gold-brand/10 group-hover:border-gold-brand/30 group-hover:text-gold-brand transition-all duration-200">
                   {section.icon}
                 </div>
-                <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-navy/5 text-navy/50 border border-navy/8">
+                <span className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] px-2.5 py-1 rounded-full bg-bg-2 text-text-faint border border-line">
                   {section.stat}
                 </span>
               </div>
 
-              {/* Label + description */}
               <div className="flex-1">
-                <h3 className="font-bold text-navy text-base mb-1.5">{section.label}</h3>
-                <p className="text-sm text-muted leading-relaxed">{section.description}</p>
+                <h3 className="text-[20px] font-medium text-text tracking-[-0.015em] mb-1.5">{section.label}</h3>
+                <p className="text-[13px] text-text-dim leading-[1.55]">{section.description}</p>
               </div>
 
-              {/* Manage arrow — reveals on hover */}
-              <div className="flex items-center gap-1.5 text-[11px] font-bold text-transparent group-hover:text-gold transition-all duration-200">
+              <div className="flex items-center gap-1.5 font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-transparent group-hover:text-gold-brand transition-all duration-200">
                 <span>Manage</span>
                 <svg
                   className="w-3.5 h-3.5 -translate-x-1 group-hover:translate-x-0 transition-transform duration-200"
@@ -142,53 +113,50 @@ export default function AdminHomePage() {
             </Link>
           ))}
 
-          {/* Spot Integration — coming soon */}
-          <div className="rounded-2xl border border-dashed border-border bg-surface/40 p-6 flex flex-col gap-5 min-h-[200px]">
+          <div className="rounded-2xl border border-dashed border-line bg-bg-3/40 p-6 flex flex-col gap-5 min-h-[200px]">
             <div className="flex items-start justify-between">
-              <div className="w-12 h-12 rounded-xl bg-navy/5 border border-navy/10 flex items-center justify-center text-navy/30">
+              <div className="w-12 h-12 rounded-xl bg-bg-2 border border-line flex items-center justify-center text-text-faint">
                 <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244" />
                 </svg>
               </div>
-              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-navy/5 text-navy/30 border border-navy/8">
+              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] px-2.5 py-1 rounded-full bg-bg-2 text-text-faint border border-line">
                 Coming Soon
               </span>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-navy/40 text-base mb-1.5">Spot Integration</h3>
-              <p className="text-sm text-muted/50 leading-relaxed">Connect and sync data with Spot for streamlined client management and automated workflows.</p>
+              <h3 className="text-[20px] font-medium text-text-faint tracking-[-0.015em] mb-1.5">Spot Integration</h3>
+              <p className="text-[13px] text-text-faint leading-[1.55]">Connect and sync data with Spot for streamlined client management and automated workflows.</p>
             </div>
           </div>
 
-          {/* Vald Performance Integration — coming soon */}
-          <div className="rounded-2xl border border-dashed border-border bg-surface/40 p-6 flex flex-col gap-5 min-h-[200px]">
+          <div className="rounded-2xl border border-dashed border-line bg-bg-3/40 p-6 flex flex-col gap-5 min-h-[200px]">
             <div className="flex items-start justify-between">
-              <div className="w-12 h-12 rounded-xl bg-navy/5 border border-navy/10 flex items-center justify-center text-navy/30">
+              <div className="w-12 h-12 rounded-xl bg-bg-2 border border-line flex items-center justify-center text-text-faint">
                 <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z" />
                 </svg>
               </div>
-              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-navy/5 text-navy/30 border border-navy/8">
+              <span className="font-mono text-[11px] font-medium uppercase tracking-[0.16em] px-2.5 py-1 rounded-full bg-bg-2 text-text-faint border border-line">
                 Coming Soon
               </span>
             </div>
             <div className="flex-1">
-              <h3 className="font-bold text-navy/40 text-base mb-1.5">Vald Performance Integration</h3>
-              <p className="text-sm text-muted/50 leading-relaxed">Sync ForceDecks force plate data directly into assessments for objective strength and power measurements.</p>
+              <h3 className="text-[20px] font-medium text-text-faint tracking-[-0.015em] mb-1.5">Vald Performance Integration</h3>
+              <p className="text-[13px] text-text-faint leading-[1.55]">Sync ForceDecks force plate data directly into assessments for objective strength and power measurements.</p>
             </div>
           </div>
 
-          {/* Generic coming soon placeholder */}
-          <div className="rounded-2xl border border-dashed border-border bg-surface/40 p-6 flex flex-col items-center justify-center gap-3 min-h-[200px] text-center">
-            <div className="w-10 h-10 rounded-full bg-border/60 flex items-center justify-center">
-              <svg className="w-5 h-5 text-muted/50" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+          <div className="rounded-2xl border border-dashed border-line bg-bg-3/40 p-6 flex flex-col items-center justify-center gap-3 min-h-[200px] text-center">
+            <div className="w-10 h-10 rounded-full bg-line flex items-center justify-center">
+              <svg className="w-5 h-5 text-text-faint" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
               </svg>
             </div>
-            <p className="text-xs text-muted/50 font-medium">More sections coming soon</p>
+            <p className="text-[13px] text-text-faint font-medium">More sections coming soon</p>
           </div>
         </div>
-      </div>
+      </main>
     </div>
   );
 }

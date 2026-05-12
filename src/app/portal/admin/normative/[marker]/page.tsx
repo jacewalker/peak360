@@ -325,7 +325,7 @@ export default function MarkerEditorPage({
       {/* Back link */}
       <a
         href="/portal/admin/normative"
-        className="inline-flex items-center gap-1 text-sm text-muted hover:text-navy mb-4"
+        className="inline-flex items-center gap-1 text-sm text-text-dim hover:text-text mb-4"
       >
         <svg
           className="w-4 h-4"
@@ -342,15 +342,15 @@ export default function MarkerEditorPage({
       {/* Marker header */}
       <div className="mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-bold text-navy">{markerDef?.label || marker}</h1>
-          {isDirty && <span className="w-2 h-2 rounded-full bg-gold" title="Unsaved changes" />}
+          <h1 className="text-2xl font-bold text-text">{markerDef?.label || marker}</h1>
+          {isDirty && <span className="w-2 h-2 rounded-full bg-gold-brand" title="Unsaved changes" />}
         </div>
-        <p className="text-sm text-muted">
+        <p className="text-sm text-text-dim">
           {markerDef?.category}
           {markerDef?.subcategory ? ` > ${markerDef.subcategory}` : ''}
         </p>
         {unit && (
-          <span className="text-xs px-2 py-1 rounded bg-gray-100 text-muted font-bold mt-1 inline-block">
+          <span className="text-xs px-2 py-1 rounded bg-gray-100 text-text-dim font-bold mt-1 inline-block">
             {unit}
           </span>
         )}
@@ -358,7 +358,7 @@ export default function MarkerEditorPage({
 
       {/* Variant tabs (if gendered) */}
       {hasGenderVariants && (
-        <div className="flex gap-1 mb-4 border-b border-border">
+        <div className="flex gap-1 mb-4 border-b border-line">
           {(['all', 'male', 'female'] as const).map((g) => (
             <button
               key={g}
@@ -370,8 +370,8 @@ export default function MarkerEditorPage({
               }}
               className={`text-sm font-bold px-4 py-2 rounded-t-lg ${
                 activeGender === g
-                  ? 'border-b-2 border-gold text-navy'
-                  : 'text-muted hover:text-navy'
+                  ? 'border-b-2 border-gold text-text'
+                  : 'text-text-dim hover:text-text'
               }`}
             >
               {g === 'all' ? 'All' : g === 'male' ? 'Male' : 'Female'}
@@ -385,7 +385,7 @@ export default function MarkerEditorPage({
         <select
           value={activeAgeGroup || ''}
           onChange={(e) => setActiveAgeGroup(e.target.value)}
-          className="mb-4 px-3 py-2 border border-border rounded-lg text-sm"
+          className="mb-4 px-3 py-2 border border-line rounded-lg text-sm"
         >
           {ageGroups.map((ag) => (
             <option key={ag} value={ag}>
@@ -397,7 +397,7 @@ export default function MarkerEditorPage({
 
       {/* No data message for "All" tab on gendered markers */}
       {hasGenderVariants && activeGender === 'all' && !editTiers.unisex && (
-        <div className="p-4 bg-gray-50 rounded-lg text-sm text-muted mb-6">
+        <div className="p-4 bg-gray-50 rounded-lg text-sm text-text-dim mb-6">
           This marker has gender-specific ranges. Select the Male or Female tab to edit.
         </div>
       )}
@@ -414,26 +414,26 @@ export default function MarkerEditorPage({
                 {tier}
               </div>
               <div>
-                <label className="text-xs text-muted">Min</label>
+                <label className="text-xs text-text-dim">Min</label>
                 <input
                   type="number"
                   step="any"
                   value={currentVariantTiers[tier]?.min ?? ''}
                   onChange={(e) => handleTierChange(tier, 'min', e.target.value)}
                   className={`w-full px-2 py-2 border rounded text-sm text-center tabular-nums ${
-                    hasValidationError(tier, 'min') ? 'border-red-500' : 'border-border'
+                    hasValidationError(tier, 'min') ? 'border-red-500' : 'border-line'
                   } focus:border-gold focus:ring-2 focus:ring-gold/25 outline-none`}
                 />
               </div>
               <div>
-                <label className="text-xs text-muted">Max</label>
+                <label className="text-xs text-text-dim">Max</label>
                 <input
                   type="number"
                   step="any"
                   value={currentVariantTiers[tier]?.max ?? ''}
                   onChange={(e) => handleTierChange(tier, 'max', e.target.value)}
                   className={`w-full px-2 py-2 border rounded text-sm text-center tabular-nums ${
-                    hasValidationError(tier, 'max') ? 'border-red-500' : 'border-border'
+                    hasValidationError(tier, 'max') ? 'border-red-500' : 'border-line'
                   } focus:border-gold focus:ring-2 focus:ring-gold/25 outline-none`}
                 />
               </div>
@@ -452,10 +452,10 @@ export default function MarkerEditorPage({
       )}
 
       {/* Severity weight slider */}
-      <div className="mb-6 p-4 border border-border rounded-lg">
-        <h3 className="text-sm font-bold text-navy mb-2">Red Flag Severity</h3>
+      <div className="mb-6 p-4 border border-line rounded-lg">
+        <h3 className="text-sm font-bold text-text mb-2">Red Flag Severity</h3>
         <div className="flex items-center gap-4">
-          <span className="text-xs text-muted">Low (0)</span>
+          <span className="text-xs text-text-dim">Low (0)</span>
           <input
             type="range"
             min="0"
@@ -468,19 +468,19 @@ export default function MarkerEditorPage({
             }}
             className="flex-1 accent-gold"
           />
-          <span className="text-xs text-muted">Critical (10)</span>
-          <span className="text-xl font-bold text-navy tabular-nums w-8 text-center">
+          <span className="text-xs text-text-dim">Critical (10)</span>
+          <span className="text-xl font-bold text-text tabular-nums w-8 text-center">
             {severityWeight}
           </span>
         </div>
-        <p className="text-xs text-muted mt-1">
+        <p className="text-xs text-text-dim mt-1">
           Controls how prominently this marker&apos;s referral flag appears in reports (0 = subtle,
           10 = critical)
         </p>
       </div>
 
       {/* Action bar */}
-      <div className="flex justify-between items-center p-4 border-t border-border">
+      <div className="flex justify-between items-center p-4 border-t border-line">
         <button
           onClick={handleReset}
           className="text-sm font-bold text-red-500 hover:text-red-700 px-4 py-2 border border-red-200 rounded-lg hover:bg-red-50"
@@ -492,8 +492,8 @@ export default function MarkerEditorPage({
           disabled={!isDirty || isSaving || allValidationErrors.length > 0}
           className={`text-sm font-bold px-6 py-2.5 rounded-lg ${
             isDirty && !isSaving && allValidationErrors.length === 0
-              ? 'bg-gold text-white hover:bg-gold/90'
-              : 'bg-gold/50 text-white opacity-50 cursor-not-allowed'
+              ? 'bg-gold-brand text-white hover:bg-gold-brand/90'
+              : 'bg-gold-brand/50 text-white opacity-50 cursor-not-allowed'
           }`}
         >
           {isSaving ? 'Saving...' : saveSuccess ? 'Saved!' : 'Save Changes'}
