@@ -155,8 +155,8 @@ Plans:
 **Goal:** Promote the landing-page brand language (dark `#0a0a0b` canvas, cream `#ece5d3` text, gold-brand `#c9a24a` accents, Inter Tight + JetBrains Mono) into every authenticated surface (login, reset-password, sidebar, portal dashboard, assessments list, clients list, client detail, admin pages, and all 11 assessment-section forms) via additive token migration, route-segment theme gating, and in-place restyle — with Phase 8 report card (`/portal/assessment/[id]/report`) and Phase 5 PDF preserved verbatim.
 **Requirements**: UI-SPEC-AC-1 through UI-SPEC-AC-10 (implicit, locked via the 10-item Acceptance Heuristics in 09-UI-SPEC.md and decisions D-01..D-18 in 09-CONTEXT.md)
 **Depends on:** Phase 8
-**Plans:** 2 plans
+**Plans:** 2/2 plans complete
 
 Plans:
 - [x] 09-01-PLAN.md — Foundations + auth surfaces: globals.css token additions, font rebind (Inter Tight + JetBrains Mono), theme-dark wrappers on portal/login/reset-password layouts (incl. NEW reset-password/layout.tsx), restyle Sidebar/Header/ProgressBar/NavigationButtons, MonoEyebrow primitive, ship /login + /reset-password (UI-SPEC-AC-1..UI-SPEC-AC-10)
-- [ ] 09-02-PLAN.md — Working surfaces: form-component sweep (all 11 sections inherit), SectionHeader mono eyebrow + Section 11 page-level injection, Dialog + Toast + MetricChart restyle, every /portal page (dashboard, clients, clients/[name], assessments, every admin/*), Phase 8 report-frame inner light wrapper (D-09 contract) (UI-SPEC-AC-1..UI-SPEC-AC-10)
+- [x] 09-02-PLAN.md — Working surfaces: form-component sweep (all 11 sections inherit), SectionHeader mono eyebrow + Section 11 page-level injection, Dialog + Toast + MetricChart restyle, every /portal page (dashboard, clients, clients/[name], assessments, every admin/*), Phase 8 report-frame inner light wrapper (D-09 contract) (UI-SPEC-AC-1..UI-SPEC-AC-10)
