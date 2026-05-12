@@ -40,12 +40,12 @@ const ACTION_OPTIONS: AuditAction[] = [
 ];
 
 const ACTION_BADGE_COLORS: Record<string, string> = {
-  'assessment.view': 'bg-blue-50 text-blue-700 border-blue-200',
-  'section.edit': 'bg-amber-50 text-amber-700 border-amber-200',
-  'report.export': 'bg-indigo-50 text-indigo-700 border-indigo-200',
-  'file.upload': 'bg-green-50 text-green-700 border-green-200',
-  'normative.update': 'bg-purple-50 text-purple-700 border-purple-200',
-  'user.manage': 'bg-red-50 text-red-700 border-red-200',
+  'assessment.view': 'bg-blue-500/10 text-blue-300 border-blue-500/20',
+  'section.edit': 'bg-gold-brand/10 text-gold-brand border-gold-brand/20',
+  'report.export': 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
+  'file.upload': 'bg-status-good/10 text-status-good border-status-good/20',
+  'normative.update': 'bg-purple-500/10 text-purple-300 border-purple-500/20',
+  'user.manage': 'bg-danger/10 text-danger border-danger/20',
 };
 
 export default function AuditLogsPage() {
@@ -216,7 +216,7 @@ export default function AuditLogsPage() {
                 </thead>
                 <tbody className="divide-y divide-line">
                   {logs.map((log) => (
-                    <tr key={log.id} className="hover:bg-bg-2-alt/50 transition-colors">
+                    <tr key={log.id} className="hover:bg-bg-2/50 transition-colors">
                       <td className="px-4 py-3 text-[13px] text-text whitespace-nowrap">{formatDate(log.createdAt)}</td>
                       <td className="px-4 py-3 text-[13px] text-text">{truncate(log.userId, 12)}</td>
                       <td className="px-4 py-3 text-[13px]">
@@ -244,7 +244,7 @@ export default function AuditLogsPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage <= 1}
-                  className="px-3 py-1.5 text-[13px] bg-bg-3 text-text border border-line rounded-lg focus:outline-none focus:border-gold-brand transition-colors disabled:opacity-50 hover:border-gold-brand hover:text-gold-brand transition-colors"
+                  className="px-3 py-1.5 text-[13px] bg-bg-3 text-text border border-line rounded-lg focus:outline-none focus:border-gold-brand transition-colors disabled:opacity-50 hover:border-gold-brand hover:text-gold-brand"
                 >
                   Previous
                 </button>
@@ -254,7 +254,7 @@ export default function AuditLogsPage() {
                 <button
                   onClick={() => setCurrentPage((p) => Math.min(pagination.totalPages, p + 1))}
                   disabled={currentPage >= pagination.totalPages}
-                  className="px-3 py-1.5 text-[13px] bg-bg-3 text-text border border-line rounded-lg focus:outline-none focus:border-gold-brand transition-colors disabled:opacity-50 hover:border-gold-brand hover:text-gold-brand transition-colors"
+                  className="px-3 py-1.5 text-[13px] bg-bg-3 text-text border border-line rounded-lg focus:outline-none focus:border-gold-brand transition-colors disabled:opacity-50 hover:border-gold-brand hover:text-gold-brand"
                 >
                   Next
                 </button>
