@@ -582,7 +582,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       </div>{/* end px-6 report body wrapper */}
 
       {/* ─── ACTION BUTTONS (hidden in PDF) ─── */}
-      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-8 pb-4">
+      <div className="flex flex-col sm:flex-row gap-3 justify-center pt-8 pb-4 px-6 sm:px-8">
         <button
           onClick={exportPdf}
           disabled={exporting}

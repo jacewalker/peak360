@@ -256,7 +256,8 @@ input[type="radio"], input[type="checkbox"] {
   }
 
   /* Existing overrides */
-  .bg-white {
+  .bg-white,
+  .bg-paper {
     box-shadow: none !important;
   }
 }
