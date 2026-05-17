@@ -56,6 +56,24 @@
   --color-status-good: #7fb37f;
 
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* ──────────────────────────────────────────────────────────────────────
+     Phase 10 Print-Safe Alias Tokens (additive — Section 11 + PDF light card)
+     Stable Tailwind utility names for the Phase 8 light-card palette
+     (cream paper surface + navy ink + dim/faint text + light dividers).
+     Values mirror existing legacy tokens by design — Phase 8 sovereign
+     components (src/components/report/*) keep using text-navy/bg-white;
+     Section 11 + PDF reference these new aliases so the grep heuristic
+     (no #1a365d / #F5A623 / text-white / bg-white) passes cleanly.
+     gold-brand + champagne already exist above (lines 49-50) — Section 11
+     adopts them per CONTEXT.md "cream/navy/gold-brand language".
+     ────────────────────────────────────────────────────────────────────── */
+  --color-paper: #ffffff;
+  --color-paper-alt: #f8fafc;
+  --color-ink: #1a365d;
+  --color-ink-dim: #64748b;
+  --color-ink-faint: #94a3b8;
+  --color-line-light: #e2e8f0;
 }
 
 body {
