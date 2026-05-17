@@ -81,7 +81,7 @@ function TierPill({ tier }: { tier: RatingTier }) {
     poor: 'bg-red-600',
   };
   return (
-    <span className={`report-tier-pill inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase text-white ${bg[tier]}`}>
+    <span className={`report-tier-pill inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold tracking-wide uppercase text-paper ${bg[tier]}`}>
       {TIER_LABELS[tier]}
     </span>
   );
@@ -90,8 +90,8 @@ function TierPill({ tier }: { tier: RatingTier }) {
 function SectionHeading({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex items-center gap-3 mb-4">
-      <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
-      <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">{children}</h2>
+      <div className="w-1 h-6 bg-gold-brand rounded-full" />
+      <h2 className="text-lg font-bold text-ink tracking-tight">{children}</h2>
     </div>
   );
 }
@@ -100,8 +100,8 @@ function ContextCell({ label, value, warn }: { label: string; value: string | nu
   const display = value != null && value !== '' ? String(value) : '—';
   return (
     <div className="py-2">
-      <p className="text-[10px] uppercase tracking-[0.12em] text-[#64748b] mb-0.5">{label}</p>
-      <p className={`text-[13px] font-semibold ${warn ? 'text-red-600' : 'text-[#1a202c]'}`}>{display}</p>
+      <p className="text-[10px] uppercase tracking-[0.12em] text-ink-dim mb-0.5">{label}</p>
+      <p className={`text-[13px] font-semibold ${warn ? 'text-red-600' : 'text-ink'}`}>{display}</p>
     </div>
   );
 }
@@ -111,7 +111,7 @@ function YesNoDot({ value }: { value: unknown }) {
   return (
     <div className="flex items-center gap-2">
       <div className={`w-2 h-2 rounded-full ${isYes ? 'bg-red-500' : 'bg-emerald-500'}`} />
-      <span className={`text-[12px] font-medium ${isYes ? 'text-red-700' : 'text-[#64748b]'}`}>
+      <span className={`text-[12px] font-medium ${isYes ? 'text-red-700' : 'text-ink-dim'}`}>
         {isYes ? 'Yes' : 'No'}
       </span>
     </div>
@@ -268,21 +268,21 @@ export default function Section11({ assessmentId }: Section11Props) {
     <div
       key={m.key}
       className={`flex items-center justify-between py-2 px-4 border-l-[3px] ${
-        m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-gray-50/40 border-l-gray-200'
-      } ${i > 0 ? 'border-t border-gray-100' : ''}`}
+        m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-paper-alt border-l-line-light'
+      } ${i > 0 ? 'border-t border-line-light' : ''}`}
     >
-      <span className="text-[13px] font-medium text-[#1a202c]">{m.label}</span>
+      <span className="text-[13px] font-medium text-ink">{m.label}</span>
       <div className="flex items-center gap-3">
         {m.value !== null ? (
           <>
-            <span className="text-[13px] font-semibold text-[#1a202c] tabular-nums tracking-tight">
+            <span className="text-[13px] font-semibold text-ink tabular-nums tracking-tight">
               {m.value}
-              <span className="text-[11px] font-normal text-[#64748b] ml-1">{m.unit}</span>
+              <span className="text-[11px] font-normal text-ink-dim ml-1">{m.unit}</span>
             </span>
             {m.tier && <TierPill tier={m.tier} />}
           </>
         ) : (
-          <span className="text-[11px] text-[#94a3b8] italic">Not recorded</span>
+          <span className="text-[11px] text-ink-faint italic">Not recorded</span>
         )}
       </div>
     </div>
@@ -291,51 +291,38 @@ export default function Section11({ assessmentId }: Section11Props) {
   // ── Render ──────────────────────────────────────────────────────────────────
 
   return (
-    <div className="bg-white">
-      {/* ─── REPORT COVER / HEADER ─── */}
-      <div className="report-header relative overflow-hidden rounded-2xl print:rounded-none bg-gradient-to-br from-[#0f2440] via-[#1a365d] to-[#2d5986] text-white p-8 sm:p-10">
-        <div className="absolute top-0 right-0 w-72 h-72 opacity-[0.07]" style={{
-          background: 'radial-gradient(circle at 70% 30%, #F5A623 0%, transparent 60%)',
-        }} />
-        <div className="absolute bottom-0 left-0 w-48 h-48 opacity-[0.05]" style={{
-          background: 'radial-gradient(circle at 30% 70%, #F5A623 0%, transparent 60%)',
-        }} />
-        <div className="absolute top-6 right-8 w-20 h-[2px] bg-gradient-to-r from-[#F5A623] to-transparent" />
-        <div className="absolute bottom-6 left-8 w-16 h-[2px] bg-gradient-to-r from-[#F5A623] to-transparent" />
-
-        <div className="relative z-10">
-          <div className="flex items-center gap-4 mb-8">
-            <img src="/logo.png" alt="Peak360" className="h-10 sm:h-12 w-auto object-contain drop-shadow-[0_2px_8px_rgba(255,255,255,0.15)]" />
-            <div className="h-8 w-[1px] bg-white/20" />
-            <span className="text-xs tracking-[0.25em] uppercase text-white/60 font-medium">Longevity Assessment Report</span>
-          </div>
-          <h1 className="text-3xl sm:text-4xl font-black tracking-tight leading-tight mb-1">
+    <div className="bg-paper rounded-2xl shadow-sm">
+      {/* ─── REPORT HEADER (Phase 8-style light card chrome: logo LEFT, title RIGHT) ─── */}
+      <div className="report-header px-6 sm:px-8 pt-8 pb-6 border-b border-line-light">
+        <div className="flex items-center justify-between">
+          <img src="/logo.png" alt="Peak360" className="h-10 sm:h-12 w-auto object-contain" />
+          <h1 className="text-[20px] sm:text-[24px] font-medium text-ink leading-[1.1] tracking-[-0.015em] text-right">
             Complete Longevity Analysis
           </h1>
-          <div className="h-1 w-16 bg-[#F5A623] rounded-full mt-3 mb-6" />
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-3">
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-white/50 mb-0.5">Client</p>
-              <p className="text-sm font-semibold">{(clientInfo.clientName as string) || 'N/A'}</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-white/50 mb-0.5">Date</p>
-              <p className="text-sm font-semibold">{reportDate}</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-white/50 mb-0.5">Age</p>
-              <p className="text-sm font-semibold">{(clientInfo.clientAge as number) || '—'}</p>
-            </div>
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.15em] text-white/50 mb-0.5">Gender</p>
-              <p className="text-sm font-semibold capitalize">{(clientInfo.clientGender as string) || '—'}</p>
-            </div>
+        </div>
+        <div className="h-1 w-16 bg-gold-brand rounded-full mt-4 mb-6" />
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-x-8 gap-y-3">
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-ink-dim mb-0.5">Client</p>
+            <p className="text-sm font-semibold text-ink">{(clientInfo.clientName as string) || 'N/A'}</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-ink-dim mb-0.5">Date</p>
+            <p className="text-sm font-semibold text-ink">{reportDate}</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-ink-dim mb-0.5">Age</p>
+            <p className="text-sm font-semibold text-ink">{(clientInfo.clientAge as number) || '—'}</p>
+          </div>
+          <div>
+            <p className="text-[10px] uppercase tracking-[0.15em] text-ink-dim mb-0.5">Gender</p>
+            <p className="text-sm font-semibold text-ink capitalize">{(clientInfo.clientGender as string) || '—'}</p>
           </div>
         </div>
       </div>
 
       {/* ─── REPORT BODY ─── */}
-      <div className="px-6">
+      <div className="px-6 sm:px-8 pb-8">
 
       {/* ─── PEAK LIVING PILLARS ─── */}
       <PillarsDisplay pillars={pillars} markers={markers} />
@@ -343,8 +330,8 @@ export default function Section11({ assessmentId }: Section11Props) {
       {/* ─── SECTION 2: DAILY READINESS ─── */}
       <div className="mt-8 print:mt-6">
         <SectionHeading>Assessment Day Readiness</SectionHeading>
-        <div className="rounded-xl border border-gray-100 bg-[#f8fafc] overflow-hidden">
-          <div className="grid grid-cols-3 sm:grid-cols-6 divide-x divide-gray-100">
+        <div className="rounded-xl border border-line-light bg-paper-alt overflow-hidden">
+          <div className="grid grid-cols-3 sm:grid-cols-6 divide-x divide-line-light">
             <div className="px-4"><ContextCell label="Sleep" value={readiness.sleepHours != null ? `${readiness.sleepHours} hrs` : null} /></div>
             <div className="px-4"><ContextCell label="Stress" value={readiness.stressLevel != null ? `${readiness.stressLevel}/10` : null} /></div>
             <div className="px-4"><ContextCell label="Energy" value={readiness.energyLevel != null ? `${readiness.energyLevel}/10` : null} /></div>
@@ -358,17 +345,17 @@ export default function Section11({ assessmentId }: Section11Props) {
       {/* ─── SECTION 3: MEDICAL SCREENING ─── */}
       <div className="mt-6 print:mt-4">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
-          <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Medical Screening</h2>
+          <div className="w-1 h-6 bg-gold-brand rounded-full" />
+          <h2 className="text-lg font-bold text-ink tracking-tight">Medical Screening</h2>
           {hasMedicalFlags && (
             <span className="ml-auto inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-100 border border-amber-300 text-[10px] font-bold uppercase tracking-wide text-amber-800">
               Flag(s) Detected
             </span>
           )}
         </div>
-        <div className="rounded-xl border border-gray-100 overflow-hidden">
+        <div className="rounded-xl border border-line-light overflow-hidden">
           {/* Safety screening */}
-          <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-2 px-4 py-3 bg-[#f8fafc]">
+          <div className="grid grid-cols-2 sm:grid-cols-5 gap-x-4 gap-y-2 px-4 py-3 bg-paper-alt">
             {([
               { key: 'chestPain', label: 'Chest Pain' },
               { key: 'dizziness', label: 'Dizziness' },
@@ -379,11 +366,11 @@ export default function Section11({ assessmentId }: Section11Props) {
               const val = medical[item.key];
               return (
                 <div key={item.key} className="flex items-center justify-between gap-2">
-                  <span className="text-[11px] text-[#64748b]">{item.label}</span>
+                  <span className="text-[11px] text-ink-dim">{item.label}</span>
                   {val != null ? (
                     <YesNoDot value={val} />
                   ) : (
-                    <span className="text-[11px] text-[#94a3b8] italic">—</span>
+                    <span className="text-[11px] text-ink-faint italic">—</span>
                   )}
                 </div>
               );
@@ -391,30 +378,30 @@ export default function Section11({ assessmentId }: Section11Props) {
           </div>
           {/* Surgery details */}
           {String(medical.recentSurgery ?? '').toLowerCase() === 'yes' && !!medical.surgeryDetailsText && (
-            <div className="px-4 py-2 border-t border-gray-100 bg-red-50/50">
-              <p className="text-[10px] uppercase tracking-wide text-[#64748b] mb-0.5">Surgery / Injury Details</p>
-              <p className="text-[12px] text-[#1a202c]">{String(medical.surgeryDetailsText)}</p>
+            <div className="px-4 py-2 border-t border-line-light bg-red-50/50">
+              <p className="text-[10px] uppercase tracking-wide text-ink-dim mb-0.5">Surgery / Injury Details</p>
+              <p className="text-[12px] text-ink">{String(medical.surgeryDetailsText)}</p>
             </div>
           )}
           {/* Additional medical info */}
           {!!(medical.currentMedications || medical.diagnosedConditions || medical.otherConcerns) && (
-            <div className="px-4 py-3 border-t border-gray-100 space-y-2">
+            <div className="px-4 py-3 border-t border-line-light space-y-2">
               {medical.currentMedications ? (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wide text-[#64748b] mb-0.5">Medications</p>
-                  <p className="text-[12px] text-[#1a202c]">{String(medical.currentMedications)}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-ink-dim mb-0.5">Medications</p>
+                  <p className="text-[12px] text-ink">{String(medical.currentMedications)}</p>
                 </div>
               ) : null}
               {medical.diagnosedConditions ? (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wide text-[#64748b] mb-0.5">Diagnosed Conditions</p>
-                  <p className="text-[12px] text-[#1a202c]">{String(medical.diagnosedConditions)}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-ink-dim mb-0.5">Diagnosed Conditions</p>
+                  <p className="text-[12px] text-ink">{String(medical.diagnosedConditions)}</p>
                 </div>
               ) : null}
               {medical.otherConcerns ? (
                 <div>
-                  <p className="text-[10px] uppercase tracking-wide text-[#64748b] mb-0.5">Other Concerns</p>
-                  <p className="text-[12px] text-[#1a202c]">{String(medical.otherConcerns)}</p>
+                  <p className="text-[10px] uppercase tracking-wide text-ink-dim mb-0.5">Other Concerns</p>
+                  <p className="text-[12px] text-ink">{String(medical.otherConcerns)}</p>
                 </div>
               ) : null}
             </div>
@@ -424,19 +411,19 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       {/* ─── SECTION 4: CONSENT STATUS ─── */}
       <div className="mt-6 print:mt-4">
-        <div className="flex items-center gap-4 px-4 py-3 bg-[#f8fafc] rounded-lg border border-gray-100 text-[12px]">
+        <div className="flex items-center gap-4 px-4 py-3 bg-paper-alt rounded-lg border border-line-light text-[12px]">
           <div className="flex items-center gap-1.5">
             <div className={`w-2.5 h-2.5 rounded-full ${consentSigned ? 'bg-emerald-500' : 'bg-gray-300'}`} />
-            <span className="font-medium text-[#1a202c]">{consentSigned ? 'Consent Provided' : 'Consent Not Recorded'}</span>
+            <span className="font-medium text-ink">{consentSigned ? 'Consent Provided' : 'Consent Not Recorded'}</span>
           </div>
-          <div className="h-4 w-px bg-gray-200" />
-          <span className="text-[#64748b]">
+          <div className="h-4 w-px bg-line-light" />
+          <span className="text-ink-dim">
             Client: {consent.clientSignatureName ? `${consent.clientSignatureName}` : '—'}
             {consent.clientSignatureDate ? ` (${consent.clientSignatureDate})` : ''}
             {clientSigCaptured ? ' — Signed' : ''}
           </span>
-          <div className="h-4 w-px bg-gray-200" />
-          <span className="text-[#64748b]">
+          <div className="h-4 w-px bg-line-light" />
+          <span className="text-ink-dim">
             Coach: {consent.coachSignatureName ? `${consent.coachSignatureName}` : '—'}
             {consent.coachSignatureDate ? ` (${consent.coachSignatureDate})` : ''}
             {coachSigCaptured ? ' — Signed' : ''}
@@ -447,10 +434,10 @@ export default function Section11({ assessmentId }: Section11Props) {
       {/* ─── TIER SUMMARY ─── */}
       <div className="mt-8 print:mt-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
-          <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Results Overview</h2>
+          <div className="w-1 h-6 bg-gold-brand rounded-full" />
+          <h2 className="text-lg font-bold text-ink tracking-tight">Results Overview</h2>
           {totalRated > 0 && (
-            <span className="text-xs text-[#64748b] ml-auto">{totalRated} markers evaluated</span>
+            <span className="text-xs text-ink-dim ml-auto">{totalRated} markers evaluated</span>
           )}
         </div>
 
@@ -458,21 +445,21 @@ export default function Section11({ assessmentId }: Section11Props) {
           {(['elite', 'great', 'normal', 'cautious', 'poor'] as RatingTier[]).map((tier) => {
             const pct = totalRated > 0 ? Math.round((tierCounts[tier] / totalRated) * 100) : 0;
             return (
-              <div key={tier} className="report-tier-card relative overflow-hidden rounded-xl border border-gray-100 bg-white p-3 sm:p-4 text-center">
+              <div key={tier} className="report-tier-card relative overflow-hidden rounded-xl border border-line-light bg-paper p-3 sm:p-4 text-center">
                 <div className="absolute top-0 left-0 right-0 h-1" style={{ backgroundColor: TIER_DOT[tier] }} />
                 <p className="text-[10px] font-bold uppercase tracking-[0.12em] mt-1 mb-1" style={{ color: TIER_DOT[tier] }}>
                   {TIER_LABELS[tier]}
                 </p>
-                <p className="text-3xl sm:text-4xl font-black text-[#1a365d] leading-none">
+                <p className="text-3xl sm:text-4xl font-black text-ink leading-none">
                   {tierCounts[tier]}
                 </p>
-                <div className="mt-2 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="mt-2 h-1.5 bg-line-light rounded-full overflow-hidden">
                   <div
                     className="h-full rounded-full transition-all duration-500"
                     style={{ width: `${pct}%`, backgroundColor: TIER_DOT[tier] }}
                   />
                 </div>
-                <p className="text-[10px] text-[#64748b] mt-1 font-medium">{pct}%</p>
+                <p className="text-[10px] text-ink-dim mt-1 font-medium">{pct}%</p>
               </div>
             );
           })}
@@ -482,8 +469,8 @@ export default function Section11({ assessmentId }: Section11Props) {
       {/* ─── DETAILED RESULTS BY CATEGORY ─── */}
       <div className="mt-8 print:mt-6">
         <div className="flex items-center gap-3 mb-5">
-          <div className="w-1 h-6 bg-[#F5A623] rounded-full" />
-          <h2 className="text-lg font-bold text-[#1a365d] tracking-tight">Detailed Results</h2>
+          <div className="w-1 h-6 bg-gold-brand rounded-full" />
+          <h2 className="text-lg font-bold text-ink tracking-tight">Detailed Results</h2>
         </div>
 
         <div className="space-y-5">
@@ -502,19 +489,19 @@ export default function Section11({ assessmentId }: Section11Props) {
               <div key={cat}>
                 {/* Category header */}
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-[#1a365d]/70">{cat}</span>
-                  <div className="flex-1 h-[1px] bg-gradient-to-r from-[#e2e8f0] to-transparent" />
+                  <span className="text-[11px] font-bold uppercase tracking-[0.1em] text-ink/70">{cat}</span>
+                  <div className="flex-1 h-[1px] bg-gradient-to-r from-line-light to-transparent" />
                 </div>
 
                 {isBloodTests ? (
                   // Blood tests: grouped by subcategory
-                  <div className="rounded-lg overflow-hidden border border-gray-100">
+                  <div className="rounded-lg overflow-hidden border border-line-light">
                     {subcategories.map((sub, si) => {
                       const subMarkers = visibleMarkers.filter((m) => m.subcategory === sub);
                       if (subMarkers.length === 0) return null;
                       return (
                         <div key={sub}>
-                          <div className={`text-[10px] font-bold uppercase tracking-[0.1em] text-[#64748b] px-4 py-1.5 bg-[#f1f5f9] ${si > 0 ? 'border-t border-gray-200' : ''}`}>
+                          <div className={`text-[10px] font-bold uppercase tracking-[0.1em] text-ink-dim px-4 py-1.5 bg-paper-alt ${si > 0 ? 'border-t border-line-light' : ''}`}>
                             {sub}
                           </div>
                           {subMarkers.map((m, i) => renderMarkerRow(m, i))}
@@ -524,7 +511,7 @@ export default function Section11({ assessmentId }: Section11Props) {
                   </div>
                 ) : (
                   // All other categories: flat list
-                  <div className="rounded-lg overflow-hidden border border-gray-100">
+                  <div className="rounded-lg overflow-hidden border border-line-light">
                     {visibleMarkers.map((m, i) => renderMarkerRow(m, i))}
                   </div>
                 )}
@@ -536,7 +523,7 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       {/* ─── TIER LEGEND ─── */}
       <div className="mt-6 print:mt-4">
-        <div className="flex items-center justify-center gap-5 py-3 px-4 bg-[#f8fafc] rounded-lg border border-gray-100">
+        <div className="flex items-center justify-center gap-5 py-3 px-4 bg-paper-alt rounded-lg border border-line-light">
           {(['elite', 'great', 'normal', 'cautious', 'poor'] as RatingTier[]).map((tier) => (
             <div key={tier} className="flex items-center gap-1.5">
               <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: TIER_DOT[tier] }} />
@@ -555,17 +542,17 @@ export default function Section11({ assessmentId }: Section11Props) {
 
           <div className="space-y-4">
             {insights.map((insight, i) => (
-              <div key={i} className="report-insight-card relative bg-white rounded-xl border border-gray-100 overflow-hidden">
-                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-[#F5A623] to-[#d4891a]" />
+              <div key={i} className="report-insight-card relative bg-paper rounded-xl border border-line-light overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-gold-brand to-champagne" />
                 <div className="pl-5 pr-5 py-4">
-                  <h4 className="text-sm font-bold text-[#1a365d] mb-1.5">{insight.title}</h4>
-                  <p className="text-[12px] leading-relaxed text-[#64748b] mb-3">{insight.why}</p>
+                  <h4 className="text-sm font-bold text-ink mb-1.5">{insight.title}</h4>
+                  <p className="text-[12px] leading-relaxed text-ink-dim mb-3">{insight.why}</p>
                   {insight.doNow.length > 0 && (
                     <div className="space-y-1.5">
                       {insight.doNow.map((item, j) => (
                         <div key={j} className="flex items-start gap-2">
-                          <div className="w-1 h-1 rounded-full bg-[#F5A623] mt-[7px] shrink-0" />
-                          <p className="text-[12px] leading-relaxed text-[#1a202c]">{item}</p>
+                          <div className="w-1 h-1 rounded-full bg-gold-brand mt-[7px] shrink-0" />
+                          <p className="text-[12px] leading-relaxed text-ink">{item}</p>
                         </div>
                       ))}
                     </div>
@@ -578,15 +565,15 @@ export default function Section11({ assessmentId }: Section11Props) {
       )}
 
       {/* ─── REPORT FOOTER ─── */}
-      <div className="report-footer mt-10 pt-5 border-t border-gray-200 print:mt-6">
-        <div className="flex items-center justify-between text-[10px] text-[#94a3b8]">
+      <div className="report-footer mt-10 pt-5 border-t border-line-light print:mt-6">
+        <div className="flex items-center justify-between text-[10px] text-ink-faint">
           <div className="flex items-center gap-2">
             <img src="/logo.png" alt="Peak360" className="h-5 w-auto object-contain opacity-40" />
             <span>Generated by Peak360 Longevity Program</span>
           </div>
           <span>{reportDate}</span>
         </div>
-        <p className="text-[9px] text-[#cbd5e1] mt-2 leading-relaxed">
+        <p className="text-[9px] text-ink-faint/60 mt-2 leading-relaxed">
           This report is for informational purposes only and does not constitute medical advice.
           Always consult with a qualified healthcare professional before making changes to your health regimen.
         </p>
@@ -599,12 +586,12 @@ export default function Section11({ assessmentId }: Section11Props) {
         <button
           onClick={exportPdf}
           disabled={exporting}
-          className="group px-8 py-3 bg-[#1a365d] text-white rounded-xl font-semibold hover:bg-[#2d5986] transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-60"
+          className="group px-8 py-3 bg-ink text-paper rounded-xl font-semibold hover:bg-ink/85 transition-all hover:shadow-lg active:scale-[0.98] disabled:opacity-60"
         >
           <span className="flex items-center justify-center gap-2">
             {exporting ? (
               <>
-                <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                <span className="w-4 h-4 border-2 border-paper/30 border-t-paper rounded-full animate-spin" />
                 Generating PDF...
               </>
             ) : (
@@ -626,7 +613,7 @@ export default function Section11({ assessmentId }: Section11Props) {
             });
             window.location.href = '/portal';
           }}
-          className="px-8 py-3 bg-[#F5A623] text-[#1a365d] rounded-xl font-semibold hover:bg-[#f7bc5a] transition-all hover:shadow-lg active:scale-[0.98]"
+          className="px-8 py-3 bg-gold-brand text-ink rounded-xl font-semibold hover:bg-champagne transition-all hover:shadow-lg active:scale-[0.98]"
         >
           Save & Complete Assessment
         </button>
