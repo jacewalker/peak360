@@ -32,7 +32,7 @@ export function ConsentStatus({ consent }: ConsentStatusProps) {
             width: 6,
             height: 6,
             borderRadius: 3,
-            backgroundColor: consentSigned ? '#10b981' : '#9ca3af',
+            backgroundColor: consentSigned ? '#10b981' : COLORS.textMuted,
           }}
         />
         <Text style={{ fontSize: 8, fontFamily: FONT.bold, color: COLORS.textPrimary }}>
