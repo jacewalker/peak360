@@ -56,7 +56,7 @@ export function MarkerTable({ markers }: MarkerTableProps) {
                   if (subMarkers.length === 0) return null;
                   return (
                     <View key={sub}>
-                      <View style={{ backgroundColor: '#f1f5f9', paddingHorizontal: 8, paddingVertical: 3 }}>
+                      <View style={{ backgroundColor: COLORS.borderLight, paddingHorizontal: 8, paddingVertical: 3 }}>
                         <Text
                           style={{
                             fontSize: 7,

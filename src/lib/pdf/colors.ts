@@ -4,8 +4,8 @@ export const COLORS = {
   navy: '#1a365d',
   navyDark: '#0f2440',
   navyLight: '#2d5986',
-  gold: '#F5A623',
-  goldDark: '#d4891a',
+  gold: '#c9a24a', // Phase 9 gold-brand — matches in-app Section 11 (--color-gold-brand)
+  goldDark: '#e8d6a8', // Phase 9 champagne — matches in-app Section 11 (--color-champagne)
   textPrimary: '#1a202c',
   textSecondary: '#64748b',
   textMuted: '#94a3b8',

@@ -22,9 +22,9 @@ export function MarkerRow({ marker }: MarkerRowProps) {
         paddingBottom: 4,
         paddingRight: 6,
         paddingLeft: 10,
-        backgroundColor: marker.tier ? TIER_ROW_BG_PDF[marker.tier] : '#f9fafb',
+        backgroundColor: marker.tier ? TIER_ROW_BG_PDF[marker.tier] : COLORS.bgLighter,
         borderLeftWidth: 3,
-        borderLeftColor: marker.tier ? TIER_BORDER_PDF[marker.tier] : '#e5e7eb',
+        borderLeftColor: marker.tier ? TIER_BORDER_PDF[marker.tier] : COLORS.border,
         borderBottomWidth: 0.5,
         borderBottomColor: COLORS.borderLight,
       }}
