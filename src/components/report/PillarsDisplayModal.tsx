@@ -49,33 +49,33 @@ const STATUS_THEME: Record<
     chipText: 'text-white',
     chipDot: 'bg-white/90',
     heroBg:
-      'bg-gradient-to-br from-emerald-50 via-emerald-100/60 to-white',
+      'bg-gradient-to-br from-emerald-500/15 via-emerald-500/8 to-transparent',
     heroAccent: 'from-emerald-400/40 via-emerald-300/15 to-transparent',
-    scoreColor: 'text-emerald-700',
+    scoreColor: 'text-emerald-300',
   },
   amber: {
     chipBg: 'bg-amber-500',
     chipText: 'text-white',
     chipDot: 'bg-white/90',
-    heroBg: 'bg-gradient-to-br from-amber-50 via-amber-100/60 to-white',
+    heroBg: 'bg-gradient-to-br from-amber-500/15 via-amber-500/8 to-transparent',
     heroAccent: 'from-amber-400/40 via-amber-300/15 to-transparent',
-    scoreColor: 'text-amber-700',
+    scoreColor: 'text-amber-300',
   },
   red: {
     chipBg: 'bg-red-500',
     chipText: 'text-white',
     chipDot: 'bg-white/90',
-    heroBg: 'bg-gradient-to-br from-red-50 via-red-100/60 to-white',
+    heroBg: 'bg-gradient-to-br from-red-500/15 via-red-500/8 to-transparent',
     heroAccent: 'from-red-400/40 via-red-300/15 to-transparent',
-    scoreColor: 'text-red-700',
+    scoreColor: 'text-red-300',
   },
   pending: {
-    chipBg: 'bg-slate-300',
-    chipText: 'text-slate-700',
-    chipDot: 'bg-slate-500',
-    heroBg: 'bg-gradient-to-br from-slate-50 via-slate-100/60 to-white',
-    heroAccent: 'from-slate-300/30 via-slate-200/15 to-transparent',
-    scoreColor: 'text-slate-500',
+    chipBg: 'bg-bg-3',
+    chipText: 'text-text-dim',
+    chipDot: 'bg-text-dim',
+    heroBg: 'bg-gradient-to-br from-bg-3 via-bg-2 to-transparent',
+    heroAccent: 'from-line-2 via-line to-transparent',
+    scoreColor: 'text-text-dim',
   },
 };
 
@@ -117,9 +117,9 @@ const TIER_THEME: Record<
     dot: 'bg-emerald-500',
   },
   pending: {
-    rail: 'bg-slate-300',
-    pill: 'bg-slate-200 text-slate-600 ring-1 ring-slate-300',
-    dot: 'bg-slate-300',
+    rail: 'bg-line-2',
+    pill: 'bg-bg-3 text-text-dim ring-1 ring-line-2',
+    dot: 'bg-line-2',
   },
 };
 
@@ -257,28 +257,26 @@ export default function PillarsDisplayModal({
 
   const drawer = (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — centred modal overlay (was right-drawer). Blur the portal behind. */}
       <div
-        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm motion-safe:transition-opacity duration-200"
+        className="fixed inset-0 z-40 bg-bg/70 backdrop-blur-md motion-safe:transition-opacity duration-200"
         onClick={onClose}
         aria-hidden
       />
 
-      {/* Drawer panel — right-slide on desktop, full-screen on mobile */}
+      {/* Centred dialog — vertically + horizontally on screen, dark portal surface. */}
       <aside
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-label={`${pillar.label} pillar details`}
         tabIndex={-1}
-        className="fixed top-0 right-0 z-50 h-full w-full md:w-[520px] bg-white shadow-2xl
-                   overflow-y-auto outline-none
-                   motion-safe:transition-transform duration-300 ease-out
-                   translate-x-0"
+        className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 pointer-events-none outline-none"
       >
+        <div className="relative w-full max-w-[640px] max-h-[90vh] overflow-y-auto bg-bg-2 border border-line rounded-2xl shadow-2xl pointer-events-auto motion-safe:transition-all duration-200">
         {/* Hero — gradient surface with corner brackets, mono eyebrow, big score */}
         <div
-          className={`relative px-6 pt-6 pb-5 border-b border-slate-200 ${theme.heroBg}`}
+          className={`relative px-6 pt-6 pb-5 border-b border-line ${theme.heroBg}`}
         >
           <CornerBrackets />
 
@@ -293,7 +291,7 @@ export default function PillarsDisplayModal({
 
           {/* Top row — gold mono eyebrow + close button */}
           <div className="relative flex items-center justify-between mb-4">
-            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">
+            <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-brand">
               Pillar · Detail
             </span>
             <button
@@ -301,7 +299,7 @@ export default function PillarsDisplayModal({
               onClick={onClose}
               aria-label="Close"
               data-autofocus
-              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-white/60 text-muted hover:bg-white hover:text-navy focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-dark/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white transition-colors"
+              className="inline-flex h-8 w-8 items-center justify-center rounded-full bg-bg-3 text-text-dim hover:bg-line hover:text-text focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-brand/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-2 transition-colors"
             >
               <svg viewBox="0 0 14 14" className="size-3" aria-hidden>
                 <path
@@ -316,10 +314,10 @@ export default function PillarsDisplayModal({
 
           {/* Hero — pillar name + score */}
           <div className="relative">
-            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-navy">
+            <h2 className="text-2xl md:text-3xl font-semibold tracking-tight text-text">
               {pillar.label}
             </h2>
-            <p className="mt-1 text-sm leading-relaxed text-muted max-w-md">
+            <p className="mt-1 text-sm leading-relaxed text-text-dim max-w-md">
               {blurb}
             </p>
 
@@ -339,7 +337,7 @@ export default function PillarsDisplayModal({
                   />
                   {STATUS_LABEL[pillar.status]}
                 </span>
-                <span className="font-mono text-[10px] uppercase tracking-wider text-muted">
+                <span className="font-mono text-[10px] uppercase tracking-wider text-text-dim">
                   Composite index · /100
                 </span>
               </div>
@@ -349,16 +347,16 @@ export default function PillarsDisplayModal({
 
         {/* Tier breakdown bar */}
         {!isPending && pillarMarkers.length > 0 && (
-          <div className="px-6 py-5 border-b border-slate-200">
+          <div className="px-6 py-5 border-b border-line">
             <div className="flex items-baseline justify-between mb-2">
-              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted">
+              <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim">
                 Score breakdown
               </span>
-              <span className="font-mono text-[10px] uppercase tracking-wider text-muted">
+              <span className="font-mono text-[10px] uppercase tracking-wider text-text-dim">
                 {pillarMarkers.length} markers
               </span>
             </div>
-            <div className="flex h-2 w-full overflow-hidden rounded-full bg-slate-100 ring-1 ring-slate-200">
+            <div className="flex h-2 w-full overflow-hidden rounded-full bg-bg-3 ring-1 ring-line">
               {tierCounts
                 .filter((t) => t.count > 0)
                 .map((t) => (
@@ -372,7 +370,7 @@ export default function PillarsDisplayModal({
                   />
                 ))}
             </div>
-            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-wider text-muted">
+            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1 font-mono text-[10px] uppercase tracking-wider text-text-dim">
               {tierCounts
                 .filter((t) => t.count > 0)
                 .map((t) => (
@@ -392,12 +390,12 @@ export default function PillarsDisplayModal({
 
         {/* Marker rows — grouped by tier */}
         <div className="px-6 py-5">
-          <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-muted mb-3">
+          <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim mb-3">
             Contributing markers
           </h3>
 
           {pillarMarkers.length === 0 ? (
-            <p className="text-sm text-muted py-4">
+            <p className="text-sm text-text-dim py-4">
               No markers classified into this pillar.
             </p>
           ) : (
@@ -414,40 +412,40 @@ export default function PillarsDisplayModal({
                       <span
                         className={`size-2 rounded-full ${tierCls.dot}`}
                       />
-                      <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-navy">
+                      <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text">
                         {label}
                       </span>
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-muted">
+                      <span className="font-mono text-[10px] uppercase tracking-wider text-text-dim">
                         ·  {rows.length}
                       </span>
                     </div>
-                    <ul className="rounded-2xl bg-slate-50/70 ring-1 ring-slate-200 overflow-hidden">
+                    <ul className="rounded-2xl bg-bg-3 ring-1 ring-line overflow-hidden">
                       {rows.map((m) => (
                         <li
                           key={m.key}
-                          className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-200/70 last:border-b-0"
+                          className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-line/70 last:border-b-0"
                         >
                           <div className="flex items-center gap-3 min-w-0">
                             <span
                               className={`block h-6 w-1 rounded-full ${tierCls.rail}`}
                               aria-hidden
                             />
-                            <span className="text-sm text-navy truncate">
+                            <span className="text-sm text-text truncate">
                               {m.label}
                             </span>
                           </div>
                           <div className="flex items-center gap-2.5 shrink-0">
                             {m.value != null ? (
-                              <span className="font-mono text-sm tabular-nums text-navy">
+                              <span className="font-mono text-sm tabular-nums text-text">
                                 {m.value}
                                 {m.unit ? (
-                                  <span className="ml-0.5 text-muted text-xs">
+                                  <span className="ml-0.5 text-text-dim text-xs">
                                     {m.unit}
                                   </span>
                                 ) : null}
                               </span>
                             ) : (
-                              <span className="font-mono text-[10px] uppercase tracking-wider text-muted">
+                              <span className="font-mono text-[10px] uppercase tracking-wider text-text-dim">
                                 No data
                               </span>
                             )}
@@ -465,6 +463,7 @@ export default function PillarsDisplayModal({
               })}
             </div>
           )}
+        </div>
         </div>
       </aside>
     </>

@@ -195,32 +195,30 @@ export default function PillarModal({
 
   const drawer = (
     <>
-      {/* Backdrop */}
+      {/* Backdrop — centred modal overlay (was right-drawer). Blur the portal behind. */}
       <div
-        className="fixed inset-0 z-40 bg-black/40 backdrop-blur-sm motion-safe:transition-opacity duration-200"
+        className="fixed inset-0 z-40 bg-bg/70 backdrop-blur-md motion-safe:transition-opacity duration-200"
         onClick={onClose}
         aria-hidden
       />
 
-      {/* Drawer panel — right-slide on desktop, full-screen on mobile */}
+      {/* Centred dialog — vertically + horizontally on screen, dark portal surface. */}
       <aside
         ref={panelRef}
         role="dialog"
         aria-modal="true"
         aria-labelledby={headingId}
         tabIndex={-1}
-        className="fixed top-0 right-0 z-50 h-full w-full md:w-[520px] bg-white shadow-2xl
-                   overflow-y-auto outline-none
-                   motion-safe:transition-transform duration-300 ease-out
-                   translate-x-0"
+        className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 pointer-events-none outline-none"
       >
+        <div className="relative w-full max-w-[640px] max-h-[90vh] overflow-y-auto bg-bg-2 border border-line rounded-2xl shadow-2xl pointer-events-auto motion-safe:transition-all duration-200">
         {/* Sticky top close button */}
         <button
           type="button"
           onClick={onClose}
           aria-label="Close"
           data-autofocus
-          className="absolute top-3 right-3 w-11 h-11 inline-flex items-center justify-center rounded-full text-navy/70 hover:text-navy hover:bg-gray-100 focus:outline-none focus-visible:ring-2 focus-visible:ring-[rgba(245,166,35,0.25)] z-10"
+          className="absolute top-3 right-3 w-11 h-11 inline-flex items-center justify-center rounded-full text-text-dim hover:text-text hover:bg-bg-3 focus:outline-none focus-visible:ring-2 focus-visible:ring-gold-brand/40 z-10"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
             <path d="M3 3l10 10M13 3L3 13" strokeLinecap="round" strokeLinejoin="round" />
@@ -232,18 +230,18 @@ export default function PillarModal({
           <header className="pr-12">
             <h2
               id={headingId}
-              className="font-semibold leading-[1.15] text-navy"
+              className="font-semibold leading-[1.15] text-text"
               style={{ fontSize: 'clamp(24px, 4vw, 28px)' }}
             >
               {definition.label}
             </h2>
             <div className="mt-2 flex items-center gap-3">
               <div
-                className="text-navy font-semibold leading-none"
+                className="text-text font-semibold leading-none"
                 style={{ fontSize: '48px', fontVariantNumeric: 'tabular-nums' }}
               >
                 {score === null ? '—' : score}
-                <span className="text-base font-normal text-muted ml-1 align-baseline">/100</span>
+                <span className="text-base font-normal text-text-dim ml-1 align-baseline">/100</span>
               </div>
               <span
                 className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-semibold"
@@ -265,30 +263,30 @@ export default function PillarModal({
 
           {/* ── Section 2: What this pillar means ── */}
           <section>
-            <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            <h3 className="text-[20px] font-semibold leading-[1.25] text-text">
               What this pillar means
             </h3>
-            <p className="mt-2 text-base leading-[1.5] text-muted">
+            <p className="mt-2 text-base leading-[1.5] text-text-dim">
               {definition.plainMeaning}
             </p>
           </section>
 
           {/* ── Section 3: Your results ── */}
           <section>
-            <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            <h3 className="text-[20px] font-semibold leading-[1.25] text-text">
               Your results
             </h3>
             {ratedPrimary.length === 0 ? (
-              <p className="mt-2 text-base leading-[1.5] text-muted">
+              <p className="mt-2 text-base leading-[1.5] text-text-dim">
                 We don&apos;t have any rated markers for this pillar in this assessment yet. Check the detailed marker results below the pillars grid for any raw values your coach has entered.
               </p>
             ) : (
               <ul className="mt-3 space-y-2">
                 {ratedPrimary.map((m) => (
                   <li key={m.key} className="flex items-center justify-between gap-3 text-sm">
-                    <span className="text-navy font-medium">{m.label}</span>
+                    <span className="text-text font-medium">{m.label}</span>
                     <span className="flex items-center gap-3">
-                      <span className="text-navy tabular-nums">{formatValue(m)}</span>
+                      <span className="text-text tabular-nums">{formatValue(m)}</span>
                       {m.tier && <TierPill tier={m.tier} />}
                     </span>
                   </li>
@@ -299,17 +297,17 @@ export default function PillarModal({
 
           {/* ── Section 4: What you are doing well ── */}
           <section>
-            <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            <h3 className="text-[20px] font-semibold leading-[1.25] text-text">
               What you are doing well
             </h3>
             {doingWell.length === 0 ? (
-              <p className="mt-2 text-base leading-[1.5] text-muted">
+              <p className="mt-2 text-base leading-[1.5] text-text-dim">
                 No standout strengths in this pillar yet — every score below tells you where momentum can build.
               </p>
             ) : (
               <ul className="mt-3 space-y-2">
                 {doingWell.map((m) => (
-                  <li key={m.key} className="flex items-center gap-2 text-sm text-navy">
+                  <li key={m.key} className="flex items-center gap-2 text-sm text-text">
                     <span
                       aria-hidden="true"
                       className="inline-block w-2 h-2 rounded-full"
@@ -324,17 +322,17 @@ export default function PillarModal({
 
           {/* ── Section 5: What needs attention ── */}
           <section>
-            <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            <h3 className="text-[20px] font-semibold leading-[1.25] text-text">
               What needs attention
             </h3>
             {needsAttention.length === 0 ? (
-              <p className="mt-2 text-base leading-[1.5] text-muted">
+              <p className="mt-2 text-base leading-[1.5] text-text-dim">
                 Nothing in this pillar is flagged for attention right now — keep it up.
               </p>
             ) : (
               <ul className="mt-3 space-y-2">
                 {needsAttention.map((m) => (
-                  <li key={m.key} className="flex items-center gap-2 text-sm text-navy">
+                  <li key={m.key} className="flex items-center gap-2 text-sm text-text">
                     <span
                       aria-hidden="true"
                       className="inline-block w-2 h-2 rounded-full"
@@ -349,13 +347,13 @@ export default function PillarModal({
 
           {/* ── Section 6: Score breakdown ── */}
           <section>
-            <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            <h3 className="text-[20px] font-semibold leading-[1.25] text-text">
               Score breakdown
             </h3>
             {ratedPrimary.length > 0 && (
               <table className="w-full text-sm mt-3">
                 <thead>
-                  <tr className="text-left text-xs uppercase tracking-wide text-muted">
+                  <tr className="text-left text-xs uppercase tracking-wide text-text-dim">
                     <th className="py-1 pr-2 font-semibold">Marker</th>
                     <th className="py-1 px-2 font-semibold">Value</th>
                     <th className="py-1 px-2 font-semibold">Tier</th>
@@ -365,10 +363,10 @@ export default function PillarModal({
                 <tbody>
                   {ratedPrimary.map((m) => (
                     <tr key={m.key} className="border-t border-border">
-                      <td className="py-2 pr-2 text-navy font-medium">{m.label}</td>
-                      <td className="py-2 px-2 text-navy tabular-nums">{formatValue(m)}</td>
+                      <td className="py-2 pr-2 text-text font-medium">{m.label}</td>
+                      <td className="py-2 px-2 text-text tabular-nums">{formatValue(m)}</td>
                       <td className="py-2 px-2">{m.tier && <TierPill tier={m.tier} />}</td>
-                      <td className="py-2 pl-2 text-right text-navy tabular-nums">
+                      <td className="py-2 pl-2 text-right text-text tabular-nums">
                         {m.tier ? `+${TIER_VALUE[m.tier]}` : ''}
                       </td>
                     </tr>
@@ -376,20 +374,20 @@ export default function PillarModal({
                 </tbody>
               </table>
             )}
-            <p className="mt-3 text-sm text-muted">{breakdownFooter}</p>
+            <p className="mt-3 text-sm text-text-dim">{breakdownFooter}</p>
 
             {supportingMarkers.length > 0 && (
               <div className="mt-5">
-                <h4 className="text-base font-semibold text-navy">Supporting markers</h4>
-                <p className="mt-1 text-sm text-muted">
+                <h4 className="text-base font-semibold text-text">Supporting markers</h4>
+                <p className="mt-1 text-sm text-text-dim">
                   Surfaced for transparency — these markers are NOT included in the pillar score.
                 </p>
                 <ul className="mt-3 space-y-2">
                   {supportingMarkers.map((m) => (
                     <li key={m.key} className="flex items-center justify-between gap-3 text-sm">
-                      <span className="text-navy font-medium">{m.label}</span>
+                      <span className="text-text font-medium">{m.label}</span>
                       <span className="flex items-center gap-3">
-                        <span className="text-navy tabular-nums">{formatValue(m)}</span>
+                        <span className="text-text tabular-nums">{formatValue(m)}</span>
                         {m.tier && <TierPill tier={m.tier} />}
                       </span>
                     </li>
@@ -401,18 +399,18 @@ export default function PillarModal({
 
           {/* ── Section 7: Recommended plan ── */}
           <section>
-            <h3 className="text-[20px] font-semibold leading-[1.25] text-navy">
+            <h3 className="text-[20px] font-semibold leading-[1.25] text-text">
               Recommended plan
             </h3>
             {!prescription ? (
-              <p className="mt-2 text-base leading-[1.5] text-muted">
+              <p className="mt-2 text-base leading-[1.5] text-text-dim">
                 Your coach hasn&apos;t written a recommendation for this pillar yet. Check back soon.
               </p>
             ) : (
               <div className="mt-2">
-                <p className="text-base leading-[1.5] text-navy">{prescription.summary}</p>
+                <p className="text-base leading-[1.5] text-text">{prescription.summary}</p>
                 {prescription.bullets && prescription.bullets.length > 0 && (
-                  <ul className="mt-3 space-y-1.5 list-disc list-inside text-sm text-navy">
+                  <ul className="mt-3 space-y-1.5 list-disc list-inside text-sm text-text">
                     {prescription.bullets.map((b, i) => (
                       <li key={i}>{b}</li>
                     ))}
@@ -429,13 +427,14 @@ export default function PillarModal({
                   </div>
                 )}
                 {prescription.updatedBy?.name && prescription.updatedAt && (
-                  <p className="mt-4 pl-3 border-l-4 border-gold text-xs text-muted">
+                  <p className="mt-4 pl-3 border-l-4 border-gold-brand text-xs text-text-dim">
                     Updated by {prescription.updatedBy.name} · {relativeTime(prescription.updatedAt)}
                   </p>
                 )}
               </div>
             )}
           </section>
+        </div>
         </div>
       </aside>
     </>

@@ -30,28 +30,29 @@ const TIER_DOT: Record<RatingTier, string> = {
   poor: '#ef4444',
 };
 
+// Dark-portal tier palette (hue-preserving; mirrors Section 11).
 const TIER_ROW_BG: Record<RatingTier, string> = {
-  elite: 'bg-emerald-50/80',
-  great: 'bg-blue-50/80',
-  normal: 'bg-gray-50/60',
-  cautious: 'bg-amber-50/80',
-  poor: 'bg-red-50/80',
+  elite: 'bg-emerald-500/15',
+  great: 'bg-blue-500/15',
+  normal: 'bg-gray-500/15',
+  cautious: 'bg-amber-500/15',
+  poor: 'bg-red-500/15',
 };
 
 const TIER_ROW_BORDER: Record<RatingTier, string> = {
   elite: 'border-l-emerald-500',
   great: 'border-l-blue-500',
-  normal: 'border-l-gray-300',
+  normal: 'border-l-gray-400',
   cautious: 'border-l-amber-500',
   poor: 'border-l-red-500',
 };
 
 const TIER_TEXT: Record<RatingTier, string> = {
-  elite: 'text-emerald-700',
-  great: 'text-blue-700',
-  normal: 'text-gray-600',
-  cautious: 'text-amber-700',
-  poor: 'text-red-700',
+  elite: 'text-emerald-300',
+  great: 'text-blue-300',
+  normal: 'text-gray-300',
+  cautious: 'text-amber-300',
+  poor: 'text-red-300',
 };
 
 function TierPill({ tier }: { tier: RatingTier }) {
@@ -74,21 +75,21 @@ function renderMarkerRow(m: ReportMarker, i: number) {
     <div
       key={m.key}
       className={`flex items-center justify-between py-2 px-4 border-l-[3px] ${
-        m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-gray-50/40 border-l-gray-200'
-      } ${i > 0 ? 'border-t border-gray-100' : ''}`}
+        m.tier ? `${TIER_ROW_BG[m.tier]} ${TIER_ROW_BORDER[m.tier]}` : 'bg-bg-3 border-l-line'
+      } ${i > 0 ? 'border-t border-line' : ''}`}
     >
-      <span className="text-[13px] font-medium text-[#1a202c]">{m.label}</span>
+      <span className="text-[13px] font-medium text-text">{m.label}</span>
       <div className="flex items-center gap-3">
         {m.value !== null ? (
           <>
-            <span className="text-[13px] font-semibold text-[#1a202c] tabular-nums tracking-tight">
+            <span className="text-[13px] font-semibold text-text tabular-nums tracking-tight">
               {m.value}
-              <span className="text-[11px] font-normal text-[#64748b] ml-1">{m.unit}</span>
+              <span className="text-[11px] font-normal text-text-dim ml-1">{m.unit}</span>
             </span>
             {m.tier && <TierPill tier={m.tier} />}
           </>
         ) : (
-          <span className="text-[11px] text-[#94a3b8] italic">Not recorded</span>
+          <span className="text-[11px] text-text-dim italic">Not recorded</span>
         )}
       </div>
     </div>
@@ -102,11 +103,11 @@ export default function DetailedMarkerResultsDisclosure({
   const categories = Array.from(new Set(markers.map((m) => m.category)));
 
   return (
-    <details className="group mt-12 border border-border rounded-2xl bg-white overflow-hidden">
-      <summary className="flex items-start justify-between gap-4 px-5 py-4 cursor-pointer list-none select-none hover:bg-gray-50">
+    <details className="group mt-12 border border-line rounded-2xl bg-bg-3 overflow-hidden">
+      <summary className="flex items-start justify-between gap-4 px-5 py-4 cursor-pointer list-none select-none hover:bg-bg">
         <div>
-          <h3 className="text-[16px] font-semibold text-navy">Detailed marker results</h3>
-          <p className="mt-1 text-sm text-muted">
+          <h3 className="text-[16px] font-semibold text-text">Detailed marker results</h3>
+          <p className="mt-1 text-sm text-text-dim">
             For coaches and curious clients — every rated marker with raw values and ranges.
           </p>
         </div>
@@ -118,7 +119,7 @@ export default function DetailedMarkerResultsDisclosure({
           stroke="currentColor"
           strokeWidth="2"
           aria-hidden="true"
-          className="mt-1 text-navy/70 transition-transform group-open:rotate-90"
+          className="mt-1 text-text-dim transition-transform group-open:rotate-90"
         >
           <path d="M6 4l4 4-4 4" strokeLinecap="round" strokeLinejoin="round" />
         </svg>

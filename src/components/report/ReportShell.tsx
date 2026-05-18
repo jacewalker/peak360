@@ -49,12 +49,12 @@ export default function ReportShell({
   return (
     <div>
       <h2
-        className="text-navy font-semibold leading-[1.15]"
+        className="text-text font-semibold leading-[1.15]"
         style={{ fontSize: 'clamp(24px, 4vw, 28px)' }}
       >
         {heading}
       </h2>
-      <p className="mt-3 text-base leading-[1.5] text-muted max-w-3xl">
+      <p className="mt-3 text-base leading-[1.5] text-text-dim max-w-3xl">
         {intro}
       </p>
 

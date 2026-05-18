@@ -118,8 +118,8 @@ export default async function ReportPage({
           Download PDF
         </a>
       </div>
-      {/* Inner light wrapper preserves Phase 8 contract — D-09 frame edge only. */}
-      <div className="bg-white rounded-2xl p-6 sm:p-8 my-6 shadow-sm">
+      {/* Dark portal-native wrapper — matches Section 11 dark vocabulary (D-09 frame edge). */}
+      <div className="bg-bg-2 border border-line rounded-2xl p-6 sm:p-8 my-6">
         <ReportShell
           assessmentId={id}
           definitions={definitions}
