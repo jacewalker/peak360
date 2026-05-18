@@ -20,10 +20,10 @@ const STATUS_RING_HEX: Record<PillarStatus, string> = {
 };
 
 const STATUS_LABEL_TEXT: Record<PillarStatus, string> = {
-  green: 'text-emerald-700',
-  amber: 'text-amber-700',
-  red: 'text-red-700',
-  pending: 'text-slate-500',
+  green: 'text-emerald-300',
+  amber: 'text-amber-300',
+  red: 'text-red-300',
+  pending: 'text-text-dim',
 };
 
 const STATUS_LABEL: Record<PillarStatus, string> = {
@@ -39,7 +39,7 @@ const TIER_DOT: Record<RatingTier | 'null', string> = {
   normal: 'bg-slate-400',
   great: 'bg-blue-500',
   elite: 'bg-emerald-500',
-  null: 'bg-slate-300',
+  null: 'bg-line-2',
 };
 
 const TIER_RANK: Record<RatingTier, number> = {
@@ -79,15 +79,15 @@ export default function PillarsDisplay({ pillars, markers }: Props) {
       {/* Section header with landing-page-style gold mono eyebrow */}
       <header className="px-2 sm:px-4 pt-4 pb-8">
         <div className="flex items-center gap-3 mb-2">
-          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-dark">
+          <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.22em] text-gold-brand">
             05 · Peak Living
           </span>
-          <span className="h-px w-10 bg-gold-dark/40" />
+          <span className="h-px w-10 bg-gold-brand/40" />
         </div>
-        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-navy">
+        <h2 className="text-2xl sm:text-3xl font-semibold tracking-tight text-text">
           The five pillars
         </h2>
-        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-muted">
+        <p className="mt-2 max-w-2xl text-sm leading-relaxed text-text-dim">
           Each column reads the rated markers in its domain and reports a
           single composite signal. Tap a pillar for the marker breakdown.
         </p>
@@ -142,12 +142,12 @@ function Pillar({
       onClick={onSelect}
       aria-label={`Open ${pillar.label} pillar details`}
       className="group flex w-full flex-col items-center text-center
-                 bg-white rounded-2xl border border-slate-200 p-5
-                 hover:border-gold-dark/50 hover:shadow-md
-                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-dark/60 focus-visible:ring-offset-2 focus-visible:ring-offset-white
+                 bg-bg-3 rounded-2xl border border-line p-5
+                 hover:border-gold-brand/40 hover:bg-bg
+                 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-brand/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-2
                  motion-safe:transition-all duration-200 cursor-pointer"
     >
-      <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-slate-500 self-start">
+      <p className="font-mono text-[10px] font-semibold uppercase tracking-wider text-text-dim self-start">
         {eyebrow}
       </p>
 
@@ -155,18 +155,18 @@ function Pillar({
       <div
         className="size-28 rounded-full grid place-items-center my-3 motion-safe:transition-[background] duration-500"
         style={{
-          background: `conic-gradient(${accent} ${pct}%, #e2e8f0 0)`,
+          background: `conic-gradient(${accent} ${pct}%, rgba(255,255,255,0.06) 0)`,
         }}
         aria-hidden
       >
-        <div className="size-[88px] rounded-full bg-white grid place-items-center">
-          <span className="font-mono text-2xl font-bold tabular-nums text-navy">
+        <div className="size-[88px] rounded-full bg-bg-2 grid place-items-center">
+          <span className="font-mono text-2xl font-bold tabular-nums text-text">
             {isPending || pillar.score == null ? '—' : pillar.score}
           </span>
         </div>
       </div>
 
-      <h3 className="text-sm font-semibold text-navy">{pillar.label}</h3>
+      <h3 className="text-sm font-semibold text-text">{pillar.label}</h3>
       <span
         className={`mt-1 text-[10px] font-semibold uppercase tracking-wider ${labelClass}`}
       >
@@ -177,8 +177,8 @@ function Pillar({
       <div className="mt-3 w-full space-y-1.5 text-left">
         {top.length === 0 ? (
           <div className="flex items-center gap-2 text-[11px]">
-            <span className="size-1.5 rounded-full bg-slate-300" aria-hidden />
-            <span className="flex-1 text-slate-500">Awaiting data</span>
+            <span className="size-1.5 rounded-full bg-line-2" aria-hidden />
+            <span className="flex-1 text-text-dim">Awaiting data</span>
           </div>
         ) : (
           top.map((m) => (
@@ -187,8 +187,8 @@ function Pillar({
                 className={`size-1.5 rounded-full ${TIER_DOT[(m.tier ?? 'null') as keyof typeof TIER_DOT]}`}
                 aria-hidden
               />
-              <span className="flex-1 text-slate-700 truncate">{m.label}</span>
-              <span className="font-mono text-slate-500">
+              <span className="flex-1 text-text truncate">{m.label}</span>
+              <span className="font-mono text-text-dim">
                 {m.tier ?? 'pending'}
               </span>
             </div>
