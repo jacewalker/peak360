@@ -44,7 +44,7 @@ export function InsightsSection({ insights }: InsightsSectionProps) {
 
           {/* Content */}
           <View style={{ paddingLeft: 12, paddingRight: 10, paddingVertical: 8 }}>
-            <Text style={{ fontSize: 10, fontFamily: FONT.bold, color: COLORS.navy }}>
+            <Text style={{ fontSize: 10, fontFamily: FONT.bold, color: COLORS.textPrimary }}>
               {insight.title}
             </Text>
             <Text style={{ fontSize: 8, color: COLORS.textSecondary, marginTop: 3 }}>

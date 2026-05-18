@@ -60,14 +60,16 @@ const STATUS_LABEL: Record<PillarStatus, string> = {
   pending: 'Awaiting data',
 };
 
+// Dark-portal status text — brightened 300-shade equivalents for legibility on dark page.
 const STATUS_TEXT: Record<PillarStatus, string> = {
-  green: '#047857', // emerald-700
-  amber: '#b45309', // amber-700
-  red: '#b91c1c', // red-700
+  green: '#6ee7b7', // emerald-300
+  amber: '#fcd34d', // amber-300
+  red: '#fca5a5', // red-300
   pending: COLORS.textSecondary,
 };
 
-const PENDING_RING = '#cbd5e1'; // slate-300
+// Pending ring on dark — faint cream (matches in-app rgba(255,255,255,0.06) conic neutral).
+const PENDING_RING = '#23221f'; // matches COLORS.border
 
 function getTopContributors(
   pillarKey: PillarKey,
@@ -165,7 +167,7 @@ function RingGauge({ score, status, size = 60 }: RingGaugeProps) {
           style={{
             fontSize: 14,
             fontFamily: FONT.bold,
-            color: COLORS.navy,
+            color: COLORS.textPrimary,
           }}
         >
           {isPending || score === null ? '—' : `${score}`}
@@ -228,7 +230,7 @@ export default function PillarsPage({
           borderColor: COLORS.border,
           borderRadius: 8,
           padding: 6,
-          backgroundColor: COLORS.white,
+          backgroundColor: COLORS.bgLighter,
           alignItems: 'center',
         }}
       >
@@ -255,7 +257,7 @@ export default function PillarsPage({
           style={{
             fontSize: 8,
             fontFamily: FONT.bold,
-            color: COLORS.navy,
+            color: COLORS.textPrimary,
             textAlign: 'center',
           }}
         >
@@ -353,7 +355,7 @@ export default function PillarsPage({
   return (
     <Page size="A4" style={styles.page}>
       <View style={{ marginBottom: 10 }}>
-        <Text style={{ fontSize: 16, fontFamily: FONT.bold, color: COLORS.navy }}>
+        <Text style={{ fontSize: 16, fontFamily: FONT.bold, color: COLORS.textPrimary }}>
           {heading}
         </Text>
         {intro ? (

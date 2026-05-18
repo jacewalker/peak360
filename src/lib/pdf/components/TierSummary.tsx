@@ -39,7 +39,7 @@ export function TierSummary({ tierCounts, totalRated }: TierSummaryProps) {
                 borderColor: COLORS.border,
                 borderRadius: 6,
                 overflow: 'hidden',
-                backgroundColor: COLORS.white,
+                backgroundColor: COLORS.bgLighter,
                 padding: '6 8',
                 alignItems: 'center',
               }}
@@ -76,7 +76,7 @@ export function TierSummary({ tierCounts, totalRated }: TierSummaryProps) {
                 style={{
                   fontSize: 22,
                   fontFamily: FONT.bold,
-                  color: COLORS.navy,
+                  color: COLORS.textPrimary,
                   lineHeight: 1,
                 }}
               >

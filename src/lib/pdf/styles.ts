@@ -9,6 +9,7 @@ export const styles = StyleSheet.create({
     fontFamily: 'Helvetica',
     fontSize: 10,
     color: COLORS.textPrimary,
+    backgroundColor: COLORS.page,
   },
   sectionHeading: {
     flexDirection: 'row',
@@ -26,7 +27,7 @@ export const styles = StyleSheet.create({
   sectionHeadingText: {
     fontSize: 13,
     fontFamily: 'Helvetica-Bold',
-    color: COLORS.navy,
+    color: COLORS.textPrimary,
   },
   card: {
     borderWidth: 0.5,

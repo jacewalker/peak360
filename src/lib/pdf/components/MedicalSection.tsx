@@ -56,13 +56,13 @@ export function MedicalSection({ medical }: MedicalSectionProps) {
               marginLeft: 'auto',
               paddingHorizontal: 6,
               paddingVertical: 2,
-              backgroundColor: '#fffbeb',
+              backgroundColor: '#30240f',
               borderWidth: 0.5,
               borderColor: '#fcd34d',
               borderRadius: 3,
             }}
           >
-            <Text style={{ fontSize: 7, fontFamily: FONT.bold, textTransform: 'uppercase', letterSpacing: 0.5, color: '#92400e' }}>
+            <Text style={{ fontSize: 7, fontFamily: FONT.bold, textTransform: 'uppercase', letterSpacing: 0.5, color: '#fcd34d' }}>
               Flag(s) Detected
             </Text>
           </View>
@@ -99,7 +99,9 @@ export function MedicalSection({ medical }: MedicalSectionProps) {
               paddingVertical: 4,
               borderTopWidth: 0.5,
               borderTopColor: COLORS.border,
-              backgroundColor: '#fef2f2',
+              backgroundColor: '#2f1617',
+              borderLeftWidth: 2,
+              borderLeftColor: '#ef4444',
             }}
           >
             <Text style={{ fontSize: 7, textTransform: 'uppercase', letterSpacing: 0.5, color: COLORS.textSecondary, marginBottom: 1 }}>

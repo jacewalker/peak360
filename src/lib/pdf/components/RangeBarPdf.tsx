@@ -103,8 +103,8 @@ export function RangeBarPdf({ value, standards }: RangeBarPdfProps) {
         cx={needleX}
         cy={6}
         r={4}
-        fill={COLORS.navy}
-        stroke={COLORS.white}
+        fill={COLORS.textPrimary}
+        stroke={COLORS.page}
         strokeWidth={1.5}
       />
     </Svg>
