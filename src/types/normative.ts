@@ -76,12 +76,16 @@ export const TIER_BORDER: Record<RatingTier, string> = {
   poor: 'border-l-red-500',
 };
 
+// Display labels for the 5-tier rating system. The underlying enum keys
+// ('elite', 'great', 'poor') stay unchanged so we don't have to migrate
+// stored data or rewrite every rating-engine reference — only the
+// user-visible copy changes.
 export const TIER_LABELS: Record<RatingTier, string> = {
-  elite: 'Elite',
-  great: 'Great',
+  elite: 'Peak',
+  great: 'Optimal',
   normal: 'Normal',
   cautious: 'Cautious',
-  poor: 'Poor',
+  poor: 'Attention',
 };
 
 export interface NormativeRangeRow {

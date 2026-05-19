@@ -16,7 +16,7 @@ import type {
   PillarStatus,
 } from '@/lib/pillars/types';
 import type { ReportMarker } from '@/lib/pdf/types';
-import type { RatingTier } from '@/types/normative';
+import { TIER_LABELS, type RatingTier } from '@/types/normative';
 
 /**
  * Phase 8 — D-26 Pillars page (Option 2 visual — see
@@ -306,7 +306,7 @@ export default function PillarsPage({
           ) : (
             top.map((m) => {
               const dotColor = m.tier ? TIER_COLORS_PDF[m.tier] : PENDING_RING;
-              const tierName = m.tier ?? 'pending';
+              const tierName = m.tier ? TIER_LABELS[m.tier].toLowerCase() : 'pending';
               return (
                 <View
                   key={m.key}

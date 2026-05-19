@@ -2,7 +2,7 @@
 
 import type { PillarDefinition, PillarStatus } from '@/lib/pillars/types';
 import type { ReportMarker } from '@/lib/pdf/types';
-import type { RatingTier } from '@/types/normative';
+import { TIER_LABELS, type RatingTier } from '@/types/normative';
 import { TRAFFIC_LIGHT_HEX } from '@/lib/pillars/colors';
 
 /**
@@ -145,7 +145,7 @@ export default function PillarCard({
               />
               <span className="flex-1 text-text truncate">{m.label}</span>
               <span className="font-mono text-text-dim">
-                {m.tier ?? 'pending'}
+                {m.tier ? TIER_LABELS[m.tier].toLowerCase() : 'pending'}
               </span>
             </div>
           ))
