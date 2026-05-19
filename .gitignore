@@ -44,6 +44,7 @@ yarn-error.log*
 # Dev artifacts
 /backup/
 /backups/
+.peak360/
 .playwright-mcp/
 test_imports/
 *.png
