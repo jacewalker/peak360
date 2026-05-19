@@ -18,7 +18,6 @@ interface ReportMarker {
 }
 
 interface Insight {
-  markerKey: string;
   title: string;
   why: string;
   doNow: string[];
@@ -328,7 +327,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       <div className="px-6 sm:px-8 pb-8">
 
       {/* ─── PEAK LIVING PILLARS ─── */}
-      <PillarsDisplay pillars={pillars} markers={markers} insights={insights} />
+      <PillarsDisplay pillars={pillars} markers={markers} />
 
       {/* ─── SECTION 2: DAILY READINESS ─── */}
       <div className="mt-8 print:mt-6">
@@ -538,9 +537,34 @@ export default function Section11({ assessmentId }: Section11Props) {
         </div>
       </div>
 
-      {/* Insights & recommendations now live inside each pillar modal in
-          PillarsDisplay above — admins/coaches see them in-context for the
-          relevant pillar instead of as a separate flat list. */}
+      {/* ─── INSIGHTS & RECOMMENDATIONS ─── */}
+      {insights.length > 0 && (
+        <div className="mt-8 print:mt-6">
+          <SectionHeading>Insights & Recommendations</SectionHeading>
+
+          <div className="space-y-4">
+            {insights.map((insight, i) => (
+              <div key={i} className="report-insight-card relative bg-bg-3 rounded-xl border border-line overflow-hidden">
+                <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-gold-brand to-champagne" />
+                <div className="pl-5 pr-5 py-4">
+                  <h4 className="text-sm font-bold text-text mb-1.5">{insight.title}</h4>
+                  <p className="text-[12px] leading-relaxed text-text-dim mb-3">{insight.why}</p>
+                  {insight.doNow.length > 0 && (
+                    <div className="space-y-1.5">
+                      {insight.doNow.map((item, j) => (
+                        <div key={j} className="flex items-start gap-2">
+                          <div className="w-1 h-1 rounded-full bg-gold-brand mt-[7px] shrink-0" />
+                          <p className="text-[12px] leading-relaxed text-text">{item}</p>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* ─── REPORT FOOTER ─── */}
       <div className="report-footer mt-10 pt-5 border-t border-line print:mt-6">

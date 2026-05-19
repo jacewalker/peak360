@@ -1,12 +1,7 @@
 import { getPeak360Rating, tierScore } from './ratings';
 import type { RatingTier, RatingResult } from '@/types/normative';
 
-export interface Insight {
-  /**
-   * The marker test key that triggered this insight. Used by the report UI to
-   * route each insight into the pillar modal of the marker it relates to.
-   */
-  markerKey: string;
+interface Insight {
   title: string;
   why: string;
   doNow: string[];
@@ -30,8 +25,8 @@ export function generatePeak360Insights({
   markers: MarkerInput[];
 }): Insight[] {
   const insights: Insight[] = [];
-  const action = (markerKey: string, title: string, why: string, doNow: string[] = []) =>
-    insights.push({ markerKey, title, why: `${PROVIDER_PREFIX} ${why}`, doNow });
+  const action = (title: string, why: string, doNow: string[] = []) =>
+    insights.push({ title, why: `${PROVIDER_PREFIX} ${why}`, doNow });
 
   const flagIf = (key: string, label: string, value: number | string | null, rating: RatingResult | null) => {
     if (!value) return;
@@ -49,7 +44,6 @@ export function generatePeak360Insights({
       case 'cholesterol_total':
       case 'triglycerides':
         action(
-          key,
           'Cardio-metabolic risk flags',
           `${label} is rated **${tier}** for age/sex norms. This can correlate with higher long-term cardiovascular risk, especially if multiple lipids are flagged together.`,
           [
@@ -66,7 +60,6 @@ export function generatePeak360Insights({
       case 'hdl':
       case 'hdl_cholesterol':
         action(
-          key,
           'Protective cholesterol low',
           `${label} is rated **${tier}**. HDL is not "the whole story", but low HDL often tracks with low activity, poor sleep, insulin resistance, or smoking.`,
           [
@@ -83,7 +76,6 @@ export function generatePeak360Insights({
       case 'hba1c':
       case 'insulin':
         action(
-          key,
           'Glucose regulation needs work',
           `${label} is rated **${tier}**. This suggests suboptimal glycaemic control (energy swings, appetite dysregulation, higher cardiometabolic risk).`,
           [
@@ -100,7 +92,6 @@ export function generatePeak360Insights({
       case 'hsCRP':
       case 'crp_hs':
         action(
-          key,
           'Inflammation / vascular stress elevated',
           `${label} is rated **${tier}**. This can reflect infection/injury, poor recovery, smoking, or chronic inflammatory load.`,
           [
@@ -114,7 +105,6 @@ export function generatePeak360Insights({
 
       case 'homocysteine':
         action(
-          key,
           'Homocysteine elevated',
           `${label} is rated **${tier}**. Elevated homocysteine is associated with vascular stress and may reflect methylation issues.`,
           [
@@ -129,7 +119,6 @@ export function generatePeak360Insights({
       case 'vitaminD':
       case 'vitamin_d_25oh':
         action(
-          key,
           'Vitamin D low',
           `${label} is rated **${tier}**. Low vitamin D is common and can impact bone health, immune function, and mood in some people.`,
           [
@@ -143,7 +132,6 @@ export function generatePeak360Insights({
 
       case 'ferritin':
         action(
-          key,
           'Ferritin (iron stores) flagged',
           `${label} is rated **${tier}**. Low ferritin indicates depleted iron stores which can reduce performance, recovery, and energy.`,
           [
@@ -158,7 +146,6 @@ export function generatePeak360Insights({
       case 'serumIron':
       case 'serum_iron':
         action(
-          key,
           'Serum iron levels flagged',
           `${label} is rated **${tier}**. Serum iron reflects circulating iron and can fluctuate with recent meals and inflammation.`,
           [
@@ -174,7 +161,6 @@ export function generatePeak360Insights({
       case 'hematocrit':
       case 'rbc':
         action(
-          key,
           `${label} flagged`,
           `${label} is rated **${tier}**. Abnormal values may reflect iron deficiency, dehydration, or other haematological concerns.`,
           [
@@ -189,7 +175,6 @@ export function generatePeak360Insights({
       case 'ft3':
       case 'ft4':
         action(
-          key,
           'Thyroid markers flagged',
           `${label} is rated **${tier}**. Thyroid patterns are context-heavy and should be interpreted with symptoms and clinician guidance.`,
           [
@@ -206,7 +191,6 @@ export function generatePeak360Insights({
       case 'oestradiol':
       case 'shbg':
         action(
-          key,
           'Sex hormone markers flagged',
           `${label} is rated **${tier}**. Hormones are sensitive to sleep, energy availability, stress, and training load.`,
           [
@@ -221,7 +205,6 @@ export function generatePeak360Insights({
       case 'egfr':
       case 'bun':
         action(
-          key,
           'Kidney markers flagged',
           `${label} is rated **${tier}**. These can be influenced by hydration, creatine use, high-protein intake, and muscle mass.`,
           [
@@ -234,7 +217,6 @@ export function generatePeak360Insights({
 
       case 'uric_acid':
         action(
-          key,
           'Uric acid flagged',
           `${label} is rated **${tier}**. Elevated uric acid can increase risk of gout and may reflect dietary or metabolic factors.`,
           [
@@ -248,7 +230,6 @@ export function generatePeak360Insights({
 
       case 'dheas':
         action(
-          key,
           'DHEA-S flagged',
           `${label} is rated **${tier}**. DHEA-S reflects adrenal function and can be affected by stress, sleep, and ageing.`,
           [
@@ -262,7 +243,6 @@ export function generatePeak360Insights({
       case 'fsh':
       case 'lh':
         action(
-          key,
           'Reproductive hormone flagged',
           `${label} is rated **${tier}**. FSH/LH levels are context-dependent (age, menstrual cycle phase for females, time of day).`,
           [
@@ -276,7 +256,6 @@ export function generatePeak360Insights({
       case 'grip_strength_left':
       case 'grip_strength_right':
         action(
-          key,
           'Grip strength needs improvement',
           `${label} is rated **${tier}**. Grip strength is one of the strongest predictors of all-cause mortality and functional independence.`,
           [
@@ -293,7 +272,6 @@ export function generatePeak360Insights({
       case 'single_leg_hop_left':
       case 'single_leg_hop_right':
         action(
-          key,
           'Lower-body power below target',
           `${label} is rated **${tier}**. Jump performance reflects explosive power, which declines faster than strength with age.`,
           [
@@ -307,7 +285,6 @@ export function generatePeak360Insights({
 
       case 'imtp_max_force':
         action(
-          key,
           'Peak force production flagged',
           `${label} is rated **${tier}**. Isometric mid-thigh pull reflects maximal lower-body force -- critical for injury resilience and performance.`,
           [
@@ -322,7 +299,6 @@ export function generatePeak360Insights({
       case 'single_leg_balance_left':
       case 'single_leg_balance_right':
         action(
-          key,
           'Balance and stability needs work',
           `${label} is rated **${tier}**. Poor single-leg balance correlates with fall risk and may indicate proprioceptive or ankle/hip deficits.`,
           [
@@ -337,7 +313,6 @@ export function generatePeak360Insights({
       case 'shoulder_iso_y_left':
       case 'shoulder_iso_y_right':
         action(
-          key,
           'Shoulder stability below target',
           `${label} is rated **${tier}**. Shoulder Iso-Y strength reflects rotator cuff and scapular stability -- important for overhead function and injury prevention.`,
           [
@@ -351,7 +326,6 @@ export function generatePeak360Insights({
 
       case 'pushups_max':
         action(
-          key,
           'Push-up endurance below target',
           `${label} is rated **${tier}**. Push-up capacity is linked to cardiovascular health and upper-body muscular endurance.`,
           [
@@ -365,7 +339,6 @@ export function generatePeak360Insights({
 
       case 'dead_man_hang':
         action(
-          key,
           'Hang time needs improvement',
           `${label} is rated **${tier}**. Dead man hang tests grip endurance and shoulder health -- both critical for longevity.`,
           [
@@ -379,7 +352,6 @@ export function generatePeak360Insights({
 
       case 'farmers_carry_distance':
         action(
-          key,
           'Loaded carry capacity flagged',
           `${label} is rated **${tier}**. Farmers carry performance reflects whole-body functional strength, grip endurance, and core stability.`,
           [
@@ -395,7 +367,6 @@ export function generatePeak360Insights({
       case 'ast':
       case 'ggt':
         action(
-          key,
           'Liver markers flagged',
           `${label} is rated **${tier}**. Can reflect alcohol intake, fatty liver risk, meds/supplements, or recent intense training.`,
           [
@@ -410,7 +381,6 @@ export function generatePeak360Insights({
 
       default:
         action(
-          key,
           'Marker out of range',
           `${label} is rated **${tier}**. This is a signal to review context, symptoms, and trends.`,
           ['Re-test and/or discuss with clinician if persistent.']

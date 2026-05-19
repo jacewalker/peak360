@@ -8,7 +8,7 @@ import {
   type PillarScore,
 } from '@/lib/pillars/mapping';
 import type { PillarStatus } from '@/lib/pillars/types';
-import type { Insight, ReportMarker } from '@/lib/pdf/types';
+import type { ReportMarker } from '@/lib/pdf/types';
 import {
   TIER_LABELS,
   type RatingTier,
@@ -19,7 +19,6 @@ interface Props {
   onClose: () => void;
   pillar: PillarScore;
   markers: ReportMarker[];
-  insights?: Insight[];
 }
 
 type GroupKey = RatingTier | 'pending';
@@ -163,7 +162,6 @@ export default function PillarsDisplayModal({
   onClose,
   pillar,
   markers,
-  insights = [],
 }: Props) {
   const panelRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -239,12 +237,6 @@ export default function PillarsDisplayModal({
   const pillarMarkers = markers.filter(
     (m) => markerToPillar(m).pillar === pillar.key,
   );
-
-  // Route each insight into the modal of the marker it relates to. The
-  // insight carries the marker test key from generatePeak360Insights; we
-  // intersect that with the markers already classified into this pillar.
-  const pillarMarkerKeys = new Set(pillarMarkers.map((m) => m.key));
-  const pillarInsights = insights.filter((i) => pillarMarkerKeys.has(i.markerKey));
 
   const grouped: Record<GroupKey, ReportMarker[]> = {
     poor: [],
@@ -472,41 +464,6 @@ export default function PillarsDisplayModal({
             </div>
           )}
         </div>
-
-        {/* Insights & recommendations — routed in from generatePeak360Insights. */}
-        {pillarInsights.length > 0 && (
-          <div className="px-6 py-5 border-t border-line">
-            <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim mb-3">
-              Insights &amp; recommendations
-            </h3>
-            <div className="space-y-3">
-              {pillarInsights.map((insight, i) => (
-                <div
-                  key={`${insight.markerKey}-${i}`}
-                  className="relative bg-bg-3 rounded-xl border border-line overflow-hidden"
-                >
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-gold-brand to-champagne" />
-                  <div className="pl-5 pr-5 py-4">
-                    <h4 className="text-sm font-semibold text-text mb-1.5">{insight.title}</h4>
-                    <p className="text-[12px] leading-relaxed text-text-dim mb-3">
-                      {insight.why}
-                    </p>
-                    {insight.doNow.length > 0 && (
-                      <div className="space-y-1.5">
-                        {insight.doNow.map((item, j) => (
-                          <div key={j} className="flex items-start gap-2">
-                            <div className="w-1 h-1 rounded-full bg-gold-brand mt-[7px] shrink-0" />
-                            <p className="text-[12px] leading-relaxed text-text">{item}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
         </div>
       </aside>
     </>
