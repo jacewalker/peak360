@@ -33,9 +33,16 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next();
   }
 
-  // Portal subdomain → apex /portal cross-domain redirect
+  // Portal subdomain → apex /portal cross-domain redirect.
+  // API routes (/api/*) live at the root of the route tree, NOT under /portal/api,
+  // so they must NOT be prefixed with /portal — that produces broken URLs like
+  // peak360.com.au/portal/api/assessments/export which (a) 404 on the apex tree
+  // and (b) mangle the suggested download filename (browser falls back to the
+  // last path segment "export", dropping the .csv extension).
+  // Serve API requests from the portal subdomain directly — same Next.js route,
+  // same auth cookie scope, no cross-host filename loss.
   const hostname = req.headers.get('host')?.split(':')[0] ?? '';
-  if (PORTAL_SUBDOMAIN_HOSTNAMES.has(hostname)) {
+  if (PORTAL_SUBDOMAIN_HOSTNAMES.has(hostname) && !pathname.startsWith('/api/')) {
     const targetPath = pathname === '/' ? '/portal' : `/portal${pathname}`;
     const targetUrl = new URL(`https://${APEX_HOSTNAME}${targetPath}${search}`);
     return NextResponse.redirect(targetUrl);
