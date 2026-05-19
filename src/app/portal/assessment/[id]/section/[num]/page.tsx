@@ -60,8 +60,24 @@ export default function SectionPage() {
   // Load section data from API + completed sections
   useEffect(() => {
     if (!isValidNum) return;
+
+    // Reset the in-memory store whenever we navigate into a DIFFERENT assessment.
+    // The Zustand store is a module-level singleton — without this reset, opening
+    // a brand-new assessment after viewing an existing one would leave the prior
+    // assessment's sectionData in place, and Section 1 would render the previous
+    // client's name/email/etc. because the API for the new assessment returns
+    // `data: null` and the load below short-circuits (only sets data when truthy).
+    const prevId = useAssessmentStore.getState().assessmentId;
+    if (prevId !== id) {
+      store.reset();
+    }
     store.setAssessmentId(id);
     store.setCurrentSection(num);
+
+    // Pre-clear the section's slot so a brand-new assessment never shows the
+    // previous one's data even mid-section (e.g. tab-switching). The API
+    // populates this on success; null/empty responses leave the slot empty.
+    store.setSectionData(num, {} as SectionData);
 
     Promise.all([
       fetch(`/api/assessments/${id}/sections/${num}`).then((r) => r.json()),
