@@ -56,10 +56,102 @@ export default function AdminPeoplePage() {
   const [inviteEmail, setInviteEmail] = useState('');
   const [inviteName, setInviteName] = useState('');
   const [inviteRole, setInviteRole] = useState<InviteRole>('client');
+  const [invitePassword, setInvitePassword] = useState('');
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteMessage, setInviteMessage] = useState<
     { type: 'success' | 'error'; text: string } | null
   >(null);
+  // After a successful create we surface the credentials inline so the admin
+  // can copy them and share with the user out-of-band (email isn't wired up).
+  const [createdCredentials, setCreatedCredentials] = useState<
+    { email: string; password: string } | null
+  >(null);
+  const [credentialsCopied, setCredentialsCopied] = useState(false);
+
+  // Shared with the reset-password modal — generates a 16-char readable password.
+  // Crockford-ish alphabet — no 0/O/1/I/l ambiguity for read-aloud sharing.
+  const buildPassword = useCallback(() => {
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789';
+    const bytes = new Uint32Array(16);
+    crypto.getRandomValues(bytes);
+    let out = '';
+    for (let i = 0; i < bytes.length; i++) {
+      out += alphabet[bytes[i] % alphabet.length];
+    }
+    return out;
+  }, []);
+
+  const generatePassword = useCallback(() => {
+    setInvitePassword(buildPassword());
+  }, [buildPassword]);
+
+  // Reset-password modal state — null when closed.
+  const [resetTarget, setResetTarget] = useState<
+    { id: string; email: string; name: string } | null
+  >(null);
+  const [resetPasswordValue, setResetPasswordValue] = useState('');
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetError, setResetError] = useState<string | null>(null);
+  const [resetCredentials, setResetCredentials] = useState<
+    { email: string; password: string } | null
+  >(null);
+  const [resetCredentialsCopied, setResetCredentialsCopied] = useState(false);
+
+  const openResetModal = useCallback(
+    (u: { id: string; email: string; name: string }) => {
+      setResetTarget(u);
+      setResetPasswordValue('');
+      setResetError(null);
+      setResetCredentials(null);
+      setResetCredentialsCopied(false);
+    },
+    [],
+  );
+
+  const closeResetModal = useCallback(() => {
+    setResetTarget(null);
+    setResetPasswordValue('');
+    setResetError(null);
+    setResetCredentials(null);
+    setResetCredentialsCopied(false);
+  }, []);
+
+  const handleResetSubmit = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!resetTarget) return;
+      const pw = resetPasswordValue;
+      if (pw.length < 8) {
+        setResetError('Password must be at least 8 characters.');
+        return;
+      }
+      setResetError(null);
+      setResetLoading(true);
+      try {
+        const res = await fetch(`/api/admin/users/${resetTarget.id}/password`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ newPassword: pw }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          setResetCredentials({ email: resetTarget.email, password: pw });
+          setResetPasswordValue('');
+          setToast({
+            variant: 'success',
+            message: `Password reset for ${resetTarget.name || resetTarget.email}.`,
+          });
+        } else {
+          setResetError(data?.error || "Couldn't set password. Try again.");
+        }
+      } catch {
+        setResetError("We couldn't reach the server. Check your connection and try again.");
+      } finally {
+        setResetLoading(false);
+      }
+    },
+    [resetTarget, resetPasswordValue],
+  );
 
   // D-10/D-11: client-side admin gating (defence-in-depth; server is source of truth)
   useEffect(() => {
@@ -217,26 +309,35 @@ export default function AdminPeoplePage() {
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     setInviteMessage(null);
+    setCreatedCredentials(null);
+    setCredentialsCopied(false);
     setInviteLoading(true);
+    const submittedEmail = inviteEmail.trim();
+    const submittedPassword = invitePassword;
     try {
       const res = await fetch('/api/invitations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          email: inviteEmail.trim(),
+          email: submittedEmail,
           name: inviteName.trim() || undefined,
           role: inviteRole,
+          password: submittedPassword || undefined,
         }),
       });
       const data = await res.json().catch(() => ({}));
       if (res.ok) {
         setInviteMessage({
           type: 'success',
-          text: `Invitation sent to ${inviteEmail.trim()}.`,
+          text: `User created: ${submittedEmail}.`,
         });
+        if (submittedPassword) {
+          setCreatedCredentials({ email: submittedEmail, password: submittedPassword });
+        }
         setInviteEmail('');
         setInviteName('');
         setInviteRole('client');
+        setInvitePassword('');
         // Refresh BOTH datasets so the new pending row appears in-place.
         void refresh();
       } else if (
@@ -250,7 +351,7 @@ export default function AdminPeoplePage() {
       } else {
         setInviteMessage({
           type: 'error',
-          text: data.error || "Couldn't send the invitation. Try again.",
+          text: data.error || "Couldn't create the user. Try again.",
         });
       }
     } catch {
@@ -286,7 +387,7 @@ export default function AdminPeoplePage() {
             People
           </h1>
           <p className="mt-3 text-[13px] text-text-dim leading-[1.55] max-w-2xl">
-            Manage everyone with portal access — admins, coaches, clients, and pending invitations.
+            Manage everyone with portal access — admins, coaches, and clients.
           </p>
         </div>
       </header>
@@ -303,10 +404,10 @@ export default function AdminPeoplePage() {
               Onboarding
             </p>
             <h2 className="text-[20px] font-medium text-text mt-1 tracking-[-0.015em]">
-              Send an invitation
+              Create a user
             </h2>
             <p className="text-[13px] text-text-dim mt-1">
-              Recipients receive a magic-link sign-in. Admin can invite any role.
+              Add a user record with the chosen role.
             </p>
           </div>
           <form onSubmit={handleInvite} className="grid gap-3 max-w-xl">
@@ -335,12 +436,35 @@ export default function AdminPeoplePage() {
               <option value="coach">Coach</option>
               <option value="admin">Admin</option>
             </select>
+            <label className="text-[11px] text-text-dim">Password</label>
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={invitePassword}
+                onChange={(e) => setInvitePassword(e.target.value)}
+                placeholder="Set or generate a password (min 8 chars)"
+                minLength={8}
+                autoComplete="new-password"
+                spellCheck={false}
+                className="flex-1 h-12 px-4 border border-line rounded-md text-[13px] font-mono bg-bg-3 text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors"
+              />
+              <button
+                type="button"
+                onClick={generatePassword}
+                className="h-12 px-4 border border-line-2 rounded-md text-[13px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
+              >
+                Generate
+              </button>
+            </div>
+            <p className="text-[11px] text-text-faint -mt-1">
+              Copy this password and share it with the user out-of-band. Minimum 8 characters.
+            </p>
             <button
               type="submit"
-              disabled={inviteLoading || !inviteEmail.trim()}
+              disabled={inviteLoading || !inviteEmail.trim() || invitePassword.length < 8}
               className="bg-gold-brand text-bg hover:bg-champagne px-4 py-2 rounded-md text-[13px] font-medium tracking-[0.02em] disabled:opacity-40 w-fit transition-colors"
             >
-              {inviteLoading ? 'Sending…' : 'Send invitation'}
+              {inviteLoading ? 'Creating…' : 'Create user'}
             </button>
             {inviteMessage && (
               <p
@@ -352,6 +476,48 @@ export default function AdminPeoplePage() {
               >
                 {inviteMessage.text}
               </p>
+            )}
+            {createdCredentials && (
+              <div className="mt-2 rounded-lg border border-gold-brand/50 bg-bg-2 p-4 space-y-3">
+                <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">
+                  Credentials to share
+                </p>
+                <dl className="grid grid-cols-[80px_1fr] gap-x-3 gap-y-1.5 text-[13px]">
+                  <dt className="text-text-dim">Email</dt>
+                  <dd className="font-mono text-text break-all">{createdCredentials.email}</dd>
+                  <dt className="text-text-dim">Password</dt>
+                  <dd className="font-mono text-text break-all">{createdCredentials.password}</dd>
+                </dl>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(
+                          `Email: ${createdCredentials.email}\nPassword: ${createdCredentials.password}`,
+                        );
+                        setCredentialsCopied(true);
+                        setTimeout(() => setCredentialsCopied(false), 2000);
+                      } catch {
+                        // Clipboard API unavailable — admin can select manually.
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-md border border-line-2 text-[12px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
+                  >
+                    {credentialsCopied ? 'Copied' : 'Copy'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => { setCreatedCredentials(null); setCredentialsCopied(false); }}
+                    className="px-3 py-1.5 rounded-md border border-transparent text-[12px] font-medium tracking-[0.02em] text-text-dim hover:text-text transition-colors"
+                  >
+                    Dismiss
+                  </button>
+                </div>
+                <p className="text-[11px] text-text-faint">
+                  This is the only time the password is shown. Save it before dismissing.
+                </p>
+              </div>
             )}
           </form>
         </section>
@@ -374,6 +540,7 @@ export default function AdminPeoplePage() {
               onToggleOpen={(id) => setOpenUserId(openUserId === id ? null : id)}
               onRoleChange={handleRoleChange}
               onRename={handleRename}
+              onResetPassword={openResetModal}
             />
           )}
         </GroupSection>
@@ -404,6 +571,7 @@ export default function AdminPeoplePage() {
                   }
                   onRoleChange={handleRoleChange}
                   onRename={handleRename}
+                  onResetPassword={openResetModal}
                 />
               </GroupSection>
             );
@@ -425,6 +593,7 @@ export default function AdminPeoplePage() {
               }
               onRoleChange={handleRoleChange}
               onRename={handleRename}
+              onResetPassword={openResetModal}
             />
           </GroupSection>
         )}
@@ -445,6 +614,7 @@ export default function AdminPeoplePage() {
               }
               onRoleChange={handleRoleChange}
               onRename={handleRename}
+              onResetPassword={openResetModal}
             />
           </GroupSection>
         )}
@@ -471,6 +641,126 @@ export default function AdminPeoplePage() {
           message={toast.message}
           onDismiss={() => setToast(null)}
         />
+      ) : null}
+
+      {resetTarget ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reset-password-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={(e) => {
+            // Close when clicking the backdrop, not the dialog itself.
+            if (e.target === e.currentTarget && !resetLoading) closeResetModal();
+          }}
+        >
+          <div className="w-full max-w-md bg-bg-3 border border-line rounded-2xl p-6 space-y-4 shadow-2xl">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">
+                Admin action
+              </p>
+              <h2 id="reset-password-title" className="text-[20px] font-medium text-text mt-1 tracking-[-0.015em]">
+                Reset password
+              </h2>
+              <p className="text-[13px] text-text-dim mt-1 break-all">
+                {resetTarget.name ? `${resetTarget.name} · ` : ''}
+                {resetTarget.email}
+              </p>
+            </div>
+
+            {!resetCredentials ? (
+              <form onSubmit={handleResetSubmit} className="space-y-3">
+                <label className="text-[11px] text-text-dim">New password</label>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    value={resetPasswordValue}
+                    onChange={(e) => setResetPasswordValue(e.target.value)}
+                    placeholder="Set or generate (min 8 chars)"
+                    minLength={8}
+                    autoComplete="new-password"
+                    spellCheck={false}
+                    autoFocus
+                    className="flex-1 h-12 px-4 border border-line rounded-md text-[13px] font-mono bg-bg-3 text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setResetPasswordValue(buildPassword())}
+                    className="h-12 px-4 border border-line-2 rounded-md text-[13px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
+                  >
+                    Generate
+                  </button>
+                </div>
+                <p className="text-[11px] text-text-faint">
+                  The user&apos;s existing sessions stay active until they re-authenticate.
+                </p>
+                {resetError && (
+                  <p className="text-[13px] text-danger">{resetError}</p>
+                )}
+                <div className="flex items-center justify-end gap-2 pt-2">
+                  <button
+                    type="button"
+                    onClick={closeResetModal}
+                    disabled={resetLoading}
+                    className="px-3 py-2 rounded-md border border-transparent text-[13px] font-medium tracking-[0.02em] text-text-dim hover:text-text transition-colors disabled:opacity-40"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    type="submit"
+                    disabled={resetLoading || resetPasswordValue.length < 8}
+                    className="bg-gold-brand text-bg hover:bg-champagne px-4 py-2 rounded-md text-[13px] font-medium tracking-[0.02em] disabled:opacity-40 transition-colors"
+                  >
+                    {resetLoading ? 'Saving…' : 'Set password'}
+                  </button>
+                </div>
+              </form>
+            ) : (
+              <div className="space-y-3">
+                <div className="rounded-lg border border-gold-brand/50 bg-bg-2 p-4 space-y-3">
+                  <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">
+                    Credentials to share
+                  </p>
+                  <dl className="grid grid-cols-[80px_1fr] gap-x-3 gap-y-1.5 text-[13px]">
+                    <dt className="text-text-dim">Email</dt>
+                    <dd className="font-mono text-text break-all">{resetCredentials.email}</dd>
+                    <dt className="text-text-dim">Password</dt>
+                    <dd className="font-mono text-text break-all">{resetCredentials.password}</dd>
+                  </dl>
+                  <button
+                    type="button"
+                    onClick={async () => {
+                      try {
+                        await navigator.clipboard.writeText(
+                          `Email: ${resetCredentials.email}\nPassword: ${resetCredentials.password}`,
+                        );
+                        setResetCredentialsCopied(true);
+                        setTimeout(() => setResetCredentialsCopied(false), 2000);
+                      } catch {
+                        // Clipboard unavailable — admin can select manually.
+                      }
+                    }}
+                    className="px-3 py-1.5 rounded-md border border-line-2 text-[12px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
+                  >
+                    {resetCredentialsCopied ? 'Copied' : 'Copy'}
+                  </button>
+                  <p className="text-[11px] text-text-faint">
+                    This is the only time the password is shown. Save it before closing.
+                  </p>
+                </div>
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    onClick={closeResetModal}
+                    className="px-4 py-2 rounded-md bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] transition-colors"
+                  >
+                    Done
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
       ) : null}
     </div>
   );
@@ -622,6 +912,7 @@ function UserTable({
   onToggleOpen,
   onRoleChange,
   onRename,
+  onResetPassword,
 }: {
   users: AdminUserRow[];
   adminCount: number;
@@ -629,6 +920,7 @@ function UserTable({
   onToggleOpen: (id: string) => void;
   onRoleChange: (userId: string, name: string, newRole: Role) => void;
   onRename: (userId: string, newName: string) => Promise<boolean>;
+  onResetPassword: (u: { id: string; email: string; name: string }) => void;
 }) {
   return (
     <>
@@ -711,14 +1003,23 @@ function UserTable({
                       )}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        type="button"
-                        onClick={() => onToggleOpen(u.id)}
-                        className="text-[11px] text-text hover:text-gold-brand transition-colors underline-offset-2 hover:underline"
-                      >
-                        View {totalAssessments} assessment
-                        {totalAssessments === 1 ? '' : 's'}
-                      </button>
+                      <div className="flex items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => onToggleOpen(u.id)}
+                          className="text-[11px] text-text hover:text-gold-brand transition-colors underline-offset-2 hover:underline"
+                        >
+                          View {totalAssessments} assessment
+                          {totalAssessments === 1 ? '' : 's'}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => onResetPassword({ id: u.id, email: u.email, name: u.name })}
+                          className="text-[11px] text-text-dim hover:text-gold-brand transition-colors underline-offset-2 hover:underline"
+                        >
+                          Reset password
+                        </button>
+                      </div>
                     </td>
                   </tr>
                   {isOpen ? (
@@ -804,6 +1105,13 @@ function UserTable({
                     {totalAssessments === 1 ? '' : 's'}
                   </span>
                 </div>
+                <button
+                  type="button"
+                  onClick={() => onResetPassword({ id: u.id, email: u.email, name: u.name })}
+                  className="self-start mt-1 px-2 py-1 rounded-md border border-line-2 text-[11px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
+                >
+                  Reset password
+                </button>
               </div>
             </div>
           );

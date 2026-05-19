@@ -40,7 +40,7 @@ const ADMIN_SECTIONS = [
     label: 'People',
     href: '/portal/admin/users',
     description:
-      'Admins, coaches, clients, and pending invitations — all in one place. Send invites and manage roles.',
+      'Admins, coaches, and clients — all in one place. Create users and manage roles.',
     stat: 'People',
     icon: (
       <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">

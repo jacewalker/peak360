@@ -41,6 +41,20 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
   }
 
+  // Optional caller-supplied password. Falls back to a random UUID when absent
+  // (legacy callers + the "user already exists" branch don't supply one).
+  // Matches the minPasswordLength configured on betterAuth (src/lib/auth.ts).
+  const password =
+    typeof body?.password === 'string' && body.password.length > 0
+      ? body.password
+      : crypto.randomUUID();
+  if (password.length < 8) {
+    return NextResponse.json(
+      { error: 'Password must be at least 8 characters.' },
+      { status: 400 },
+    );
+  }
+
   // Check if user already exists
   const existing = await db.select().from(user).where(eq(user.email, email)).limit(1);
 
@@ -79,7 +93,7 @@ export async function POST(request: NextRequest) {
     await auth.api.createUser({
       body: {
         email,
-        password: crypto.randomUUID(),
+        password,
         name: inviteName,
         // Better Auth admin plugin role typing narrows to its own union; the
         // runtime accepts any configured role string, so we widen via cast.
