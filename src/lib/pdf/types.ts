@@ -14,6 +14,11 @@ export interface ReportMarker {
 }
 
 export interface Insight {
+  /**
+   * Test key of the marker that triggered this insight. Routes the insight
+   * into the matching pillar modal in the portal view; ignored by PDF rendering.
+   */
+  markerKey: string;
   title: string;
   why: string;
   doNow: string[];
