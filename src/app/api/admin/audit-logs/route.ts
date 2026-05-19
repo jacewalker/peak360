@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
-import { auditLogs } from '@/lib/db/schema';
+import { auditLogs, user } from '@/lib/db/schema';
 import { desc, eq, and, gte, lte, sql } from 'drizzle-orm';
 
 export async function GET(request: Request) {
@@ -24,8 +24,26 @@ export async function GET(request: Request) {
 
   const where = conditions.length > 0 ? and(...conditions) : undefined;
 
+  // Left-join the actor so the UI can show a readable name/email instead of
+  // the opaque user id (e.g. "6BbYcPRjPJCniu5J"). Deleted users still render
+  // with the bare id since the join produces NULL.
   const [rows, countResult] = await Promise.all([
-    db.select().from(auditLogs)
+    db
+      .select({
+        id: auditLogs.id,
+        userId: auditLogs.userId,
+        action: auditLogs.action,
+        resourceType: auditLogs.resourceType,
+        resourceId: auditLogs.resourceId,
+        metadata: auditLogs.metadata,
+        ipAddress: auditLogs.ipAddress,
+        userAgent: auditLogs.userAgent,
+        createdAt: auditLogs.createdAt,
+        userName: user.name,
+        userEmail: user.email,
+      })
+      .from(auditLogs)
+      .leftJoin(user, eq(auditLogs.userId, user.id))
       .where(where)
       .orderBy(desc(auditLogs.createdAt))
       .limit(limit)

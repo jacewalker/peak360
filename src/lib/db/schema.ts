@@ -122,6 +122,9 @@ export const user = pgTable('user', {
   emailVerified: boolean('email_verified'),
   image: text('image'),
   role: text('role').default('coach'), // admin | coach | client
+  // Nullable. For clients, points at the coach they're assigned to. Independent
+  // of assessments.coach_id (which records who ran a specific assessment).
+  coachId: text('coach_id'),
   banned: boolean('banned'),
   banReason: text('ban_reason'),
   banExpires: integer('ban_expires'),

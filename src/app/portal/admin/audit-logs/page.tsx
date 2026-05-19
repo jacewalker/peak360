@@ -14,6 +14,8 @@ type AuditAction =
 interface AuditLogEntry {
   id: string;
   userId: string;
+  userName: string | null;
+  userEmail: string | null;
   action: string;
   resourceType: string;
   resourceId: string;
@@ -218,7 +220,18 @@ export default function AuditLogsPage() {
                   {logs.map((log) => (
                     <tr key={log.id} className="hover:bg-bg-2/50 transition-colors">
                       <td className="px-4 py-3 text-[13px] text-text whitespace-nowrap">{formatDate(log.createdAt)}</td>
-                      <td className="px-4 py-3 text-[13px] text-text">{truncate(log.userId, 12)}</td>
+                      <td className="px-4 py-3 text-[13px] text-text" title={log.userId}>
+                        {log.userName ? (
+                          <div className="flex flex-col leading-tight">
+                            <span className="font-medium">{log.userName}</span>
+                            {log.userEmail && (
+                              <span className="text-[11px] text-text-dim">{log.userEmail}</span>
+                            )}
+                          </div>
+                        ) : (
+                          <span className="font-mono text-text-dim">{truncate(log.userId, 12)}</span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-[13px]">
                         <span className={`inline-block px-2 py-0.5 text-[11px] font-semibold rounded-full border ${ACTION_BADGE_COLORS[log.action] ?? 'bg-bg-3 text-text-dim border-line'}`}>
                           {log.action}

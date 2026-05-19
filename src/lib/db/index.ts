@@ -203,6 +203,10 @@ export async function runMigrations() {
     await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_action" ON "audit_logs" ("action")`);
     await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_created_at" ON "audit_logs" ("created_at")`);
 
+    // user.coach_id — assigns a client to a specific coach independently of
+    // any assessment. Nullable; only meaningful for role='client' rows.
+    await d.execute(sql`ALTER TABLE "user" ADD COLUMN IF NOT EXISTS "coach_id" text`);
+
     // Phase 7.1 — convert user.email_verified and user.banned from INTEGER
     // (Phase 4 legacy) to BOOLEAN. Better Auth's admin-plugin createUser
     // sends actual booleans, which PG rejects against an integer column —
@@ -385,6 +389,7 @@ export async function runMigrations() {
         "email_verified" integer,
         "image" text,
         "role" text DEFAULT 'coach',
+        "coach_id" text,
         "banned" integer,
         "ban_reason" text,
         "ban_expires" integer,
@@ -392,6 +397,9 @@ export async function runMigrations() {
         "updated_at" text NOT NULL
       )
     `);
+    try {
+      d.run(sql`ALTER TABLE "user" ADD COLUMN "coach_id" text`);
+    } catch { /* column already exists */ }
     d.run(sql`
       CREATE TABLE IF NOT EXISTS "session" (
         "id" text PRIMARY KEY NOT NULL,

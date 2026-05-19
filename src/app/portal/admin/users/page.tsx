@@ -153,6 +153,31 @@ export default function AdminPeoplePage() {
     [resetTarget, resetPasswordValue],
   );
 
+  // Assign-coach modal state — null when closed.
+  const [coachTarget, setCoachTarget] = useState<
+    { id: string; name: string; email: string; currentCoachId: string | null } | null
+  >(null);
+  const [coachSelection, setCoachSelection] = useState<string>('');
+  const [coachLoading, setCoachLoading] = useState(false);
+  const [coachError, setCoachError] = useState<string | null>(null);
+
+  const openCoachModal = useCallback(
+    (u: { id: string; name: string; email: string; currentCoachId: string | null }) => {
+      setCoachTarget(u);
+      setCoachSelection(u.currentCoachId ?? '');
+      setCoachError(null);
+    },
+    [],
+  );
+
+  const closeCoachModal = useCallback(() => {
+    setCoachTarget(null);
+    setCoachSelection('');
+    setCoachError(null);
+  }, []);
+
+  // handleAssignCoach is defined further down — after `refresh` is in scope.
+
   // D-10/D-11: client-side admin gating (defence-in-depth; server is source of truth)
   useEffect(() => {
     if (!isPending && userRole && userRole !== 'admin') {
@@ -190,6 +215,38 @@ export default function AdminPeoplePage() {
       void refresh();
     }
   }, [userRole, refresh]);
+
+  const handleAssignCoach = useCallback(
+    async (e: React.FormEvent) => {
+      e.preventDefault();
+      if (!coachTarget) return;
+      setCoachError(null);
+      setCoachLoading(true);
+      try {
+        const res = await fetch(`/api/admin/users/${coachTarget.id}/coach`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ coachId: coachSelection || null }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          setToast({
+            variant: 'success',
+            message: `Coach updated for ${coachTarget.name || coachTarget.email}.`,
+          });
+          closeCoachModal();
+          void refresh();
+        } else {
+          setCoachError(data?.error || "Couldn't update coach. Try again.");
+        }
+      } catch {
+        setCoachError("We couldn't reach the server. Check your connection and try again.");
+      } finally {
+        setCoachLoading(false);
+      }
+    },
+    [coachTarget, coachSelection, closeCoachModal, refresh],
+  );
 
   const adminCount = users.filter((u) => u.role === 'admin').length;
 
@@ -541,6 +598,7 @@ export default function AdminPeoplePage() {
               onRoleChange={handleRoleChange}
               onRename={handleRename}
               onResetPassword={openResetModal}
+              onAssignCoach={openCoachModal}
             />
           )}
         </GroupSection>
@@ -572,6 +630,7 @@ export default function AdminPeoplePage() {
                   onRoleChange={handleRoleChange}
                   onRename={handleRename}
                   onResetPassword={openResetModal}
+                  onAssignCoach={openCoachModal}
                 />
               </GroupSection>
             );
@@ -594,6 +653,7 @@ export default function AdminPeoplePage() {
               onRoleChange={handleRoleChange}
               onRename={handleRename}
               onResetPassword={openResetModal}
+              onAssignCoach={openCoachModal}
             />
           </GroupSection>
         )}
@@ -615,6 +675,7 @@ export default function AdminPeoplePage() {
               onRoleChange={handleRoleChange}
               onRename={handleRename}
               onResetPassword={openResetModal}
+              onAssignCoach={openCoachModal}
             />
           </GroupSection>
         )}
@@ -759,6 +820,72 @@ export default function AdminPeoplePage() {
                 </div>
               </div>
             )}
+          </div>
+        </div>
+      ) : null}
+
+      {coachTarget ? (
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="assign-coach-title"
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+          onClick={(e) => {
+            if (e.target === e.currentTarget && !coachLoading) closeCoachModal();
+          }}
+        >
+          <div className="w-full max-w-md bg-bg-3 border border-line rounded-2xl p-6 space-y-4 shadow-2xl">
+            <div>
+              <p className="font-mono text-[11px] uppercase tracking-[0.18em] text-gold-brand">
+                Admin action
+              </p>
+              <h2 id="assign-coach-title" className="text-[20px] font-medium text-text mt-1 tracking-[-0.015em]">
+                {coachTarget.currentCoachId ? 'Change coach' : 'Assign coach'}
+              </h2>
+              <p className="text-[13px] text-text-dim mt-1 break-all">
+                {coachTarget.name ? `${coachTarget.name} · ` : ''}
+                {coachTarget.email}
+              </p>
+            </div>
+
+            <form onSubmit={handleAssignCoach} className="space-y-3">
+              <label className="text-[11px] text-text-dim">Coach</label>
+              <select
+                value={coachSelection}
+                onChange={(e) => setCoachSelection(e.target.value)}
+                className="w-full h-12 px-4 border border-line rounded-md text-[13px] bg-bg-3 text-text focus:outline-none focus:border-gold-brand transition-colors"
+              >
+                <option value="">— No coach —</option>
+                {users
+                  .filter((u) => u.role === 'coach' || u.role === 'admin')
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name} ({c.email})
+                    </option>
+                  ))}
+              </select>
+              {coachError && (
+                <p className="text-[13px] text-danger">{coachError}</p>
+              )}
+              <div className="flex items-center justify-end gap-2 pt-2">
+                <button
+                  type="button"
+                  onClick={closeCoachModal}
+                  disabled={coachLoading}
+                  className="px-3 py-2 rounded-md border border-transparent text-[13px] font-medium tracking-[0.02em] text-text-dim hover:text-text transition-colors disabled:opacity-40"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={coachLoading}
+                  className="bg-gold-brand text-bg hover:bg-champagne px-4 py-2 rounded-md text-[13px] font-medium tracking-[0.02em] disabled:opacity-40 transition-colors"
+                >
+                  {coachLoading ? 'Saving…' : 'Save'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       ) : null}
@@ -913,6 +1040,7 @@ function UserTable({
   onRoleChange,
   onRename,
   onResetPassword,
+  onAssignCoach,
 }: {
   users: AdminUserRow[];
   adminCount: number;
@@ -921,6 +1049,7 @@ function UserTable({
   onRoleChange: (userId: string, name: string, newRole: Role) => void;
   onRename: (userId: string, newName: string) => Promise<boolean>;
   onResetPassword: (u: { id: string; email: string; name: string }) => void;
+  onAssignCoach: (u: { id: string; name: string; email: string; currentCoachId: string | null }) => void;
 }) {
   return (
     <>
@@ -1019,6 +1148,15 @@ function UserTable({
                         >
                           Reset password
                         </button>
+                        {u.role === 'client' && (
+                          <button
+                            type="button"
+                            onClick={() => onAssignCoach({ id: u.id, name: u.name, email: u.email, currentCoachId: u.coachId })}
+                            className="text-[11px] text-text-dim hover:text-gold-brand transition-colors underline-offset-2 hover:underline"
+                          >
+                            {u.coachId ? 'Change coach' : 'Assign coach'}
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -1105,13 +1243,24 @@ function UserTable({
                     {totalAssessments === 1 ? '' : 's'}
                   </span>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => onResetPassword({ id: u.id, email: u.email, name: u.name })}
-                  className="self-start mt-1 px-2 py-1 rounded-md border border-line-2 text-[11px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
-                >
-                  Reset password
-                </button>
+                <div className="flex flex-wrap gap-2 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => onResetPassword({ id: u.id, email: u.email, name: u.name })}
+                    className="px-2 py-1 rounded-md border border-line-2 text-[11px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
+                  >
+                    Reset password
+                  </button>
+                  {u.role === 'client' && (
+                    <button
+                      type="button"
+                      onClick={() => onAssignCoach({ id: u.id, name: u.name, email: u.email, currentCoachId: u.coachId })}
+                      className="px-2 py-1 rounded-md border border-line-2 text-[11px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
+                    >
+                      {u.coachId ? 'Change coach' : 'Assign coach'}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           );

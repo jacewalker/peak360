@@ -7,25 +7,23 @@ import { requireAdmin } from '@/lib/auth-helpers';
 /**
  * GET /api/admin/users
  *
- * REQ-7.10: returns the user list with banned status + last-active + per-user
- * assessment counts (as coach + as client). Admin-only.
+ * Returns the user list with banned status, last-active session timestamp,
+ * per-user assessment counts (as coach + as client), and — for clients — the
+ * coach derived from their most recent assessment.
  *
- * Response shape:
- *   { success: true, data: Array<{ id, email, name, role, banned, banReason,
- *       banExpires, createdAt, lastActive, coachCount, clientCount,
- *       coachId, coachName }> }
- *
- * Additive fields (260510-osn):
- *   - coachId:   id of the coach assigned via the user's MOST RECENT
- *                assessment (assessments.coachId, ordered by created_at desc).
- *                Populated only when role === 'client'; otherwise null.
- *   - coachName: display name of that coach (joined from user table by id).
- *                Populated only when role === 'client'; otherwise null.
+ * Previous version used correlated subqueries (`SELECT COUNT(*) FROM
+ * assessments WHERE coachId = "user"."id"`) which proved unreliable in
+ * production: in some configurations the inner `"user"."id"` reference
+ * resolved against the wrong table or was silently mishandled, yielding
+ * absurd counts (e.g. "View 10 assessments" on a brand-new client with zero
+ * assessments). Counts now happen in JS over a single batched fetch.
  */
 export async function GET() {
   const [, errorRes] = await requireAdmin();
   if (errorRes) return errorRes;
 
+  // 1. User rows with banned/active metadata via a single correlated subquery
+  //    we KNOW works (session is a simple table lookup, no foot-gun aliases).
   const rows: Array<{
     id: string;
     email: string;
@@ -36,53 +34,86 @@ export async function GET() {
     banExpires: number | null;
     createdAt: string;
     lastActive: string | null;
-    coachCount: number;
-    clientCount: number;
-    coachId: string | null;
-    coachName: string | null;
+    storedCoachId: string | null;
   }> = await db
     .select({
       id: user.id,
       email: user.email,
       name: user.name,
       role: user.role,
-      // BLOCKER 1 fix — REQ-7.10 mandates banned status surfacing.
       banned: user.banned,
       banReason: user.banReason,
       banExpires: user.banExpires,
       createdAt: user.createdAt,
       lastActive:
         sql<string | null>`(SELECT MAX(${session.createdAt}) FROM ${session} WHERE ${session.userId} = ${user.id})`.as(
-          'last_active'
+          'last_active',
         ),
-      coachCount:
-        sql<number>`(SELECT COUNT(*) FROM ${assessments} WHERE ${assessments.coachId} = "user"."id")`.as(
-          'coach_count'
-        ),
-      clientCount:
-        sql<number>`(SELECT COUNT(*) FROM ${assessments} WHERE ${assessments.clientId} = "user"."id")`.as(
-          'client_count'
-        ),
-      // 260510-osn: coachId of the client's most-recent assessment.
-      // NOTE: must qualify outer-table column as "user"."id" — drizzle's
-      // ${user.id} expands to bare "id" which collides with assessments.id
-      // inside the correlated subquery and silently always resolves false.
-      coachId:
-        sql<string | null>`(SELECT ${assessments.coachId} FROM ${assessments} WHERE ${assessments.clientId} = "user"."id" AND ${assessments.coachId} IS NOT NULL ORDER BY ${assessments.createdAt} DESC LIMIT 1)`.as(
-          'coach_id'
-        ),
-      coachName:
-        sql<string | null>`(SELECT u2.name FROM ${user} u2 WHERE u2.id = (SELECT ${assessments.coachId} FROM ${assessments} WHERE ${assessments.clientId} = "user"."id" AND ${assessments.coachId} IS NOT NULL ORDER BY ${assessments.createdAt} DESC LIMIT 1))`.as(
-          'coach_name'
-        ),
+      storedCoachId: user.coachId,
     })
     .from(user)
     .orderBy(desc(user.createdAt));
 
-  // Defensive post-process: only `client` rows ever surface a coach.
-  const data = rows.map((r) =>
-    r.role === 'client' ? r : { ...r, coachId: null, coachName: null }
-  );
+  // 2. All assessments — small table, fine to scan. Pull the minimal columns
+  //    needed to derive counts and the "most recent coach per client".
+  const assessmentRows: Array<{
+    id: string;
+    coachId: string | null;
+    clientId: string | null;
+    createdAt: string;
+  }> = await db
+    .select({
+      id: assessments.id,
+      coachId: assessments.coachId,
+      clientId: assessments.clientId,
+      createdAt: assessments.createdAt,
+    })
+    .from(assessments);
+
+  const coachCountById = new Map<string, number>();
+  const clientCountById = new Map<string, number>();
+  // For each client user, remember the most recent assessment with a non-null
+  // coachId (assessments without a coach don't reveal one).
+  const latestCoachForClient = new Map<
+    string,
+    { coachId: string; createdAt: string }
+  >();
+
+  for (const a of assessmentRows) {
+    if (a.coachId) {
+      coachCountById.set(a.coachId, (coachCountById.get(a.coachId) ?? 0) + 1);
+    }
+    if (a.clientId) {
+      clientCountById.set(a.clientId, (clientCountById.get(a.clientId) ?? 0) + 1);
+      if (a.coachId) {
+        const prev = latestCoachForClient.get(a.clientId);
+        if (!prev || a.createdAt > prev.createdAt) {
+          latestCoachForClient.set(a.clientId, {
+            coachId: a.coachId,
+            createdAt: a.createdAt,
+          });
+        }
+      }
+    }
+  }
+
+  const nameById = new Map(rows.map((r) => [r.id, r.name] as const));
+
+  const data = rows.map(({ storedCoachId, ...r }) => {
+    const coachCount = coachCountById.get(r.id) ?? 0;
+    const clientCount = clientCountById.get(r.id) ?? 0;
+    let coachId: string | null = null;
+    let coachName: string | null = null;
+    if (r.role === 'client') {
+      // Prefer the explicit user.coach_id assignment; fall back to the coach
+      // on the client's most-recent assessment for users that pre-date the
+      // user.coach_id column.
+      const fallback = latestCoachForClient.get(r.id)?.coachId ?? null;
+      coachId = storedCoachId ?? fallback;
+      if (coachId) coachName = nameById.get(coachId) ?? null;
+    }
+    return { ...r, coachCount, clientCount, coachId, coachName };
+  });
 
   return NextResponse.json({ success: true, data });
 }

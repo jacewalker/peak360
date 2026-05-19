@@ -189,12 +189,28 @@ export default function SectionPage() {
     router.push('/portal');
   }, [id, router, saveSection]);
 
-  const handleCancel = useCallback(() => {
-    if (window.confirm('Discard all unsaved changes and return to home?')) {
-      store.markClean();
-      router.push('/portal');
+  const handleCancel = useCallback(async () => {
+    if (!window.confirm('Discard all unsaved changes and return to home?')) return;
+    store.markClean();
+
+    // If nothing has been completed and the in-memory store has no content
+    // for any section, drop the orphan assessment record instead of leaving
+    // an empty row in the dashboard. We only auto-delete when there's
+    // definitely nothing to preserve — partially-filled assessments stay.
+    const hasCompletedSections = store.completedSections.length > 0;
+    const hasAnySectionData = Object.values(store.sectionData).some(
+      (d) => d && Object.keys(d).length > 0,
+    );
+    if (!hasCompletedSections && !hasAnySectionData) {
+      try {
+        await fetch(`/api/assessments/${id}`, { method: 'DELETE' });
+      } catch {
+        // Best-effort cleanup; the row will surface in the dashboard if this fails.
+      }
     }
-  }, [router, store]);
+
+    router.push('/portal');
+  }, [id, router, store]);
 
   if (!isValidNum || !loaded) {
     return (

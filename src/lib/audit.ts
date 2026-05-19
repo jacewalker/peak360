@@ -14,6 +14,7 @@ export type AuditAction =
   | 'user.role.rollback'
   | 'user.name.changed'
   | 'user.password.reset'
+  | 'user.coach.assigned'
   // Phase 8 — Peak Living pillar authoring (D-16, D-20)
   | 'pillar_definition.update'
   | 'pillar_page_copy.update'

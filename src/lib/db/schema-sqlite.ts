@@ -115,6 +115,7 @@ export const user = sqliteTable('user', {
   emailVerified: integer('email_verified'),
   image: text('image'),
   role: text('role').default('coach'), // admin | coach | client
+  coachId: text('coach_id'),
   banned: integer('banned'),
   banReason: text('ban_reason'),
   banExpires: integer('ban_expires'),
