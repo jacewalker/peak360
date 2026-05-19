@@ -140,6 +140,42 @@ export default function AdminPeoplePage() {
     };
   }, [users, invites]);
 
+  const handleRename = useCallback(
+    async (userId: string, newName: string): Promise<boolean> => {
+      const trimmed = newName.trim();
+      if (!trimmed) {
+        setToast({ variant: 'error', message: 'Name cannot be empty.' });
+        return false;
+      }
+      try {
+        const res = await fetch(`/api/admin/users/${userId}/name`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ name: trimmed }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (res.ok) {
+          setUsers((u) =>
+            u.map((x) => (x.id === userId ? { ...x, name: trimmed } : x)),
+          );
+          if (data?.changed !== false) {
+            setToast({ variant: 'success', message: `Renamed to ${trimmed}.` });
+          }
+          return true;
+        }
+        setToast({
+          variant: 'error',
+          message: data?.error || "Couldn't rename. Try again.",
+        });
+        return false;
+      } catch {
+        setToast({ variant: 'error', message: "Couldn't rename. Try again." });
+        return false;
+      }
+    },
+    [],
+  );
+
   const handleRoleChange = useCallback(
     async (userId: string, name: string, newRole: Role) => {
       try {
@@ -337,6 +373,7 @@ export default function AdminPeoplePage() {
               openUserId={openUserId}
               onToggleOpen={(id) => setOpenUserId(openUserId === id ? null : id)}
               onRoleChange={handleRoleChange}
+              onRename={handleRename}
             />
           )}
         </GroupSection>
@@ -366,6 +403,7 @@ export default function AdminPeoplePage() {
                     setOpenUserId(openUserId === id ? null : id)
                   }
                   onRoleChange={handleRoleChange}
+                  onRename={handleRename}
                 />
               </GroupSection>
             );
@@ -386,6 +424,7 @@ export default function AdminPeoplePage() {
                 setOpenUserId(openUserId === id ? null : id)
               }
               onRoleChange={handleRoleChange}
+              onRename={handleRename}
             />
           </GroupSection>
         )}
@@ -405,6 +444,7 @@ export default function AdminPeoplePage() {
                 setOpenUserId(openUserId === id ? null : id)
               }
               onRoleChange={handleRoleChange}
+              onRename={handleRename}
             />
           </GroupSection>
         )}
@@ -496,18 +536,99 @@ function SkeletonTable({ rows }: { rows: number }) {
   );
 }
 
+function EditableName({
+  value,
+  onSave,
+  compact,
+}: {
+  value: string;
+  onSave: (next: string) => Promise<boolean>;
+  compact?: boolean;
+}) {
+  const [editing, setEditing] = useState(false);
+  const [draft, setDraft] = useState(value);
+  const [saving, setSaving] = useState(false);
+
+  useEffect(() => {
+    setDraft(value);
+  }, [value]);
+
+  const commit = useCallback(async () => {
+    const next = draft.trim();
+    if (!next || next === value) {
+      setDraft(value);
+      setEditing(false);
+      return;
+    }
+    setSaving(true);
+    const ok = await onSave(next);
+    setSaving(false);
+    if (ok) {
+      setEditing(false);
+    } else {
+      // keep editing so the user can retry / fix
+      setDraft(next);
+    }
+  }, [draft, value, onSave]);
+
+  const cancel = useCallback(() => {
+    setDraft(value);
+    setEditing(false);
+  }, [value]);
+
+  const textCls = compact
+    ? 'text-text font-medium text-[13px]'
+    : 'text-text font-medium';
+
+  if (!editing) {
+    return (
+      <button
+        type="button"
+        onClick={() => setEditing(true)}
+        title="Click to rename"
+        className={`${textCls} text-left hover:text-gold-brand transition-colors`}
+      >
+        {value}
+      </button>
+    );
+  }
+
+  return (
+    <input
+      type="text"
+      autoFocus
+      value={draft}
+      disabled={saving}
+      onChange={(e) => setDraft(e.target.value)}
+      onBlur={commit}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          void commit();
+        } else if (e.key === 'Escape') {
+          e.preventDefault();
+          cancel();
+        }
+      }}
+      className={`${textCls} bg-bg-2 border border-line rounded-md px-2 py-1 focus:outline-none focus:border-gold-brand disabled:opacity-60`}
+    />
+  );
+}
+
 function UserTable({
   users,
   adminCount,
   openUserId,
   onToggleOpen,
   onRoleChange,
+  onRename,
 }: {
   users: AdminUserRow[];
   adminCount: number;
   openUserId: string | null;
   onToggleOpen: (id: string) => void;
   onRoleChange: (userId: string, name: string, newRole: Role) => void;
+  onRename: (userId: string, newName: string) => Promise<boolean>;
 }) {
   return (
     <>
@@ -552,7 +673,7 @@ function UserTable({
                   <tr className="border-b border-line last:border-0 hover:bg-bg-2 transition-colors">
                     <td className="px-4 py-3">
                       <div className="flex flex-col gap-1">
-                        <span className="text-text font-medium">{u.name}</span>
+                        <EditableName value={u.name} onSave={(v) => onRename(u.id, v)} />
                         <RolePill role={u.role} />
                       </div>
                     </td>
@@ -639,7 +760,7 @@ function UserTable({
             <div key={u.id} className="bg-bg-3 rounded-xl border border-line p-4">
               <div className="flex items-start justify-between mb-2">
                 <div className="flex flex-col">
-                  <span className="text-text font-medium text-[13px]">{u.name}</span>
+                  <EditableName value={u.name} onSave={(v) => onRename(u.id, v)} compact />
                   <span className="text-text-dim text-[11px] flex items-center gap-2">
                     {u.email}
                     {u.banned === true ? <StatusPill status="banned" /> : null}
