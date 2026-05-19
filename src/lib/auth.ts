@@ -24,32 +24,12 @@ export const auth = betterAuth({
       });
     },
   },
-  databaseHooks: {
-    user: {
-      create: {
-        before: async (user) => {
-          if (typeof user.emailVerified === 'boolean') {
-            (user as Record<string, unknown>).emailVerified = user.emailVerified ? 1 : 0;
-          }
-          if (typeof (user as Record<string, unknown>).banned === 'boolean') {
-            (user as Record<string, unknown>).banned = (user as Record<string, unknown>).banned ? 1 : 0;
-          }
-          return { data: user };
-        },
-      },
-      update: {
-        before: async (user) => {
-          if (typeof user.emailVerified === 'boolean') {
-            (user as Record<string, unknown>).emailVerified = user.emailVerified ? 1 : 0;
-          }
-          if (typeof (user as Record<string, unknown>).banned === 'boolean') {
-            (user as Record<string, unknown>).banned = (user as Record<string, unknown>).banned ? 1 : 0;
-          }
-          return { data: user };
-        },
-      },
-    },
-  },
+  // Phase 4 schema declared email_verified + banned as INTEGER (with a TS-only
+  // boolean type hint), and previously we coerced boolean→integer here via
+  // databaseHooks. The admin plugin's createUser path bypassed that hook,
+  // which broke every invite. Phase 7.1 migrates the columns to BOOLEAN in
+  // runMigrations() so Better Auth's native boolean writes work directly;
+  // the coercion hook is no longer needed.
   session: {
     expiresIn: 60 * 60 * 24 * 7, // 7 days (AUTH-04)
     updateAge: 60 * 60 * 24, // refresh after 1 day (sliding window)

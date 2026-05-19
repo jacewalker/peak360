@@ -1,4 +1,4 @@
-import { pgTable, text, integer, serial, jsonb, primaryKey } from 'drizzle-orm/pg-core';
+import { pgTable, text, integer, serial, jsonb, primaryKey, boolean } from 'drizzle-orm/pg-core';
 
 export const assessments = pgTable('assessments', {
   id: text('id').primaryKey(),
@@ -114,10 +114,15 @@ export const user = pgTable('user', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   email: text('email').notNull().unique(),
-  emailVerified: integer('email_verified').$type<boolean>(),
+  // Native PG boolean. Phase 4 created these as integer (0/1) with a TS-only
+  // boolean type hint, which the Better Auth admin plugin's createUser path
+  // rejected (it sends actual booleans → PG integer column → type error =>
+  // "Failed to create user account" on every invite). Migrated to boolean via
+  // runMigrations(); the cast preserves existing 0→false, 1→true rows.
+  emailVerified: boolean('email_verified'),
   image: text('image'),
   role: text('role').default('coach'), // admin | coach | client
-  banned: integer('banned').$type<boolean>(),
+  banned: boolean('banned'),
   banReason: text('ban_reason'),
   banExpires: integer('ban_expires'),
   createdAt: text('created_at').notNull(),

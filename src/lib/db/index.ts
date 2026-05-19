@@ -203,6 +203,34 @@ export async function runMigrations() {
     await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_action" ON "audit_logs" ("action")`);
     await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_audit_logs_created_at" ON "audit_logs" ("created_at")`);
 
+    // Phase 7.1 — convert user.email_verified and user.banned from INTEGER
+    // (Phase 4 legacy) to BOOLEAN. Better Auth's admin-plugin createUser
+    // sends actual booleans, which PG rejects against an integer column —
+    // that's the "Failed to create user account" bug visible on every invite.
+    // Idempotent: ALTER only fires when the column is still integer. The
+    // explicit CASE preserves 0→false, 1→true verbatim.
+    await d.execute(sql`
+      DO $$
+      BEGIN
+        IF EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'user' AND column_name = 'email_verified' AND data_type = 'integer'
+        ) THEN
+          ALTER TABLE "user"
+            ALTER COLUMN "email_verified" TYPE boolean
+            USING CASE WHEN "email_verified" = 0 THEN false ELSE true END;
+        END IF;
+        IF EXISTS (
+          SELECT 1 FROM information_schema.columns
+          WHERE table_name = 'user' AND column_name = 'banned' AND data_type = 'integer'
+        ) THEN
+          ALTER TABLE "user"
+            ALTER COLUMN "banned" TYPE boolean
+            USING CASE WHEN "banned" = 0 THEN false ELSE true END;
+        END IF;
+      END $$;
+    `);
+
     // Phase 8 — Peak Living pillar tables
     await d.execute(sql`
       CREATE TABLE IF NOT EXISTS "pillar_definitions" (

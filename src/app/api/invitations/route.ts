@@ -70,6 +70,11 @@ export async function POST(request: NextRequest) {
   const inviteName =
     (typeof body?.name === 'string' && body.name.trim()) || email.split('@')[0];
 
+  // D-02: atomic create with role param via Better Auth admin plugin.
+  // Phase 7.1 fix: this used to fail with "Failed to create user account"
+  // because the admin plugin sends email_verified/banned as native booleans
+  // but the user table had INTEGER columns. Phase 7.1 migrated those columns
+  // to BOOLEAN (runMigrations()) so this path now works directly.
   try {
     await auth.api.createUser({
       body: {
@@ -81,9 +86,18 @@ export async function POST(request: NextRequest) {
         role: requestedRole as 'user' | 'admin',
       },
     });
-  } catch {
+  } catch (err) {
+    console.error('[invitations] createUser failed', {
+      email,
+      requestedRole,
+      err: err instanceof Error ? { name: err.name, message: err.message, stack: err.stack } : err,
+    });
+    const detail = err instanceof Error ? err.message : undefined;
     return NextResponse.json(
-      { error: 'Failed to create user account' },
+      {
+        error: 'Failed to create user account',
+        ...(process.env.NODE_ENV !== 'production' && detail ? { detail } : {}),
+      },
       { status: 500 }
     );
   }
