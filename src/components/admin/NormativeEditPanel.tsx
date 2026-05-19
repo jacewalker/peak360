@@ -8,11 +8,11 @@ import type { RatingTier, TierRanges, NormativeRangeRow } from '@/types/normativ
 const TIER_ORDER: RatingTier[] = ['poor', 'cautious', 'normal', 'great', 'elite'];
 
 const TIER_CONFIG: Record<RatingTier, { color: string; label: string; bg: string; ring: string }> = {
-  poor:     { color: '#ef4444', label: 'Poor',     bg: 'rgba(239,68,68,0.05)',    ring: '#ef444440' },
-  cautious: { color: '#f59e0b', label: 'Cautious', bg: 'rgba(245,158,11,0.05)',   ring: '#f59e0b40' },
-  normal:   { color: '#6b7280', label: 'Normal',   bg: 'rgba(107,114,128,0.05)',  ring: '#6b728040' },
-  great:    { color: '#3b82f6', label: 'Great',    bg: 'rgba(59,130,246,0.05)',   ring: '#3b82f640' },
-  elite:    { color: '#10b981', label: 'Elite',    bg: 'rgba(16,185,129,0.05)',   ring: '#10b98140' },
+  poor:     { color: '#ef4444', label: 'Attention', bg: 'rgba(239,68,68,0.05)',    ring: '#ef444440' },
+  cautious: { color: '#f59e0b', label: 'Cautious',  bg: 'rgba(245,158,11,0.05)',   ring: '#f59e0b40' },
+  normal:   { color: '#6b7280', label: 'Normal',    bg: 'rgba(107,114,128,0.05)',  ring: '#6b728040' },
+  great:    { color: '#3b82f6', label: 'Optimal',   bg: 'rgba(59,130,246,0.05)',   ring: '#3b82f640' },
+  elite:    { color: '#10b981', label: 'Peak',      bg: 'rgba(16,185,129,0.05)',   ring: '#10b98140' },
 };
 
 interface HardcodedDefaults {

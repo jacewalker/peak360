@@ -1,7 +1,5 @@
 'use client';
 
-import Link from 'next/link';
-import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useAssessmentStore } from '@/lib/store/assessment-store';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
@@ -24,17 +22,10 @@ export default function Header() {
 
   return (
     <header className="bg-bg-2 border-b border-line text-text h-14">
-      <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-between">
-        <Link href="/portal" className="flex items-center group">
-          <Image
-            src="/landing/peak360-logo.png"
-            alt="Peak360 Logo"
-            width={107}
-            height={32}
-            className="group-hover:scale-105 transition-transform"
-          />
-        </Link>
-
+      {/* Logo intentionally removed — the sidebar already renders the
+          Peak360 wordmark and the report body has its own logo block,
+          so this header just carries the client eyebrow + logout. */}
+      <div className="max-w-6xl mx-auto px-6 h-full flex items-center justify-end">
         <div className="flex items-center gap-4">
           {showClientEyebrow && (
             <div className="hidden sm:flex flex-col items-end leading-tight">

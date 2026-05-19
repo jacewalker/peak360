@@ -3,8 +3,8 @@
 import { useState } from 'react';
 import { markerToPillar, type PillarScore } from '@/lib/pillars/mapping';
 import type { PillarKey, PillarStatus } from '@/lib/pillars/types';
-import type { ReportMarker } from '@/lib/pdf/types';
-import type { RatingTier } from '@/types/normative';
+import type { Insight, ReportMarker } from '@/lib/pdf/types';
+import { TIER_LABELS, type RatingTier } from '@/types/normative';
 import PillarsDisplayModal from '@/components/report/PillarsDisplayModal';
 
 interface Props {
@@ -189,7 +189,7 @@ function Pillar({
               />
               <span className="flex-1 text-text truncate">{m.label}</span>
               <span className="font-mono text-text-dim">
-                {m.tier ?? 'pending'}
+                {m.tier ? TIER_LABELS[m.tier].toLowerCase() : 'pending'}
               </span>
             </div>
           ))

@@ -21,7 +21,7 @@ interface Props {
   markers: ReportMarker[];
 }
 
-type GroupKey = RatingTier | 'pending';
+type GroupKey = RatingTier | 'recorded' | 'pending';
 
 const GROUP_ORDER: readonly GroupKey[] = [
   'poor',
@@ -29,6 +29,10 @@ const GROUP_ORDER: readonly GroupKey[] = [
   'normal',
   'great',
   'elite',
+  // "Recorded" = the user entered a value but no normative range exists for
+  // this marker, so we can't assign a tier. Distinct from "Pending", which
+  // means no data has been entered yet.
+  'recorded',
   'pending',
 ] as const;
 
@@ -115,6 +119,11 @@ const TIER_THEME: Record<
     rail: 'bg-emerald-500',
     pill: 'bg-emerald-500 text-white',
     dot: 'bg-emerald-500',
+  },
+  recorded: {
+    rail: 'bg-slate-600',
+    pill: 'bg-slate-700 text-text-dim ring-1 ring-line-2',
+    dot: 'bg-slate-600',
   },
   pending: {
     rail: 'bg-line-2',
@@ -238,16 +247,41 @@ export default function PillarsDisplayModal({
     (m) => markerToPillar(m).pillar === pillar.key,
   );
 
+  // Route each insight into the modal of the marker it relates to, then
+  // dedup by title within this pillar so the same recommendation (e.g.
+  // "Cardio-metabolic risk flags" triggered by five lipid markers) doesn't
+  // render five times. Dedup is per-pillar, never global — a global dedup
+  // would erase the insight from every pillar but the first.
+  const pillarMarkerKeys = new Set(pillarMarkers.map((m) => m.key));
+  const seenTitles = new Set<string>();
+  const pillarInsights = insights
+    .filter((i) => pillarMarkerKeys.has(i.markerKey))
+    .filter((i) => {
+      if (seenTitles.has(i.title)) return false;
+      seenTitles.add(i.title);
+      return true;
+    });
+
   const grouped: Record<GroupKey, ReportMarker[]> = {
     poor: [],
     cautious: [],
     normal: [],
     great: [],
     elite: [],
+    recorded: [],
     pending: [],
   };
   for (const m of pillarMarkers) {
-    grouped[m.tier ?? 'pending'].push(m);
+    if (m.tier) {
+      grouped[m.tier].push(m);
+    } else if (m.value !== null && m.value !== '') {
+      // Value entered but no normative range exists for this marker — show
+      // it as "Recorded" so the user can see their data without misreading
+      // a missing tier as a missing entry.
+      grouped.recorded.push(m);
+    } else {
+      grouped.pending.push(m);
+    }
   }
 
   // Tier counts excluding pending — for the score breakdown row
@@ -273,10 +307,10 @@ export default function PillarsDisplayModal({
         tabIndex={-1}
         className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 pointer-events-none outline-none"
       >
-        <div className="relative w-full max-w-[640px] max-h-[90vh] overflow-y-auto bg-bg-2 border border-line rounded-2xl shadow-2xl pointer-events-auto motion-safe:transition-all duration-200">
+        <div className="relative w-full max-w-[640px] max-h-[90vh] overflow-x-hidden overflow-y-auto bg-bg-2 border border-line rounded-2xl shadow-2xl pointer-events-auto motion-safe:transition-all duration-200">
         {/* Hero — gradient surface with corner brackets, mono eyebrow, big score */}
         <div
-          className={`relative px-6 pt-6 pb-5 border-b border-line ${theme.heroBg}`}
+          className={`relative overflow-hidden px-6 pt-6 pb-5 border-b border-line ${theme.heroBg}`}
         >
           <CornerBrackets />
 
@@ -404,7 +438,11 @@ export default function PillarsDisplayModal({
                 const rows = grouped[tier];
                 if (rows.length === 0) return null;
                 const label =
-                  tier === 'pending' ? 'Pending' : TIER_LABELS[tier];
+                  tier === 'pending'
+                    ? 'Pending'
+                    : tier === 'recorded'
+                    ? 'Recorded'
+                    : TIER_LABELS[tier];
                 const tierCls = TIER_THEME[tier];
                 return (
                   <div key={tier}>
@@ -464,6 +502,41 @@ export default function PillarsDisplayModal({
             </div>
           )}
         </div>
+
+        {/* Insights & recommendations — routed in from generatePeak360Insights. */}
+        {pillarInsights.length > 0 && (
+          <div className="px-6 py-5 border-t border-line">
+            <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim mb-3">
+              Insights &amp; recommendations
+            </h3>
+            <div className="space-y-3">
+              {pillarInsights.map((insight, i) => (
+                <div
+                  key={`${insight.markerKey}-${i}`}
+                  className="relative bg-bg-3 rounded-xl border border-line overflow-hidden"
+                >
+                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-gold-brand to-champagne" />
+                  <div className="pl-5 pr-5 py-4 min-w-0">
+                    <h4 className="text-sm font-semibold text-text mb-1.5 break-words">{insight.title}</h4>
+                    <p className="text-[12px] leading-relaxed text-text-dim mb-3 break-words">
+                      {insight.why}
+                    </p>
+                    {insight.doNow.length > 0 && (
+                      <div className="space-y-1.5">
+                        {insight.doNow.map((item, j) => (
+                          <div key={j} className="flex items-start gap-2 min-w-0">
+                            <div className="w-1 h-1 rounded-full bg-gold-brand mt-[7px] shrink-0" />
+                            <p className="text-[12px] leading-relaxed text-text break-words min-w-0">{item}</p>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         </div>
       </aside>
     </>

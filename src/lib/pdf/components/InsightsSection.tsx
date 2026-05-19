@@ -9,7 +9,17 @@ interface InsightsSectionProps {
 }
 
 export function InsightsSection({ insights }: InsightsSectionProps) {
-  if (insights.length === 0) return null;
+  // generatePeak360Insights returns one insight per triggering marker so the
+  // portal can route each into the matching pillar modal. The PDF wants a
+  // single flat list, so collapse duplicates by title here.
+  const seenTitles = new Set<string>();
+  const deduped = insights.filter((i) => {
+    if (seenTitles.has(i.title)) return false;
+    seenTitles.add(i.title);
+    return true;
+  });
+
+  if (deduped.length === 0) return null;
 
   return (
     <View break>
@@ -18,7 +28,7 @@ export function InsightsSection({ insights }: InsightsSectionProps) {
         <Text style={styles.sectionHeadingText}>Insights & Recommendations</Text>
       </View>
 
-      {insights.map((insight, i) => (
+      {deduped.map((insight, i) => (
         <View
           key={i}
           wrap={false}

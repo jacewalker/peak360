@@ -138,9 +138,9 @@ function Hero() {
         <div className="hero-copy">
           <Eyebrow num="01 ·">Geelong · Longevity Testing</Eyebrow>
           <h1 className="hero-title">
-            <span className="hero-title-faint">Discover your true</span>
+            <span className="hero-title-faint">Find your</span>
             <br />
-            <span className="hero-title-gold">Health Age.</span>
+            <span className="hero-title-gold">peak.</span>
           </h1>
           <p className="hero-lede">
             Most Australians don&apos;t know their real biological age. We test the 60+ biomarkers that actually

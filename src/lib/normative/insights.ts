@@ -1,5 +1,6 @@
 import { getPeak360Rating, tierScore } from './ratings';
 import type { RatingTier, RatingResult } from '@/types/normative';
+import { TIER_LABELS } from '@/types/normative';
 
 interface Insight {
   title: string;
@@ -30,8 +31,11 @@ export function generatePeak360Insights({
 
   const flagIf = (key: string, label: string, value: number | string | null, rating: RatingResult | null) => {
     if (!value) return;
-    const tier: RatingTier = rating?.tier || 'normal';
-    const r = tierScore(tier);
+    const tierKey: RatingTier = rating?.tier || 'normal';
+    // Use the display label (e.g. "Attention") in user-facing copy, not the
+    // internal enum key. Lowercased so it reads naturally mid-sentence.
+    const tier = TIER_LABELS[tierKey].toLowerCase();
+    const r = tierScore(tierKey);
     // If rating data exists and tier is normal or better, skip (no concern).
     // If no normative data (rating is null), still flag -- the marker was provided
     // for review and we should give guidance even without tier classification.
@@ -393,11 +397,11 @@ export function generatePeak360Insights({
     flagIf(m.testKey, m.label, m.value, rating);
   });
 
-  // De-duplicate identical titles
-  const seen = new Set<string>();
-  return insights.filter((x) => {
-    if (seen.has(x.title)) return false;
-    seen.add(x.title);
-    return true;
-  });
+  // Return one insight per triggering marker — no global dedup. Several
+  // markers legitimately produce the same title (e.g. five lipid markers
+  // → "Cardio-metabolic risk flags") and historically we collapsed them
+  // here, but a global dedup also erased duplicates across pillars, leaving
+  // pillar modals empty when their relevant insight had been kept under a
+  // different pillar. Consumers that want a flat list can dedup locally.
+  return insights;
 }

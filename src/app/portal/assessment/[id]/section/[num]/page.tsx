@@ -232,7 +232,10 @@ export default function SectionPage() {
         </div>
         <main className="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
           <MonoEyebrow variant="hero" as="div" className="mb-3">
-            SECTION 11 / 11 · LONGEVITY ANALYSIS
+            {/* Section 10 (Balance & Power) is hidden, so the report is the
+                10th visible section — match the ProgressBar's "X of Y" label
+                instead of the legacy hardcoded "11 / 11". */}
+            SECTION {VISIBLE_SECTIONS.indexOf(num) + 1} / {VISIBLE_SECTIONS.length} · LONGEVITY ANALYSIS
           </MonoEyebrow>
           <Section11 assessmentId={id} />
         </main>
