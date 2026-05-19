@@ -251,6 +251,10 @@ export default function AdminPeoplePage() {
   const adminCount = users.filter((u) => u.role === 'admin').length;
 
   const groups = useMemo(() => {
+    // Flat "everyone" view — never hides a row, so admins always have a
+    // place to find a user regardless of role or coach assignment.
+    const allUsers = [...users].sort((a, b) => a.name.localeCompare(b.name));
+
     const admins = users
       .filter((u) => u.role === 'admin')
       .sort((a, b) => a.name.localeCompare(b.name));
@@ -280,6 +284,7 @@ export default function AdminPeoplePage() {
     const pendingInvites = invites.filter((i) => !i.accepted);
 
     return {
+      allUsers,
       admins,
       coachesWithClients,
       clientsByCoach,
@@ -578,6 +583,30 @@ export default function AdminPeoplePage() {
             )}
           </form>
         </section>
+
+        {/* 0. Everyone — flat list, doesn't hide users when coach grouping changes. */}
+        <GroupSection
+          eyebrow="Everyone"
+          title="All users"
+          count={groups.allUsers.length}
+        >
+          {listLoading ? (
+            <SkeletonTable rows={5} />
+          ) : groups.allUsers.length === 0 ? (
+            <EmptyRow text="No users yet." />
+          ) : (
+            <UserTable
+              users={groups.allUsers}
+              adminCount={adminCount}
+              openUserId={openUserId}
+              onToggleOpen={(id) => setOpenUserId(openUserId === id ? null : id)}
+              onRoleChange={handleRoleChange}
+              onRename={handleRename}
+              onResetPassword={openResetModal}
+              onAssignCoach={openCoachModal}
+            />
+          )}
+        </GroupSection>
 
         {/* 1. Admins */}
         <GroupSection
