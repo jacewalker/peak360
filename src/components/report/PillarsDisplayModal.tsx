@@ -8,7 +8,7 @@ import {
   type PillarScore,
 } from '@/lib/pillars/mapping';
 import type { PillarStatus } from '@/lib/pillars/types';
-import type { ReportMarker } from '@/lib/pdf/types';
+import type { Insight, ReportMarker } from '@/lib/pdf/types';
 import {
   TIER_LABELS,
   type RatingTier,
@@ -19,6 +19,7 @@ interface Props {
   onClose: () => void;
   pillar: PillarScore;
   markers: ReportMarker[];
+  insights?: Insight[];
 }
 
 type GroupKey = RatingTier | 'recorded' | 'pending';
@@ -171,6 +172,7 @@ export default function PillarsDisplayModal({
   onClose,
   pillar,
   markers,
+  insights = [],
 }: Props) {
   const panelRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
@@ -274,7 +276,7 @@ export default function PillarsDisplayModal({
   for (const m of pillarMarkers) {
     if (m.tier) {
       grouped[m.tier].push(m);
-    } else if (m.value !== null && m.value !== '') {
+    } else if (m.value !== null) {
       // Value entered but no normative range exists for this marker — show
       // it as "Recorded" so the user can see their data without misreading
       // a missing tier as a missing entry.

@@ -14,6 +14,7 @@ export interface ReportMarker {
 }
 
 export interface Insight {
+  markerKey: string;
   title: string;
   why: string;
   doNow: string[];

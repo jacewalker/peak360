@@ -10,6 +10,7 @@ import PillarsDisplayModal from '@/components/report/PillarsDisplayModal';
 interface Props {
   pillars: PillarScore[];
   markers?: ReportMarker[];
+  insights?: Insight[];
 }
 
 const STATUS_RING_HEX: Record<PillarStatus, string> = {
@@ -68,7 +69,7 @@ function getTopContributors(
     .slice(0, 3);
 }
 
-export default function PillarsDisplay({ pillars, markers }: Props) {
+export default function PillarsDisplay({ pillars, markers, insights }: Props) {
   const [selectedKey, setSelectedKey] = useState<PillarKey | null>(null);
   const selected = selectedKey
     ? pillars.find((p) => p.key === selectedKey) ?? null
@@ -112,6 +113,7 @@ export default function PillarsDisplay({ pillars, markers }: Props) {
           onClose={() => setSelectedKey(null)}
           pillar={selected}
           markers={markers ?? []}
+          insights={insights ?? []}
         />
       )}
     </section>
