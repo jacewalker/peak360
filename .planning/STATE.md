@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 Phase: 09 — COMPLETE
 Plan: 2 of 2
 Status: Phase 09 complete
-Last activity: 2026-05-24 -- Completed quick task 260524-iuw: Role-gate client Notes tab (coach/admin only)
+Last activity: 2026-05-24 -- Completed quick task 260524-jk6: Fix clients-page selection visual state
 
 Progress: [██████████] 100%
 
@@ -118,6 +118,7 @@ Recent decisions affecting current work:
 | 260524-hua | Strength (S8): CMJ single jump height + Modified RSI; IMTP asymmetry %; rename Single Leg Hop → SL Jump w/ L/R RSI | 2026-05-24 | d982471 | [260524-hua-strength-testing-section-8-metric-change](./quick/260524-hua-strength-testing-section-8-metric-change/) |
 | 260524-inb | Client notes log (append-only, attributed) on the client page — Notes tab w/ add + history | 2026-05-24 | d0ae305 | [260524-inb-client-notes-option-b-append-only-log-on](./quick/260524-inb-client-notes-option-b-append-only-log-on/) |
 | 260524-iuw | Role-gate the client Notes tab — coach/admin only, hidden from clients (UI gate matching API 403) | 2026-05-24 | dbc3b60 | [260524-iuw-hide-the-client-profile-notes-tab-sectio](./quick/260524-iuw-hide-the-client-profile-notes-tab-sectio/) |
+| 260524-jk6 | Fix clients page: selected client cards now show a gold border + ring + tint (clear selection state) | 2026-05-24 | 78f2d02 | [260524-jk6-fix-clients-page-selection-bug-a-selecte](./quick/260524-jk6-fix-clients-page-selection-bug-a-selecte/) |
 
 ## Session Continuity
 
