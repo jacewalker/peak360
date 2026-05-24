@@ -25,6 +25,15 @@ export interface AssessmentTimeline {
   markers: Record<string, MarkerTimeline>;
 }
 
+export interface ClientNote {
+  id: string;
+  clientName: string;
+  authorId: string;
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
 // Rating-tier marker pill colours — preserved verbatim per Phase 9 UI-SPEC §Color
 // "Rating tier palette preserved verbatim".
 const TIER_PILL: Record<RatingTier, string> = {
@@ -49,8 +58,13 @@ export default function ClientDetailPage() {
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [timelines, setTimelines] = useState<AssessmentTimeline[]>([]);
   const [loading, setLoading] = useState(true);
-  const [tab, setTab] = useState<'assessments' | 'trends'>('assessments');
+  const [tab, setTab] = useState<'assessments' | 'trends' | 'notes'>('assessments');
   const [creating, setCreating] = useState(false);
+  const [notes, setNotes] = useState<ClientNote[]>([]);
+  const [notesLoading, setNotesLoading] = useState(true);
+  const [notesLoaded, setNotesLoaded] = useState(false);
+  const [noteBody, setNoteBody] = useState('');
+  const [notesSaving, setNotesSaving] = useState(false);
 
   const handleStartAssessment = async () => {
     setCreating(true);
@@ -141,6 +155,45 @@ export default function ClientDetailPage() {
     load();
   }, [clientName]);
 
+  // Lazy-load notes the first time the Notes tab is opened.
+  useEffect(() => {
+    if (tab !== 'notes' || notesLoaded) return;
+    async function loadNotes() {
+      setNotesLoading(true);
+      try {
+        const res = await fetch(`/api/client-notes?client=${encodeURIComponent(clientName)}`);
+        const json = await res.json();
+        setNotes(json.data || []);
+      } catch {
+        setNotes([]);
+      } finally {
+        setNotesLoading(false);
+        setNotesLoaded(true);
+      }
+    }
+    loadNotes();
+  }, [tab, notesLoaded, clientName]);
+
+  const handleAddNote = async () => {
+    const body = noteBody.trim();
+    if (!body || notesSaving) return;
+    setNotesSaving(true);
+    try {
+      const res = await fetch('/api/client-notes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ client: clientName, body }),
+      });
+      const json = await res.json();
+      if (json.success && json.data) {
+        setNotes((prev) => [json.data as ClientNote, ...prev]);
+        setNoteBody('');
+      }
+    } finally {
+      setNotesSaving(false);
+    }
+  };
+
   const clientEmail = assessments[0]?.clientEmail || '';
   const clientGender = assessments[0]?.clientGender || '';
 
@@ -218,11 +271,21 @@ export default function ClientDetailPage() {
           >
             Trends &amp; Analytics
           </button>
+          <button
+            onClick={() => setTab('notes')}
+            className={`py-3 text-[13px] font-medium tracking-[0.02em] border-b-2 transition-colors ${
+              tab === 'notes'
+                ? 'border-gold-brand text-text'
+                : 'border-transparent text-text-dim hover:text-text'
+            }`}
+          >
+            Notes
+          </button>
         </div>
       </div>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 py-8">
-        {tab === 'assessments' ? (
+        {tab === 'assessments' && (
           assessments.length === 0 ? (
             <div className="text-center py-16">
               <p className="text-[13px] text-text-dim">No assessments found for this client.</p>
@@ -276,7 +339,9 @@ export default function ClientDetailPage() {
               })}
             </div>
           )
-        ) : (
+        )}
+
+        {tab === 'trends' && (
           timelines.length < 2 ? (
             <div className="bg-bg-3 rounded-xl border border-line p-12 text-center">
               <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Not enough data for trends.</h3>
@@ -287,6 +352,62 @@ export default function ClientDetailPage() {
           ) : (
             <TrendsTab timelines={timelines} clientName={clientName} />
           )
+        )}
+
+        {tab === 'notes' && (
+          <div className="space-y-6">
+            {/* Add note */}
+            <div className="bg-bg-3 rounded-xl border border-line p-6">
+              <MonoEyebrow as="div" className="mb-3">ADD A NOTE</MonoEyebrow>
+              <textarea
+                value={noteBody}
+                onChange={(e) => setNoteBody(e.target.value)}
+                rows={4}
+                placeholder="Write a note about this client…"
+                className="w-full bg-bg-2 border border-line rounded-lg px-3 py-2.5 text-[13px] text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand/50 transition-colors resize-y"
+              />
+              <div className="flex justify-end mt-3">
+                <button
+                  onClick={handleAddNote}
+                  disabled={!noteBody.trim() || notesSaving}
+                  className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-5 py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                >
+                  {notesSaving ? 'Adding…' : 'Add note'}
+                </button>
+              </div>
+            </div>
+
+            {/* History */}
+            {notesLoading ? (
+              <div className="text-center py-12">
+                <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">Loading notes…</span>
+              </div>
+            ) : notes.length === 0 ? (
+              <div className="text-center py-12">
+                <p className="text-[13px] text-text-dim">No notes yet.</p>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                {notes.map((note) => (
+                  <div key={note.id} className="bg-bg-3 rounded-xl border border-line p-6">
+                    <div className="flex items-center gap-3 mb-2">
+                      <span className="text-[13px] font-medium text-text">{note.authorName}</span>
+                      <span className="font-mono text-[11px] uppercase tracking-[0.16em] text-text-faint">
+                        {new Date(note.createdAt).toLocaleString('en-AU', {
+                          day: 'numeric',
+                          month: 'short',
+                          year: 'numeric',
+                          hour: '2-digit',
+                          minute: '2-digit',
+                        })}
+                      </span>
+                    </div>
+                    <p className="text-[13px] text-text-dim leading-[1.55] whitespace-pre-wrap">{note.body}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         )}
       </main>
     </div>

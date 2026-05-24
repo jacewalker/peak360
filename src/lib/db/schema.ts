@@ -109,6 +109,18 @@ export const normativeVersions = pgTable('normative_versions', {
   createdAt: text('created_at').notNull(),
 });
 
+// Append-only client notes log, keyed by client name. Author attribution is
+// denormalized (author_id + author_name) at write time so history renders
+// without a join and survives later name changes as "who wrote it then".
+export const clientNotes = pgTable('client_notes', {
+  id: text('id').primaryKey(),
+  clientName: text('client_name').notNull(),
+  authorId: text('author_id').notNull(),
+  authorName: text('author_name').notNull(),
+  body: text('body').notNull(),
+  createdAt: text('created_at').notNull(),
+});
+
 // Better Auth tables
 export const user = pgTable('user', {
   id: text('id').primaryKey(),
