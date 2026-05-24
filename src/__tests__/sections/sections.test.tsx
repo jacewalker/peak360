@@ -266,26 +266,9 @@ describe('Section7 - Cardiovascular Fitness', () => {
     expect(screen.getByText('Cardiovascular Fitness Testing')).toBeInTheDocument();
   });
 
-  it('renders cardio test radio options', () => {
+  it('renders VO2 max field', () => {
     render(<Section7 {...defaultProps} />);
-    expect(screen.getByText('VO2 Max Test')).toBeInTheDocument();
-    expect(screen.getByText('6-Minute Walk Test')).toBeInTheDocument();
-  });
-
-  it('shows VO2 max field when vo2max selected', () => {
-    render(<Section7 {...defaultProps} data={{ cardioTest: 'vo2max' }} />);
     expect(screen.getByLabelText(/vo2 max/i)).toBeInTheDocument();
-  });
-
-  it('shows 6-min walk field when sixminwalk selected', () => {
-    render(<Section7 {...defaultProps} data={{ cardioTest: 'sixminwalk' }} />);
-    expect(screen.getByLabelText(/6-minute walk/i)).toBeInTheDocument();
-  });
-
-  it('hides conditional fields when no test selected', () => {
-    render(<Section7 {...defaultProps} />);
-    expect(screen.queryByLabelText(/vo2 max \(ml/i)).not.toBeInTheDocument();
-    expect(screen.queryByLabelText(/6-minute walk/i)).not.toBeInTheDocument();
   });
 
   it('renders vitals fields', () => {

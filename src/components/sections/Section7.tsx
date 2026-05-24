@@ -4,7 +4,6 @@ import type { SectionProps } from '@/app/portal/assessment/[id]/section/[num]/pa
 import SectionHeader from '@/components/ui/SectionHeader';
 import FormField from '@/components/forms/FormField';
 import FormRow from '@/components/forms/FormRow';
-import RadioGroup from '@/components/forms/RadioGroup';
 
 export default function Section7({ data, onChange }: SectionProps) {
   const n = (field: string) => (v: string) => onChange(field, v === '' ? null : Number(v));
@@ -14,46 +13,18 @@ export default function Section7({ data, onChange }: SectionProps) {
       <SectionHeader
         number={7}
         title="Cardiovascular Fitness Testing"
-        description="Choose one cardiovascular test and record vitals."
+        description="Record the VO2 max result and vitals."
       />
 
       <div className="bg-bg-3 rounded-xl border border-line p-4 sm:p-6 space-y-6">
-        <RadioGroup
-          name="cardioTest"
-          label="Choose ONE cardiovascular test"
-          value={data.cardioTest as string}
-          onChange={(v) => onChange('cardioTest', v)}
-          options={[
-            { value: 'vo2max', label: 'VO2 Max Test' },
-            { value: 'sixminwalk', label: '6-Minute Walk Test' },
-          ]}
+        <FormField
+          id="vo2max"
+          label="VO2 Max (mL/kg/min)"
+          type="number"
+          value={data.vo2max as number}
+          onChange={n('vo2max')}
+          step={0.1}
         />
-
-        {data.cardioTest === 'vo2max' && (
-          <div className="bg-bg-2 rounded-lg p-4">
-            <FormField
-              id="vo2max"
-              label="VO2 Max (mL/kg/min)"
-              type="number"
-              value={data.vo2max as number}
-              onChange={n('vo2max')}
-              step={0.1}
-            />
-          </div>
-        )}
-
-        {data.cardioTest === 'sixminwalk' && (
-          <div className="bg-bg-2 rounded-lg p-4">
-            <FormField
-              id="sixMinWalk"
-              label="6-Minute Walk Distance (meters)"
-              type="number"
-              value={data.sixMinWalk as number}
-              onChange={n('sixMinWalk')}
-              step={1}
-            />
-          </div>
-        )}
       </div>
 
       <div className="bg-bg-3 rounded-xl border border-line p-4 sm:p-6 space-y-6">

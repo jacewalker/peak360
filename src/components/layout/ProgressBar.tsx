@@ -1,8 +1,14 @@
 'use client';
 
 import Link from 'next/link';
+import { useState } from 'react';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
-import { SECTION_TITLES, VISIBLE_SECTIONS, type SectionNumber } from '@/types/assessment';
+import {
+  SECTION_DESCRIPTIONS,
+  SECTION_TITLES,
+  VISIBLE_SECTIONS,
+  type SectionNumber,
+} from '@/types/assessment';
 
 interface ProgressBarProps {
   currentSection: number;
@@ -11,6 +17,7 @@ interface ProgressBarProps {
 }
 
 export default function ProgressBar({ currentSection, assessmentId, completedSections = [] }: ProgressBarProps) {
+  const [hoveredSection, setHoveredSection] = useState<SectionNumber | null>(null);
   const visibleCompleted = completedSections.filter((s) => VISIBLE_SECTIONS.includes(s));
   const completedCount = visibleCompleted.length;
   // Section 11 is a report — divide by visible-1, but guard against
@@ -45,6 +52,12 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
               <Link
                 key={num}
                 href={`/portal/assessment/${assessmentId}/section/${num}`}
+                title={`${SECTION_TITLES[num as SectionNumber]} — ${SECTION_DESCRIPTIONS[num as SectionNumber]}`}
+                aria-label={`Section ${displayNum}: ${SECTION_TITLES[num as SectionNumber]}. ${SECTION_DESCRIPTIONS[num as SectionNumber]}`}
+                onMouseEnter={() => setHoveredSection(num as SectionNumber)}
+                onMouseLeave={() => setHoveredSection((h) => (h === num ? null : h))}
+                onFocus={() => setHoveredSection(num as SectionNumber)}
+                onBlur={() => setHoveredSection((h) => (h === num ? null : h))}
                 className={`
                   group relative w-6 h-6 sm:w-7 sm:h-7 rounded-full flex items-center justify-center shrink-0
                   text-[11px] font-semibold transition-all duration-300 hover:scale-110
@@ -70,6 +83,24 @@ export default function ProgressBar({ currentSection, assessmentId, completedSec
         <p className="text-[13px] text-text-dim mt-1.5 sm:hidden text-center">
           {SECTION_TITLES[currentSection as SectionNumber]}
         </p>
+
+        {/* Always-visible info panel — defaults to the current section, swaps
+            to the hovered/focused section as the user inspects the pill row.
+            Sits outside the scrolling pill row so the overflow container
+            can't clip it. */}
+        {(() => {
+          const shownSection = (hoveredSection ?? (currentSection as SectionNumber));
+          return (
+            <div className="mt-2 mx-auto max-w-md rounded-md border border-line bg-bg-3 px-3 py-2 text-center shadow-sm">
+              <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gold-brand">
+                {SECTION_TITLES[shownSection]}
+              </p>
+              <p className="mt-0.5 text-[12px] leading-snug text-text-dim">
+                {SECTION_DESCRIPTIONS[shownSection]}
+              </p>
+            </div>
+          );
+        })()}
       </div>
     </div>
   );

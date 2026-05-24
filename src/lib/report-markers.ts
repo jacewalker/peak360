@@ -101,7 +101,6 @@ export const REPORT_MARKERS: MarkerDef[] = [
   { testKey: 'resting_hr', label: 'Resting Heart Rate', section: 7, dataKey: 'restingHR', category: 'Cardiovascular Fitness', hasNorms: true },
   { testKey: 'blood_pressure_systolic', label: 'BP (Systolic)', section: 7, dataKey: 'bpSystolic', category: 'Cardiovascular Fitness', hasNorms: true },
   { testKey: 'bp_diastolic', label: 'BP (Diastolic)', section: 7, dataKey: 'bpDiastolic', category: 'Cardiovascular Fitness', fallbackUnit: 'mmHg', hasNorms: false },
-  { testKey: 'six_min_walk', label: '6-Min Walk Distance', section: 7, dataKey: 'sixMinWalk', category: 'Cardiovascular Fitness', fallbackUnit: 'm', hasNorms: false },
 
   // ── Strength Testing ──
   { testKey: 'grip_strength_left', label: 'Grip Strength (Left)', section: 8, dataKey: 'gripStrengthLeft', category: 'Strength Testing', hasNorms: true },

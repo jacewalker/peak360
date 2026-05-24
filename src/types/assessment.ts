@@ -114,9 +114,7 @@ export interface BloodTests {
 
 // Section 7: Cardiovascular Fitness
 export interface CardiovascularFitness {
-  testType: 'vo2max' | '6min_walk' | '';
   vo2max: number | null;
-  sixMinWalkDistance: number | null;
   restingHr: number | null;
   bloodPressureSystolic: number | null;
   bloodPressureDiastolic: number | null;
@@ -210,6 +208,20 @@ export const SECTION_TITLES: Record<SectionNumber, string> = {
   9: 'Mobility & Flexibility',
   10: 'Balance & Power',
   11: 'Complete Longevity Analysis',
+};
+
+export const SECTION_DESCRIPTIONS: Record<SectionNumber, string> = {
+  1: 'Client name, contact, date of birth, and gender.',
+  2: 'Sleep, stress, energy, soreness, caffeine and alcohol for the assessment day.',
+  3: 'Health history, conditions, medications and exercise contraindications.',
+  4: 'Client and coach signatures consenting to the assessment.',
+  5: 'Lipid panel, glucose, hormones, vitamins and inflammation markers — upload labs to auto-fill.',
+  6: 'Height, weight, body-fat, waist, hip and other body-composition metrics.',
+  7: 'VO2 max and resting vitals (heart rate and blood pressure).',
+  8: 'Grip strength, leg press and CMJ — upper- and lower-body force production.',
+  9: 'Range-of-motion tests for shoulders, spine, hips and ankles.',
+  10: 'Single-leg balance and lower-body power (CMJ, single-leg hop).',
+  11: 'Generated longevity report with pillar scores and recommendations.',
 };
 
 export const TOTAL_SECTIONS = 11;
