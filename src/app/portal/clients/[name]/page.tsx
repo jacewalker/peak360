@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import type { Assessment } from '@/types/assessment';
@@ -37,6 +37,7 @@ const TIER_PILL: Record<RatingTier, string> = {
 
 export default function ClientDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const rawName = params.name as string;
   let clientName: string;
   try {
@@ -49,6 +50,29 @@ export default function ClientDetailPage() {
   const [timelines, setTimelines] = useState<AssessmentTimeline[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<'assessments' | 'trends'>('assessments');
+  const [creating, setCreating] = useState(false);
+
+  const handleStartAssessment = async () => {
+    setCreating(true);
+    try {
+      const res = await fetch('/api/assessments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientName }),
+      });
+      const { data } = await res.json();
+      // Seed Section 1 so the route's client name renders pre-filled and the
+      // auto-save can't blank it back out on arrival.
+      await fetch(`/api/assessments/${data.id}/sections/1`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { clientName } }),
+      });
+      router.push(`/portal/assessment/${data.id}/section/1`);
+    } finally {
+      setCreating(false);
+    }
+  };
 
   useEffect(() => {
     async function load() {
@@ -145,18 +169,28 @@ export default function ClientDetailPage() {
           <MonoEyebrow variant="hero" as="div" className="mb-3">
             CLIENT · {clientName.toUpperCase()}
           </MonoEyebrow>
-          <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-full bg-bg-2 border border-line flex items-center justify-center text-[20px] font-medium text-text">
-              {(clientName || 'U')[0].toUpperCase()}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-4">
+              <div className="w-14 h-14 rounded-full bg-bg-2 border border-line flex items-center justify-center text-[20px] font-medium text-text">
+                {(clientName || 'U')[0].toUpperCase()}
+              </div>
+              <div>
+                <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">{clientName}</h1>
+                <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">
+                  {clientEmail && <>{clientEmail.toUpperCase()} · </>}
+                  {clientGender && <>{clientGender.toUpperCase()} · </>}
+                  {assessments.length} ASSESSMENT{assessments.length !== 1 ? 'S' : ''}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-[32px] sm:text-[40px] font-medium text-text leading-none tracking-[-0.03em]">{clientName}</h1>
-              <p className="mt-3 font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">
-                {clientEmail && <>{clientEmail.toUpperCase()} · </>}
-                {clientGender && <>{clientGender.toUpperCase()} · </>}
-                {assessments.length} ASSESSMENT{assessments.length !== 1 ? 'S' : ''}
-              </p>
-            </div>
+            <button
+              onClick={handleStartAssessment}
+              disabled={creating}
+              aria-label={`Start assessment for ${clientName}`}
+              className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-6 py-3 rounded-lg transition-colors whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
+            >
+              {creating ? 'Starting…' : 'Start assessment'}
+            </button>
           </div>
         </div>
       </header>
