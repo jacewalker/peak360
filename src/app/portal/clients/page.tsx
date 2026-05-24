@@ -285,13 +285,17 @@ export default function ClientsPage() {
                   <Link
                     key={c.name}
                     href={`/portal/clients/${encodeURIComponent(c.name)}`}
-                    className="block bg-bg-3 rounded-xl border border-line p-6 hover:border-gold-brand/40 transition-colors"
+                    className={`block rounded-xl border p-6 transition-colors ${
+                      selectedNames.has(c.name)
+                        ? 'border-gold-brand ring-1 ring-gold-brand/40 bg-gold-brand/5'
+                        : 'bg-bg-3 border-line hover:border-gold-brand/40'
+                    }`}
                   >
                     <div className="flex items-start gap-3 mb-4">
                       <div onClick={(e) => e.preventDefault()} className="shrink-0">
                         <input
                           type="checkbox"
-                          className="w-4 h-4 rounded border-line accent-gold-brand"
+                          className="w-5 h-5 rounded border border-line accent-gold-brand"
                           checked={selectedNames.has(c.name)}
                           onChange={() => toggleSelectOne(c.name)}
                           aria-label={`Select ${c.name}`}
