@@ -52,7 +52,7 @@ export default function Section8({ data, onChange }: SectionProps) {
         </FormRow>
       } result={
         <ValdResultCard title="Countermovement Jump" category="Jump" metric="Jump height" unit="cm" isForceDecks
-          singleValue={data.cmjJumpHeight as number} secondaryLabel="Modified RSI" secondaryValue={data.cmjModifiedRsi as number} secondaryUnit="" date={assessmentDate} />
+          singleValue={data.cmjJumpHeight as number} secondaryLabel="Modified RSI" secondaryValue={data.cmjModifiedRsi as number} secondaryUnit="" secondaryDecimals={2} date={assessmentDate} />
       } />
 
       {/* 3. Isometric Mid-Thigh Pull (Vald) */}
@@ -86,7 +86,7 @@ export default function Section8({ data, onChange }: SectionProps) {
       } result={
         <ValdResultCard title="SL Jump" category="Jump" metric="Jump height" unit="cm" isForceDecks
           left={data.singleLegHopLeft as number} right={data.singleLegHopRight as number}
-          secondaryLeft={data.singleLegHopRsiLeft as number} secondaryRight={data.singleLegHopRsiRight as number} secondaryMetric="Modified RSI" date={assessmentDate} />
+          secondaryLeft={data.singleLegHopRsiLeft as number} secondaryRight={data.singleLegHopRsiRight as number} secondaryMetric="Modified RSI" secondaryDecimals={2} date={assessmentDate} />
       } />
 
       {/* 5. Single Leg Balance Test (Vald) */}

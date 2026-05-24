@@ -17,6 +17,7 @@ interface ValdResultCardProps {
   secondaryLeft?: number | null;
   secondaryRight?: number | null;
   secondaryMetric?: string;
+  secondaryDecimals?: number;
   showAsymmetryPercent?: boolean;
   unit: string;
   lowerIsBetter?: boolean;
@@ -108,6 +109,7 @@ export default function ValdResultCard({
   secondaryLeft,
   secondaryRight,
   secondaryMetric,
+  secondaryDecimals,
   showAsymmetryPercent,
   unit,
   lowerIsBetter = false,
@@ -128,6 +130,11 @@ export default function ValdResultCard({
     if (Number.isInteger(v)) return v.toString();
     return v % 1 === 0 ? v.toString() : v.toFixed(1);
   };
+
+  // Secondary metrics (e.g. Modified RSI) may need finer precision than the
+  // 1-decimal default — RSI is conventionally read to 2 decimals.
+  const formatSecondary = (v: number) =>
+    secondaryDecimals != null ? v.toFixed(secondaryDecimals) : formatVal(v);
 
   return (
     <div className="bg-bg-3 rounded-2xl border border-line px-5 py-3.5 space-y-2.5 transition-colors hover:border-gold-brand/30 h-full flex flex-col justify-between">
@@ -228,11 +235,11 @@ export default function ValdResultCard({
             <div className="flex items-end gap-6 sm:gap-8 min-w-0">
               <div>
                 <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-0.5">Left {secondaryMetric}</p>
-                <span className="text-lg font-bold text-text tabular-nums leading-none">{formatVal(secondaryLeft!)}</span>
+                <span className="text-lg font-bold text-text tabular-nums leading-none">{formatSecondary(secondaryLeft!)}</span>
               </div>
               <div>
                 <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-0.5">Right {secondaryMetric}</p>
-                <span className="text-lg font-bold text-text tabular-nums leading-none">{formatVal(secondaryRight!)}</span>
+                <span className="text-lg font-bold text-text tabular-nums leading-none">{formatSecondary(secondaryRight!)}</span>
               </div>
             </div>
           )}
@@ -257,7 +264,7 @@ export default function ValdResultCard({
               <div className="pb-1">
                 <p className="text-[10px] text-text-faint uppercase tracking-wider font-medium">{secondaryLabel}</p>
                 <div className="flex items-baseline gap-0.5">
-                  <span className="text-lg font-bold text-text tabular-nums">{formatVal(secondaryValue)}</span>
+                  <span className="text-lg font-bold text-text tabular-nums">{formatSecondary(secondaryValue)}</span>
                   <span className="text-xs text-text-faint">{secondaryUnit}</span>
                 </div>
               </div>
