@@ -4,6 +4,9 @@ import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
 import Link from 'next/link';
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
+import { authClient } from '@/lib/auth-client';
+
+const UNASSIGNED_COACH = 'Unassigned';
 
 interface Client {
   name: string;
@@ -12,13 +15,21 @@ interface Client {
   dob: string | null;
   assessmentCount: number;
   lastAssessment: string;
+  // Distinct coach names across this client's assessments. Use a set to
+  // dedup — a client may have multiple assessments under one coach, or
+  // (rarely) be reassigned between coaches.
+  coaches: string[];
 }
 
 export default function ClientsPage() {
+  const { data: sessionData } = authClient.useSession();
+  const isAdmin = sessionData?.user?.role === 'admin';
+
   const [clients, setClients] = useState<Client[]>([]);
   const [rawAssessments, setRawAssessments] = useState<Array<{ id: string; clientName?: string }>>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [coachFilter, setCoachFilter] = useState<string>('all');
   const [selectedNames, setSelectedNames] = useState<Set<string>>(new Set());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const selectAllRef = useRef<HTMLInputElement>(null);
@@ -29,12 +40,14 @@ export default function ClientsPage() {
       const res = await r.json();
       const data = res.data || [];
       setRawAssessments(data);
-      const byClient = new Map<string, Client>();
+      const byClient = new Map<string, Client & { coachSet: Set<string> }>();
       for (const a of data) {
         const name = a.clientName || 'Unnamed Client';
+        const coachName = a.coachName || UNASSIGNED_COACH;
         const existing = byClient.get(name);
         if (existing) {
           existing.assessmentCount++;
+          existing.coachSet.add(coachName);
           // Normalise both sides to YYYY-MM-DD before comparison so a full ISO
           // timestamp on createdAt cannot lexicographically beat a same-day
           // date-only stored value.
@@ -53,10 +66,15 @@ export default function ClientsPage() {
             dob: a.clientDob || null,
             assessmentCount: 1,
             lastAssessment: a.assessmentDate || a.createdAt.split('T')[0],
+            coaches: [],
+            coachSet: new Set([coachName]),
           });
         }
       }
-      setClients(Array.from(byClient.values()).sort((a, b) => a.name.localeCompare(b.name)));
+      const aggregated: Client[] = Array.from(byClient.values())
+        .map(({ coachSet, ...c }) => ({ ...c, coaches: Array.from(coachSet).sort() }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+      setClients(aggregated);
     } catch {
       // ignore
     } finally {
@@ -70,17 +88,33 @@ export default function ClientsPage() {
 
   useEffect(() => {
     setSelectedNames(new Set());
-  }, [search]);
+  }, [search, coachFilter]);
+
+  const coachOptions = useMemo(() => {
+    const set = new Set<string>();
+    for (const c of clients) {
+      for (const coach of c.coaches) set.add(coach);
+    }
+    // Sort alphabetically, but pin "Unassigned" to the end.
+    return Array.from(set).sort((a, b) => {
+      if (a === UNASSIGNED_COACH) return 1;
+      if (b === UNASSIGNED_COACH) return -1;
+      return a.localeCompare(b);
+    });
+  }, [clients]);
 
   const filtered = useMemo(() => {
-    if (!search.trim()) return clients;
-    const q = search.toLowerCase();
-    return clients.filter(
-      (c) =>
-        c.name.toLowerCase().includes(q) ||
-        (c.email && c.email.toLowerCase().includes(q))
-    );
-  }, [clients, search]);
+    const q = search.trim().toLowerCase();
+    return clients.filter((c) => {
+      if (q && !(c.name.toLowerCase().includes(q) || (c.email && c.email.toLowerCase().includes(q)))) {
+        return false;
+      }
+      if (isAdmin && coachFilter !== 'all' && !c.coaches.includes(coachFilter)) {
+        return false;
+      }
+      return true;
+    });
+  }, [clients, search, coachFilter, isAdmin]);
 
   useEffect(() => {
     if (selectAllRef.current) {
@@ -174,7 +208,10 @@ export default function ClientsPage() {
               </div>
             </div>
 
-            {/* Select / Bulk actions toolbar */}
+            {/* Select / Bulk actions toolbar — coach filter (admin-only)
+                lives on the right of this row, so the search below keeps
+                its full width. Inline style on the select bypasses the
+                Tailwind class scanner entirely. */}
             <div className="flex items-center gap-2 flex-wrap">
               <label className="flex items-center gap-2 cursor-pointer text-[13px] text-text-dim">
                 <input
@@ -198,9 +235,32 @@ export default function ClientsPage() {
                   </button>
                 </>
               )}
+              {isAdmin && coachOptions.length > 0 && (
+                <div className="ml-auto flex items-center gap-2">
+                  <label
+                    htmlFor="coach-filter"
+                    className="font-mono text-[11px] font-medium uppercase tracking-[0.18em] text-text-faint shrink-0"
+                  >
+                    Coach
+                  </label>
+                  <select
+                    id="coach-filter"
+                    value={coachFilter}
+                    onChange={(e) => setCoachFilter(e.target.value)}
+                    aria-label="Filter clients by coach"
+                    style={{ width: '20rem' }}
+                    className="h-10 px-3 rounded-lg border border-line bg-bg-3 text-[13px] text-text focus:outline-none focus:border-gold-brand transition-colors"
+                  >
+                    <option value="all">All coaches</option>
+                    {coachOptions.map((coach) => (
+                      <option key={coach} value={coach}>{coach}</option>
+                    ))}
+                  </select>
+                </div>
+              )}
             </div>
 
-            {/* Search */}
+            {/* Search — full width, untouched from the original layout. */}
             <div className="relative">
               <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-faint pointer-events-none" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
@@ -246,6 +306,21 @@ export default function ClientsPage() {
                           <p className="text-[13px] text-text-dim truncate mt-0.5">{c.email}</p>
                         )}
                       </div>
+                    </div>
+
+                    {/* Coach attribution row — pinned under the identity block
+                        so admins (and the client themselves) can see at a
+                        glance who is running these assessments. */}
+                    <div className="mb-4 flex items-center gap-2 text-[12px]">
+                      <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-text-faint shrink-0">
+                        Coach
+                      </span>
+                      <span
+                        className={`truncate ${c.coaches.length === 1 && c.coaches[0] === UNASSIGNED_COACH ? 'text-text-faint italic' : 'text-text'}`}
+                        title={c.coaches.join(', ')}
+                      >
+                        {c.coaches.join(', ')}
+                      </span>
                     </div>
 
                     <div className="flex items-end justify-between">
