@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import type { Assessment } from '@/types/assessment';
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
+import ClientPickerDialog from '@/components/portal/ClientPickerDialog';
 
 interface ImportResult {
   imported: number;
@@ -24,6 +25,8 @@ export default function HomePage() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const selectAllRef = useRef<HTMLInputElement>(null);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
 
   const fetchAssessments = useCallback(async () => {
     try {
@@ -45,14 +48,26 @@ export default function HomePage() {
     setSelectedIds(new Set());
   }, [search]);
 
-  const createAssessment = async () => {
-    const res = await fetch('/api/assessments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}),
-    });
-    const { data } = await res.json();
-    router.push(`/portal/assessment/${data.id}/section/1`);
+  const handleCreateForClient = async (name: string) => {
+    setCreating(true);
+    try {
+      const res = await fetch('/api/assessments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientName: name }),
+      });
+      const { data } = await res.json();
+      // Seed Section 1 so the chosen name renders pre-filled and the
+      // auto-save can't blank it back out on arrival.
+      await fetch(`/api/assessments/${data.id}/sections/1`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { clientName: name } }),
+      });
+      router.push(`/portal/assessment/${data.id}/section/1`);
+    } finally {
+      setCreating(false);
+    }
   };
 
   const deleteAssessment = async (id: string) => {
@@ -89,6 +104,15 @@ export default function HomePage() {
       (a.clientName || '').toLowerCase().includes(q)
     );
   }, [assessments, search]);
+
+  // Distinct existing client names for the picker (mirror the clients-page dedup).
+  const existingNames = useMemo(() => {
+    const names = new Set<string>();
+    assessments.forEach((a) => {
+      if (a.clientName) names.add(a.clientName);
+    });
+    return Array.from(names).sort();
+  }, [assessments]);
 
   useEffect(() => {
     if (selectAllRef.current) {
@@ -152,7 +176,7 @@ export default function HomePage() {
               </p>
             </div>
             <button
-              onClick={createAssessment}
+              onClick={() => setPickerOpen(true)}
               aria-label="Start new assessment"
               className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-6 py-3 rounded-lg transition-colors whitespace-nowrap"
             >
@@ -206,7 +230,7 @@ export default function HomePage() {
               <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">No assessments in scope.</h3>
               <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Adjust your filter or create a new assessment.</p>
               <button
-                onClick={createAssessment}
+                onClick={() => setPickerOpen(true)}
                 className="mt-6 bg-gold-brand text-bg hover:bg-champagne py-3 px-6 rounded-lg text-[13px] font-medium tracking-[0.02em] transition-colors"
               >
                 Start new assessment
@@ -378,6 +402,14 @@ export default function HomePage() {
         itemLabel="assessment"
         onCancel={() => setShowDeleteModal(false)}
         onConfirm={handleBulkDelete}
+      />
+
+      <ClientPickerDialog
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        existingNames={existingNames}
+        onConfirm={handleCreateForClient}
+        busy={creating}
       />
     </div>
   );

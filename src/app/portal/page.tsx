@@ -11,6 +11,7 @@ import { getPeak360Rating } from '@/lib/normative/ratings';
 import type { RatingTier } from '@/types/normative';
 import type { ChartPoint } from '@/components/charts/MetricChart';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
+import ClientPickerDialog from '@/components/portal/ClientPickerDialog';
 
 const MetricChart = dynamic(() => import('@/components/charts/MetricChart'), { ssr: false });
 
@@ -22,6 +23,8 @@ export default function DashboardPage() {
   const [inviteLoading, setInviteLoading] = useState(false);
   const [inviteMessage, setInviteMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
   const [showWelcome, setShowWelcome] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
   const { data: sessionData } = authClient.useSession();
   const userRole = sessionData?.user?.role;
   const firstName = (sessionData?.user?.name || '').split(' ')[0] || '';
@@ -64,14 +67,26 @@ export default function DashboardPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const createAssessment = async () => {
-    const res = await fetch('/api/assessments', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({}),
-    });
-    const { data } = await res.json();
-    router.push(`/portal/assessment/${data.id}/section/1`);
+  const handleCreateForClient = async (name: string) => {
+    setCreating(true);
+    try {
+      const res = await fetch('/api/assessments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientName: name }),
+      });
+      const { data } = await res.json();
+      // Seed Section 1 so the chosen name renders pre-filled and the
+      // auto-save can't blank it back out on arrival.
+      await fetch(`/api/assessments/${data.id}/sections/1`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ data: { clientName: name } }),
+      });
+      router.push(`/portal/assessment/${data.id}/section/1`);
+    } finally {
+      setCreating(false);
+    }
   };
 
   const handleInvite = async (e: React.FormEvent) => {
@@ -112,6 +127,9 @@ export default function DashboardPage() {
     });
     return names;
   }, [assessments]);
+
+  // Distinct existing client names for the new-assessment picker.
+  const existingNames = useMemo(() => Array.from(clientNames).sort(), [clientNames]);
 
   // Action items: assessments stuck on early sections (1-3) or stale (no progress)
   const actionItems = useMemo(() => {
@@ -183,7 +201,7 @@ export default function DashboardPage() {
             </div>
             {(userRole === 'coach' || userRole === 'admin') && (
               <button
-                onClick={createAssessment}
+                onClick={() => setPickerOpen(true)}
                 aria-label="Start new assessment"
                 className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-6 py-3 rounded-lg transition-colors whitespace-nowrap"
               >
@@ -290,7 +308,7 @@ export default function DashboardPage() {
             <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Nothing here yet.</h3>
             <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Create your first assessment to start tracking a client.</p>
             <button
-              onClick={createAssessment}
+              onClick={() => setPickerOpen(true)}
               className="mt-6 bg-gold-brand text-bg hover:bg-champagne py-3 px-6 rounded-lg text-[13px] font-medium tracking-[0.02em] transition-colors"
             >
               Start new assessment
@@ -374,13 +392,13 @@ export default function DashboardPage() {
                     <>
                       <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">No assessments yet.</h3>
                       <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Once coaches start creating assessments, you&apos;ll see them grouped here.</p>
-                      <button onClick={createAssessment} className="mt-4 text-[13px] font-medium text-gold-brand hover:text-champagne">Start new assessment</button>
+                      <button onClick={() => setPickerOpen(true)} className="mt-4 text-[13px] font-medium text-gold-brand hover:text-champagne">Start new assessment</button>
                     </>
                   ) : (
                     <>
                       <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Nothing here yet.</h3>
                       <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Create your first assessment to start tracking a client.</p>
-                      <button onClick={createAssessment} className="mt-4 text-[13px] font-medium text-gold-brand hover:text-champagne">Start new assessment</button>
+                      <button onClick={() => setPickerOpen(true)} className="mt-4 text-[13px] font-medium text-gold-brand hover:text-champagne">Start new assessment</button>
                     </>
                   )}
                 </div>
@@ -467,6 +485,14 @@ export default function DashboardPage() {
           />
         )}
       </main>
+
+      <ClientPickerDialog
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        existingNames={existingNames}
+        onConfirm={handleCreateForClient}
+        busy={creating}
+      />
     </div>
   );
 }
