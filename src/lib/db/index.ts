@@ -296,6 +296,19 @@ export async function runMigrations() {
       `);
     }
 
+    // Append-only client notes log (keyed by client name)
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "client_notes" (
+        "id" text PRIMARY KEY NOT NULL,
+        "client_name" text NOT NULL,
+        "author_id" text NOT NULL,
+        "author_name" text NOT NULL,
+        "body" text NOT NULL,
+        "created_at" text NOT NULL
+      )
+    `);
+    await d.execute(sql`CREATE INDEX IF NOT EXISTS "idx_client_notes_client_name" ON "client_notes" ("client_name")`);
+
   } else {
     d.run(sql`
       CREATE TABLE IF NOT EXISTS "assessments" (
@@ -518,6 +531,19 @@ export async function runMigrations() {
         WHERE NOT EXISTS (SELECT 1 FROM "pillar_page_copy")
       `);
     }
+
+    // Append-only client notes log (keyed by client name)
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "client_notes" (
+        "id" text PRIMARY KEY NOT NULL,
+        "client_name" text NOT NULL,
+        "author_id" text NOT NULL,
+        "author_name" text NOT NULL,
+        "body" text NOT NULL,
+        "created_at" text NOT NULL
+      )
+    `);
+    d.run(sql`CREATE INDEX IF NOT EXISTS "idx_client_notes_client_name" ON "client_notes" ("client_name")`);
 
   }
 
