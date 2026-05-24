@@ -491,6 +491,7 @@ export default function DashboardPage() {
         onClose={() => setPickerOpen(false)}
         existingNames={existingNames}
         onConfirm={handleCreateForClient}
+        createLabel="Create Client & Start"
         busy={creating}
       />
     </div>

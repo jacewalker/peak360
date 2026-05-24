@@ -441,6 +441,7 @@ export default function HomePage() {
         onClose={() => setPickerOpen(false)}
         existingNames={existingNames}
         onConfirm={handleCreateForClient}
+        createLabel="Create Client & Start"
         busy={creating}
       />
 
