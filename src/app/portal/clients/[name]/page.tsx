@@ -9,6 +9,7 @@ import { REPORT_MARKERS } from '@/lib/report-markers';
 import { getPeak360Rating } from '@/lib/normative/ratings';
 import type { RatingTier } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
+import { authClient } from '@/lib/auth-client';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 const TrendsTab = dynamic(() => import('./TrendsTab'), { ssr: false });
@@ -65,6 +66,13 @@ export default function ClientDetailPage() {
   const [notesLoaded, setNotesLoaded] = useState(false);
   const [noteBody, setNoteBody] = useState('');
   const [notesSaving, setNotesSaving] = useState(false);
+
+  // Notes are coach/admin-only. Strict positive equality (D-12): while the
+  // session is still resolving (role === undefined) or for a client-role user,
+  // canViewNotes stays false so the Notes tab never flashes for non-privileged users.
+  const { data: sessionData } = authClient.useSession();
+  const canViewNotes =
+    sessionData?.user?.role === 'coach' || sessionData?.user?.role === 'admin';
 
   const handleStartAssessment = async () => {
     setCreating(true);
@@ -157,7 +165,7 @@ export default function ClientDetailPage() {
 
   // Lazy-load notes the first time the Notes tab is opened.
   useEffect(() => {
-    if (tab !== 'notes' || notesLoaded) return;
+    if (!canViewNotes || tab !== 'notes' || notesLoaded) return;
     async function loadNotes() {
       setNotesLoading(true);
       try {
@@ -172,7 +180,7 @@ export default function ClientDetailPage() {
       }
     }
     loadNotes();
-  }, [tab, notesLoaded, clientName]);
+  }, [canViewNotes, tab, notesLoaded, clientName]);
 
   const handleAddNote = async () => {
     const body = noteBody.trim();
@@ -271,16 +279,18 @@ export default function ClientDetailPage() {
           >
             Trends &amp; Analytics
           </button>
-          <button
-            onClick={() => setTab('notes')}
-            className={`py-3 text-[13px] font-medium tracking-[0.02em] border-b-2 transition-colors ${
-              tab === 'notes'
-                ? 'border-gold-brand text-text'
-                : 'border-transparent text-text-dim hover:text-text'
-            }`}
-          >
-            Notes
-          </button>
+          {canViewNotes && (
+            <button
+              onClick={() => setTab('notes')}
+              className={`py-3 text-[13px] font-medium tracking-[0.02em] border-b-2 transition-colors ${
+                tab === 'notes'
+                  ? 'border-gold-brand text-text'
+                  : 'border-transparent text-text-dim hover:text-text'
+              }`}
+            >
+              Notes
+            </button>
+          )}
         </div>
       </div>
 
@@ -354,7 +364,7 @@ export default function ClientDetailPage() {
           )
         )}
 
-        {tab === 'notes' && (
+        {tab === 'notes' && canViewNotes && (
           <div className="space-y-6">
             {/* Add note */}
             <div className="bg-bg-3 rounded-xl border border-line p-6">
