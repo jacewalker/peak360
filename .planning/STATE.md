@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 Phase: 09 — COMPLETE
 Plan: 2 of 2
 Status: Phase 09 complete
-Last activity: 2026-05-24 -- Completed quick task 260524-h7m: Start assessment from client detail page
+Last activity: 2026-05-24 -- Completed quick task 260524-haw: Picker new-client guidance + "Create Client & Start" label
 
 Progress: [██████████] 100%
 
@@ -114,6 +114,7 @@ Recent decisions affecting current work:
 | 260512-ru4 | Swap portal logo to landing brand mark | 2026-05-12 | be64239 | [260512-ru4-swap-portal-logo-to-landing-brand-mark](./quick/260512-ru4-swap-portal-logo-to-landing-brand-mark/) |
 | 260524-gre | New-assessment client gate (ask which client) + assign unassigned assessments | 2026-05-24 | 7feb771 | [260524-gre-when-starting-a-new-assessment-the-first](./quick/260524-gre-when-starting-a-new-assessment-the-first/) |
 | 260524-h7m | Start assessment from client detail page (auto-assigned to that client) | 2026-05-24 | 1822167 | [260524-h7m-on-the-client-detail-page-portal-clients](./quick/260524-h7m-on-the-client-detail-page-portal-clients/) |
+| 260524-haw | Picker: clearer new-client guidance + dynamic "Create Client & Start" confirm label | 2026-05-24 | 01cdd04 | [260524-haw-make-creating-a-new-client-more-obvious-](./quick/260524-haw-make-creating-a-new-client-more-obvious-/) |
 
 ## Session Continuity
 
