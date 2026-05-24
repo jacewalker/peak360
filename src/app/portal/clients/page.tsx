@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useMemo, useRef, useCallback } from 'react';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
 import { authClient } from '@/lib/auth-client';
@@ -22,6 +22,7 @@ interface Client {
 }
 
 export default function ClientsPage() {
+  const router = useRouter();
   const { data: sessionData } = authClient.useSession();
   const isAdmin = sessionData?.user?.role === 'admin';
 
@@ -274,70 +275,87 @@ export default function ClientsPage() {
               />
             </div>
 
-            {/* Client grid */}
+            {/* Client list — mirrors the assessments list pattern: a single
+                bordered container with divided rows. The whole row is the
+                navigation target; the checkbox sits in a stopPropagation
+                wrapper so toggling selection never fires the row click. */}
             {filtered.length === 0 ? (
               <div className="text-center py-10">
                 <p className="text-[13px] text-text-dim">No clients match &quot;{search}&quot;.</p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-                {filtered.map((c) => (
-                  <Link
-                    key={c.name}
-                    href={`/portal/clients/${encodeURIComponent(c.name)}`}
-                    className={`block rounded-xl border p-6 transition-colors ${
-                      selectedNames.has(c.name)
-                        ? 'border-gold-brand ring-1 ring-gold-brand/40 bg-gold-brand/5'
-                        : 'bg-bg-3 border-line hover:border-gold-brand/40'
-                    }`}
-                  >
-                    <div className="flex items-start gap-3 mb-4">
-                      <div onClick={(e) => e.preventDefault()} className="shrink-0">
-                        <input
-                          type="checkbox"
-                          className="w-5 h-5 rounded border border-line accent-gold-brand"
-                          checked={selectedNames.has(c.name)}
-                          onChange={() => toggleSelectOne(c.name)}
-                          aria-label={`Select ${c.name}`}
-                        />
-                      </div>
-                      <div className="w-10 h-10 rounded-full bg-bg-2 flex items-center justify-center text-text font-medium text-[13px] shrink-0">
-                        {(c.name || 'U')[0].toUpperCase()}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <h3 className="text-[20px] font-medium text-text tracking-[-0.015em] truncate">{c.name}</h3>
-                        {c.email && (
-                          <p className="text-[13px] text-text-dim truncate mt-0.5">{c.email}</p>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Coach attribution row — pinned under the identity block
-                        so admins (and the client themselves) can see at a
-                        glance who is running these assessments. */}
-                    <div className="mb-4 flex items-center gap-2 text-[12px]">
-                      <span className="font-mono text-[10px] font-medium uppercase tracking-[0.18em] text-text-faint shrink-0">
-                        Coach
-                      </span>
-                      <span
-                        className={`truncate ${c.coaches.length === 1 && c.coaches[0] === UNASSIGNED_COACH ? 'text-text-faint italic' : 'text-text'}`}
-                        title={c.coaches.join(', ')}
+              <div className="bg-bg-3 rounded-xl border border-line overflow-hidden">
+                <div className="divide-y divide-line">
+                  {filtered.map((c) => {
+                    const isSelected = selectedNames.has(c.name);
+                    const unassignedOnly = c.coaches.length === 1 && c.coaches[0] === UNASSIGNED_COACH;
+                    return (
+                      <div
+                        key={c.name}
+                        onClick={() => router.push(`/portal/clients/${encodeURIComponent(c.name)}`)}
+                        className={`px-5 py-4 flex items-center justify-between transition-colors cursor-pointer group border-l-2 ${
+                          isSelected
+                            ? 'bg-gold-brand/5 border-gold-brand'
+                            : 'border-transparent hover:bg-bg-2'
+                        }`}
                       >
-                        {c.coaches.join(', ')}
-                      </span>
-                    </div>
-
-                    <div className="flex items-end justify-between">
-                      <div>
-                        <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Assessments</p>
-                        <p className="font-mono text-[40px] font-medium text-gold-brand leading-none mt-1" style={{ fontVariantNumeric: 'tabular-nums' }}>
-                          {c.assessmentCount}
-                        </p>
+                        <div className="flex items-center gap-3 sm:gap-4 min-w-0">
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              className="w-5 h-5 rounded border border-line accent-gold-brand"
+                              checked={isSelected}
+                              onChange={() => toggleSelectOne(c.name)}
+                              aria-label={`Select ${c.name}`}
+                            />
+                          </div>
+                          <div className="w-10 h-10 rounded-full bg-bg-2 flex items-center justify-center text-text font-medium text-[13px] group-hover:bg-gold-brand/10 transition-colors shrink-0">
+                            {(c.name || 'U')[0].toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <div className="text-[13px] font-medium text-text truncate">{c.name}</div>
+                            <div className="text-[13px] text-text-dim flex items-center gap-1 sm:gap-2 flex-wrap">
+                              {c.email && (
+                                <>
+                                  <span className="truncate">{c.email}</span>
+                                  <span className="text-line-2">&bull;</span>
+                                </>
+                              )}
+                              <span
+                                className={`truncate ${unassignedOnly ? 'text-text-faint italic' : ''}`}
+                                title={c.coaches.join(', ')}
+                              >
+                                {c.coaches.join(', ')}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-3 sm:gap-4 shrink-0">
+                          <div className="text-right">
+                            <p className="font-mono text-[10px] font-medium text-text-faint uppercase tracking-[0.18em]">
+                              Assessments
+                            </p>
+                            <p className="font-mono text-[15px] font-medium text-gold-brand leading-none mt-0.5 tabular-nums">
+                              {c.assessmentCount}
+                            </p>
+                          </div>
+                          <p className="hidden sm:block text-[13px] text-text-dim tabular-nums whitespace-nowrap">
+                            Last: {c.lastAssessment}
+                          </p>
+                          <svg
+                            className="w-4 h-4 text-text-faint group-hover:text-gold-brand transition-colors shrink-0"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                            strokeWidth={2}
+                            stroke="currentColor"
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                          </svg>
+                        </div>
                       </div>
-                      <p className="text-[13px] text-text-dim">Last: {c.lastAssessment}</p>
-                    </div>
-                  </Link>
-                ))}
+                    );
+                  })}
+                </div>
               </div>
             )}
           </div>
