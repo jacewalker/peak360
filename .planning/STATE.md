@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 Phase: 09 — COMPLETE
 Plan: 2 of 2
 Status: Phase 09 complete
-Last activity: 2026-05-24 -- Completed quick task 260524-gre: New-assessment client gate + assign unassigned assessments
+Last activity: 2026-05-24 -- Completed quick task 260524-h7m: Start assessment from client detail page
 
 Progress: [██████████] 100%
 
@@ -113,6 +113,7 @@ Recent decisions affecting current work:
 | 260510-osn | Merge admin invitations + users into one People page grouped by coach | 2026-05-10 | 2d980ad | [260510-osn-merge-admin-invitations-users-into-one-p](./quick/260510-osn-merge-admin-invitations-users-into-one-p/) |
 | 260512-ru4 | Swap portal logo to landing brand mark | 2026-05-12 | be64239 | [260512-ru4-swap-portal-logo-to-landing-brand-mark](./quick/260512-ru4-swap-portal-logo-to-landing-brand-mark/) |
 | 260524-gre | New-assessment client gate (ask which client) + assign unassigned assessments | 2026-05-24 | 7feb771 | [260524-gre-when-starting-a-new-assessment-the-first](./quick/260524-gre-when-starting-a-new-assessment-the-first/) |
+| 260524-h7m | Start assessment from client detail page (auto-assigned to that client) | 2026-05-24 | 1822167 | [260524-h7m-on-the-client-detail-page-portal-clients](./quick/260524-h7m-on-the-client-detail-page-portal-clients/) |
 
 ## Session Continuity
 
