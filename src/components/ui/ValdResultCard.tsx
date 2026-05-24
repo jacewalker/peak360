@@ -14,9 +14,18 @@ interface ValdResultCardProps {
   secondaryLabel?: string;
   secondaryValue?: number | null;
   secondaryUnit?: string;
+  secondaryLeft?: number | null;
+  secondaryRight?: number | null;
+  secondaryMetric?: string;
+  showAsymmetryPercent?: boolean;
   unit: string;
   lowerIsBetter?: boolean;
   date?: string;
+}
+
+function asymmetryPct(l: number, r: number): number {
+  const max = Math.max(l, r);
+  return max > 0 ? (Math.abs(l - r) / max) * 100 : 0;
 }
 
 const CATEGORY_STYLES = {
@@ -96,12 +105,18 @@ export default function ValdResultCard({
   secondaryLabel,
   secondaryValue,
   secondaryUnit,
+  secondaryLeft,
+  secondaryRight,
+  secondaryMetric,
+  showAsymmetryPercent,
   unit,
   lowerIsBetter = false,
   date,
 }: ValdResultCardProps) {
   const hasLR = left != null && right != null && (left !== 0 || right !== 0);
   const hasSingle = singleValue != null && singleValue !== 0;
+  const hasSecondaryLR =
+    secondaryLeft != null && secondaryRight != null && (secondaryLeft !== 0 || secondaryRight !== 0);
 
   if (!hasLR && !hasSingle) return null;
 
@@ -171,35 +186,63 @@ export default function ValdResultCard({
               <AsymmetryGraph left={left!} right={right!} />
             </div>
           </div>
+          {showAsymmetryPercent && (
+            <div>
+              <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Max Force Asymmetry</p>
+              <span className="text-lg font-bold text-text tabular-nums">{asymmetryPct(left!, right!).toFixed(1)}%</span>
+            </div>
+          )}
         </div>
       ) : hasLR ? (
-        <div className="flex items-end justify-between gap-4">
-          <div className="flex items-end gap-6 sm:gap-8 min-w-0">
-            {/* Left */}
-            <div>
-              <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-0.5">Left</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl sm:text-3xl font-extrabold text-text tabular-nums leading-none">
-                  {formatVal(left!)}
-                </span>
-                <span className="text-sm font-medium text-text-faint">{unit}</span>
+        <div className="space-y-3">
+          <div className="flex items-end justify-between gap-4">
+            <div className="flex items-end gap-6 sm:gap-8 min-w-0">
+              {/* Left */}
+              <div>
+                <p className="text-xs font-bold text-blue-500 uppercase tracking-widest mb-0.5">Left</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-text tabular-nums leading-none">
+                    {formatVal(left!)}
+                  </span>
+                  <span className="text-sm font-medium text-text-faint">{unit}</span>
+                </div>
+              </div>
+              {/* Right */}
+              <div>
+                <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-0.5">Right</p>
+                <div className="flex items-baseline gap-1">
+                  <span className="text-2xl sm:text-3xl font-extrabold text-text tabular-nums leading-none">
+                    {formatVal(right!)}
+                  </span>
+                  <span className="text-sm font-medium text-text-faint">{unit}</span>
+                </div>
               </div>
             </div>
-            {/* Right */}
-            <div>
-              <p className="text-xs font-bold text-amber-500 uppercase tracking-widest mb-0.5">Right</p>
-              <div className="flex items-baseline gap-1">
-                <span className="text-2xl sm:text-3xl font-extrabold text-text tabular-nums leading-none">
-                  {formatVal(right!)}
-                </span>
-                <span className="text-sm font-medium text-text-faint">{unit}</span>
-              </div>
+            {/* Asymmetry graph */}
+            <div className="shrink-0 hidden sm:block">
+              <AsymmetryGraph left={left!} right={right!} />
             </div>
           </div>
-          {/* Asymmetry graph */}
-          <div className="shrink-0 hidden sm:block">
-            <AsymmetryGraph left={left!} right={right!} />
-          </div>
+          {/* Secondary L/R row (e.g. Modified RSI) */}
+          {hasSecondaryLR && (
+            <div className="flex items-end gap-6 sm:gap-8 min-w-0">
+              <div>
+                <p className="text-[10px] font-bold text-blue-500 uppercase tracking-widest mb-0.5">Left {secondaryMetric}</p>
+                <span className="text-lg font-bold text-text tabular-nums leading-none">{formatVal(secondaryLeft!)}</span>
+              </div>
+              <div>
+                <p className="text-[10px] font-bold text-amber-500 uppercase tracking-widest mb-0.5">Right {secondaryMetric}</p>
+                <span className="text-lg font-bold text-text tabular-nums leading-none">{formatVal(secondaryRight!)}</span>
+              </div>
+            </div>
+          )}
+          {/* Computed asymmetry % */}
+          {showAsymmetryPercent && (
+            <div>
+              <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Max Force Asymmetry</p>
+              <span className="text-lg font-bold text-text tabular-nums">{asymmetryPct(left!, right!).toFixed(1)}%</span>
+            </div>
+          )}
         </div>
       ) : hasSingle ? (
         <div className="flex items-end justify-between gap-4">

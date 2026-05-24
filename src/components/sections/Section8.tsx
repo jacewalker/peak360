@@ -47,12 +47,12 @@ export default function Section8({ data, onChange }: SectionProps) {
       {/* 2. Countermovement Jump (Vald) */}
       <TestRow num={2} title="Countermovement Jump" inputs={
         <FormRow>
-          <FormField id="cmjLeft" label="Left (cm)" type="number" value={data.cmjLeft as number} onChange={n('cmjLeft')} step={0.1} />
-          <FormField id="cmjRight" label="Right (cm)" type="number" value={data.cmjRight as number} onChange={n('cmjRight')} step={0.1} />
+          <FormField id="cmjJumpHeight" label="Jump Height (cm)" type="number" value={data.cmjJumpHeight as number} onChange={n('cmjJumpHeight')} step={0.1} />
+          <FormField id="cmjModifiedRsi" label="Modified RSI" type="number" value={data.cmjModifiedRsi as number} onChange={n('cmjModifiedRsi')} step={0.01} />
         </FormRow>
       } result={
         <ValdResultCard title="Countermovement Jump" category="Jump" metric="Jump height" unit="cm" isForceDecks
-          left={data.cmjLeft as number} right={data.cmjRight as number} date={assessmentDate} />
+          singleValue={data.cmjJumpHeight as number} secondaryLabel="Modified RSI" secondaryValue={data.cmjModifiedRsi as number} secondaryUnit="" date={assessmentDate} />
       } />
 
       {/* 3. Isometric Mid-Thigh Pull (Vald) */}
@@ -67,19 +67,26 @@ export default function Section8({ data, onChange }: SectionProps) {
           </FormRow>
         </>
       } result={
-        <ValdResultCard title="Isometric Mid-Thigh Pull" category="Strength" metric="Max force" unit="kg" isForceDecks
+        <ValdResultCard title="Isometric Mid-Thigh Pull" category="Strength" metric="Max force" unit="kg" isForceDecks showAsymmetryPercent
           left={data.imtpLeft as number} right={data.imtpRight as number} singleValue={data.imtpMaxForce as number} date={assessmentDate} />
       } />
 
-      {/* 4. Single Leg Hop Test */}
-      <TestRow num={4} title="Single Leg Hop Test" inputs={
-        <FormRow>
-          <FormField id="singleLegHopLeft" label="Left Avg Height (cm)" type="number" value={data.singleLegHopLeft as number} onChange={n('singleLegHopLeft')} step={0.1} />
-          <FormField id="singleLegHopRight" label="Right Avg Height (cm)" type="number" value={data.singleLegHopRight as number} onChange={n('singleLegHopRight')} step={0.1} />
-        </FormRow>
+      {/* 4. SL Jump */}
+      <TestRow num={4} title="SL Jump" inputs={
+        <>
+          <FormRow>
+            <FormField id="singleLegHopLeft" label="Left Jump Height (cm)" type="number" value={data.singleLegHopLeft as number} onChange={n('singleLegHopLeft')} step={0.1} />
+            <FormField id="singleLegHopRight" label="Right Jump Height (cm)" type="number" value={data.singleLegHopRight as number} onChange={n('singleLegHopRight')} step={0.1} />
+          </FormRow>
+          <FormRow>
+            <FormField id="singleLegHopRsiLeft" label="Left Modified RSI" type="number" value={data.singleLegHopRsiLeft as number} onChange={n('singleLegHopRsiLeft')} step={0.01} />
+            <FormField id="singleLegHopRsiRight" label="Right Modified RSI" type="number" value={data.singleLegHopRsiRight as number} onChange={n('singleLegHopRsiRight')} step={0.01} />
+          </FormRow>
+        </>
       } result={
-        <ValdResultCard title="Single Leg Hop Test" category="Jump" metric="Average jump height" subtitle="Top 3 hops" unit="cm" isForceDecks
-          left={data.singleLegHopLeft as number} right={data.singleLegHopRight as number} date={assessmentDate} />
+        <ValdResultCard title="SL Jump" category="Jump" metric="Jump height" unit="cm" isForceDecks
+          left={data.singleLegHopLeft as number} right={data.singleLegHopRight as number}
+          secondaryLeft={data.singleLegHopRsiLeft as number} secondaryRight={data.singleLegHopRsiRight as number} secondaryMetric="Modified RSI" date={assessmentDate} />
       } />
 
       {/* 5. Single Leg Balance Test (Vald) */}
