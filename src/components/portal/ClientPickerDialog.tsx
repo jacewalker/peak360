@@ -11,6 +11,13 @@ interface ClientPickerDialogProps {
   onConfirm: (name: string) => void | Promise<void>;
   title?: string;
   confirmLabel?: string;
+  /**
+   * Confirm-button label used when the typed name does NOT match an existing
+   * client (i.e. confirming will create a brand-new client). When omitted, the
+   * button always shows `confirmLabel` — this preserves current behavior for
+   * call sites like the assign dialog that should never show a create label.
+   */
+  createLabel?: string;
   busy?: boolean;
 }
 
@@ -34,6 +41,7 @@ export default function ClientPickerDialog({
   onConfirm,
   title = 'WHICH CLIENT?',
   confirmLabel = 'Start assessment',
+  createLabel,
   busy = false,
 }: ClientPickerDialogProps) {
   const [name, setName] = useState('');
@@ -68,6 +76,17 @@ export default function ClientPickerDialog({
   const trimmed = name.trim();
   const canConfirm = trimmed.length > 0 && !busy;
 
+  // A non-empty name that doesn't match an existing client (case-insensitive)
+  // means confirming will create a brand-new client.
+  const isExisting = sortedNames.some(
+    (n) => n.toLowerCase() === trimmed.toLowerCase(),
+  );
+  const isNewClient = trimmed.length > 0 && !isExisting;
+
+  // Use the create-flavored label only when a create label was provided AND the
+  // typed name is new; otherwise fall back to the standard confirm label.
+  const activeLabel = isNewClient && createLabel ? createLabel : confirmLabel;
+
   const handleConfirm = async () => {
     if (!canConfirm) return;
     await onConfirm(trimmed);
@@ -93,9 +112,20 @@ export default function ClientPickerDialog({
             handleConfirm();
           }
         }}
-        placeholder="Client name"
+        placeholder="Search existing or type a new client name"
         className="w-full h-12 px-4 bg-bg-3 border border-line rounded-md text-[13px] text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand transition-colors"
       />
+
+      <p className="mt-2 text-[12px] text-text-dim">
+        {isNewClient ? (
+          <>
+            New client — <span className="text-gold-brand">“{trimmed}”</span>{' '}
+            will be created.
+          </>
+        ) : (
+          'Pick an existing client, or type a new name to create one.'
+        )}
+      </p>
 
       {sortedNames.length > 0 && (
         <div className="mt-4">
@@ -103,7 +133,7 @@ export default function ClientPickerDialog({
             EXISTING CLIENTS
           </MonoEyebrow>
           {filteredNames.length === 0 ? (
-            <p className="text-[13px] text-text-dim">No matches — confirm to create a new client.</p>
+            <p className="text-[13px] text-text-dim">No matches.</p>
           ) : (
             <div className="max-h-56 overflow-y-auto rounded-md border border-line divide-y divide-line">
               {filteredNames.map((n) => (
@@ -139,7 +169,7 @@ export default function ClientPickerDialog({
           disabled={!canConfirm}
           className="px-6 py-2.5 text-[13px] font-medium tracking-[0.02em] rounded-md bg-gold-brand text-bg hover:bg-champagne disabled:opacity-40 disabled:cursor-not-allowed transition-colors whitespace-nowrap"
         >
-          {busy ? 'Working…' : confirmLabel}
+          {busy ? 'Working…' : activeLabel}
         </button>
       </div>
     </Dialog>
