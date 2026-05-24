@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import Dialog from '@/components/ui/Dialog';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
@@ -38,10 +38,13 @@ export default function ClientPickerDialog({
 }: ClientPickerDialogProps) {
   const [name, setName] = useState('');
 
-  // Reset the input each time the dialog opens.
-  useEffect(() => {
-    if (open) setName('');
-  }, [open]);
+  // The parent owns `open`. Clearing the input on close means the next open
+  // always starts empty without a setState-in-effect (which the project's
+  // react-hooks lint rule forbids).
+  const handleClose = () => {
+    setName('');
+    onClose();
+  };
 
   // Distinct non-empty names, deduped case-insensitively, sorted.
   const sortedNames = useMemo(() => {
@@ -68,10 +71,13 @@ export default function ClientPickerDialog({
   const handleConfirm = async () => {
     if (!canConfirm) return;
     await onConfirm(trimmed);
+    // Clear so a subsequent open (the parent may reuse this instance, e.g. the
+    // assign flow) starts fresh. The parent owns whether the dialog closes.
+    setName('');
   };
 
   return (
-    <Dialog open={open} onClose={onClose} ariaLabel="Choose client">
+    <Dialog open={open} onClose={handleClose} ariaLabel="Choose client">
       <MonoEyebrow variant="meta" as="div" className="mb-4">
         {title}
       </MonoEyebrow>
@@ -122,7 +128,7 @@ export default function ClientPickerDialog({
       <div className="mt-6 flex items-center justify-end gap-2">
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleClose}
           className="px-4 py-2.5 text-[13px] font-medium tracking-[0.02em] rounded-md border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
         >
           Cancel

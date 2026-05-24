@@ -27,6 +27,8 @@ export default function HomePage() {
   const selectAllRef = useRef<HTMLInputElement>(null);
   const [pickerOpen, setPickerOpen] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [assignTarget, setAssignTarget] = useState<string | null>(null);
+  const [assigning, setAssigning] = useState(false);
 
   const fetchAssessments = useCallback(async () => {
     try {
@@ -67,6 +69,24 @@ export default function HomePage() {
       router.push(`/portal/assessment/${data.id}/section/1`);
     } finally {
       setCreating(false);
+    }
+  };
+
+  const handleAssign = async (name: string) => {
+    if (!assignTarget) return;
+    setAssigning(true);
+    try {
+      const res = await fetch(`/api/assessments/${assignTarget}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientName: name }),
+      });
+      if (res.ok) {
+        setAssignTarget(null);
+        await fetchAssessments();
+      }
+    } finally {
+      setAssigning(false);
     }
   };
 
@@ -358,8 +378,8 @@ export default function HomePage() {
                           {(a.clientName || 'U')[0].toUpperCase()}
                         </div>
                         <div className="min-w-0">
-                          <div className="text-[13px] font-medium text-text truncate">
-                            {a.clientName || 'Unnamed Client'}
+                          <div className={`text-[13px] font-medium truncate ${a.clientName ? 'text-text' : 'text-text-faint italic'}`}>
+                            {a.clientName || 'Unassigned'}
                           </div>
                           <div className="text-[13px] text-text-dim flex items-center gap-1 sm:gap-2 flex-wrap">
                             <span>{a.assessmentDate || a.createdAt.split('T')[0]}</span>
@@ -376,6 +396,18 @@ export default function HomePage() {
                         }`}>
                           {a.status === 'completed' ? 'COMPLETED' : 'IN PROGRESS'}
                         </span>
+                        {!a.clientName && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setAssignTarget(a.id);
+                            }}
+                            aria-label={`Assign assessment ${a.id} to a client`}
+                            className="px-3 py-1.5 text-[13px] text-text-dim hover:text-gold-brand hover:bg-gold-brand/10 rounded-lg transition-colors shrink-0"
+                          >
+                            Assign
+                          </button>
+                        )}
                         <button
                           onClick={(e) => {
                             e.stopPropagation();
@@ -410,6 +442,16 @@ export default function HomePage() {
         existingNames={existingNames}
         onConfirm={handleCreateForClient}
         busy={creating}
+      />
+
+      <ClientPickerDialog
+        open={assignTarget !== null}
+        onClose={() => setAssignTarget(null)}
+        existingNames={existingNames}
+        onConfirm={handleAssign}
+        title="ASSIGN TO CLIENT"
+        confirmLabel="Assign"
+        busy={assigning}
       />
     </div>
   );
