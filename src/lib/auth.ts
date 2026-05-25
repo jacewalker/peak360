@@ -68,6 +68,7 @@ export const auth = betterAuth({
         });
       },
       expiresIn: 300, // 5 minutes
+      disableSignUp: true, // sign-in only: a public magic-link request can't mint a new account; invite/client-login createUser flows are unaffected
     }),
     nextCookies(), // must be last plugin
   ],
