@@ -34,5 +34,12 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:3000',
     reuseExistingServer: true,
+    // Make the spawned dev server trust its own origin so Better Auth's
+    // email/password sign-in does not 403 with INVALID_ORIGIN when the test
+    // base URL is http://localhost:3000.
+    env: {
+      BETTER_AUTH_URL: 'http://localhost:3000',
+      PORT: '3000',
+    },
   },
 });
