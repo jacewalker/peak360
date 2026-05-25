@@ -44,15 +44,28 @@ export async function POST(request: Request) {
   const [session, errorRes] = await requireSession();
   if (errorRes) return errorRes;
 
-  // Only coach or admin can create/resend client logins
-  if (session.user.role === 'client') {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
-  }
-
   const body = await request.json().catch(() => null);
 
   const clientName: string =
     typeof body?.clientName === 'string' ? body.clientName.trim() : '';
+
+  // Only coach or admin can create/resend client logins
+  if (session.user.role === 'client') {
+    console.warn('[client-login] forbidden', {
+      reason: 'role-client',
+      role: session.user.role,
+      userId: session.user.id,
+      clientName,
+    });
+    return NextResponse.json(
+      {
+        error:
+          "You're signed in as a client account. Sign out and sign in as a coach or admin to manage client logins.",
+      },
+      { status: 403 }
+    );
+  }
+
   if (!clientName) {
     return NextResponse.json({ error: 'Client name is required' }, { status: 400 });
   }
@@ -69,7 +82,16 @@ export async function POST(request: Request) {
 
   // Coach can only act on their own clients; admin on any
   if (!(await canAccess(session, clientName))) {
-    return NextResponse.json({ error: 'Forbidden' }, { status: 403 });
+    console.warn('[client-login] forbidden', {
+      reason: 'not-own-client',
+      role: session.user.role,
+      userId: session.user.id,
+      clientName,
+    });
+    return NextResponse.json(
+      { error: 'You can only create a login for a client in your own assessments.' },
+      { status: 403 }
+    );
   }
 
   // Look up the user by email
@@ -134,7 +156,7 @@ export async function POST(request: Request) {
 
   await db
     .update(assessments)
-    .set({ clientId: userId })
+    .set({ clientId: userId, clientEmail: email })
     .where(or(eq(assessments.clientName, clientName), eq(assessments.clientEmail, email)));
 
   // Send the magic-link sign-in email. Falls back to an inline email if the
