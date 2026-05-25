@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { sendEmailViaSMTP2Go } from '@/lib/email/send';
+import { renderBrandedEmail } from '@/lib/email/template';
 import { db } from '@/lib/db';
 import { user } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
@@ -74,7 +75,16 @@ export async function POST(request: NextRequest) {
       await sendEmailViaSMTP2Go({
         to: email,
         subject: 'Sign in to Peak360',
-        html: `<p>You've been invited to sign in to Peak360.</p><p>Click the link below to sign in:</p><a href="${baseUrl}/login">Sign in to Peak360</a>`,
+        html: renderBrandedEmail({
+          preheader: 'You’ve been invited to sign in to Peak360.',
+          heading: 'Sign in to Peak360',
+          intro:
+            'You’ve been invited to sign in to Peak360. Use the button below to go to the login page and access your account.',
+          ctaLabel: 'Sign in to Peak360',
+          ctaUrl: `${baseUrl}/login`,
+          footnote:
+            'If you weren’t expecting this invitation, you can safely ignore this email.',
+        }),
       });
     }
     return NextResponse.json({ success: true, message: 'User already exists, sent sign-in link' });
@@ -131,13 +141,16 @@ export async function POST(request: NextRequest) {
     await sendEmailViaSMTP2Go({
       to: email,
       subject: "You've been invited to Peak360",
-      html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
-        <h2 style="color: #1a365d;">Welcome to Peak360</h2>
-        <p>You've been invited to access Peak360.</p>
-        <p>Click the link below to sign in:</p>
-        <a href="${baseUrl}/login" style="display: inline-block; padding: 12px 24px; background: #F5A623; color: #1a365d; text-decoration: none; border-radius: 8px; font-weight: 600;">Sign in to Peak360</a>
-        <p style="color: #666; font-size: 12px; margin-top: 24px;">This link will take you to the login page where you can request a magic link to access your account.</p>
-      </div>`,
+      html: renderBrandedEmail({
+        preheader: 'You’ve been invited to Peak360 — an account has been created for you.',
+        heading: 'Welcome to Peak360',
+        intro:
+          'You’ve been invited to access Peak360 and an account has been created for you. Use the button below to head to the login page and sign in.',
+        ctaLabel: 'Sign in to Peak360',
+        ctaUrl: `${baseUrl}/login`,
+        footnote:
+          'At the login page you can request a magic link to securely access your account.',
+      }),
     });
   }
 
