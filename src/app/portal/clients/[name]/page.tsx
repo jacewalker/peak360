@@ -11,6 +11,8 @@ import type { RatingTier } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
 import { authClient } from '@/lib/auth-client';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
+import Dialog from '@/components/ui/Dialog';
+import Toast, { type ToastVariant } from '@/components/ui/Toast';
 
 const TrendsTab = dynamic(() => import('./TrendsTab'), { ssr: false });
 
@@ -67,11 +69,22 @@ export default function ClientDetailPage() {
   const [noteBody, setNoteBody] = useState('');
   const [notesSaving, setNotesSaving] = useState(false);
 
+  // Client-login dialog state
+  const [loginDialogOpen, setLoginDialogOpen] = useState(false);
+  const [loginEmail, setLoginEmail] = useState('');
+  const [loginSending, setLoginSending] = useState(false);
+  const [toast, setToast] = useState<{ variant: ToastVariant; message: string } | null>(null);
+
   // Notes are coach/admin-only. Strict positive equality (D-12): while the
   // session is still resolving (role === undefined) or for a client-role user,
   // canViewNotes stays false so the Notes tab never flashes for non-privileged users.
   const { data: sessionData } = authClient.useSession();
   const canViewNotes =
+    sessionData?.user?.role === 'coach' || sessionData?.user?.role === 'admin';
+  // Staff (coach/admin) can trigger a client login. Strict positive equality so
+  // the button never flashes while the session is still resolving (role undefined)
+  // or for a client-role user.
+  const isStaff =
     sessionData?.user?.role === 'coach' || sessionData?.user?.role === 'admin';
 
   const handleStartAssessment = async () => {
@@ -205,6 +218,43 @@ export default function ClientDetailPage() {
   const clientEmail = assessments[0]?.clientEmail || '';
   const clientGender = assessments[0]?.clientGender || '';
 
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  const loginEmailValid = emailRegex.test(loginEmail.trim());
+
+  const openLoginDialog = () => {
+    setLoginEmail(clientEmail);
+    setLoginDialogOpen(true);
+  };
+
+  const handleSendLogin = async () => {
+    const email = loginEmail.trim();
+    if (!loginEmailValid || loginSending) return;
+    setLoginSending(true);
+    try {
+      const res = await fetch('/api/client-login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ clientName, email }),
+      });
+      const json = await res.json();
+      if (res.ok && json.success) {
+        const linked = json.linkedCount as number;
+        const verb = json.created ? 'Login created — invite sent to' : 'Login link resent to';
+        setToast({
+          variant: 'success',
+          message: `${verb} ${email} (${linked} assessment${linked === 1 ? '' : 's'} linked)`,
+        });
+        setLoginDialogOpen(false);
+      } else {
+        setToast({ variant: 'error', message: json.error || 'Failed to send login link' });
+      }
+    } catch {
+      setToast({ variant: 'error', message: 'Failed to send login link' });
+    } finally {
+      setLoginSending(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -244,14 +294,25 @@ export default function ClientDetailPage() {
                 </p>
               </div>
             </div>
-            <button
-              onClick={handleStartAssessment}
-              disabled={creating}
-              aria-label={`Start assessment for ${clientName}`}
-              className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-6 py-3 rounded-lg transition-colors whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
-            >
-              {creating ? 'Starting…' : 'Start assessment'}
-            </button>
+            <div className="flex items-center gap-3 flex-wrap">
+              {isStaff && (
+                <button
+                  onClick={openLoginDialog}
+                  aria-label={`Create or resend client login for ${clientName}`}
+                  className="border border-line-2 text-text hover:border-gold-brand text-[13px] font-medium tracking-[0.02em] px-6 py-3 rounded-lg transition-colors whitespace-nowrap"
+                >
+                  Client login
+                </button>
+              )}
+              <button
+                onClick={handleStartAssessment}
+                disabled={creating}
+                aria-label={`Start assessment for ${clientName}`}
+                className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-6 py-3 rounded-lg transition-colors whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
+              >
+                {creating ? 'Starting…' : 'Start assessment'}
+              </button>
+            </div>
           </div>
         </div>
       </header>
@@ -420,6 +481,61 @@ export default function ClientDetailPage() {
           </div>
         )}
       </main>
+
+      {/* Client login dialog */}
+      <Dialog
+        open={loginDialogOpen}
+        onClose={() => setLoginDialogOpen(false)}
+        mode="centered"
+        ariaLabel={`Client login for ${clientName}`}
+      >
+        <MonoEyebrow variant="hero" as="div" className="mb-3">
+          CLIENT LOGIN
+        </MonoEyebrow>
+        <h2 className="text-[24px] font-medium text-text tracking-[-0.02em] leading-tight">
+          Send a login link
+        </h2>
+        <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">
+          Creates a client account (or resends the link if one exists), emails a magic
+          sign-in link, and links this client&rsquo;s assessments so they can view them.
+        </p>
+        <label className="block mt-5">
+          <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">
+            Client email
+          </span>
+          <input
+            type="email"
+            value={loginEmail}
+            data-autofocus
+            onChange={(e) => setLoginEmail(e.target.value)}
+            placeholder="client@example.com"
+            className="mt-2 w-full bg-bg-2 border border-line rounded-lg px-3 py-2.5 text-[13px] text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand/50 transition-colors"
+          />
+        </label>
+        <div className="flex justify-end gap-3 mt-6">
+          <button
+            onClick={() => setLoginDialogOpen(false)}
+            className="border border-line-2 text-text hover:border-gold-brand text-[13px] font-medium tracking-[0.02em] px-5 py-2.5 rounded-lg transition-colors"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={handleSendLogin}
+            disabled={!loginEmailValid || loginSending}
+            className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-5 py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            {loginSending ? 'Sending…' : 'Send login link'}
+          </button>
+        </div>
+      </Dialog>
+
+      {toast && (
+        <Toast
+          variant={toast.variant}
+          message={toast.message}
+          onDismiss={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
