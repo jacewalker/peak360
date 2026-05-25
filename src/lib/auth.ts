@@ -5,6 +5,7 @@ import { magicLink } from 'better-auth/plugins';
 import { nextCookies } from 'better-auth/next-js';
 import { db } from '@/lib/db';
 import { sendEmailViaSMTP2Go } from '@/lib/email/send';
+import { renderBrandedEmail } from '@/lib/email/template';
 
 const isSQLite = !process.env.DATABASE_URL;
 
@@ -20,7 +21,16 @@ export const auth = betterAuth({
       await sendEmailViaSMTP2Go({
         to: user.email,
         subject: 'Reset your Peak360 password',
-        html: `<p>Click the link below to set a new password:</p><a href="${url}">Reset password</a><p>This link expires in 1 hour. If you didn't request this, ignore this email.</p>`,
+        html: renderBrandedEmail({
+          preheader: 'Reset your Peak360 password — link expires in 1 hour.',
+          heading: 'Reset your password',
+          intro:
+            'We received a request to reset your Peak360 password. Use the button below to choose a new one.',
+          ctaLabel: 'Reset password',
+          ctaUrl: url,
+          footnote:
+            'This link expires in 1 hour. If you didn’t request a reset, you can ignore this email — your password stays the same.',
+        }),
       });
     },
   },
@@ -44,7 +54,17 @@ export const auth = betterAuth({
         await sendEmailViaSMTP2Go({
           to: email,
           subject: 'Your Peak360 Login Link',
-          html: `<p>Click the link below to sign in to Peak360:</p><a href="${url}">Sign in to Peak360</a><p>This link expires in 5 minutes.</p>`,
+          html: renderBrandedEmail({
+            preheader:
+              'Your secure sign-in link for Peak360 — expires in 5 minutes.',
+            heading: 'Sign in to Peak360',
+            intro:
+              'Use the button below to securely access your Peak360 portal. For your security, this link works once and expires shortly.',
+            ctaLabel: 'Sign in to Peak360',
+            ctaUrl: url,
+            footnote:
+              'This link expires in 5 minutes and can be used once. If you didn’t request it, you can safely ignore this email.',
+          }),
         });
       },
       expiresIn: 300, // 5 minutes
