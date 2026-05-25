@@ -7,11 +7,15 @@ import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 type AuthMode = 'coach' | 'client';
 
+type ClientMode = 'magic' | 'password';
+
 export default function LoginPage() {
   const [mode, setMode] = useState<AuthMode>('coach');
+  const [clientMode, setClientMode] = useState<ClientMode>('magic');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [info, setInfo] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -33,6 +37,77 @@ export default function LoginPage() {
         router.push('/portal');
         router.refresh();
       }
+    } catch {
+      setError("We couldn't reach the server. Check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Client tab: magic-link sign-in (default). Shows a neutral message regardless
+  // of whether an account exists, so we never leak account existence.
+  const handleMagicLink = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setInfo('');
+    setLoading(true);
+
+    try {
+      await authClient.signIn.magicLink({ email, callbackURL: '/portal' });
+      setInfo(
+        'If an account exists for that email, a secure sign-in link is on its way. Check your inbox.',
+      );
+    } catch {
+      setError("We couldn't reach the server. Check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Client tab: optional email + password sign-in.
+  const handleClientPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setInfo('');
+    setLoading(true);
+
+    try {
+      const res = await authClient.signIn.email({
+        email,
+        password,
+        callbackURL: '/portal',
+      });
+
+      if (res.error) {
+        setError('Invalid email or password.');
+      } else {
+        router.push('/portal');
+        router.refresh();
+      }
+    } catch {
+      setError("We couldn't reach the server. Check your connection and try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Client tab: request a set/reset-password email. Neutral message for privacy.
+  const handleSetPassword = async () => {
+    setError('');
+    setInfo('');
+
+    if (!email) {
+      setError('Enter your email to set or reset your password.');
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      await authClient.requestPasswordReset({ email, redirectTo: '/reset-password' });
+      setInfo(
+        "If an account exists for that email, we've sent a link to set your password.",
+      );
     } catch {
       setError("We couldn't reach the server. Check your connection and try again.");
     } finally {
@@ -64,7 +139,7 @@ export default function LoginPage() {
               <button
                 key={m}
                 type="button"
-                onClick={() => { setMode(m); setError(''); }}
+                onClick={() => { setMode(m); setError(''); setInfo(''); }}
                 aria-pressed={mode === m}
                 className={`flex-1 px-3 py-2 rounded text-[13px] font-medium tracking-[0.02em] transition-all ${
                   mode === m ? 'bg-bg-3 text-text' : 'text-text-dim hover:text-text'
@@ -142,15 +217,151 @@ export default function LoginPage() {
           )}
 
           {mode === 'client' && (
-            <div className="py-10 text-center space-y-3">
-              <MonoEyebrow as="div">CLIENT PORTAL</MonoEyebrow>
-              <h2 className="text-[20px] font-medium text-text tracking-[-0.015em]">
-                Coming soon
-              </h2>
-              <p className="text-[13px] text-text-dim leading-[1.55] max-w-[280px] mx-auto">
-                Client sign-in isn&apos;t available yet. Your coach will let you know when it&apos;s ready.
-              </p>
-            </div>
+            <>
+              <p className="text-text-dim text-[13px] text-center mb-6">Sign in to view your assessments.</p>
+
+              {clientMode === 'magic' && (
+                <form onSubmit={handleMagicLink} className="space-y-4">
+                  <div>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email"
+                      autoFocus
+                      required
+                      className={inputClasses}
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="flex items-center gap-2 text-danger text-[13px]">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  {info && (
+                    <div className="flex items-center gap-2 text-gold-brand text-[13px]">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <span>{info}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || !email}
+                    className="w-full py-3 bg-gold-brand text-bg rounded-md text-[13px] font-medium tracking-[0.02em] hover:bg-champagne transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-4 h-4 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
+                        Sending link…
+                      </span>
+                    ) : (
+                      'Email me a login link'
+                    )}
+                  </button>
+
+                  <p className="mt-3 text-center text-[13px] text-text-dim">
+                    Prefer a password?{' '}
+                    <button
+                      type="button"
+                      onClick={() => { setClientMode('password'); setError(''); setInfo(''); }}
+                      className="text-gold-brand hover:underline"
+                    >
+                      Sign in with a password
+                    </button>
+                  </p>
+                </form>
+              )}
+
+              {clientMode === 'password' && (
+                <form onSubmit={handleClientPassword} className="space-y-4">
+                  <div>
+                    <input
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Email"
+                      autoFocus
+                      required
+                      className={inputClasses}
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      placeholder="Password"
+                      required
+                      className={inputClasses}
+                    />
+                  </div>
+
+                  {error && (
+                    <div className="flex items-center gap-2 text-danger text-[13px]">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" />
+                      </svg>
+                      <span>{error}</span>
+                    </div>
+                  )}
+
+                  {info && (
+                    <div className="flex items-center gap-2 text-gold-brand text-[13px]">
+                      <svg className="w-3.5 h-3.5 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
+                      </svg>
+                      <span>{info}</span>
+                    </div>
+                  )}
+
+                  <button
+                    type="submit"
+                    disabled={loading || !email || !password}
+                    className="w-full py-3 bg-gold-brand text-bg rounded-md text-[13px] font-medium tracking-[0.02em] hover:bg-champagne transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.98]"
+                  >
+                    {loading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <span className="w-4 h-4 border-2 border-bg/30 border-t-bg rounded-full animate-spin" />
+                        Signing in…
+                      </span>
+                    ) : (
+                      'Sign In'
+                    )}
+                  </button>
+
+                  <div className="mt-3 space-y-2 text-center text-[13px] text-text-dim">
+                    <p>
+                      <button
+                        type="button"
+                        onClick={() => { setClientMode('magic'); setError(''); setInfo(''); }}
+                        className="text-gold-brand hover:underline"
+                      >
+                        Email me a login link instead
+                      </button>
+                    </p>
+                    <p>
+                      First time, or forgot it?{' '}
+                      <button
+                        type="button"
+                        onClick={handleSetPassword}
+                        disabled={loading}
+                        className="text-gold-brand hover:underline disabled:opacity-40 disabled:cursor-not-allowed"
+                      >
+                        Set / reset your password
+                      </button>
+                    </p>
+                  </div>
+                </form>
+              )}
+            </>
           )}
         </div>
 
