@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 Phase: 09 — COMPLETE
 Plan: 2 of 2
 Status: Phase 09 complete
-Last activity: 2026-05-25 -- Completed quick task 260525-equ: Client login button + assessment linking (verified, email delivered)
+Last activity: 2026-05-25 -- Completed quick task 260525-f5s: Branded login-link email matching the landing aesthetic
 
 Progress: [██████████] 100%
 
@@ -121,6 +121,7 @@ Recent decisions affecting current work:
 | 260524-jk6 | Fix clients page: selected client cards now show a gold border + ring + tint (clear selection state) | 2026-05-24 | 78f2d02 | [260524-jk6-fix-clients-page-selection-bug-a-selecte](./quick/260524-jk6-fix-clients-page-selection-bug-a-selecte/) |
 | 260524-jrm | Redesign clients page as a list matching assessments (frontend-design); rows w/ select, nav, selected/hover states | 2026-05-24 | dbbf954 | [260524-jrm-redesign-the-clients-page-replace-the-ca](./quick/260524-jrm-redesign-the-clients-page-replace-the-ca/) |
 | 260525-equ | Client login: client-page Create/Resend login button → creates client account, links assessments (name OR email), emails magic link. Verified end-to-end (delivered to me@jace.au). | 2026-05-25 | 3212bb5 | [260525-equ-client-login-add-a-create-resend-login-b](./quick/260525-equ-client-login-add-a-create-resend-login-b/) |
+| 260525-f5s | Branded transactional emails: reusable renderBrandedEmail() matching the peak360.com.au landing (near-black/gold, Inter Tight, logo, sharp gold CTA); applied to magic-link login, reset-password, invite emails | 2026-05-25 | 1e66b1c | [260525-f5s-convert-the-plain-peak360-login-link-mag](./quick/260525-f5s-convert-the-plain-peak360-login-link-mag/) |
 
 ## Session Continuity
 
