@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 Phase: 09 — COMPLETE
 Plan: 2 of 2
 Status: Phase 09 complete
-Last activity: 2026-05-25 -- Completed quick task 260525-fj2: Functional client login (magic-link default + optional password)
+Last activity: 2026-05-25 -- Completed quick task 260525-gga: Store client email on login + clearer client-login 403s
 
 Progress: [██████████] 100%
 
@@ -123,6 +123,7 @@ Recent decisions affecting current work:
 | 260525-equ | Client login: client-page Create/Resend login button → creates client account, links assessments (name OR email), emails magic link. Verified end-to-end (delivered to me@jace.au). | 2026-05-25 | 3212bb5 | [260525-equ-client-login-add-a-create-resend-login-b](./quick/260525-equ-client-login-add-a-create-resend-login-b/) |
 | 260525-f5s | Branded transactional emails: reusable renderBrandedEmail() matching the peak360.com.au landing (near-black/gold, Inter Tight, logo, sharp gold CTA); applied to magic-link login, reset-password, invite emails | 2026-05-25 | 1e66b1c | [260525-f5s-convert-the-plain-peak360-login-link-mag](./quick/260525-f5s-convert-the-plain-peak360-login-link-mag/) |
 | 260525-fj2 | Functional client login: magic-link default + optional set-password/email-password sign-in; magicLink restricted to sign-in only. Verified (real magic-link email sent). | 2026-05-25 | 3446f6a | [260525-fj2-make-the-login-client-tab-functional-mag](./quick/260525-fj2-make-the-login-client-tab-functional-mag/) |
+| 260525-gga | Store login email as client email on client-login; specific 403 messages + diagnostic logging (magic-link click = client session was the "Forbidden" cause) | 2026-05-25 | 62ccb90 | [260525-gga-when-a-client-login-is-created-resent-st](./quick/260525-gga-when-a-client-login-is-created-resent-st/) |
 
 ## Session Continuity
 
