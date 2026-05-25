@@ -1,62 +1,66 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect } from '@playwright/test';
+import { signInAsAdmin } from './helpers/auth';
+import {
+  createAssessment,
+  seedSection,
+  deleteAssessment,
+} from './helpers/assessment';
 
 /**
  * Phase 8: Five-pillar Peak Living module — portal interactive UI.
  *
- * Drafted by /gsd-execute-phase 08 to give the human-UAT items in
- * 08-HUMAN-UAT.md an automated counterpart. Set TEST_ADMIN_EMAIL,
- * TEST_ADMIN_PASSWORD, and TEST_ASSESSMENT_ID before running:
- *
- *   TEST_ADMIN_EMAIL=admin@peak360.com.au \
- *   TEST_ADMIN_PASSWORD=<password> \
- *   TEST_ASSESSMENT_ID=<uuid> \
- *     npx playwright test e2e/phase8-pillars.spec.ts
- *
- * Without those env vars the suite is skipped — it doesn't fall over the
- * Phase 7 auth gate the way the older e2e/phase1-report.spec.ts does.
+ * Modernised: authenticates via the shared signInAsAdmin helper and creates
+ * its OWN seeded assessment (no more hardcoded TEST_ASSESSMENT_ID / skip-gate).
+ * The report renders ReportShell → PillarsGrid → PillarCard (aria-label
+ * "Open detailed view for {label}") and PillarModal (role="dialog").
  */
 
-const ADMIN_EMAIL = process.env.TEST_ADMIN_EMAIL ?? '';
-const ADMIN_PASSWORD = process.env.TEST_ADMIN_PASSWORD ?? '';
-const ASSESSMENT_ID = process.env.TEST_ASSESSMENT_ID ?? '';
-
-async function signIn(page: Page): Promise<void> {
-  // Use page.request so the auth cookie lands in the page's context.
-  const res = await page.request.post('/api/auth/sign-in/email', {
-    data: { email: ADMIN_EMAIL, password: ADMIN_PASSWORD },
-  });
-  expect(res.ok(), `sign-in failed: ${res.status()} ${await res.text()}`).toBeTruthy();
-}
-
-async function gotoReport(page: Page): Promise<void> {
-  await page.goto(`/portal/assessment/${ASSESSMENT_ID}/report`);
-  await page.waitForLoadState('networkidle');
-}
+// Seed enough blood data that pillars compute non-pending scores.
+const BLOODS = {
+  hemoglobin: '14.5',
+  ferritin: '120',
+  vitaminD: '45',
+  cholesterolTotal: '4.5',
+};
 
 test.describe('Phase 8: Peak Living pillars module', () => {
-  test.skip(
-    !ADMIN_EMAIL || !ADMIN_PASSWORD || !ASSESSMENT_ID,
-    'Set TEST_ADMIN_EMAIL, TEST_ADMIN_PASSWORD, TEST_ASSESSMENT_ID to run',
-  );
+  let assessmentId: string;
 
   test.beforeEach(async ({ page }) => {
-    await signIn(page);
+    await signInAsAdmin(page);
+    assessmentId = await createAssessment(page, {
+      clientName: 'Pillar Tester',
+      clientGender: 'male',
+      clientDob: '1986-03-15',
+    });
+    await seedSection(page, assessmentId, 5, BLOODS);
+    await page.goto(`/portal/assessment/${assessmentId}/report`);
+    await page.waitForLoadState('domcontentloaded');
+  });
+
+  test.afterEach(async ({ page }) => {
+    if (assessmentId) await deleteAssessment(page, assessmentId);
   });
 
   test('renders heading + intro from pillar_page_copy', async ({ page }) => {
-    await gotoReport(page);
-    await expect(page.getByRole('heading', { name: /Peak Living Pillars/i })).toBeVisible();
+    await expect(
+      page.getByRole('heading', { name: /Peak Living Pillars/i }),
+    ).toBeVisible();
   });
 
   test('renders five pillar cards in sort order', async ({ page }) => {
-    await gotoReport(page);
-    const cards = page.getByRole('button', { name: /Open detailed view for/i });
+    const cards = page.getByRole('button', {
+      name: /Open detailed view for/i,
+    });
     await expect(cards).toHaveCount(5);
   });
 
-  test('clicking a card opens the modal, ESC closes it and returns focus', async ({ page }) => {
-    await gotoReport(page);
-    const firstCard = page.getByRole('button', { name: /Open detailed view for/i }).first();
+  test('clicking a card opens the modal, ESC closes it and returns focus', async ({
+    page,
+  }) => {
+    const firstCard = page
+      .getByRole('button', { name: /Open detailed view for/i })
+      .first();
     await firstCard.focus();
     await firstCard.click();
 
@@ -69,12 +73,13 @@ test.describe('Phase 8: Peak Living pillars module', () => {
   });
 
   test('focus is trapped inside the modal', async ({ page }) => {
-    await gotoReport(page);
-    await page.getByRole('button', { name: /Open detailed view for/i }).first().click();
+    await page
+      .getByRole('button', { name: /Open detailed view for/i })
+      .first()
+      .click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
-    // Tab forward several times — focus must remain inside the dialog.
     for (let i = 0; i < 8; i++) {
       await page.keyboard.press('Tab');
       const stillInside = await page.evaluate(
@@ -84,27 +89,39 @@ test.describe('Phase 8: Peak Living pillars module', () => {
     }
   });
 
-  test('mobile viewport renders bottom-sheet variant', async ({ page }) => {
+  test('mobile viewport renders a visible centred modal', async ({ page }) => {
     await page.setViewportSize({ width: 390, height: 844 });
-    await gotoReport(page);
-    await page.getByRole('button', { name: /Open detailed view for/i }).first().click();
+    await page.reload();
+    await page.waitForLoadState('domcontentloaded');
+    await page
+      .getByRole('button', { name: /Open detailed view for/i })
+      .first()
+      .click();
 
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
 
-    const verticalAlignment = await dialog.evaluate((el) => {
+    // Phase 8 Plan 03+ replaced the bottom-sheet with a centred modal
+    // (PillarModal uses `grid place-items-center`). Assert the dialog stays
+    // within the viewport rather than anchoring to the bottom edge.
+    const geometry = await dialog.evaluate((el) => {
       const rect = el.getBoundingClientRect();
       return { top: rect.top, bottom: rect.bottom, vh: window.innerHeight };
     });
-    // Bottom-sheet anchors to viewport bottom — bottom edge within 4px of vh.
-    expect(verticalAlignment.vh - verticalAlignment.bottom).toBeLessThan(4);
+    expect(geometry.top).toBeGreaterThanOrEqual(0);
+    expect(geometry.bottom).toBeLessThanOrEqual(geometry.vh + 1);
   });
 
-  test('detailed marker results disclosure is collapsed by default', async ({ page }) => {
-    await gotoReport(page);
-    const disclosure = page.locator('details').filter({ hasText: /Detailed marker results/i });
+  test('detailed marker results disclosure is collapsed by default', async ({
+    page,
+  }) => {
+    const disclosure = page
+      .locator('details')
+      .filter({ hasText: /Detailed marker results/i });
     await expect(disclosure).toBeVisible();
-    const isOpen = await disclosure.evaluate((el) => (el as HTMLDetailsElement).open);
+    const isOpen = await disclosure.evaluate(
+      (el) => (el as HTMLDetailsElement).open,
+    );
     expect(isOpen).toBeFalsy();
   });
 });
