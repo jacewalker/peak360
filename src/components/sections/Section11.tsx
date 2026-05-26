@@ -5,6 +5,7 @@ import { getPeak360Rating } from '@/lib/normative/ratings';
 import { generatePeak360Insights } from '@/lib/normative/insights';
 import type { RatingTier } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
+import type { MarkerContent } from '@/lib/marker-content/queries';
 
 interface ReportMarker {
   key: string;
@@ -138,6 +139,10 @@ export default function Section11({ assessmentId }: Section11Props) {
     elite: 0, great: 0, normal: 0, cautious: 0, poor: 0,
   });
   const [pillars, setPillars] = useState<PillarScore[]>([]);
+  const [markerContentMap, setMarkerContentMap] = useState<
+    Map<string, MarkerContent>
+  >(new Map());
+  const [gender, setGender] = useState<string | null>(null);
   // ── PDF Export ──────────────────────────────────────────────────────────────
 
   const exportPdf = useCallback(async () => {
@@ -170,7 +175,28 @@ export default function Section11({ assessmentId }: Section11Props) {
         const { data } = await res.json();
         sections[num] = (data || {}) as Record<string, unknown>;
       });
-      await Promise.all(fetches);
+
+      // Fetch admin-authored marker content in parallel with the section
+      // fetches (D-12). Build a Map keyed by testKey for O(1) lookup in the
+      // pillar modal. A failed fetch leaves the map empty — the modal then
+      // falls back to generatePeak360Insights output (D-06).
+      const markerContentFetch = (async () => {
+        try {
+          const res = await fetch('/api/marker-content');
+          const json = await res.json();
+          const map = new Map<string, MarkerContent>();
+          if (json.success) {
+            for (const row of json.data as MarkerContent[]) {
+              map.set(row.testKey, row);
+            }
+          }
+          setMarkerContentMap(map);
+        } catch {
+          setMarkerContentMap(new Map());
+        }
+      })();
+
+      await Promise.all([...fetches, markerContentFetch]);
 
       const info = sections[1] || {};
       setClientInfo(info);
@@ -180,6 +206,7 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       const age = info.clientAge as number || null;
       const gender = info.clientGender as string || null;
+      setGender(gender);
 
       const evaluated: ReportMarker[] = [];
       const counts: Record<RatingTier, number> = { elite: 0, great: 0, normal: 0, cautious: 0, poor: 0 };
@@ -330,7 +357,13 @@ export default function Section11({ assessmentId }: Section11Props) {
       <div className="px-6 sm:px-8 pb-8">
 
       {/* ─── PEAK LIVING PILLARS ─── */}
-      <PillarsDisplay pillars={pillars} markers={markers} insights={insights} />
+      <PillarsDisplay
+        pillars={pillars}
+        markers={markers}
+        insights={insights}
+        markerContentMap={markerContentMap}
+        gender={gender}
+      />
 
       {/* ─── SECTION 2: DAILY READINESS ─── */}
       <div className="mt-8 print:mt-6">
