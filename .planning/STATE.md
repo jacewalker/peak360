@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 Phase: 11
 Plan: Not started
 Status: Milestone complete
-Last activity: 2026-05-26
+Last activity: 2026-05-26 - Completed quick task 260526-rtt: authoritative client_id linkage + DRY-RUN backfill
 
 Progress: [██████████] 100%
 
@@ -126,6 +126,7 @@ Recent decisions affecting current work:
 | 260525-fj2 | Functional client login: magic-link default + optional set-password/email-password sign-in; magicLink restricted to sign-in only. Verified (real magic-link email sent). | 2026-05-25 | 3446f6a | [260525-fj2-make-the-login-client-tab-functional-mag](./quick/260525-fj2-make-the-login-client-tab-functional-mag/) |
 | 260525-gga | Store login email as client email on client-login; specific 403 messages + diagnostic logging (magic-link click = client session was the "Forbidden" cause) | 2026-05-25 | 62ccb90 | [260525-gga-when-a-client-login-is-created-resent-st](./quick/260525-gga-when-a-client-login-is-created-resent-st/) |
 | 260525-ls8 | Modernize Playwright e2e suite (auth + /portal routes, shared sign-in/assessment helpers, hermetic self-created data); suite green 49 passed/5 skipped | 2026-05-25 | 3ba6973 | [260525-ls8-modernize-the-playwright-e2e-suite-for-t](./quick/260525-ls8-modernize-the-playwright-e2e-suite-for-t/) |
+| 260526-rtt | Authoritative client_id linkage: applyClientLink resolver wired into assign PUT / Section 1 sync / POST create (auto-creates role='client' user, no email); client-login dedup-by-name upgrade; DRY-RUN-by-default backfill script. Verified PASSED. | 2026-05-26 | 0788d30 | [260526-rtt-client-id-linkage](./quick/260526-rtt-client-id-linkage/) |
 
 ## Session Continuity
 
