@@ -296,6 +296,36 @@ export async function runMigrations() {
       `);
     }
 
+    // Phase 11 — Admin-authored marker content (D-08)
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "marker_content" (
+        "test_key" text PRIMARY KEY NOT NULL,
+        "definition" text,
+        "impact" text,
+        "coach_insights" jsonb,
+        "updated_by" text NOT NULL,
+        "updated_at" bigint NOT NULL
+      )
+    `);
+
+    // Idempotent seed — marker content (D-09; insert-if-absent per test_key,
+    // never overwrites admin edits). One INSERT per marker keeps each statement
+    // small and the conflict target unambiguous.
+    {
+      const now11 = Date.now();
+      const { SEED_MARKER_CONTENT } = require('@/lib/marker-content/seed-content');
+      const { REPORT_MARKERS } = require('@/lib/report-markers');
+      for (const m of REPORT_MARKERS) {
+        const c = SEED_MARKER_CONTENT[m.testKey];
+        if (!c) continue;
+        await d.execute(sql`
+          INSERT INTO "marker_content" ("test_key", "definition", "impact", "coach_insights", "updated_by", "updated_at")
+          VALUES (${m.testKey}, ${c.definition}, ${c.impact}, ${JSON.stringify(c.coachInsights)}::jsonb, 'system', ${now11})
+          ON CONFLICT ("test_key") DO NOTHING
+        `);
+      }
+    }
+
     // Append-only client notes log (keyed by client name)
     await d.execute(sql`
       CREATE TABLE IF NOT EXISTS "client_notes" (
@@ -530,6 +560,35 @@ export async function runMigrations() {
                ${now8}
         WHERE NOT EXISTS (SELECT 1 FROM "pillar_page_copy")
       `);
+    }
+
+    // Phase 11 — Admin-authored marker content (D-08). SQLite stores the
+    // coach_insights JSON as text and updated_at as integer epoch ms.
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "marker_content" (
+        "test_key" text PRIMARY KEY NOT NULL,
+        "definition" text,
+        "impact" text,
+        "coach_insights" text,
+        "updated_by" text NOT NULL,
+        "updated_at" integer NOT NULL
+      )
+    `);
+
+    // Idempotent seed — marker content (D-09; INSERT OR IGNORE never
+    // overwrites admin edits). coach_insights serialized to JSON text.
+    {
+      const now11 = Date.now();
+      const { SEED_MARKER_CONTENT } = require('@/lib/marker-content/seed-content');
+      const { REPORT_MARKERS } = require('@/lib/report-markers');
+      for (const m of REPORT_MARKERS) {
+        const c = SEED_MARKER_CONTENT[m.testKey];
+        if (!c) continue;
+        d.run(sql`
+          INSERT OR IGNORE INTO "marker_content" ("test_key", "definition", "impact", "coach_insights", "updated_by", "updated_at")
+          VALUES (${m.testKey}, ${c.definition}, ${c.impact}, ${JSON.stringify(c.coachInsights)}, 'system', ${now11})
+        `);
+      }
     }
 
     // Append-only client notes log (keyed by client name)
