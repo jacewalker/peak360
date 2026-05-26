@@ -252,10 +252,10 @@ function MarkerDetailPanel({
   const genderLabel = genderKey === 'female' ? 'Female' : 'Male';
 
   // Authored coach insight for this (tier, gender), if present + non-empty.
-  const authored =
-    tier && content?.coachInsights
-      ? content.coachInsights[tier]?.[genderKey]?.trim() || null
-      : null;
+  // Defensively guard against a legacy/poisoned non-string cell so a bad
+  // stored value can never crash the globally-read report modal (CR-01).
+  const cell = tier ? content?.coachInsights?.[tier]?.[genderKey] : null;
+  const authored = typeof cell === 'string' ? cell.trim() || null : null;
 
   // D-06 fallback — the generatePeak360Insights output routed to this marker.
   const fallbackInsight = !authored

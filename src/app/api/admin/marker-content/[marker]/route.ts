@@ -22,6 +22,35 @@ type CoachInsights = Record<
   { male: string | null; female: string | null }
 > | null;
 
+const TIERS = ['poor', 'cautious', 'normal', 'great', 'elite'] as const;
+
+/**
+ * Validate + clamp an untrusted coachInsights blob into the expected
+ * 5-tier x {male,female} string matrix. Any non-string cell is coerced to
+ * null and over-long strings are clamped, so a malicious/buggy write can
+ * never poison the JSON column and crash the report read path (CR-01).
+ */
+function sanitizeCoachInsights(raw: unknown): CoachInsights {
+  if (raw == null || typeof raw !== 'object') return null;
+  const out = {} as NonNullable<CoachInsights>;
+  for (const tier of TIERS) {
+    const cell = (raw as Record<string, unknown>)[tier];
+    const male =
+      cell && typeof cell === 'object'
+        ? (cell as Record<string, unknown>).male
+        : null;
+    const female =
+      cell && typeof cell === 'object'
+        ? (cell as Record<string, unknown>).female
+        : null;
+    out[tier] = {
+      male: typeof male === 'string' ? male.slice(0, 5000) : null,
+      female: typeof female === 'string' ? female.slice(0, 5000) : null,
+    };
+  }
+  return out;
+}
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ marker: string }> }
@@ -122,23 +151,33 @@ export async function PUT(
       }
     }
 
+    // Validate + clamp before persisting so a poisoned blob can never crash
+    // the globally-read report modal (CR-01).
+    const definition =
+      typeof body.definition === 'string'
+        ? body.definition.slice(0, 10000)
+        : null;
+    const impact =
+      typeof body.impact === 'string' ? body.impact.slice(0, 10000) : null;
+    const coachInsights = sanitizeCoachInsights(body.coachInsights);
+
     const now = Date.now();
     await db
       .insert(markerContent)
       .values({
         testKey: marker,
-        definition: body.definition ?? null,
-        impact: body.impact ?? null,
-        coachInsights: body.coachInsights ?? null,
+        definition,
+        impact,
+        coachInsights,
         updatedBy: session.user.id,
         updatedAt: now,
       })
       .onConflictDoUpdate({
         target: markerContent.testKey,
         set: {
-          definition: body.definition ?? null,
-          impact: body.impact ?? null,
-          coachInsights: body.coachInsights ?? null,
+          definition,
+          impact,
+          coachInsights,
           updatedBy: session.user.id,
           updatedAt: now,
         },
@@ -155,7 +194,7 @@ export async function PUT(
       userAgent: ctx.userAgent,
     });
 
-    return NextResponse.json({ success: true, data: { updated: 1 } });
+    return NextResponse.json({ success: true, data: { updated: 1, updatedAt: now } });
   } catch {
     return NextResponse.json(
       { success: false, error: 'Failed to save marker content' },

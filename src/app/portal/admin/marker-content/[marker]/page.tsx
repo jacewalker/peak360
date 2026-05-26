@@ -94,7 +94,11 @@ export default function MarkerContentEditorPage({
   // Beforeunload dirty guard
   useEffect(() => {
     const handler = (e: BeforeUnloadEvent) => {
-      if (isDirty) e.preventDefault();
+      if (!isDirty) return;
+      e.preventDefault();
+      // Some browsers only show the prompt when returnValue is set, not on
+      // preventDefault() alone (WR-06).
+      e.returnValue = '';
     };
     window.addEventListener('beforeunload', handler);
     return () => window.removeEventListener('beforeunload', handler);
@@ -129,7 +133,9 @@ export default function MarkerContentEditorPage({
       } else {
         setIsDirty(false);
         setSaveSuccess(true);
-        setServerUpdatedAt(Date.now());
+        // Adopt the server's authoritative timestamp rather than the browser
+        // clock, so the optimistic-concurrency check stays on one clock (WR-01).
+        setServerUpdatedAt(json.data?.updatedAt ?? Date.now());
         setTimeout(() => setSaveSuccess(false), 2000);
       }
     } catch {
