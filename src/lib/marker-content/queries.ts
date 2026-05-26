@@ -19,7 +19,7 @@ export interface MarkerContent {
   coachInsights:
     | Record<RatingTier, { male: string | null; female: string | null }>
     | null;
-  updatedBy: string;
+  updatedBy: string | null;
   updatedAt: number; // epoch ms
 }
 
@@ -31,7 +31,7 @@ export async function getAllMarkerContent(): Promise<MarkerContent[]> {
     impact: (r.impact as string | null) ?? null,
     coachInsights:
       (r.coachInsights as MarkerContent['coachInsights']) ?? null,
-    updatedBy: r.updatedBy as string,
+    updatedBy: (r.updatedBy as string | null) ?? null,
     updatedAt: r.updatedAt as number,
   }));
 }
@@ -51,7 +51,7 @@ export async function getMarkerContentByKey(
     impact: (r.impact as string | null) ?? null,
     coachInsights:
       (r.coachInsights as MarkerContent['coachInsights']) ?? null,
-    updatedBy: r.updatedBy as string,
+    updatedBy: (r.updatedBy as string | null) ?? null,
     updatedAt: r.updatedAt as number,
   };
 }
