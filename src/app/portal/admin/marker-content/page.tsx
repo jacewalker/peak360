@@ -3,8 +3,8 @@ import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { redirect } from 'next/navigation';
 import type { AuthSession } from '@/lib/auth-helpers';
-import { REPORT_MARKERS, REPORT_CATEGORIES } from '@/lib/report-markers';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
+import MarkerContentList from './MarkerContentList';
 
 /**
  * Phase 11 — Admin SSR-gated marker-content list (D-07, D-10).
@@ -47,54 +47,7 @@ export default async function AdminMarkerContentPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
-        {REPORT_CATEGORIES.map((cat) => {
-          const markers = REPORT_MARKERS.filter((m) => m.category === cat);
-          if (markers.length === 0) return null;
-
-          return (
-            <section key={cat} className="mb-9">
-              {/* Category header */}
-              <div className="flex items-center gap-3 mb-3">
-                <h2 className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">
-                  {cat}
-                </h2>
-                <div className="flex-1 h-px bg-line" />
-                <span className="font-mono text-[11px] text-text-dim tabular-nums">{markers.length}</span>
-              </div>
-
-              {/* Marker rows */}
-              <div className="space-y-1.5">
-                {markers.map((m) => (
-                  <Link
-                    key={m.testKey}
-                    href={`/portal/admin/marker-content/${m.testKey}`}
-                    className="group flex items-center justify-between gap-3 px-4 py-3 rounded-xl border border-line bg-bg-3 hover:border-gold-brand/40 hover:bg-bg-2 transition-colors duration-150"
-                  >
-                    <div className="min-w-0">
-                      <span className="block text-sm font-medium text-text truncate group-hover:text-gold-brand transition-colors">
-                        {m.label}
-                      </span>
-                      {m.subcategory && (
-                        <span className="block font-mono text-[10px] uppercase tracking-[0.14em] text-text-faint mt-0.5">
-                          {m.subcategory}
-                        </span>
-                      )}
-                    </div>
-                    <svg
-                      className="w-4 h-4 flex-none text-text-faint group-hover:text-gold-brand transition-colors"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      strokeWidth={2}
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                    </svg>
-                  </Link>
-                ))}
-              </div>
-            </section>
-          );
-        })}
+        <MarkerContentList />
       </main>
     </div>
   );
