@@ -318,3 +318,59 @@ describe('findClientUserByName', () => {
     expect(await findClientUserByName('NameClash', deps())).toBeNull();
   });
 });
+
+// Test 7 — the client-login dedup-by-name decision. The route's
+// tryUpgradePlaceholderByName builds on findClientUserByName (tested above) plus
+// a UNIQUE-email guard, then updates the matched user's email. We exercise that
+// exact decision here against the throwaway db so the dedup contract is covered
+// without booting the full route handler / Better Auth.
+describe('client-login dedup-by-name decision (findClientUserByName + upgrade)', () => {
+  // Mirror of route.ts tryUpgradePlaceholderByName, driven against the test db.
+  async function tryUpgrade(clientName: string, email: string): Promise<boolean> {
+    const { findClientUserByName } = await import('@/lib/clients/link');
+    const match = await findClientUserByName(clientName, deps());
+    if (match === null || match === 'ambiguous') return false;
+    const holder = await db
+      .select({ id: schema.user.id })
+      .from(schema.user)
+      .where(eq(schema.user.email, email))
+      .limit(1);
+    if (holder.length > 0 && holder[0].id !== match) return false;
+    await db.update(schema.user).set({ email }).where(eq(schema.user.id, match));
+    return true;
+  }
+
+  it('upgrades a single name-matched placeholder in place (no duplicate row)', async () => {
+    await insertUser({
+      id: 'placeholder-1',
+      name: 'Jane Doe',
+      email: 'client+abc@placeholder.peak360.local',
+      role: 'client',
+    });
+
+    const upgraded = await tryUpgrade('Jane Doe', 'jane@real.com');
+    expect(upgraded).toBe(true);
+
+    // Same user, new email — count for that name stays 1.
+    const byName = await db.select().from(schema.user).where(eq(schema.user.name, 'Jane Doe'));
+    expect(byName.length).toBe(1);
+    expect(byName[0].id).toBe('placeholder-1');
+    expect(byName[0].email).toBe('jane@real.com');
+  });
+
+  it('falls through (no upgrade) on an ambiguous name', async () => {
+    await insertUser({ id: 'amb-1', name: 'Ambiguous', email: 'amb1@placeholder.peak360.local', role: 'client' });
+    await insertUser({ id: 'amb-2', name: 'Ambiguous', email: 'amb2@placeholder.peak360.local', role: 'client' });
+    expect(await tryUpgrade('Ambiguous', 'amb@real.com')).toBe(false);
+  });
+
+  it('falls through (no upgrade) when the email is already held by another user', async () => {
+    await insertUser({ id: 'ph', name: 'Taken Name', email: 'ph@placeholder.peak360.local', role: 'client' });
+    await insertUser({ id: 'other', name: 'Other', email: 'taken@real.com', role: 'client' });
+    // Email 'taken@real.com' belongs to a different user → must not steal it.
+    expect(await tryUpgrade('Taken Name', 'taken@real.com')).toBe(false);
+    // The placeholder keeps its original email.
+    const [ph] = await db.select().from(schema.user).where(eq(schema.user.id, 'ph'));
+    expect(ph.email).toBe('ph@placeholder.peak360.local');
+  });
+});

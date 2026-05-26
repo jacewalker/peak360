@@ -6,6 +6,7 @@ import { db } from '@/lib/db';
 import { assessments, user } from '@/lib/db/schema';
 import { and, eq, or } from 'drizzle-orm';
 import { requireSession, type AuthSession } from '@/lib/auth-helpers';
+import { findClientUserByName } from '@/lib/clients/link';
 
 /**
  * Can the signed-in user create/resend a login for this client name?
@@ -30,6 +31,37 @@ async function canAccess(session: AuthSession, clientName: string): Promise<bool
     .limit(1);
 
   return rows.length > 0;
+}
+
+/**
+ * Dedup-by-name upgrade: when no user matches the entered email, look for a
+ * SINGLE role='client' placeholder (auto-created by the link resolver) matched
+ * by NAME and upgrade its email to the entered email instead of creating a
+ * second user. Returns true if it upgraded, false to fall through to createUser.
+ *
+ * Guards:
+ * - Ambiguous name (2+ client users) → do NOT guess; fall through (return false).
+ * - UNIQUE-email collision: if some OTHER user already holds the entered email,
+ *   do NOT reassign it; fall through (return false) so createUser surfaces the
+ *   constraint error as today. (The caller already proved no email match exists,
+ *   but we re-confirm defensively.)
+ *
+ * Uses findClientUserByName from @/lib/clients/link (the same name-match rule the
+ * resolver uses), keeping the dedup decision unit-testable.
+ */
+async function tryUpgradePlaceholderByName(
+  clientName: string,
+  email: string
+): Promise<boolean> {
+  const match = await findClientUserByName(clientName);
+  if (match === null || match === 'ambiguous') return false;
+
+  // Defensive UNIQUE-email re-confirm: never steal an email another user holds.
+  const holder = await db.select({ id: user.id }).from(user).where(eq(user.email, email)).limit(1);
+  if (holder.length > 0 && holder[0].id !== match) return false;
+
+  await db.update(user).set({ email }).where(eq(user.id, match));
+  return true;
 }
 
 /**
@@ -103,6 +135,14 @@ export async function POST(request: Request) {
   if (existing.length > 0) {
     // Account exists → resend the sign-in link
     userId = existing[0].id;
+    created = false;
+  } else if (await tryUpgradePlaceholderByName(clientName, email)) {
+    // A single role='client' placeholder (auto-created by the link resolver,
+    // matched by name) had its email upgraded to the entered email instead of
+    // creating a duplicate user. This is effectively the placeholder's first
+    // real login, so created stays false.
+    const upgraded = await db.select().from(user).where(eq(user.email, email)).limit(1);
+    userId = upgraded[0].id;
     created = false;
   } else {
     // No account → create a client-role account (password is a placeholder;
