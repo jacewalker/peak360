@@ -5,6 +5,7 @@ import { desc, eq } from 'drizzle-orm';
 import { v4 as uuid } from 'uuid';
 import { createOrReuseVersion } from '@/lib/normative/versioning';
 import { requireSession } from '@/lib/auth-helpers';
+import { applyClientLink } from '@/lib/clients/link';
 
 export async function GET() {
   const [session, errorRes] = await requireSession();
@@ -122,6 +123,17 @@ export async function POST(request: Request) {
       .where(eq(assessments.id, id));
   } catch {
     // Non-fatal: assessment still created, just without version pinning
+  }
+
+  // Set client_id at create time when the new assessment carries a client
+  // name/email. The auto-created client inherits this coach. Not wrapped in
+  // try/catch — a failed link should surface as a 500 so it's visible.
+  if (body.clientName || body.clientEmail) {
+    await applyClientLink(id, {
+      clientName: body.clientName,
+      clientEmail: body.clientEmail,
+      coachId: session.user.id,
+    });
   }
 
   return NextResponse.json({ success: true, data: { id } }, { status: 201 });

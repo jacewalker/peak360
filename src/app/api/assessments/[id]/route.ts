@@ -3,6 +3,7 @@ import { db } from '@/lib/db';
 import { assessments, assessmentSections } from '@/lib/db/schema';
 import { eq, and, isNotNull } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth-helpers';
+import { applyClientLink } from '@/lib/clients/link';
 
 /**
  * Check if the user has access to this assessment based on role.
@@ -68,6 +69,18 @@ export async function PUT(request: Request, { params }: { params: Promise<{ id: 
     .update(assessments)
     .set({ ...body, updatedAt: now })
     .where(eq(assessments.id, id));
+
+  // Make client_id authoritative on reassign/rename. When the assign/rename
+  // payload carries a clientName and/or clientEmail, repoint (or clear) client_id
+  // to the resolved client. Use the pre-fetched row.coachId so a newly
+  // auto-created client inherits the assessment's coach.
+  if (body.clientName || body.clientEmail) {
+    await applyClientLink(id, {
+      clientName: body.clientName,
+      clientEmail: body.clientEmail,
+      coachId: row.coachId,
+    });
+  }
 
   return NextResponse.json({ success: true });
 }

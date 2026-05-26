@@ -5,6 +5,7 @@ import { eq, and } from 'drizzle-orm';
 import { requireSession } from '@/lib/auth-helpers';
 import { encrypt, decrypt } from '@/lib/crypto';
 import { logAuditEvent, getRequestContext } from '@/lib/audit';
+import { applyClientLink } from '@/lib/clients/link';
 
 const ENCRYPTED_SECTIONS = new Set([3, 4, 5]);
 
@@ -141,6 +142,20 @@ export async function PUT(
     .update(assessments)
     .set(updatePayload)
     .where(eq(assessments.id, id));
+
+  // Keep client_id authoritative when Section 1 syncs a client name/email
+  // (e.g. a rename). Repoint/clear to the resolved client; an auto-created
+  // client inherits the assessment's coach.
+  if (sectionNum === 1 && body.data) {
+    const d = body.data as Record<string, unknown>;
+    if (d.clientName || d.clientEmail) {
+      await applyClientLink(id, {
+        clientName: d.clientName as string | undefined,
+        clientEmail: d.clientEmail as string | undefined,
+        coachId: assessment.coachId,
+      });
+    }
+  }
 
   const ctx = await getRequestContext();
   logAuditEvent({
