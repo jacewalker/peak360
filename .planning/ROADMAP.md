@@ -171,3 +171,16 @@ Plans:
 Plans:
 - [ ] 10-01-PLAN.md — Section 11 in-app retokenization: light card surface, Phase 8 brand vocabulary, eliminate legacy navy/gold/white literals, add print-safe alias tokens to globals.css
 - [x] 10-02-PLAN.md — PDF renderer brand alignment: shift COLORS.gold + COLORS.goldDark to gold-brand/champagne, route stray hex literals (MarkerTable/MarkerRow/ConsentStatus) through tokens, preserve Phase 8 sovereign palettes
+
+### Phase 11: Report marker-detail expansion + admin coach insights
+
+**Goal:** In the Longevity Analysis report's pillar modals (`PillarsDisplayModal`), make each marker clickable to reveal a detail panel — Definition (gender-neutral), Impact (gender-neutral), and a Coach Insight matched to the client's tier and gender — with two-pane master/detail on desktop and drill-in on mobile. Back it with a new admin-only global `marker_content` store (definition, impact, and a per-tier × per-gender coach-insight matrix), an admin authoring UI cloned from the normative-ranges editor, a client-readable report-read API, and pre-seeded researched draft content for all ~98 REPORT_MARKERS. Coach Insights fall back to the existing `generatePeak360Insights` output when unauthored. Web report only — no PDF/`@react-pdf` changes.
+**Requirements**: Implicit, locked via decisions D-01..D-14 in 11-CONTEXT.md and the `mockups/marker-detail-modal.html` visual contract
+**Depends on:** Phase 8 (pillar modal + global-content/admin/audit patterns), Phase 10 (Section 11 brand tokens)
+**Plans:** 4 plans
+
+Plans:
+- [ ] 11-01-PLAN.md — Foundation: marker_content schema (D-08) + MarkerContent queries (D-07) + audit action (D-11) + researched draft seed for all REPORT_MARKERS (D-09, D-14) + [BLOCKING] db:push
+- [ ] 11-02-PLAN.md — APIs: admin GET/PUT + list (409 + audit, D-11) + client-readable any-role GET (D-07, D-12)
+- [ ] 11-03-PLAN.md — Admin UI: marker-content list + per-marker editor (definition/impact + 5-tier × male/female matrix, optimistic concurrency, dirty guard, tone guidance) + admin nav card (D-07, D-10, D-14)
+- [ ] 11-04-PLAN.md — Report UI: PillarsDisplayModal master/detail (desktop two-pane, mobile drill-in) + thread marker content + gender from Section11; (tier,gender) insight with generatePeak360Insights fallback; dark-portal brand; no PDF (D-01..D-06, D-12, D-13, D-14)
