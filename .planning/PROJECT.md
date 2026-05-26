@@ -37,7 +37,7 @@ Clients can securely log in to view their own assessment results, and coaches ha
 - [ ] Admin panel for normative range and threshold management
 - [ ] Client portal with authentication and role-based access
 - ✓ Report marker range visualization (gauge bars) — Validated in Phase 5: SVG range bars in PDF
-- [ ] Actionable recommendations and referral flags in reports
+- ✓ Actionable recommendations in reports — Validated in Phase 11: admin-authored marker definition/impact + per-tier × per-gender coach insights surfaced in the report's marker detail panels (with auto fallback to generatePeak360Insights)
 - [ ] Data encryption at rest for sensitive health data
 - [ ] Automated backup strategy
 
@@ -89,4 +89,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-12 — Milestone v3.0 started*
+*Last updated: 2026-05-26 — Phase 11 complete (report marker-detail + admin coach insights)*
