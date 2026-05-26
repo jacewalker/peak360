@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { db } from '@/lib/db';
+import { db, runMigrations } from '@/lib/db';
 import { markerContent } from '@/lib/db/schema';
 import { requireAdmin } from '@/lib/auth-helpers';
 
@@ -40,6 +40,7 @@ export async function GET() {
   if (errorRes) return errorRes;
 
   try {
+    await runMigrations();
     const rows = await db.select().from(markerContent);
     const authoredKeys = (rows as Record<string, unknown>[])
       .filter(hasAuthoredContent)

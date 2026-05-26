@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
 import { REPORT_MARKERS } from '@/lib/report-markers';
-import { db } from '@/lib/db';
+import { db, runMigrations } from '@/lib/db';
 import { markerContent } from '@/lib/db/schema';
 import { requireAdmin } from '@/lib/auth-helpers';
 import { logAuditEvent, getRequestContext } from '@/lib/audit';
@@ -59,6 +59,7 @@ export async function GET(
   if (errorRes) return errorRes;
 
   try {
+    await runMigrations();
     const { marker } = await params;
 
     const markerDef = REPORT_MARKERS.find((m) => m.testKey === marker);
@@ -116,6 +117,7 @@ export async function PUT(
   if (errorRes) return errorRes;
 
   try {
+    await runMigrations();
     const { marker } = await params;
 
     const markerDef = REPORT_MARKERS.find((m) => m.testKey === marker);

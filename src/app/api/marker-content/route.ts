@@ -1,4 +1,5 @@
 import { NextResponse } from 'next/server';
+import { runMigrations } from '@/lib/db';
 import { requireSession } from '@/lib/auth-helpers';
 import { getAllMarkerContent } from '@/lib/marker-content/queries';
 
@@ -16,6 +17,9 @@ export async function GET() {
   if (errorRes) return errorRes;
 
   try {
+    // Ensure the marker_content table exists + is seeded on first use (prod
+    // creates tables lazily via runMigrations). Idempotent / no-op once present.
+    await runMigrations();
     const rows = await getAllMarkerContent();
     return NextResponse.json({ success: true, data: rows });
   } catch {
