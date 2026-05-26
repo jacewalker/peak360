@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import {
   PILLARS,
@@ -9,6 +9,7 @@ import {
 } from '@/lib/pillars/mapping';
 import type { PillarStatus } from '@/lib/pillars/types';
 import type { Insight, ReportMarker } from '@/lib/pdf/types';
+import type { MarkerContent } from '@/lib/marker-content/queries';
 import {
   TIER_LABELS,
   type RatingTier,
@@ -20,6 +21,8 @@ interface Props {
   pillar: PillarScore;
   markers: ReportMarker[];
   insights?: Insight[];
+  markerContentMap?: Map<string, MarkerContent>;
+  gender?: string | null;
 }
 
 type GroupKey = RatingTier | 'recorded' | 'pending';
@@ -167,13 +170,215 @@ function getTabbables(root: HTMLElement | null): HTMLElement[] {
   );
 }
 
+/** Normalise the client's stored gender string to the male/female key the
+ *  coach-insight matrix is keyed by. Anything that isn't clearly female
+ *  defaults to male (the seed authors both, so a miss here only affects the
+ *  badge wording, never authorization — T-11-11). */
+function normalizeGender(gender: string | null | undefined): 'male' | 'female' {
+  return (gender ?? '').toLowerCase().startsWith('f') ? 'female' : 'male';
+}
+
+/** Tiny star glyph for the coach-insight card heading (echoes the mockup). */
+function CoachStar() {
+  return (
+    <svg
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      aria-hidden
+      className="text-gold-brand"
+    >
+      <path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.4L12 16.8 5.7 21l2.3-7.4-6-4.4h7.6z" />
+    </svg>
+  );
+}
+
+/** A single "What it is" / "How it affects you" block — gold bar heading +
+ *  paragraph. Rendered only when its text is non-empty (D-06: no fallback for
+ *  definition/impact). Text is a plain React child, so React escapes it. */
+function DetailBlock({ heading, body }: { heading: string; body: string }) {
+  return (
+    <div className="mt-5">
+      <div className="flex items-center gap-2.5 mb-2">
+        <span className="block h-[15px] w-[3px] rounded-full bg-gold-brand" aria-hidden />
+        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim">
+          {heading}
+        </span>
+      </div>
+      <p className="text-sm leading-relaxed text-text-dim max-w-[62ch] whitespace-pre-line">
+        {body}
+      </p>
+    </div>
+  );
+}
+
+/** Empty-state shown in the right pane (desktop) before a marker is picked. */
+function EmptyDetailState() {
+  return (
+    <div className="flex h-full min-h-[260px] flex-col items-center justify-center px-8 py-12 text-center">
+      <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-faint">
+        Select a marker
+      </span>
+      <p className="mt-2 max-w-[34ch] text-sm leading-relaxed text-text-dim">
+        Choose a marker from the list to see what it is, how it affects you,
+        and tailored coaching for your result.
+      </p>
+    </div>
+  );
+}
+
+/** Marker detail panel (D-03): header → "What it is" → "How it affects you"
+ *  → gold-railed Coach insight. Resolves the (tier, gender) coach insight from
+ *  authored content (D-05); falls back to generatePeak360Insights output with
+ *  an "Auto-generated" note when nothing is authored (D-06). */
+function MarkerDetailPanel({
+  marker,
+  content,
+  gender,
+  insights,
+}: {
+  marker: ReportMarker;
+  content: MarkerContent | undefined;
+  gender: string | null | undefined;
+  insights: Insight[];
+}) {
+  const tier = marker.tier;
+  const tierTheme = tier ? TIER_THEME[tier] : null;
+  const tierLabel = tier ? TIER_LABELS[tier] : null;
+  const genderKey = normalizeGender(gender);
+  const genderLabel = genderKey === 'female' ? 'Female' : 'Male';
+
+  // Authored coach insight for this (tier, gender), if present + non-empty.
+  const authored =
+    tier && content?.coachInsights
+      ? content.coachInsights[tier]?.[genderKey]?.trim() || null
+      : null;
+
+  // D-06 fallback — the generatePeak360Insights output routed to this marker.
+  const fallbackInsight = !authored
+    ? insights.find((i) => i.markerKey === marker.key) ?? null
+    : null;
+
+  return (
+    <div className="px-6 py-6 sm:px-7 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-right-2 motion-safe:duration-200">
+      {/* Header — name + category, value + unit + tier pill */}
+      <div className="flex items-start justify-between gap-4 pb-4 border-b border-line">
+        <div className="min-w-0">
+          <h3 className="text-xl font-semibold tracking-tight text-text">
+            {marker.label}
+          </h3>
+          <div className="mt-1.5 font-mono text-[10px] uppercase tracking-[0.16em] text-text-faint">
+            {marker.category}
+            {marker.subcategory ? ` · ${marker.subcategory}` : ''}
+          </div>
+        </div>
+        <div className="flex-none text-right">
+          <div className="font-mono text-2xl font-semibold tabular-nums text-text">
+            {marker.value != null ? marker.value : '—'}
+            {marker.value != null && marker.unit ? (
+              <span className="ml-1 text-xs text-text-dim">{marker.unit}</span>
+            ) : null}
+          </div>
+          {tierTheme && tierLabel ? (
+            <span
+              className={`mt-2 inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${tierTheme.pill}`}
+            >
+              {tierLabel}
+            </span>
+          ) : null}
+        </div>
+      </div>
+
+      {/* "What it is" — Definition (omitted when blank, no fallback) */}
+      {content?.definition?.trim() ? (
+        <DetailBlock heading="What it is" body={content.definition.trim()} />
+      ) : null}
+
+      {/* "How it affects you" — Impact (omitted when blank, no fallback) */}
+      {content?.impact?.trim() ? (
+        <DetailBlock heading="How it affects you" body={content.impact.trim()} />
+      ) : null}
+
+      {/* Coach insight — gold-railed card */}
+      {(authored || fallbackInsight) && (
+        <div className="relative mt-6 overflow-hidden rounded-2xl border border-line-2 bg-gradient-to-b from-gold-brand/8 to-bg-3/60">
+          <span
+            aria-hidden
+            className="absolute left-0 top-0 bottom-0 w-[3px] bg-gradient-to-b from-gold-brand to-champagne"
+          />
+          <div className="py-5 pl-6 pr-5">
+            <div className="mb-2.5 flex flex-wrap items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-2 font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-champagne">
+                <CoachStar />
+                {authored ? 'Coach insight' : 'Insights & recommendations'}
+              </span>
+              {tierTheme && tierLabel ? (
+                <span className="inline-flex items-center gap-1.5 rounded-full border border-line-2 px-2.5 py-1 font-mono text-[9.5px] uppercase tracking-[0.1em] text-text-dim">
+                  <span className={`size-1.5 rounded-full ${tierTheme.dot}`} aria-hidden />
+                  {authored ? `${genderLabel} · ${tierLabel}` : tierLabel}
+                </span>
+              ) : null}
+            </div>
+
+            {authored ? (
+              <p className="text-sm leading-relaxed text-text whitespace-pre-line">
+                {authored}
+              </p>
+            ) : fallbackInsight ? (
+              <>
+                <p className="text-sm leading-relaxed text-text">
+                  {fallbackInsight.why}
+                </p>
+                {fallbackInsight.doNow.length > 0 && (
+                  <ul className="mt-3 flex flex-col gap-2.5">
+                    {fallbackInsight.doNow.map((item, j) => (
+                      <li key={j} className="flex items-start gap-2.5">
+                        <span
+                          aria-hidden
+                          className="mt-[7px] size-[5px] flex-none rounded-full bg-gold-brand"
+                        />
+                        <span className="text-[13.5px] leading-relaxed text-text">
+                          {item}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                <div className="mt-3.5 flex items-center gap-2 font-mono text-[9.5px] uppercase tracking-[0.08em] text-text-faint">
+                  <span className="size-1.5 rounded-full bg-gold-brand/70" aria-hidden />
+                  Auto-generated · no coach insight authored yet
+                </div>
+              </>
+            ) : null}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function PillarsDisplayModal({
   open,
   onClose,
   pillar,
   markers,
   insights = [],
+  markerContentMap,
+  gender,
 }: Props) {
+  const [selectedMarker, setSelectedMarker] = useState<string | null>(null);
+  // Track the pillar+open identity so we can clear the selection during render
+  // when the modal reopens or switches pillars — avoids a stale detail panel
+  // without a setState-in-effect (which triggers cascading renders).
+  const [paneKey, setPaneKey] = useState<string>(`${open}:${pillar.key}`);
+  const currentPaneKey = `${open}:${pillar.key}`;
+  if (paneKey !== currentPaneKey) {
+    setPaneKey(currentPaneKey);
+    setSelectedMarker(null);
+  }
   const panelRef = useRef<HTMLElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
 
@@ -291,6 +496,22 @@ export default function PillarsDisplayModal({
     ['poor', 'cautious', 'normal', 'great', 'elite'] as const
   ).map((t) => ({ tier: t, count: grouped[t].length }));
 
+  // The currently-selected marker (or null). Looked up within this pillar's
+  // markers so a stale key from another pillar resolves to nothing.
+  const selected =
+    selectedMarker != null
+      ? pillarMarkers.find((m) => m.key === selectedMarker) ?? null
+      : null;
+
+  const detailPanel = selected ? (
+    <MarkerDetailPanel
+      marker={selected}
+      content={markerContentMap?.get(selected.key)}
+      gender={gender}
+      insights={insights}
+    />
+  ) : null;
+
   const drawer = (
     <>
       {/* Backdrop — centred modal overlay (was right-drawer). Blur the portal behind. */}
@@ -309,7 +530,7 @@ export default function PillarsDisplayModal({
         tabIndex={-1}
         className="fixed inset-0 z-50 grid place-items-center p-4 sm:p-6 pointer-events-none outline-none"
       >
-        <div className="relative w-full max-w-[640px] max-h-[90vh] overflow-x-hidden overflow-y-auto bg-bg-2 border border-line rounded-2xl shadow-2xl pointer-events-auto motion-safe:transition-all duration-200">
+        <div className="relative w-full max-w-[980px] max-h-[90vh] overflow-x-hidden overflow-y-auto bg-bg-2 border border-line rounded-2xl shadow-2xl pointer-events-auto motion-safe:transition-all duration-200">
         {/* Hero — gradient surface with corner brackets, mono eyebrow, big score */}
         <div
           className={`relative overflow-hidden px-6 pt-6 pb-5 border-b border-line ${theme.heroBg}`}
@@ -424,86 +645,151 @@ export default function PillarsDisplayModal({
           </div>
         )}
 
-        {/* Marker rows — grouped by tier */}
-        <div className="px-6 py-5">
-          <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim mb-3">
-            Contributing markers
-          </h3>
-
-          {pillarMarkers.length === 0 ? (
+        {/* Two-pane master/detail body (D-01, D-02). Desktop: left marker
+            list + right detail pane side-by-side. Mobile: single column —
+            the list, with a full-width drill-in overlay when a marker is
+            selected. */}
+        {pillarMarkers.length === 0 ? (
+          <div className="px-6 py-5">
+            <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim mb-3">
+              Contributing markers
+            </h3>
             <p className="text-sm text-text-dim py-4">
               No markers classified into this pillar.
             </p>
-          ) : (
-            <div className="space-y-5">
-              {GROUP_ORDER.map((tier) => {
-                const rows = grouped[tier];
-                if (rows.length === 0) return null;
-                const label =
-                  tier === 'pending'
-                    ? 'Pending'
-                    : tier === 'recorded'
-                    ? 'Recorded'
-                    : TIER_LABELS[tier];
-                const tierCls = TIER_THEME[tier];
-                return (
-                  <div key={tier}>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span
-                        className={`size-2 rounded-full ${tierCls.dot}`}
-                      />
-                      <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text">
-                        {label}
-                      </span>
-                      <span className="font-mono text-[10px] uppercase tracking-wider text-text-dim">
-                        ·  {rows.length}
-                      </span>
-                    </div>
-                    <ul className="rounded-2xl bg-bg-3 ring-1 ring-line overflow-hidden">
-                      {rows.map((m) => (
-                        <li
-                          key={m.key}
-                          className="flex items-center justify-between gap-3 px-4 py-2.5 border-b border-line/70 last:border-b-0"
-                        >
-                          <div className="flex items-center gap-3 min-w-0">
-                            <span
-                              className={`block h-6 w-1 rounded-full ${tierCls.rail}`}
-                              aria-hidden
-                            />
-                            <span className="text-sm text-text truncate">
-                              {m.label}
-                            </span>
-                          </div>
-                          <div className="flex items-center gap-2.5 shrink-0">
-                            {m.value != null ? (
-                              <span className="font-mono text-sm tabular-nums text-text">
-                                {m.value}
-                                {m.unit ? (
-                                  <span className="ml-0.5 text-text-dim text-xs">
-                                    {m.unit}
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-[minmax(280px,38%)_1fr]">
+            {/* LEFT — tier-grouped, selectable marker list. Hidden on mobile
+                once a marker is selected (the detail overlay takes over). */}
+            <div
+              className={`md:border-r border-line md:max-h-[560px] md:overflow-y-auto ${
+                selected ? 'hidden md:block' : 'block'
+              }`}
+            >
+              <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim px-6 pt-5 pb-3">
+                Contributing markers
+              </h3>
+              <div className="space-y-5 px-4 pb-5">
+                {GROUP_ORDER.map((tier) => {
+                  const rows = grouped[tier];
+                  if (rows.length === 0) return null;
+                  const label =
+                    tier === 'pending'
+                      ? 'Pending'
+                      : tier === 'recorded'
+                      ? 'Recorded'
+                      : TIER_LABELS[tier];
+                  const tierCls = TIER_THEME[tier];
+                  return (
+                    <div key={tier} className="px-2">
+                      <div className="flex items-center gap-2 mb-2 px-1.5">
+                        <span className={`size-2 rounded-full ${tierCls.dot}`} />
+                        <span className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text">
+                          {label}
+                        </span>
+                        <span className="font-mono text-[10px] uppercase tracking-wider text-text-dim">
+                          ·  {rows.length}
+                        </span>
+                      </div>
+                      <ul
+                        role="listbox"
+                        aria-label={`${label} markers`}
+                        className="space-y-1.5"
+                      >
+                        {rows.map((m) => {
+                          const isSelected = selectedMarker === m.key;
+                          return (
+                            <li key={m.key} role="presentation">
+                              <button
+                                type="button"
+                                role="option"
+                                onClick={() => setSelectedMarker(m.key)}
+                                aria-selected={isSelected}
+                                className={`w-full flex items-center gap-3 rounded-xl px-3 py-2.5 text-left border motion-safe:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-brand/60 focus-visible:ring-offset-2 focus-visible:ring-offset-bg-2 ${
+                                  isSelected
+                                    ? 'border-gold-brand/45 bg-gradient-to-r from-gold-brand/14 to-gold-brand/4'
+                                    : 'border-transparent bg-bg-3 hover:bg-bg hover:border-line-2'
+                                }`}
+                              >
+                                <span
+                                  className={`block h-6 w-[3px] rounded-full flex-none ${tierCls.rail}`}
+                                  aria-hidden
+                                />
+                                <span className="flex-1 text-[13.5px] text-text truncate">
+                                  {m.label}
+                                </span>
+                                {m.value != null ? (
+                                  <span className="font-mono text-[12.5px] tabular-nums text-text-dim">
+                                    {m.value}
+                                    {m.unit ? ` ${m.unit}` : ''}
                                   </span>
-                                ) : null}
-                              </span>
-                            ) : (
-                              <span className="font-mono text-[10px] uppercase tracking-wider text-text-dim">
-                                No data
-                              </span>
-                            )}
-                            <span
-                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider ${tierCls.pill}`}
-                            >
-                              {label}
-                            </span>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                );
-              })}
+                                ) : (
+                                  <span className="font-mono text-[10px] uppercase tracking-wider text-text-dim">
+                                    No data
+                                  </span>
+                                )}
+                                <svg
+                                  width="14"
+                                  height="14"
+                                  viewBox="0 0 12 12"
+                                  fill="none"
+                                  stroke="currentColor"
+                                  strokeWidth="2"
+                                  strokeLinecap="round"
+                                  aria-hidden
+                                  className={`flex-none motion-safe:transition-transform ${
+                                    isSelected
+                                      ? 'text-gold-brand translate-x-0.5'
+                                      : 'text-text-faint'
+                                  }`}
+                                >
+                                  <path d="M4.5 3L7.5 6L4.5 9" />
+                                </svg>
+                              </button>
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
-          )}
-        </div>
+
+            {/* RIGHT — detail pane. Hidden on mobile (mobile uses the overlay
+                below); on desktop shows the panel or an empty-state prompt. */}
+            <div className="hidden md:block md:max-h-[560px] md:overflow-y-auto">
+              {detailPanel ?? <EmptyDetailState />}
+            </div>
+
+            {/* MOBILE — full-width drill-in overlay with a back control. */}
+            {selected && (
+              <div className="md:hidden border-t border-line">
+                <button
+                  type="button"
+                  onClick={() => setSelectedMarker(null)}
+                  className="flex items-center gap-2 px-4 py-3.5 text-gold-brand font-mono text-[10px] uppercase tracking-[0.14em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-gold-brand/60 rounded-md"
+                >
+                  <svg
+                    width="11"
+                    height="11"
+                    viewBox="0 0 12 12"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    aria-hidden
+                  >
+                    <path d="M7.5 3L4.5 6L7.5 9" />
+                  </svg>
+                  {pillar.label}
+                </button>
+                {detailPanel}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Insights & recommendations — routed in from generatePeak360Insights. */}
         {pillarInsights.length > 0 && (
