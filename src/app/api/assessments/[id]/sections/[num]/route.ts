@@ -146,12 +146,27 @@ export async function PUT(
   // Keep client_id authoritative when Section 1 syncs a client name/email
   // (e.g. a rename). Repoint/clear to the resolved client; an auto-created
   // client inherits the assessment's coach.
+  //
+  // Only re-link when the name/email ACTUALLY CHANGED vs. what's already stored
+  // (compare against the pre-update `assessment` row loaded above). This PUT
+  // fires on a 1s autosave debounce, so re-resolving on every no-op save would,
+  // for an ambiguous name with no email, mint a fresh placeholder client on each
+  // call (a runaway). Gating on change makes the hot path idempotent.
   if (sectionNum === 1 && body.data) {
     const d = body.data as Record<string, unknown>;
-    if (d.clientName || d.clientEmail) {
+    const incomingName = typeof d.clientName === 'string' ? d.clientName : undefined;
+    const incomingEmail = typeof d.clientEmail === 'string' ? d.clientEmail : undefined;
+    const nameChanged =
+      incomingName !== undefined &&
+      incomingName.trim() !== (assessment.clientName ?? '').trim();
+    const emailChanged =
+      incomingEmail !== undefined &&
+      incomingEmail.trim().toLowerCase() !==
+        (assessment.clientEmail ?? '').trim().toLowerCase();
+    if (nameChanged || emailChanged) {
       await applyClientLink(id, {
-        clientName: d.clientName as string | undefined,
-        clientEmail: d.clientEmail as string | undefined,
+        clientName: incomingName,
+        clientEmail: incomingEmail,
         coachId: assessment.coachId,
       });
     }
