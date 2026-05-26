@@ -454,21 +454,6 @@ export default function PillarsDisplayModal({
     (m) => markerToPillar(m).pillar === pillar.key,
   );
 
-  // Route each insight into the modal of the marker it relates to, then
-  // dedup by title within this pillar so the same recommendation (e.g.
-  // "Cardio-metabolic risk flags" triggered by five lipid markers) doesn't
-  // render five times. Dedup is per-pillar, never global — a global dedup
-  // would erase the insight from every pillar but the first.
-  const pillarMarkerKeys = new Set(pillarMarkers.map((m) => m.key));
-  const seenTitles = new Set<string>();
-  const pillarInsights = insights
-    .filter((i) => pillarMarkerKeys.has(i.markerKey))
-    .filter((i) => {
-      if (seenTitles.has(i.title)) return false;
-      seenTitles.add(i.title);
-      return true;
-    });
-
   const grouped: Record<GroupKey, ReportMarker[]> = {
     poor: [],
     cautious: [],
@@ -791,40 +776,6 @@ export default function PillarsDisplayModal({
           </div>
         )}
 
-        {/* Insights & recommendations — routed in from generatePeak360Insights. */}
-        {pillarInsights.length > 0 && (
-          <div className="px-6 py-5 border-t border-line">
-            <h3 className="font-mono text-[10px] font-semibold uppercase tracking-[0.18em] text-text-dim mb-3">
-              Insights &amp; recommendations
-            </h3>
-            <div className="space-y-3">
-              {pillarInsights.map((insight, i) => (
-                <div
-                  key={`${insight.markerKey}-${i}`}
-                  className="relative bg-bg-3 rounded-xl border border-line overflow-hidden"
-                >
-                  <div className="absolute left-0 top-0 bottom-0 w-1 bg-gradient-to-b from-gold-brand to-champagne" />
-                  <div className="pl-5 pr-5 py-4 min-w-0">
-                    <h4 className="text-sm font-semibold text-text mb-1.5 break-words">{insight.title}</h4>
-                    <p className="text-[12px] leading-relaxed text-text-dim mb-3 break-words">
-                      {insight.why}
-                    </p>
-                    {insight.doNow.length > 0 && (
-                      <div className="space-y-1.5">
-                        {insight.doNow.map((item, j) => (
-                          <div key={j} className="flex items-start gap-2 min-w-0">
-                            <div className="w-1 h-1 rounded-full bg-gold-brand mt-[7px] shrink-0" />
-                            <p className="text-[12px] leading-relaxed text-text break-words min-w-0">{item}</p>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
         </div>
       </aside>
     </>
