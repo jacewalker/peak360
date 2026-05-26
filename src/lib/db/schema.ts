@@ -102,6 +102,18 @@ export const pillarPrescriptions = pgTable(
   })
 );
 
+// Phase 11 — Admin-authored marker content (D-08). One row per REPORT_MARKERS
+// testKey. Definition + impact are gender-neutral (D-04); coachInsights is a
+// 5-tier x {male,female} matrix (D-05). Mirrors pillarDefinitions ownership.
+export const markerContent = pgTable('marker_content', {
+  testKey: text('test_key').primaryKey(),          // matches REPORT_MARKERS[].testKey
+  definition: text('definition'),                  // gender-neutral, nullable
+  impact: text('impact'),                          // gender-neutral, nullable
+  coachInsights: jsonb('coach_insights'),          // Record<RatingTier, { male: string|null; female: string|null }>
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at').notNull(),      // epoch ms — matches pillarDefinitions convention
+});
+
 export const normativeVersions = pgTable('normative_versions', {
   id: text('id').primaryKey(),
   rangesJson: jsonb('ranges_json'),

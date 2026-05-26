@@ -100,6 +100,17 @@ export const pillarPrescriptions = sqliteTable(
   })
 );
 
+// Phase 11 — Admin-authored marker content (D-08). SQLite stores the
+// coach_insights JSON matrix as a JSON-mode text column.
+export const markerContent = sqliteTable('marker_content', {
+  testKey: text('test_key').primaryKey(),
+  definition: text('definition'),
+  impact: text('impact'),
+  coachInsights: text('coach_insights', { mode: 'json' }),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+
 export const normativeVersions = sqliteTable('normative_versions', {
   id: text('id').primaryKey(),
   rangesJson: text('ranges_json', { mode: 'json' }),

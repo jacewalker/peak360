@@ -19,7 +19,9 @@ export type AuditAction =
   | 'pillar_definition.update'
   | 'pillar_page_copy.update'
   | 'pillar_prescription.upsert'
-  | 'pillar_prescription.delete';
+  | 'pillar_prescription.delete'
+  // Phase 11 — Marker content authoring (D-11)
+  | 'marker_content.update';
 
 export async function logAuditEvent(params: {
   userId: string;
