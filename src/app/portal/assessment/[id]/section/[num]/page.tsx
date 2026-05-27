@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useParams } from 'next/navigation';
+import { authClient } from '@/lib/auth-client';
 import ProgressBar from '@/components/layout/ProgressBar';
 import NavigationButtons from '@/components/layout/NavigationButtons';
 import { useAssessmentStore } from '@/lib/store/assessment-store';
@@ -49,6 +50,16 @@ export default function SectionPage() {
   const store = useAssessmentStore();
   const [loaded, setLoaded] = useState(false);
   const saveTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Single source of truth for "may this viewer mutate the assessment".
+  // Positive equality: loading/unknown role ⇒ canWrite === false ⇒ read-only,
+  // so a client (or the loading window) never gets a writable form or fires a
+  // write. Writes (re-)enable the instant the session resolves to coach/admin,
+  // before any debounce can fire from a real edit (see role_detection_decision).
+  const { data: sessionData } = authClient.useSession();
+  const role = sessionData?.user?.role;
+  const canWrite = role === 'coach' || role === 'admin';
+  const readOnly = !canWrite;
 
   // Redirect to section 1 if `num` is invalid (NaN, out-of-range, or hidden).
   useEffect(() => {
@@ -99,6 +110,7 @@ export default function SectionPage() {
 
   // Save section data to API
   const saveSection = useCallback(async (checkCompletion = false) => {
+    if (!canWrite) return; // clients never write (defensive: covers any caller)
     const sectionData = store.sectionData[num];
     if (!sectionData) return;
 
@@ -125,20 +137,22 @@ export default function SectionPage() {
     } finally {
       store.setIsSaving(false);
     }
-  }, [id, num, store]);
+  }, [id, num, store, canWrite]);
 
   // Auto-save on change with 1s debounce
   useEffect(() => {
+    if (!canWrite) return; // clients never schedule a save
     if (!store.isDirty || !loaded) return;
     if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     saveTimerRef.current = setTimeout(saveSection, 1000);
     return () => {
       if (saveTimerRef.current) clearTimeout(saveTimerRef.current);
     };
-  }, [store.isDirty, store.sectionData, saveSection, loaded]);
+  }, [store.isDirty, store.sectionData, saveSection, loaded, canWrite]);
 
   // Save on page unload
   useEffect(() => {
+    if (!canWrite) return; // clients register no beforeunload beacon
     const onUnload = () => {
       if (store.isDirty) {
         const sectionData = store.sectionData[num];
@@ -152,34 +166,40 @@ export default function SectionPage() {
     };
     window.addEventListener('beforeunload', onUnload);
     return () => window.removeEventListener('beforeunload', onUnload);
-  }, [id, num, store]);
+  }, [id, num, store, canWrite]);
 
   const handleChange = useCallback(
     (field: string, value: unknown) => {
+      if (!canWrite) return; // belt to the auto-save suspenders: store never goes dirty for a client
       store.updateSectionField(num, field, value);
     },
-    [num, store]
+    [num, store, canWrite]
   );
 
   const navigate = useCallback(
     async (direction: 'prev' | 'next') => {
-      // Check completion when navigating away from a section
-      await saveSection(true);
+      // Coaches/admins save (and toggle completion) on nav; clients skip the
+      // write entirely and just move between sections read-only.
+      if (canWrite) {
+        await saveSection(true);
+      }
       const currentIdx = VISIBLE_SECTIONS.indexOf(num);
       const targetIdx = direction === 'next' ? currentIdx + 1 : currentIdx - 1;
       if (targetIdx >= 0 && targetIdx < VISIBLE_SECTIONS.length) {
         router.push(`/portal/assessment/${id}/section/${VISIBLE_SECTIONS[targetIdx]}`);
       }
     },
-    [id, num, router, saveSection]
+    [id, num, router, saveSection, canWrite]
   );
 
   const handleSaveExit = useCallback(async () => {
+    if (!canWrite) return; // defense-in-depth: no client save
     await saveSection();
     router.push('/portal');
-  }, [router, saveSection]);
+  }, [router, saveSection, canWrite]);
 
   const handleComplete = useCallback(async () => {
+    if (!canWrite) return; // defense-in-depth: no client status PUT
     await saveSection(true);
     await fetch(`/api/assessments/${id}`, {
       method: 'PUT',
@@ -187,9 +207,10 @@ export default function SectionPage() {
       body: JSON.stringify({ status: 'completed' }),
     });
     router.push('/portal');
-  }, [id, router, saveSection]);
+  }, [id, router, saveSection, canWrite]);
 
   const handleCancel = useCallback(async () => {
+    if (!canWrite) return; // defense-in-depth: no client DELETE
     if (!window.confirm('Discard all unsaved changes and return to home?')) return;
     store.markClean();
 
@@ -210,7 +231,7 @@ export default function SectionPage() {
     }
 
     router.push('/portal');
-  }, [id, router, store]);
+  }, [id, router, store, canWrite]);
 
   if (!isValidNum || !loaded) {
     return (
@@ -244,9 +265,9 @@ export default function SectionPage() {
             currentSection={num}
             onPrev={() => navigate('prev')}
             onNext={() => navigate('next')}
-            onComplete={handleComplete}
-            onSaveExit={handleSaveExit}
-            onCancel={handleCancel}
+            onComplete={readOnly ? undefined : handleComplete}
+            onSaveExit={readOnly ? undefined : handleSaveExit}
+            onCancel={readOnly ? undefined : handleCancel}
             isSaving={store.isSaving}
             lastSaved={store.lastSaved}
           />
@@ -262,17 +283,27 @@ export default function SectionPage() {
     <>
       <ProgressBar currentSection={num} assessmentId={id} completedSections={store.completedSections} />
       <main className="flex-1 max-w-4xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8">
-        {SectionComponent && (
-          <SectionComponent data={sectionData} onChange={handleChange} assessmentId={id} />
-        )}
+        {/* Read-only clients view sections 1–10 inside a native disabled
+            fieldset: it inert-disables every descendant input/select/button
+            (incl. signature canvases / custom widgets) without passing any new
+            prop into the section components. Coaches/admins get no fieldset. */}
+        <fieldset
+          disabled={readOnly}
+          aria-disabled={readOnly}
+          className={readOnly ? 'min-w-0 border-0 m-0 p-0 pointer-events-none opacity-80' : 'min-w-0 border-0 m-0 p-0'}
+        >
+          {SectionComponent && (
+            <SectionComponent data={sectionData} onChange={handleChange} assessmentId={id} />
+          )}
+        </fieldset>
       </main>
       <NavigationButtons
         currentSection={num}
         onPrev={() => navigate('prev')}
         onNext={() => navigate('next')}
-        onComplete={handleComplete}
-        onSaveExit={handleSaveExit}
-        onCancel={handleCancel}
+        onComplete={readOnly ? undefined : handleComplete}
+        onSaveExit={readOnly ? undefined : handleSaveExit}
+        onCancel={readOnly ? undefined : handleCancel}
         isSaving={store.isSaving}
         lastSaved={store.lastSaved}
       />

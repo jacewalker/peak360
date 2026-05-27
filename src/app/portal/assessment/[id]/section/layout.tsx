@@ -9,18 +9,18 @@ import type { AuthSession } from '@/lib/auth-helpers';
 /**
  * SSR ownership gate for the assessment section surface (I23).
  *
- * Previously this layout force-redirected every client to /report, which both
- * trapped clients on a single screen AND provided the implicit IDOR protection
- * (a client could never reach another client's section pages). I23 removes that
- * redirect so owning clients can browse their own sections read-only — so the
- * ownership check must now live here explicitly.
+ * Previously this layout force-redirected every client to the report route,
+ * which both trapped clients on a single screen AND provided the implicit IDOR
+ * protection (a client could never reach another client's section pages). I23
+ * removes that redirect so owning clients can browse their own sections
+ * read-only — so the ownership check must now live here explicitly.
  *
  * This gate runs BEFORE any child renders or any client JS executes: it requires
  * a session, fetches the assessment row, and redirects non-owners to /portal
  * (404 on a missing row). Owning clients fall through and render `children`; the
  * section page itself enforces read-only / no-write client-side (canWrite flag).
  *
- * Scope: wraps `/portal/assessment/[id]/section/[num]/*` only. The /report route
+ * Scope: wraps `/portal/assessment/[id]/section/[num]/*` only. The report route
  * does NOT nest under /section/, so its own SSR gate is unaffected.
  *
  * Coach + admin sessions render section pages normally (hasAccess passes for
