@@ -401,12 +401,16 @@ export default function DashboardPage() {
                       <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Once coaches start creating assessments, you&apos;ll see them grouped here.</p>
                       <button onClick={() => setPickerOpen(true)} className="mt-4 text-[13px] font-medium text-gold-brand hover:text-champagne">Start new assessment</button>
                     </>
-                  ) : (
+                  ) : userRole === 'coach' ? (
                     <>
                       <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Nothing here yet.</h3>
                       <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Create your first assessment to start tracking a client.</p>
                       <button onClick={() => setPickerOpen(true)} className="mt-4 text-[13px] font-medium text-gold-brand hover:text-champagne">Start new assessment</button>
                     </>
+                  ) : (
+                    // Role still loading (undefined): render a neutral heading with
+                    // NO "Start new assessment" CTA so it never flashes to a client (D-12).
+                    <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">Nothing here yet.</h3>
                   )}
                 </div>
               ) : userRole === 'admin' && grouped ? (
