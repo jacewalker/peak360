@@ -15,6 +15,11 @@ export type AuditAction =
   | 'user.name.changed'
   | 'user.password.reset'
   | 'user.coach.assigned'
+  // Reserved name for admin impersonation start. Wiring is deferred: the start
+  // is triggered by Better Auth's own /admin/impersonate-user endpoint (no
+  // server route of ours in that path), so there is no caller yet. A future,
+  // properly-scoped server-side hook can emit this without a type change.
+  | 'user.impersonation.started'
   // Phase 8 — Peak Living pillar authoring (D-16, D-20)
   | 'pillar_definition.update'
   | 'pillar_page_copy.update'
