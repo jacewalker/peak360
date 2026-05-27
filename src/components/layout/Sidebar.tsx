@@ -39,9 +39,8 @@ const ASSESSMENTS_ITEM: NavItem = {
   matchPaths: ['/portal/assessments', '/portal/assessment'],
 };
 
-// Clients land on the portal dashboard which already lists their assessments,
-// so there's no separate "My Assessments" destination. Keeping a duplicate link
-// here would be a no-op click — drop it.
+// Clients get Dashboard + Assessments (their read-only assessments list +
+// individual assessment views). Clients never get the coach-only Clients link.
 
 const CLIENTS_ITEM: NavItem = {
   label: 'Clients',
@@ -80,7 +79,7 @@ export default function Sidebar() {
   // because the loading state (role === undefined) would silently slip through.
   const navItems = useMemo<NavItem[]>(() => {
     if (role === 'client') {
-      return [DASHBOARD_ITEM];
+      return [DASHBOARD_ITEM, ASSESSMENTS_ITEM];
     }
     if (role === 'coach') {
       return [DASHBOARD_ITEM, ASSESSMENTS_ITEM, CLIENTS_ITEM];
