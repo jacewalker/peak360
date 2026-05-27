@@ -226,7 +226,7 @@ export default function ClientDetailPage() {
     setLoginDialogOpen(true);
   };
 
-  const handleSendLogin = async () => {
+  const handleSendLogin = async (mode: 'welcome' | 'magic-link') => {
     const email = loginEmail.trim();
     if (!loginEmailValid || loginSending) return;
     setLoginSending(true);
@@ -234,22 +234,27 @@ export default function ClientDetailPage() {
       const res = await fetch('/api/client-login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ clientName, email }),
+        body: JSON.stringify({ clientName, email, mode }),
       });
       const json = await res.json();
       if (res.ok && json.success) {
         const linked = json.linkedCount as number;
-        const verb = json.created ? 'Login created — invite sent to' : 'Login link resent to';
-        setToast({
-          variant: 'success',
-          message: `${verb} ${email} (${linked} assessment${linked === 1 ? '' : 's'} linked)`,
-        });
+        const suffix = `${email} (${linked} assessment${linked === 1 ? '' : 's'} linked)`;
+        const message =
+          mode === 'welcome'
+            ? json.created
+              ? `Account created — welcome email sent to ${suffix}`
+              : `Welcome email sent to ${suffix}`
+            : json.created
+              ? `Account created — sign-on link sent to ${suffix}`
+              : `Sign-on link sent to ${suffix}`;
+        setToast({ variant: 'success', message });
         setLoginDialogOpen(false);
       } else {
-        setToast({ variant: 'error', message: json.error || 'Failed to send login link' });
+        setToast({ variant: 'error', message: json.error || 'Failed to send login' });
       }
     } catch {
-      setToast({ variant: 'error', message: 'Failed to send login link' });
+      setToast({ variant: 'error', message: 'Failed to send login' });
     } finally {
       setLoginSending(false);
     }
@@ -493,11 +498,11 @@ export default function ClientDetailPage() {
           CLIENT LOGIN
         </MonoEyebrow>
         <h2 className="text-[24px] font-medium text-text tracking-[-0.02em] leading-tight">
-          Send a login link
+          Create client login
         </h2>
         <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">
-          Creates a client account (or resends the link if one exists), emails a magic
-          sign-in link, and links this client&rsquo;s assessments so they can view them.
+          Creates a client account (or reuses an existing one), links this client&rsquo;s
+          assessments, then either sends a branded welcome email or a one-time sign-on link.
         </p>
         <label className="block mt-5">
           <span className="font-mono text-[11px] uppercase tracking-[0.18em] text-text-dim">
@@ -512,7 +517,7 @@ export default function ClientDetailPage() {
             className="mt-2 w-full bg-bg-2 border border-line rounded-lg px-3 py-2.5 text-[13px] text-text placeholder:text-text-faint focus:outline-none focus:border-gold-brand/50 transition-colors"
           />
         </label>
-        <div className="flex justify-end gap-3 mt-6">
+        <div className="flex justify-end gap-3 mt-6 flex-wrap">
           <button
             onClick={() => setLoginDialogOpen(false)}
             className="border border-line-2 text-text hover:border-gold-brand text-[13px] font-medium tracking-[0.02em] px-5 py-2.5 rounded-lg transition-colors"
@@ -520,11 +525,18 @@ export default function ClientDetailPage() {
             Cancel
           </button>
           <button
-            onClick={handleSendLogin}
+            onClick={() => handleSendLogin('magic-link')}
+            disabled={!loginEmailValid || loginSending}
+            className="border border-line-2 text-text hover:border-gold-brand text-[13px] font-medium tracking-[0.02em] px-5 py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            Create account + send sign-on link
+          </button>
+          <button
+            onClick={() => handleSendLogin('welcome')}
             disabled={!loginEmailValid || loginSending}
             className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-5 py-2.5 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            {loginSending ? 'Sending…' : 'Send login link'}
+            {loginSending ? 'Sending…' : 'Create account + welcome email'}
           </button>
         </div>
       </Dialog>
