@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { auth } from '@/lib/auth';
 import { headers } from 'next/headers';
 import { sendEmailViaSMTP2Go } from '@/lib/email/send';
+import { renderBrandedEmail } from '@/lib/email/template';
 import { db } from '@/lib/db';
 import { assessments, user } from '@/lib/db/schema';
 import { and, eq, or } from 'drizzle-orm';
@@ -112,6 +113,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'Invalid email address' }, { status: 400 });
   }
 
+  // Decision A1: any absent/invalid value DEFAULTS to 'welcome'. Welcome mode
+  // sends a branded email whose CTA points at the public /login page — it NEVER
+  // falls through to auto-sending a magic link.
+  const mode: 'welcome' | 'magic-link' =
+    body?.mode === 'magic-link' ? 'magic-link' : 'welcome';
+
   // Coach can only act on their own clients; admin on any
   if (!(await canAccess(session, clientName))) {
     console.warn('[client-login] forbidden', {
@@ -199,31 +206,53 @@ export async function POST(request: Request) {
     .set({ clientId: userId, clientEmail: email })
     .where(or(eq(assessments.clientName, clientName), eq(assessments.clientEmail, email)));
 
-  // Send the magic-link sign-in email. Falls back to an inline email if the
-  // magic-link surface is unavailable (mirrors invitations.ts). In dev (no
-  // SMTP2GO_API_KEY) sendEmailViaSMTP2Go logs the email to the console.
-  try {
-    await auth.api.signInMagicLink({
-      body: {
-        email,
-        callbackURL: '/portal',
-      },
-      headers: await headers(),
-    });
-  } catch {
-    const baseUrl = process.env.BETTER_AUTH_URL ?? 'http://localhost:3000';
-    await sendEmailViaSMTP2Go({
-      to: email,
-      subject: 'Sign in to Peak360',
-      html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
+  // Email step (A2). The chosen mode decides what the client receives:
+  // - 'magic-link': the EXISTING signInMagicLink flow (5-min sign-in link),
+  //   with the inline fallback email if the magic-link surface is unavailable.
+  // - 'welcome' (default): a branded welcome email whose CTA points at the
+  //   public /login page — NOT a magic link.
+  // In dev (no SMTP2GO_API_KEY) sendEmailViaSMTP2Go logs the email to console.
+  if (mode === 'magic-link') {
+    try {
+      await auth.api.signInMagicLink({
+        body: {
+          email,
+          callbackURL: '/portal',
+        },
+        headers: await headers(),
+      });
+    } catch {
+      const baseUrl = process.env.BETTER_AUTH_URL ?? 'http://localhost:3000';
+      await sendEmailViaSMTP2Go({
+        to: email,
+        subject: 'Sign in to Peak360',
+        html: `<div style="font-family: sans-serif; max-width: 480px; margin: 0 auto;">
         <h2 style="color: #1a365d;">Sign in to Peak360</h2>
         <p>A login has been created for your Peak360 account.</p>
         <p>Click the link below to sign in:</p>
         <a href="${baseUrl}/login" style="display: inline-block; padding: 12px 24px; background: #F5A623; color: #1a365d; text-decoration: none; border-radius: 8px; font-weight: 600;">Sign in to Peak360</a>
         <p style="color: #666; font-size: 12px; margin-top: 24px;">This link will take you to the login page where you can request a magic link to access your account.</p>
       </div>`,
+      });
+    }
+  } else {
+    const baseUrl = process.env.BETTER_AUTH_URL ?? 'http://localhost:3000';
+    await sendEmailViaSMTP2Go({
+      to: email,
+      subject: 'Welcome to Peak360',
+      html: renderBrandedEmail({
+        preheader: 'Your Peak360 account is ready — sign in to view your assessments.',
+        eyebrow: 'WELCOME',
+        heading: 'Welcome to Peak360',
+        intro:
+          'A Peak360 account has been created for you. Sign in to view your assessment results and track your progress over time.',
+        ctaLabel: 'Sign in to Peak360',
+        ctaUrl: `${baseUrl}/login`,
+        footnote:
+          'This link takes you to the Peak360 sign-in page. If you didn’t expect this email, you can safely ignore it.',
+      }),
     });
   }
 
-  return NextResponse.json({ success: true, created, linkedCount });
+  return NextResponse.json({ success: true, created, linkedCount, mode });
 }
