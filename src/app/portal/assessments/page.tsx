@@ -6,6 +6,7 @@ import type { Assessment } from '@/types/assessment';
 import ConfirmDeleteModal from '@/components/ui/ConfirmDeleteModal';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
 import ClientPickerDialog from '@/components/portal/ClientPickerDialog';
+import { authClient } from '@/lib/auth-client';
 
 interface ImportResult {
   imported: number;
@@ -16,6 +17,11 @@ interface ImportResult {
 
 export default function HomePage() {
   const router = useRouter();
+  const { data: sessionData } = authClient.useSession();
+  const role = sessionData?.user?.role;
+  // Positive equality (D-12): nothing privileged flashes while the session
+  // is still resolving (role === undefined ⇒ canManage === false).
+  const canManage = role === 'admin' || role === 'coach';
   const [assessments, setAssessments] = useState<Assessment[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -195,13 +201,15 @@ export default function HomePage() {
                 {assessments.length} TOTAL · {completedCount} COMPLETED · {inProgressCount} IN PROGRESS
               </p>
             </div>
-            <button
-              onClick={() => setPickerOpen(true)}
-              aria-label="Start new assessment"
-              className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-6 py-3 rounded-lg transition-colors whitespace-nowrap"
-            >
-              Start new assessment
-            </button>
+            {canManage && (
+              <button
+                onClick={() => setPickerOpen(true)}
+                aria-label="Start new assessment"
+                className="bg-gold-brand text-bg hover:bg-champagne text-[13px] font-medium tracking-[0.02em] px-6 py-3 rounded-lg transition-colors whitespace-nowrap"
+              >
+                Start new assessment
+              </button>
+            )}
           </div>
         </div>
       </header>
@@ -215,32 +223,34 @@ export default function HomePage() {
         ) : assessments.length === 0 ? (
           <div className="space-y-6">
             {/* Export / Import toolbar */}
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => { window.location.href = '/api/assessments/export'; }}
-                className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
-              >
-                Export CSV
-              </button>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={importState === 'uploading'}
-                className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-colors disabled:opacity-50"
-              >
-                {importState === 'uploading' ? 'Importing…' : 'Import CSV'}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImport(file);
-                  e.target.value = '';
-                }}
-              />
-            </div>
+            {canManage && (
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => { window.location.href = '/api/assessments/export'; }}
+                  className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
+                >
+                  Export CSV
+                </button>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={importState === 'uploading'}
+                  className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-colors disabled:opacity-50"
+                >
+                  {importState === 'uploading' ? 'Importing…' : 'Import CSV'}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImport(file);
+                    e.target.value = '';
+                  }}
+                />
+              </div>
+            )}
 
             {importResult && (
               <ImportResultBanner result={importResult} onDismiss={() => { setImportResult(null); setImportState('idle'); }} />
@@ -248,13 +258,15 @@ export default function HomePage() {
 
             <div className="bg-bg-3 rounded-xl border border-line p-12 text-center">
               <h3 className="text-[20px] font-medium text-text tracking-[-0.015em]">No assessments in scope.</h3>
-              <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">Adjust your filter or create a new assessment.</p>
-              <button
-                onClick={() => setPickerOpen(true)}
-                className="mt-6 bg-gold-brand text-bg hover:bg-champagne py-3 px-6 rounded-lg text-[13px] font-medium tracking-[0.02em] transition-colors"
-              >
-                Start new assessment
-              </button>
+              <p className="text-[13px] text-text-dim mt-2 leading-[1.55]">{canManage ? 'Adjust your filter or create a new assessment.' : 'No assessments have been shared with you yet.'}</p>
+              {canManage && (
+                <button
+                  onClick={() => setPickerOpen(true)}
+                  className="mt-6 bg-gold-brand text-bg hover:bg-champagne py-3 px-6 rounded-lg text-[13px] font-medium tracking-[0.02em] transition-colors"
+                >
+                  Start new assessment
+                </button>
+              )}
             </div>
           </div>
         ) : (
@@ -275,53 +287,55 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Toolbar */}
-            <div className="flex items-center gap-2 flex-wrap">
-              <label className="flex items-center gap-2 cursor-pointer text-[13px] text-text-dim">
-                <input
-                  ref={selectAllRef}
-                  type="checkbox"
-                  className="w-4 h-4 rounded border-line accent-gold-brand"
-                  onChange={toggleSelectAll}
-                  aria-label="Select all assessments"
-                />
-                Select all
-              </label>
-              <div className="w-px h-5 bg-line" />
-              <button
-                onClick={() => { window.location.href = '/api/assessments/export'; }}
-                className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
-              >
-                Export CSV
-              </button>
-              <button
-                onClick={() => fileInputRef.current?.click()}
-                disabled={importState === 'uploading'}
-                className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-colors disabled:opacity-50"
-              >
-                {importState === 'uploading' ? 'Importing…' : 'Import CSV'}
-              </button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept=".csv"
-                className="hidden"
-                onChange={(e) => {
-                  const file = e.target.files?.[0];
-                  if (file) handleImport(file);
-                  e.target.value = '';
-                }}
-              />
-              {selectedIds.size > 0 && (
+            {/* Toolbar — coach/admin only (mutating controls) */}
+            {canManage && (
+              <div className="flex items-center gap-2 flex-wrap">
+                <label className="flex items-center gap-2 cursor-pointer text-[13px] text-text-dim">
+                  <input
+                    ref={selectAllRef}
+                    type="checkbox"
+                    className="w-4 h-4 rounded border-line accent-gold-brand"
+                    onChange={toggleSelectAll}
+                    aria-label="Select all assessments"
+                  />
+                  Select all
+                </label>
+                <div className="w-px h-5 bg-line" />
                 <button
-                  onClick={() => setShowDeleteModal(true)}
-                  aria-label={`Delete ${selectedIds.size} selected assessments`}
-                  className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg bg-danger text-bg hover:opacity-90 transition-colors ml-auto"
+                  onClick={() => { window.location.href = '/api/assessments/export'; }}
+                  className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
                 >
-                  Delete {selectedIds.size} selected
+                  Export CSV
                 </button>
-              )}
-            </div>
+                <button
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={importState === 'uploading'}
+                  className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg border border-line-2 text-text hover:border-gold-brand hover:text-gold-brand transition-colors disabled:opacity-50"
+                >
+                  {importState === 'uploading' ? 'Importing…' : 'Import CSV'}
+                </button>
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept=".csv"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) handleImport(file);
+                    e.target.value = '';
+                  }}
+                />
+                {selectedIds.size > 0 && (
+                  <button
+                    onClick={() => setShowDeleteModal(true)}
+                    aria-label={`Delete ${selectedIds.size} selected assessments`}
+                    className="px-4 py-2 text-[13px] font-medium tracking-[0.02em] rounded-lg bg-danger text-bg hover:opacity-90 transition-colors ml-auto"
+                  >
+                    Delete {selectedIds.size} selected
+                  </button>
+                )}
+              </div>
+            )}
 
             {importResult && (
               <ImportResultBanner result={importResult} onDismiss={() => { setImportResult(null); setImportState('idle'); }} />
@@ -361,19 +375,25 @@ export default function HomePage() {
                       key={a.id}
                       className="px-5 py-4 flex items-center justify-between hover:bg-bg-2 transition-colors cursor-pointer group"
                       onClick={() =>
-                        router.push(`/portal/assessment/${a.id}/section/${a.currentSection}`)
+                        router.push(
+                          role === 'client'
+                            ? `/portal/assessment/${a.id}/section/11`
+                            : `/portal/assessment/${a.id}/section/${a.currentSection}`
+                        )
                       }
                     >
                       <div className="flex items-center gap-3 sm:gap-4 min-w-0">
-                        <div onClick={(e) => e.stopPropagation()}>
-                          <input
-                            type="checkbox"
-                            className="w-4 h-4 rounded border-line accent-gold-brand"
-                            checked={selectedIds.has(a.id)}
-                            onChange={() => toggleSelectOne(a.id)}
-                            aria-label={`Select assessment for ${a.clientName || 'Unnamed Client'}`}
-                          />
-                        </div>
+                        {canManage && (
+                          <div onClick={(e) => e.stopPropagation()}>
+                            <input
+                              type="checkbox"
+                              className="w-4 h-4 rounded border-line accent-gold-brand"
+                              checked={selectedIds.has(a.id)}
+                              onChange={() => toggleSelectOne(a.id)}
+                              aria-label={`Select assessment for ${a.clientName || 'Unnamed Client'}`}
+                            />
+                          </div>
+                        )}
                         <div className="w-10 h-10 rounded-full bg-bg-2 flex items-center justify-center text-text font-medium text-[13px] group-hover:bg-gold-brand/10 transition-colors shrink-0">
                           {(a.clientName || 'U')[0].toUpperCase()}
                         </div>
@@ -396,7 +416,7 @@ export default function HomePage() {
                         }`}>
                           {a.status === 'completed' ? 'COMPLETED' : 'IN PROGRESS'}
                         </span>
-                        {!a.clientName && (
+                        {canManage && !a.clientName && (
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
@@ -408,16 +428,18 @@ export default function HomePage() {
                             Assign
                           </button>
                         )}
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (confirm('Delete this assessment?')) deleteAssessment(a.id);
-                          }}
-                          aria-label={`Delete assessment for ${a.clientName || 'Unnamed Client'}`}
-                          className="px-3 py-1.5 text-[13px] text-text-dim hover:text-danger hover:bg-danger/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 shrink-0"
-                        >
-                          Delete
-                        </button>
+                        {canManage && (
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (confirm('Delete this assessment?')) deleteAssessment(a.id);
+                            }}
+                            aria-label={`Delete assessment for ${a.clientName || 'Unnamed Client'}`}
+                            className="px-3 py-1.5 text-[13px] text-text-dim hover:text-danger hover:bg-danger/10 rounded-lg transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                          >
+                            Delete
+                          </button>
+                        )}
                       </div>
                     </div>
                   ))}
