@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { authClient } from '@/lib/auth-client';
 
 // Persistent, sticky banner shown across the whole portal while an admin is
@@ -15,7 +14,6 @@ export default function ImpersonationBanner({
   name: string;
   role: string;
 }) {
-  const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,8 +29,11 @@ export default function ImpersonationBanner({
         setLoading(false);
         return;
       }
-      router.push('/portal/admin/users');
-      router.refresh();
+      // Hard navigation, not router.push/refresh: the sidebar reads role from
+      // authClient.useSession()'s cache, which router.refresh() won't invalidate.
+      // A full reload re-initializes the session store so the UI returns fully to
+      // the admin view (sidebar nav + Admin link included).
+      window.location.href = '/portal/admin/users';
     } catch {
       setError("Couldn't switch back. Try again.");
       setLoading(false);

@@ -387,8 +387,12 @@ export default function AdminPeoplePage() {
           });
           return;
         }
-        router.push('/portal');
-        router.refresh();
+        // Hard navigation, not router.push/refresh: the sidebar and other
+        // client components read the role from authClient.useSession()'s cache,
+        // which router.refresh() does NOT invalidate (it only re-renders server
+        // components). A full reload re-initializes the session store so the
+        // whole UI — sidebar nav included — reflects the impersonated user.
+        window.location.href = '/portal';
       } catch {
         setToast({
           variant: 'error',
