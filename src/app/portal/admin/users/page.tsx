@@ -45,6 +45,14 @@ export default function AdminPeoplePage() {
   const router = useRouter();
   const { data: sessionData, isPending } = authClient.useSession();
   const userRole = sessionData?.user?.role;
+  // While impersonating we hide the "Log in as" action entirely (no nested
+  // impersonation). The runtime session carries impersonatedBy even though the
+  // typed session shape doesn't model it — widen via a local cast.
+  const isImpersonating = Boolean(
+    (sessionData?.session as { impersonatedBy?: string | null } | undefined)
+      ?.impersonatedBy,
+  );
+  const currentUserId = sessionData?.user?.id;
 
   const [users, setUsers] = useState<AdminUserRow[]>([]);
   const [invites, setInvites] = useState<Invitation[]>([]);
@@ -368,6 +376,29 @@ export default function AdminPeoplePage() {
     [refresh],
   );
 
+  const handleImpersonate = useCallback(
+    async (userId: string) => {
+      try {
+        const { error } = await authClient.admin.impersonateUser({ userId });
+        if (error) {
+          setToast({
+            variant: 'error',
+            message: "Couldn't switch to that user. Try again.",
+          });
+          return;
+        }
+        router.push('/portal');
+        router.refresh();
+      } catch {
+        setToast({
+          variant: 'error',
+          message: "Couldn't switch to that user. Try again.",
+        });
+      }
+    },
+    [router],
+  );
+
   const handleInvite = async (e: React.FormEvent) => {
     e.preventDefault();
     setInviteMessage(null);
@@ -604,6 +635,9 @@ export default function AdminPeoplePage() {
               onRename={handleRename}
               onResetPassword={openResetModal}
               onAssignCoach={openCoachModal}
+              canImpersonate={userRole === 'admin' && !isImpersonating}
+              currentUserId={currentUserId}
+              onImpersonate={handleImpersonate}
             />
           )}
         </GroupSection>
@@ -628,6 +662,9 @@ export default function AdminPeoplePage() {
               onRename={handleRename}
               onResetPassword={openResetModal}
               onAssignCoach={openCoachModal}
+              canImpersonate={userRole === 'admin' && !isImpersonating}
+              currentUserId={currentUserId}
+              onImpersonate={handleImpersonate}
             />
           )}
         </GroupSection>
@@ -660,6 +697,9 @@ export default function AdminPeoplePage() {
                   onRename={handleRename}
                   onResetPassword={openResetModal}
                   onAssignCoach={openCoachModal}
+                  canImpersonate={userRole === 'admin' && !isImpersonating}
+                  currentUserId={currentUserId}
+                  onImpersonate={handleImpersonate}
                 />
               </GroupSection>
             );
@@ -683,6 +723,9 @@ export default function AdminPeoplePage() {
               onRename={handleRename}
               onResetPassword={openResetModal}
               onAssignCoach={openCoachModal}
+              canImpersonate={userRole === 'admin' && !isImpersonating}
+              currentUserId={currentUserId}
+              onImpersonate={handleImpersonate}
             />
           </GroupSection>
         )}
@@ -705,6 +748,9 @@ export default function AdminPeoplePage() {
               onRename={handleRename}
               onResetPassword={openResetModal}
               onAssignCoach={openCoachModal}
+              canImpersonate={userRole === 'admin' && !isImpersonating}
+              currentUserId={currentUserId}
+              onImpersonate={handleImpersonate}
             />
           </GroupSection>
         )}
@@ -1070,6 +1116,9 @@ function UserTable({
   onRename,
   onResetPassword,
   onAssignCoach,
+  canImpersonate,
+  currentUserId,
+  onImpersonate,
 }: {
   users: AdminUserRow[];
   adminCount: number;
@@ -1079,6 +1128,9 @@ function UserTable({
   onRename: (userId: string, newName: string) => Promise<boolean>;
   onResetPassword: (u: { id: string; email: string; name: string }) => void;
   onAssignCoach: (u: { id: string; name: string; email: string; currentCoachId: string | null }) => void;
+  canImpersonate: boolean;
+  currentUserId: string | undefined;
+  onImpersonate: (userId: string) => void;
 }) {
   return (
     <>
@@ -1118,6 +1170,10 @@ function UserTable({
                 ? "You can't change the role of the only admin. Promote another user to admin first."
                 : undefined;
               const isOpen = openUserId === u.id;
+              // Coaches + clients only, never admin rows, never the viewer's
+              // own row, and hidden entirely when already impersonating.
+              const showImpersonate =
+                canImpersonate && u.role !== 'admin' && u.id !== currentUserId;
               return (
                 <Fragment key={u.id}>
                   <tr className="border-b border-line last:border-0 hover:bg-bg-2 transition-colors">
@@ -1186,6 +1242,15 @@ function UserTable({
                             {u.coachId ? 'Change coach' : 'Assign coach'}
                           </button>
                         )}
+                        {showImpersonate && (
+                          <button
+                            type="button"
+                            onClick={() => onImpersonate(u.id)}
+                            className="text-[11px] text-text-dim hover:text-gold-brand transition-colors underline-offset-2 hover:underline"
+                          >
+                            Log in as
+                          </button>
+                        )}
                       </div>
                     </td>
                   </tr>
@@ -1224,6 +1289,8 @@ function UserTable({
           const tooltip = isOnlyAdmin
             ? "You can't change the role of the only admin. Promote another user to admin first."
             : undefined;
+          const showImpersonate =
+            canImpersonate && u.role !== 'admin' && u.id !== currentUserId;
           return (
             <div key={u.id} className="bg-bg-3 rounded-xl border border-line p-4">
               <div className="flex items-start justify-between mb-2">
@@ -1287,6 +1354,15 @@ function UserTable({
                       className="px-2 py-1 rounded-md border border-line-2 text-[11px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
                     >
                       {u.coachId ? 'Change coach' : 'Assign coach'}
+                    </button>
+                  )}
+                  {showImpersonate && (
+                    <button
+                      type="button"
+                      onClick={() => onImpersonate(u.id)}
+                      className="px-2 py-1 rounded-md border border-line-2 text-[11px] font-medium tracking-[0.02em] text-text hover:border-gold-brand hover:text-gold-brand transition-colors"
+                    >
+                      Log in as
                     </button>
                   )}
                 </div>
