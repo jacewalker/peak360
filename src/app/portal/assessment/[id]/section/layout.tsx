@@ -1,22 +1,45 @@
 import { auth } from '@/lib/auth';
-import { redirect } from 'next/navigation';
+import { db } from '@/lib/db';
+import { assessments } from '@/lib/db/schema';
+import { eq } from 'drizzle-orm';
+import { redirect, notFound } from 'next/navigation';
 import { headers } from 'next/headers';
+import type { AuthSession } from '@/lib/auth-helpers';
 
 /**
- * D-19: Server-side guard for the editable assessment surface.
+ * SSR ownership gate for the assessment section surface (I23).
  *
- * Clients are read-only and must be redirected to /portal/assessment/[id]/report
- * BEFORE any child page renders or any client JS executes. This eliminates the
- * flicker + stale-auto-save POST risk a client-side useEffect would introduce
- * (07 phase checker warning 3).
+ * Previously this layout force-redirected every client to /report, which both
+ * trapped clients on a single screen AND provided the implicit IDOR protection
+ * (a client could never reach another client's section pages). I23 removes that
+ * redirect so owning clients can browse their own sections read-only — so the
+ * ownership check must now live here explicitly.
  *
- * Scope: this layout wraps `/portal/assessment/[id]/section/[num]/*` only.
- * The /report route does NOT nest under /section/, so clients can still reach
- * their report after this redirect (Option A in plan 07-08 task 2).
+ * This gate runs BEFORE any child renders or any client JS executes: it requires
+ * a session, fetches the assessment row, and redirects non-owners to /portal
+ * (404 on a missing row). Owning clients fall through and render `children`; the
+ * section page itself enforces read-only / no-write client-side (canWrite flag).
  *
- * Coach + admin sessions are unaffected — the redirect branch is skipped for
- * any role other than 'client', so editable section pages render normally.
+ * Scope: wraps `/portal/assessment/[id]/section/[num]/*` only. The /report route
+ * does NOT nest under /section/, so its own SSR gate is unaffected.
+ *
+ * Coach + admin sessions render section pages normally (hasAccess passes for
+ * owning coaches and all admins).
  */
+
+// hasAccess mirrors report/page.tsx:36-45 — a duplicated pure function is
+// acceptable per that file's own note; the static-source IDOR test guards both.
+function hasAccess(
+  role: string,
+  userId: string,
+  row: { coachId: string | null; clientId: string | null }
+): boolean {
+  if (role === 'admin') return true;
+  if (role === 'coach') return row.coachId === userId;
+  if (role === 'client') return row.clientId === userId;
+  return false;
+}
+
 export default async function AssessmentSectionLayout({
   children,
   params,
@@ -25,10 +48,23 @@ export default async function AssessmentSectionLayout({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const session = await auth.api.getSession({ headers: await headers() });
 
-  if (session?.user.role === 'client') {
-    redirect(`/portal/assessment/${id}/report`);
+  // 1. Require an authenticated session.
+  const rawSession = await auth.api.getSession({ headers: await headers() });
+  if (!rawSession?.user) {
+    redirect('/login');
+  }
+  const session = rawSession as unknown as AuthSession;
+
+  // 2. Fetch the assessment row.
+  const [row] = await db.select().from(assessments).where(eq(assessments.id, id));
+  if (!row) {
+    notFound();
+  }
+
+  // 3. Enforce ownership BEFORE rendering any child page.
+  if (!hasAccess(session.user.role, session.user.id, row)) {
+    redirect('/portal');
   }
 
   return <>{children}</>;

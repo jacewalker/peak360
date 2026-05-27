@@ -137,6 +137,11 @@ export default function DashboardPage() {
 
     const incomplete = assessments.filter((a) => a.status !== 'completed');
 
+    const hrefFor = (a: Assessment) =>
+      userRole === 'client'
+        ? `/portal/assessment/${a.id}/section/11`
+        : `/portal/assessment/${a.id}/section/${a.currentSection}`;
+
     // Stuck on early sections (section 1-3 — likely haven't really started)
     incomplete
       .filter((a) => a.currentSection <= 3)
@@ -145,7 +150,7 @@ export default function DashboardPage() {
           type: 'stuck',
           label: a.clientName || 'Unnamed Client',
           detail: `Stuck on Section ${a.currentSection} of 11`,
-          href: `/portal/assessment/${a.id}/section/${a.currentSection}`,
+          href: hrefFor(a),
         });
       });
 
@@ -157,12 +162,12 @@ export default function DashboardPage() {
           type: 'stale',
           label: a.clientName || 'Unnamed Client',
           detail: `In progress — Section ${a.currentSection} of 11`,
-          href: `/portal/assessment/${a.id}/section/${a.currentSection}`,
+          href: hrefFor(a),
         });
       });
 
     return items;
-  }, [assessments]);
+  }, [assessments, userRole]);
 
   if (loading) {
     return (
@@ -260,15 +265,17 @@ export default function DashboardPage() {
             <p className="text-[13px] text-text-dim mt-2">Finished</p>
           </div>
 
-          <Link
-            href="/portal/clients"
-            aria-label={`View ${clientNames.size} clients`}
-            className="bg-bg-3 rounded-xl border border-line p-5 hover:border-gold-brand/40 transition-colors group block"
-          >
-            <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Clients</p>
-            <p className="font-mono text-[40px] font-medium text-text leading-none mt-2" style={{ fontVariantNumeric: 'tabular-nums' }}>{clientNames.size}</p>
-            <p className="text-[13px] text-text-dim mt-2">Unique</p>
-          </Link>
+          {(userRole === 'coach' || userRole === 'admin') && (
+            <Link
+              href="/portal/clients"
+              aria-label={`View ${clientNames.size} clients`}
+              className="bg-bg-3 rounded-xl border border-line p-5 hover:border-gold-brand/40 transition-colors group block"
+            >
+              <p className="font-mono text-[11px] font-medium text-text-faint uppercase tracking-[0.18em]">Clients</p>
+              <p className="font-mono text-[40px] font-medium text-text leading-none mt-2" style={{ fontVariantNumeric: 'tabular-nums' }}>{clientNames.size}</p>
+              <p className="text-[13px] text-text-dim mt-2">Unique</p>
+            </Link>
+          )}
         </div>
 
         {/* Invite Client — coach/admin only */}
@@ -468,7 +475,7 @@ export default function DashboardPage() {
               ) : (
                 <div className="divide-y divide-line">
                   {assessments.slice(0, 5).map((a) => (
-                    <AssessmentRow key={a.id} a={a} />
+                    <AssessmentRow key={a.id} a={a} clientView={userRole === 'client'} />
                   ))}
                 </div>
               )}
@@ -498,10 +505,14 @@ export default function DashboardPage() {
   );
 }
 
-function AssessmentRow({ a }: { a: Assessment }) {
+function AssessmentRow({ a, clientView }: { a: Assessment; clientView?: boolean }) {
   return (
     <Link
-      href={`/portal/assessment/${a.id}/section/${a.currentSection}`}
+      href={
+        clientView
+          ? `/portal/assessment/${a.id}/section/11`
+          : `/portal/assessment/${a.id}/section/${a.currentSection}`
+      }
       className="flex items-center gap-3 px-5 py-3.5 hover:bg-bg-2 transition-colors group"
     >
       <div className="w-8 h-8 rounded-full bg-bg-2 flex items-center justify-center text-text font-medium text-[13px] group-hover:bg-gold-brand/10 transition-colors shrink-0">
