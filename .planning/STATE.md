@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 Phase: 11
 Plan: Not started
 Status: Milestone complete
-Last activity: 2026-05-27 - Completed quick task 260527-ft2: admin impersonation (Log in as coach/client + return banner)
+Last activity: 2026-05-27 - Completed quick task 260527-i23: client read-only assessment experience (Assessments link + read-only sections + Section 11 default)
 
 Progress: [██████████] 100%
 
@@ -128,6 +128,7 @@ Recent decisions affecting current work:
 | 260525-ls8 | Modernize Playwright e2e suite (auth + /portal routes, shared sign-in/assessment helpers, hermetic self-created data); suite green 49 passed/5 skipped | 2026-05-25 | 3ba6973 | [260525-ls8-modernize-the-playwright-e2e-suite-for-t](./quick/260525-ls8-modernize-the-playwright-e2e-suite-for-t/) |
 | 260526-rtt | Authoritative client_id linkage: applyClientLink resolver wired into assign PUT / Section 1 sync / POST create (auto-creates role='client' user, no email); client-login dedup-by-name upgrade; DRY-RUN-by-default backfill script. Verified PASSED. | 2026-05-26 | 0788d30 | [260526-rtt-client-id-linkage](./quick/260526-rtt-client-id-linkage/) |
 | 260527-ft2 | Admin impersonation: "Log in as" coach/client from People page (desktop+mobile; gated to admins, not self/admin rows, hidden while impersonating) via Better Auth admin plugin; global sticky banner to return to admin account. Verified PASSED (code); live UAT pending. | 2026-05-27 | 546a7a3 | [260527-ft2-admin-impersonation](./quick/260527-ft2-admin-impersonation/) |
+| 260527-i23 | Client read-only assessment experience: Assessments sidebar link for clients + read-only list (coach actions hidden); clients open into Section 11 report (interactive pillars + marker modal), browse all sections read-only with zero writes (canWrite gating + disabled fieldset); SSR ownership gate replaces the /report redirect; /report+PDF kept. Verified PASSED (code); live UAT pending. | 2026-05-27 | 1657ba1 | [260527-i23-client-readonly-assessment](./quick/260527-i23-client-readonly-assessment/) |
 
 ## Session Continuity
 
