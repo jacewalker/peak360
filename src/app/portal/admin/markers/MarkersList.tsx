@@ -35,12 +35,17 @@ export default function MarkersList() {
   const [confirmDeleteKey, setConfirmDeleteKey] = useState<string | null>(null);
   const [deletingKey, setDeletingKey] = useState<string | null>(null);
   const [deleteError, setDeleteError] = useState<string | null>(null);
+  const [reloadTick, setReloadTick] = useState(0);
 
-  const load = () => {
-    setLoading(true);
+  // Load markers on mount and whenever reloadTick changes (post-delete refresh).
+  // Set-state inside the effect happens only via the async .then/.catch
+  // callbacks, never synchronously (avoids react-hooks/set-state-in-effect).
+  useEffect(() => {
+    let cancelled = false;
     fetch('/api/markers')
       .then((r) => r.json())
       .then((j) => {
+        if (cancelled) return;
         if (j.success) {
           setMarkers(j.data.markers as RegistryMarker[]);
         } else {
@@ -49,14 +54,16 @@ export default function MarkersList() {
         setLoading(false);
       })
       .catch(() => {
+        if (cancelled) return;
         setError('Could not load markers. Refresh to try again.');
         setLoading(false);
       });
-  };
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadTick]);
 
-  useEffect(() => {
-    load();
-  }, []);
+  const reload = () => setReloadTick((n) => n + 1);
 
   // Auto-clear pending confirm after 5s so a stray click doesn't linger.
   useEffect(() => {
@@ -103,7 +110,7 @@ export default function MarkersList() {
       }
       setConfirmDeleteKey(null);
       setDeletingKey(null);
-      load();
+      reload();
     } catch {
       setDeleteError('Could not delete marker. Check your connection and try again.');
       setDeletingKey(null);

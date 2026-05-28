@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import FormField from '@/components/forms/FormField';
 import { PILLAR_KEYS, type PillarKey } from '@/lib/pillars/types';
@@ -82,13 +82,18 @@ function deriveDataKey(label: string): string {
 export default function NewMarkerForm() {
   const router = useRouter();
 
-  // Core fields
+  // Core fields. When the admin has not manually overridden the derived
+  // keys, we treat the *override* fields as null and compute the visible
+  // value from `label` via useMemo. This avoids the
+  // react-hooks/set-state-in-effect anti-pattern of mirroring derived
+  // state into useState via useEffect.
   const [label, setLabel] = useState('');
-  const [testKey, setTestKey] = useState('');
-  const [dataKey, setDataKey] = useState('');
-  const [testKeyEdited, setTestKeyEdited] = useState(false);
-  const [dataKeyEdited, setDataKeyEdited] = useState(false);
+  const [testKeyOverride, setTestKeyOverride] = useState<string | null>(null);
+  const [dataKeyOverride, setDataKeyOverride] = useState<string | null>(null);
   const [editingKeys, setEditingKeys] = useState(false);
+
+  const testKey = testKeyOverride ?? deriveTestKey(label);
+  const dataKey = dataKeyOverride ?? deriveDataKey(label);
 
   const [section, setSection] = useState<number>(5);
   const [pillar, setPillar] = useState<PillarKey>('cardiometabolic');
@@ -105,12 +110,6 @@ export default function NewMarkerForm() {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
-
-  // Auto-derive keys from label unless admin has manually edited
-  useEffect(() => {
-    if (!testKeyEdited) setTestKey(deriveTestKey(label));
-    if (!dataKeyEdited) setDataKey(deriveDataKey(label));
-  }, [label, testKeyEdited, dataKeyEdited]);
 
   // Client-side validation summary
   const validationErrors = useMemo(() => {
@@ -235,8 +234,7 @@ export default function NewMarkerForm() {
                   type="text"
                   value={testKey}
                   onChange={(e) => {
-                    setTestKey(e.target.value);
-                    setTestKeyEdited(true);
+                    setTestKeyOverride(e.target.value);
                   }}
                   className={`w-full px-3 py-2 bg-bg-3 border rounded text-[13px] font-mono text-text focus:outline-none focus:border-gold-brand ${
                     testKey && !TEST_KEY_RE.test(testKey) ? 'border-danger' : 'border-line'
@@ -257,8 +255,7 @@ export default function NewMarkerForm() {
                   type="text"
                   value={dataKey}
                   onChange={(e) => {
-                    setDataKey(e.target.value);
-                    setDataKeyEdited(true);
+                    setDataKeyOverride(e.target.value);
                   }}
                   className={`w-full px-3 py-2 bg-bg-3 border rounded text-[13px] font-mono text-text focus:outline-none focus:border-gold-brand ${
                     dataKey && !DATA_KEY_RE.test(dataKey) ? 'border-danger' : 'border-line'
