@@ -193,7 +193,7 @@ Plans:
 **Plans:** 5 plans
 
 Plans:
-- [ ] 12-01-PLAN.md - Foundation: markers table (PG + SQLite + raw migration), query layer, getReportMarkers/getFieldMappings merge helpers, markerToPillar DB short-circuit, new AuditAction members, BLOCKING db:push (D-01..D-04, D-07, D-13)
+- [x] 12-01-PLAN.md - Foundation: markers table (PG + SQLite + raw migration), query layer, getReportMarkers/getFieldMappings merge helpers, markerToPillar DB short-circuit, new AuditAction members, BLOCKING db:push (D-01..D-04, D-07, D-13)
 - [ ] 12-02-PLAN.md - Admin + client APIs: /api/admin/markers + /[testKey] (validation, optimistic concurrency, cascade delete, audit), client-readable /api/markers, AI extract route migrated to getFieldMappings (D-05, D-13, D-14)
 - [ ] 12-03-PLAN.md - Admin UI: section-grouped list page, create form (auto-derived test_key/data_key, inline 5-tier ranges, AI aliases, severity slider), edit page (dataKey lock, optimistic concurrency, two-click cascade delete), admin nav card (D-05, D-12, D-15, D-16)
 - [ ] 12-04-PLAN.md - Coach input + report integration: CustomMarkersBlock component (TDD), mechanical insert into Section1-10, Section11 + load-report-data + admin marker-content/normative + red-flags route migrated to /api/markers / getReportMarkers, PDF pillar-page-data audited (D-06, D-08, D-09, D-10, D-11). Dashboard/clients/TrendsTab migrations deferred to 12-04b.

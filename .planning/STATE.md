@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: milestone_complete
-stopped_at: Milestone complete (Phase 11 was final phase)
-last_updated: 2026-05-26T07:12:58.459Z
-last_activity: 2026-05-26 -- Phase 11 execution started
+status: in_progress
+stopped_at: Phase 12 Plan 01 complete (foundation: markers table + query layer + merge helpers + audit)
+last_updated: 2026-05-28T00:00:00.000Z
+last_activity: 2026-05-28 -- Phase 12 Plan 01 execution complete (markers registry foundation)
 progress:
-  total_phases: 10
+  total_phases: 11
   completed_phases: 9
-  total_plans: 42
-  completed_plans: 43
-  percent: 90
+  total_plans: 47
+  completed_plans: 44
+  percent: 93
 ---
 
 # Project State
@@ -25,12 +25,12 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-05-27 - Completed quick task 260527-ine: client-login welcome-vs-magic-link choice + Bob Smith dev seed script
+Phase: 12
+Plan: 12-02 (next)
+Status: Phase 12 in progress
+Last activity: 2026-05-28 - Completed 12-01 (markers registry foundation: schema + queries + merge helpers + audit)
 
-Progress: [██████████] 100%
+Progress: [█████████░] 93%
 
 ## Performance Metrics
 
@@ -63,6 +63,7 @@ Progress: [██████████] 100%
 | Phase 04 P03 | 3m 24s | 3 tasks | 9 files |
 | Phase 09 P01 | 6m 12s | 9 tasks | 13 files |
 | Phase 9 P02 | 70 | - tasks | - files |
+| Phase 12 P01 | 6m 14s | 3 tasks | 11 files |
 
 ## Accumulated Context
 
