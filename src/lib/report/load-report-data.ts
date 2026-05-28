@@ -107,7 +107,7 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
 
   const totalRated = Object.values(counts).reduce((a, b) => a + b, 0);
 
-  // Phase 8 — fetch pillar layer in parallel (D-21 SSR reads).
+  // Phase 8 - fetch pillar layer in parallel (D-21 SSR reads).
   // Both the portal report page (Plan 03) and the PDF route (Plan 05)
   // share this loader so PDF and portal scores stay identical.
   const [definitions, pageCopy, prescriptions] = await Promise.all([
