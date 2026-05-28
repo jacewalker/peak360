@@ -1,0 +1,770 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Peak360 · Longevity Report PDF - 5-pillar redesign mockup</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  /* ── Peak360 dark-portal brand tokens (src/app/globals.css) ───────────── */
+  :root{
+    --bg:#0a0a0b; --bg-2:#0e0e10; --bg-3:#131316;
+    --text:#ece5d3; --text-dim:rgba(236,229,211,.62); --text-faint:rgba(236,229,211,.38);
+    --gold-brand:#c9a24a; --gold-dark:#d4891a; --champagne:#e8d6a8;
+    --line:rgba(232,214,168,.12); --line-2:rgba(232,214,168,.22);
+    /* 5-tier marker palette */
+    --t-poor:#ef4444; --t-cautious:#f59e0b; --t-normal:#94a3b8; --t-great:#3b82f6; --t-elite:#10b981;
+    /* traffic-light pillar status palette */
+    --s-red:#ef4444; --s-amber:#f59e0b; --s-green:#10b981;
+    --font-sans:"Inter Tight",system-ui,sans-serif;
+    --font-mono:"JetBrains Mono",ui-monospace,monospace;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+
+  /* ── Screen presentation: stack A4 pages on a neutral deck ─────────────── */
+  body{
+    background:#1b1b1e;
+    padding:40px 20px 80px;
+    font-family:var(--font-sans);
+    -webkit-font-smoothing:antialiased;
+    color:var(--text);
+  }
+  .deck{display:flex;flex-direction:column;align-items:center;gap:34px}
+  .deck-cap{font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:rgba(236,229,211,.4);margin-bottom:6px}
+
+  /* A4 = 210×297mm. We render at 794×1123px (96dpi) for crisp screen review. */
+  .page{
+    position:relative;
+    width:794px;height:1123px;
+    background:
+      radial-gradient(680px 380px at 82% -8%, rgba(201,162,74,.10), transparent 60%),
+      radial-gradient(560px 340px at -12% 108%, rgba(232,214,168,.05), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    overflow:hidden;
+    box-shadow:0 30px 90px -30px rgba(0,0,0,.9);
+    display:flex;flex-direction:column;
+  }
+  /* fine dot grain - matches the in-app .scene texture */
+  .page::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:radial-gradient(rgba(236,229,211,.022) 1px, transparent 1px);
+    background-size:24px 24px;
+  }
+  .pad{position:relative;flex:1;display:flex;flex-direction:column;padding:42px 56px 0}
+
+  /* ── shared eyebrow / mono motifs ─────────────────────────────────────── */
+  .eyebrow{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.24em;text-transform:uppercase;color:var(--gold-brand);display:flex;align-items:center;gap:12px}
+  .eyebrow .n{color:var(--text-faint)}
+  .rule{height:1px;background:linear-gradient(90deg,var(--line-2),transparent);flex:1}
+
+  .corner{position:absolute;width:16px;height:16px;border-color:rgba(201,162,74,.5);pointer-events:none}
+  .corner.tl{top:22px;left:22px;border-left:1px solid;border-top:1px solid}
+  .corner.tr{top:22px;right:22px;border-right:1px solid;border-top:1px solid}
+  .corner.bl{bottom:22px;left:22px;border-left:1px solid;border-bottom:1px solid}
+  .corner.br{bottom:22px;right:22px;border-right:1px solid;border-bottom:1px solid}
+
+  /* ── page footer ──────────────────────────────────────────────────────── */
+  .foot{position:relative;margin-top:auto;display:flex;align-items:center;justify-content:space-between;
+    padding:14px 56px 20px;border-top:1px solid var(--line)}
+  .foot .brand{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-faint)}
+  .foot .brand b{color:var(--gold-brand);font-weight:600}
+  .foot .pageno{font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;color:var(--text-dim)}
+
+  /* ═══════════════ COVER ═══════════════════════════════════════════════ */
+  .cover .pad{padding-top:0;justify-content:center}
+  .cover-top{position:absolute;top:54px;left:60px;right:60px;display:flex;align-items:flex-start;justify-content:space-between}
+  .wordmark{display:flex;align-items:baseline;gap:2px;font-weight:700;font-size:26px;letter-spacing:-.02em}
+  .wordmark .peak{color:var(--text)} .wordmark .num{color:var(--gold-brand)}
+  .wordmark-sub{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--text-faint);margin-top:6px}
+  .cover-meta{text-align:right;font-family:var(--font-mono);font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-dim);line-height:1.9}
+  .cover-meta b{color:var(--text);font-weight:600}
+
+  .cover-hero{text-align:left;margin-bottom:8px}
+  .cover-hero .eyebrow{justify-content:flex-start;margin-bottom:20px}
+  .cover-title{font-size:62px;font-weight:300;line-height:1.02;letter-spacing:-.025em}
+  .cover-title b{font-weight:600}
+  .cover-title .gold{color:var(--gold-brand);font-weight:600}
+  .cover-lede{margin-top:22px;max-width:46ch;font-size:15.5px;line-height:1.7;color:var(--text-dim)}
+
+  .client-band{margin-top:38px;display:flex;gap:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--bg-2)}
+  .client-cell{flex:1;padding:18px 22px;border-right:1px solid var(--line)}
+  .client-cell:last-child{border-right:none}
+  .client-cell .k{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-faint)}
+  .client-cell .v{font-size:18px;font-weight:600;margin-top:7px;letter-spacing:-.01em}
+
+  /* pillar scoreboard on cover */
+  .board{margin-top:34px}
+  .board-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px}
+  .board-head .lbl{font-family:var(--font-mono);font-size:10px;letter-spacing:.2em;text-transform:uppercase;color:var(--text-dim)}
+  .board-head .composite{font-family:var(--font-mono);font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim)}
+  .board-head .composite b{color:var(--gold-brand);font-size:15px}
+  .board-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px}
+  .pcard{position:relative;border:1px solid var(--line);border-radius:14px;background:var(--bg-2);padding:18px 14px 16px;text-align:center;overflow:hidden}
+  .pcard .pc-eye{font-family:var(--font-mono);font-size:9px;letter-spacing:.14em;color:var(--text-faint);text-align:left}
+  .ring{position:relative;width:84px;height:84px;margin:12px auto 0}
+  .ring .bg{position:absolute;inset:0;border-radius:50%}
+  .ring .hole{position:absolute;inset:8px;border-radius:50%;background:var(--bg-2);display:grid;place-items:center}
+  .ring .num{font-family:var(--font-mono);font-size:26px;font-weight:700;font-variant-numeric:tabular-nums;line-height:1}
+  .ring .den{font-family:var(--font-mono);font-size:9px;color:var(--text-faint);margin-top:1px}
+  .pcard .pc-name{font-size:13px;font-weight:600;margin-top:13px;letter-spacing:-.01em}
+  .pcard .pc-status{font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;margin-top:6px}
+
+  .cover-tag{margin-top:34px;display:flex;align-items:center;justify-content:center;gap:14px;font-family:var(--font-mono);font-size:11px;letter-spacing:.22em;text-transform:uppercase;color:var(--text-dim)}
+  .cover-tag .dot{width:4px;height:4px;border-radius:50%;background:var(--gold-brand)}
+
+  /* ═══════════════ PILLAR PAGE ═════════════════════════════════════════ */
+  .p-head{display:flex;align-items:flex-start;justify-content:space-between;gap:24px;padding-bottom:16px;border-bottom:1px solid var(--line)}
+  .p-head .eyebrow{margin-bottom:12px}
+  .p-name{font-size:37px;font-weight:600;letter-spacing:-.025em;line-height:1}
+  .p-mean{margin-top:10px;font-size:14px;line-height:1.5;color:var(--text-dim);max-width:48ch}
+
+  .p-score{flex:none;display:flex;flex-direction:column;align-items:center;gap:10px}
+  .ring-lg{position:relative;width:118px;height:118px}
+  .ring-lg .hole{position:absolute;inset:11px;border-radius:50%;background:var(--bg);display:grid;place-items:center}
+  .ring-lg .num{font-family:var(--font-mono);font-size:40px;font-weight:700;line-height:1;font-variant-numeric:tabular-nums}
+  .ring-lg .den{font-family:var(--font-mono);font-size:10px;color:var(--text-faint);letter-spacing:.1em;margin-top:2px}
+  .chip{display:inline-flex;align-items:center;gap:7px;border-radius:999px;padding:6px 14px;font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:#0a0a0b}
+  .chip .cdot{width:6px;height:6px;border-radius:50%;background:rgba(10,10,11,.55)}
+
+  /* tier distribution strip */
+  .dist{display:flex;align-items:center;gap:14px;margin:13px 0 2px}
+  .dist-bar{flex:1;height:10px;border-radius:999px;overflow:hidden;display:flex;background:var(--bg-3)}
+  .dist-bar i{height:100%}
+  .dist-leg{font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;color:var(--text-dim);white-space:nowrap}
+  .dist-leg b{color:var(--text)}
+
+  /* tier groups (Attention → Peak) */
+  .groups{margin-top:9px;display:flex;flex-direction:column;gap:10px}
+  .group-head{display:flex;align-items:center;gap:10px;margin-bottom:5px}
+  .group-head .gd{width:9px;height:9px;border-radius:50%}
+  .group-head .gl{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text)}
+  .group-head .gc{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--text-dim)}
+  .group-head .gline{flex:1;height:1px;background:var(--line)}
+
+  .rows{display:flex;flex-direction:column;gap:5px}
+  .row{display:flex;align-items:center;gap:14px;padding:7px 15px;border-radius:10px;background:var(--bg-2);border:1px solid var(--line);position:relative}
+  .row .rail{width:3px;align-self:stretch;border-radius:999px;flex:none}
+  .row .rname{flex:1;font-size:14px;font-weight:500;letter-spacing:-.005em}
+  .row .rcat{font-family:var(--font-mono);font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-faint);margin-top:2px}
+  .row .rval{font-family:var(--font-mono);font-size:15px;font-weight:600;font-variant-numeric:tabular-nums;text-align:right}
+  .row .rval span{font-size:11px;color:var(--text-dim);font-weight:400}
+  .row .rpill{flex:none;width:74px;text-align:center;font-family:var(--font-mono);font-size:9px;font-weight:600;letter-spacing:.1em;text-transform:uppercase;padding:5px 0;border-radius:999px}
+
+  /* coach note */
+  .coach{position:relative;margin-top:14px;border-radius:13px;border:1px solid var(--line-2);
+    background:linear-gradient(180deg, rgba(201,162,74,.09), rgba(19,19,22,.55));overflow:hidden}
+  .coach::before{content:"";position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,var(--gold-brand),var(--champagne))}
+  .coach-in{padding:14px 20px 15px 22px}
+  .coach-h{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:9px}
+  .coach-t{display:flex;align-items:center;gap:9px;font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--champagne)}
+  .coach-by{font-family:var(--font-mono);font-size:9px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);border:1px solid var(--line-2);border-radius:999px;padding:4px 10px}
+  .coach p{font-size:13.5px;line-height:1.6;color:var(--text)}
+  .coach ul{list-style:none;margin-top:9px;display:flex;flex-direction:column;gap:6px}
+  .coach li{display:flex;gap:11px;font-size:13px;line-height:1.45;color:var(--text)}
+  .coach li::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--gold-brand);margin-top:7px;flex:none}
+
+  /* ═══════════════ APPENDIX ════════════════════════════════════════════ */
+  .ap-title{font-size:34px;font-weight:600;letter-spacing:-.02em;margin-top:14px}
+  .ap-sub{font-size:14px;color:var(--text-dim);margin-top:8px;max-width:54ch;line-height:1.6}
+  .ap-block{margin-top:26px}
+  .ap-h{display:flex;align-items:center;gap:10px;margin-bottom:13px}
+  .ap-h .bar{width:3px;height:16px;border-radius:999px;background:var(--gold-brand)}
+  .ap-h .t{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--text-dim)}
+  .readi{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+  .readi .cell{border:1px solid var(--line);border-radius:11px;background:var(--bg-2);padding:14px 16px}
+  .readi .k{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-faint)}
+  .readi .v{font-size:20px;font-weight:600;margin-top:6px}
+  .readi .v small{font-size:11px;color:var(--text-dim);font-weight:400;letter-spacing:.04em}
+  .flags{display:flex;flex-direction:column;gap:8px}
+  .flag{display:flex;align-items:center;gap:12px;padding:11px 16px;border:1px solid var(--line);border-radius:11px;background:var(--bg-2);font-size:14px}
+  .flag .ft{flex:1;color:var(--text-dim)}
+  .flag .fy{font-family:var(--font-mono);font-size:10px;font-weight:600;letter-spacing:.1em;text-transform:uppercase}
+  .flag .yes{color:var(--t-cautious)} .flag .no{color:var(--t-elite)}
+  .consent{display:flex;gap:12px}
+  .consent .cc{flex:1;display:flex;align-items:center;gap:12px;padding:14px 18px;border:1px solid var(--line);border-radius:11px;background:var(--bg-2)}
+  .consent .cc .sig{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:rgba(16,185,129,.12);color:var(--t-elite);flex:none}
+  .consent .cc .who{font-size:14px;font-weight:600} .consent .cc .st{font-family:var(--font-mono);font-size:9.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim);margin-top:3px}
+  .disc{margin-top:26px;border:1px solid var(--line);border-radius:11px;background:rgba(217,117,87,.06);padding:16px 18px}
+  .disc .dh{font-family:var(--font-mono);font-size:9.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:#d99b86;margin-bottom:8px}
+  .disc p{font-size:12px;line-height:1.65;color:var(--text-dim)}
+
+  /* ═══════════════ FULL BLOOD PANEL ════════════════════════════════════ */
+  .bp-sub{font-size:14px;color:var(--text-dim);margin-top:8px;max-width:58ch;line-height:1.55}
+  .panel{margin-top:18px}
+  .panel-head{display:flex;align-items:center;gap:10px;margin-bottom:9px}
+  .panel-head .pname{font-family:var(--font-mono);font-size:11px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--text)}
+  .panel-head .pcount{font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;color:var(--text-faint)}
+  .panel-head .pline{flex:1;height:1px;background:var(--line)}
+  .bp-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px 14px}
+  .bp-row{display:flex;align-items:center;gap:10px;padding:7px 12px;border-radius:9px;background:var(--bg-2);border:1px solid var(--line)}
+  .bp-row .bdot{width:8px;height:8px;border-radius:50%;flex:none}
+  .bp-row .bn{flex:1;font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .bp-row .bv{font-family:var(--font-mono);font-size:12.5px;font-weight:600;font-variant-numeric:tabular-nums}
+  .bp-row .bv span{font-size:10px;color:var(--text-dim);font-weight:400}
+  .bp-legend{display:flex;gap:20px;flex-wrap:wrap;justify-content:center;margin-top:24px;padding-top:16px;border-top:1px solid var(--line);
+    font-family:var(--font-mono);font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-dim)}
+  .bp-legend span{display:inline-flex;align-items:center;gap:7px}
+  .bp-legend i{width:8px;height:8px;border-radius:50%}
+
+  @media print{
+    body{background:#fff;padding:0}
+    .deck{gap:0} .deck-cap{display:none}
+    .page{box-shadow:none;width:210mm;height:297mm;page-break-after:always;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  }
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <!-- ════════════════════ PAGE 1 · COVER ════════════════════ -->
+  <div class="deck-cap">Page 1 · Cover</div>
+  <section class="page cover">
+    <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+    <div class="cover-top">
+      <div>
+        <div class="wordmark"><span class="peak">Peak</span><span class="num">360</span></div>
+        <div class="wordmark-sub">Longevity Assessment · Geelong</div>
+      </div>
+      <div class="cover-meta">
+        Report issued<br><b>14 May 2026</b>
+      </div>
+    </div>
+
+    <div class="pad">
+      <div class="cover-hero">
+        <div class="eyebrow"><span class="n">01 ·</span><span>Complete Longevity Analysis</span></div>
+        <h1 class="cover-title">Your five<br>pillars of <span class="gold">peak.</span></h1>
+        <p class="cover-lede">A full read of where you stand today across the systems that most predict how well - and how long - you live. Each pillar that follows ranks your results from what needs attention to where you're already at your peak.</p>
+      </div>
+
+      <div class="client-band">
+        <div class="client-cell"><div class="k">Client</div><div class="v">Marcus Reid</div></div>
+        <div class="client-cell"><div class="k">Age</div><div class="v">48</div></div>
+        <div class="client-cell"><div class="k">Biological sex</div><div class="v">Male</div></div>
+        <div class="client-cell"><div class="k">Assessment date</div><div class="v">12 May 2026</div></div>
+      </div>
+
+      <div class="board">
+        <div class="board-head">
+          <span class="lbl">Pillar scoreboard</span>
+          <span class="composite">Overall · <b>65</b> / 100</span>
+        </div>
+        <div class="board-grid">
+          <!-- each ring: conic-gradient accent = traffic-light status color -->
+          <div class="pcard">
+            <div class="pc-eye">P·01</div>
+            <div class="ring"><div class="bg" style="background:conic-gradient(var(--s-red) 42%, var(--bg-3) 0)"></div><div class="hole"><div><div class="num" style="color:var(--s-red)">42</div></div></div></div>
+            <div class="pc-name">Cardiometabolic</div>
+            <div class="pc-status" style="color:var(--s-red)">Priority</div>
+          </div>
+          <div class="pcard">
+            <div class="pc-eye">P·02</div>
+            <div class="ring"><div class="bg" style="background:conic-gradient(var(--s-amber) 61%, var(--bg-3) 0)"></div><div class="hole"><div><div class="num" style="color:var(--s-amber)">61</div></div></div></div>
+            <div class="pc-name">Aerobic Fitness</div>
+            <div class="pc-status" style="color:var(--s-amber)">Needs focus</div>
+          </div>
+          <div class="pcard">
+            <div class="pc-eye">P·03</div>
+            <div class="ring"><div class="bg" style="background:conic-gradient(var(--s-amber) 55%, var(--bg-3) 0)"></div><div class="hole"><div><div class="num" style="color:var(--s-amber)">55</div></div></div></div>
+            <div class="pc-name">Body Composition</div>
+            <div class="pc-status" style="color:var(--s-amber)">Needs focus</div>
+          </div>
+          <div class="pcard">
+            <div class="pc-eye">P·04</div>
+            <div class="ring"><div class="bg" style="background:conic-gradient(var(--s-green) 78%, var(--bg-3) 0)"></div><div class="hole"><div><div class="num" style="color:var(--s-green)">78</div></div></div></div>
+            <div class="pc-name">Strength</div>
+            <div class="pc-status" style="color:var(--s-green)">Strong</div>
+          </div>
+          <div class="pcard">
+            <div class="pc-eye">P·05</div>
+            <div class="ring"><div class="bg" style="background:conic-gradient(var(--s-green) 88%, var(--bg-3) 0)"></div><div class="hole"><div><div class="num" style="color:var(--s-green)">88</div></div></div></div>
+            <div class="pc-name">Balance</div>
+            <div class="pc-status" style="color:var(--s-green)">Strong</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="cover-tag"><span>Know more.</span><span class="dot"></span><span>Live longer.</span><span class="dot"></span><span>Optimise everything.</span></div>
+    </div>
+
+    <div class="foot">
+      <span class="brand"><b>Peak360</b> · Strong Bodies Geelong</span>
+      <span class="pageno">01 / 08</span>
+    </div>
+  </section>
+
+  <!-- ════════════════════ PAGE 2 · CARDIOMETABOLIC ════════════════════ -->
+  <div class="deck-cap">Page 2 · Pillar - Cardiometabolic</div>
+  <section class="page">
+    <div class="pad">
+      <div class="p-head">
+        <div>
+          <div class="eyebrow"><span class="n">Pillar 01 / 05</span><span class="rule"></span></div>
+          <h2 class="p-name">Cardiometabolic</h2>
+          <p class="p-mean">How your heart, vessels and metabolism are ageing - driven by lipids, blood sugar and inflammation. The pillar that most predicts heart-attack and stroke risk.</p>
+        </div>
+        <div class="p-score">
+          <div class="ring-lg"><div class="bg" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--s-red) 42%, var(--bg-3) 0)"></div><div class="hole"><div style="text-align:center"><div class="num" style="color:var(--s-red)">42</div><div class="den">/ 100</div></div></div></div>
+          <span class="chip" style="background:var(--s-red);color:#fff"><span class="cdot" style="background:rgba(255,255,255,.7)"></span>Priority</span>
+        </div>
+      </div>
+
+      <div class="dist">
+        <div class="dist-bar">
+          <i style="background:var(--t-poor);width:27%"></i>
+          <i style="background:var(--t-cautious);width:27%"></i>
+          <i style="background:var(--t-normal);width:27%"></i>
+          <i style="background:var(--t-great);width:9%"></i>
+          <i style="background:var(--t-elite);width:10%"></i>
+        </div>
+        <span class="dist-leg"><b>11</b> markers scored</span>
+      </div>
+
+      <div class="groups">
+        <!-- ATTENTION -->
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-poor)"></span><span class="gl">Attention</span><span class="gc">· 3</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-poor)"></span><div class="rname">Total Testosterone<div class="rcat">Blood · Hormones</div></div><div class="rval">9.1<span> nmol/L</span></div><span class="rpill" style="background:rgba(239,68,68,.16);color:#fca5a5">Attention</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-poor)"></span><div class="rname">hs-CRP<div class="rcat">Blood · Inflammation</div></div><div class="rval">3.4<span> mg/L</span></div><span class="rpill" style="background:rgba(239,68,68,.16);color:#fca5a5">Attention</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-poor)"></span><div class="rname">ApoB<div class="rcat">Blood · Lipid Panel</div></div><div class="rval">1.18<span> g/L</span></div><span class="rpill" style="background:rgba(239,68,68,.16);color:#fca5a5">Attention</span></div>
+          </div>
+        </div>
+        <!-- CAUTIOUS -->
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-cautious)"></span><span class="gl">Cautious</span><span class="gc">· 3</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-cautious)"></span><div class="rname">LDL Cholesterol<div class="rcat">Blood · Lipid Panel</div></div><div class="rval">3.7<span> mmol/L</span></div><span class="rpill" style="background:rgba(245,158,11,.16);color:#fcd34d">Cautious</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-cautious)"></span><div class="rname">Triglycerides<div class="rcat">Blood · Lipid Panel</div></div><div class="rval">1.9<span> mmol/L</span></div><span class="rpill" style="background:rgba(245,158,11,.16);color:#fcd34d">Cautious</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-cautious)"></span><div class="rname">Fasting Insulin<div class="rcat">Blood · Glucose &amp; Metabolic</div></div><div class="rval">11<span> mIU/L</span></div><span class="rpill" style="background:rgba(245,158,11,.16);color:#fcd34d">Cautious</span></div>
+          </div>
+        </div>
+        <!-- NORMAL -->
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-normal)"></span><span class="gl">Normal</span><span class="gc">· 3</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-normal)"></span><div class="rname">HbA1c<div class="rcat">Blood · Glucose &amp; Metabolic</div></div><div class="rval">5.4<span> %</span></div><span class="rpill" style="background:rgba(148,163,184,.16);color:#cbd5e1">Normal</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-normal)"></span><div class="rname">Blood Pressure<div class="rcat">Cardiovascular · Resting</div></div><div class="rval">128/82<span> mmHg</span></div><span class="rpill" style="background:rgba(148,163,184,.16);color:#cbd5e1">Normal</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-normal)"></span><div class="rname">Fasting Glucose<div class="rcat">Blood · Glucose &amp; Metabolic</div></div><div class="rval">5.3<span> mmol/L</span></div><span class="rpill" style="background:rgba(148,163,184,.16);color:#cbd5e1">Normal</span></div>
+          </div>
+        </div>
+        <!-- OPTIMAL + PEAK row -->
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-great)"></span><span class="gl">Optimal</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-great)"></span><div class="rname">Total Cholesterol<div class="rcat">Blood · Lipid Panel</div></div><div class="rval">4.6<span> mmol/L</span></div><span class="rpill" style="background:rgba(59,130,246,.16);color:#93c5fd">Optimal</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-elite)"></span><span class="gl">Peak</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-elite)"></span><div class="rname">HDL Cholesterol<div class="rcat">Blood · Lipid Panel</div></div><div class="rval">1.7<span> mmol/L</span></div><span class="rpill" style="background:rgba(16,185,129,.16);color:#6ee7b7">Peak</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach">
+        <div class="coach-in">
+          <div class="coach-h"><span class="coach-t"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.4L12 16.8 5.7 21l2.3-7.4-6-4.4h7.6z"/></svg>Coach focus</span><span class="coach-by">Priority pillar</span></div>
+          <p>This is your highest-leverage pillar right now. Testosterone, hs-CRP and ApoB all flag - together pointing at inflammation and visceral fat as the common root. Win here and the whole pillar lifts.</p>
+          <ul>
+            <li>Resistance-train 3–4×/week, protect 7–9 h sleep, and shift saturated fat toward olive oil and oily fish.</li>
+            <li>Re-test ApoB, hs-CRP and testosterone together in 12 weeks to confirm the trend.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand"><b>Peak360</b> · Cardiometabolic</span><span class="pageno">02 / 08</span></div>
+  </section>
+
+  <!-- ════════════════════ PAGE 3 · AEROBIC FITNESS ════════════════════ -->
+  <div class="deck-cap">Page 3 · Pillar - Aerobic Fitness</div>
+  <section class="page">
+    <div class="pad">
+      <div class="p-head">
+        <div>
+          <div class="eyebrow"><span class="n">Pillar 02 / 05</span><span class="rule"></span></div>
+          <h2 class="p-name">Aerobic Fitness</h2>
+          <p class="p-mean">Your engine's capacity - how efficiently your body delivers and uses oxygen. VO₂ max is the single strongest fitness predictor of all-cause mortality we measure.</p>
+        </div>
+        <div class="p-score">
+          <div class="ring-lg"><div class="bg" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--s-amber) 61%, var(--bg-3) 0)"></div><div class="hole"><div style="text-align:center"><div class="num" style="color:var(--s-amber)">61</div><div class="den">/ 100</div></div></div></div>
+          <span class="chip" style="background:var(--s-amber);color:#0a0a0b"><span class="cdot"></span>Needs focus</span>
+        </div>
+      </div>
+
+      <div class="dist">
+        <div class="dist-bar">
+          <i style="background:var(--t-cautious);width:50%"></i>
+          <i style="background:var(--t-normal);width:50%"></i>
+        </div>
+        <span class="dist-leg"><b>2</b> markers scored</span>
+      </div>
+
+      <div class="groups">
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-cautious)"></span><span class="gl">Cautious</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-cautious)"></span><div class="rname">VO₂ Max<div class="rcat">Cardiovascular · Aerobic capacity</div></div><div class="rval">34<span> ml/kg/min</span></div><span class="rpill" style="background:rgba(245,158,11,.16);color:#fcd34d">Cautious</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-normal)"></span><span class="gl">Normal</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-normal)"></span><div class="rname">Resting Heart Rate<div class="rcat">Cardiovascular · Resting</div></div><div class="rval">64<span> bpm</span></div><span class="rpill" style="background:rgba(148,163,184,.16);color:#cbd5e1">Normal</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach">
+        <div class="coach-in">
+          <div class="coach-h"><span class="coach-t"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.4L12 16.8 5.7 21l2.3-7.4-6-4.4h7.6z"/></svg>Coach focus</span><span class="coach-by">Biggest longevity lever</span></div>
+          <p>A VO₂ max of 34 is workable but below where we want you for your age. The good news: it's one of the most trainable numbers in this whole report, and small gains carry outsized longevity benefit.</p>
+          <ul>
+            <li>Add two zone-2 sessions a week (45–60 min, conversational pace) to build your aerobic base.</li>
+            <li>Layer in one short interval session (e.g. 4×4 min hard) once the base is established.</li>
+            <li>Re-test VO₂ max at the next quarterly review - expect 3–5 points of movement.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand"><b>Peak360</b> · Aerobic Fitness</span><span class="pageno">03 / 08</span></div>
+  </section>
+
+  <!-- ════════════════════ PAGE 4 · BODY COMPOSITION ════════════════════ -->
+  <div class="deck-cap">Page 4 · Pillar - Body Composition</div>
+  <section class="page">
+    <div class="pad">
+      <div class="p-head">
+        <div>
+          <div class="eyebrow"><span class="n">Pillar 03 / 05</span><span class="rule"></span></div>
+          <h2 class="p-name">Body Composition</h2>
+          <p class="p-mean">The balance of muscle, fat and where that fat sits. Visceral fat and lean mass are powerful, modifiable signals for metabolic health and how robustly you'll age.</p>
+        </div>
+        <div class="p-score">
+          <div class="ring-lg"><div class="bg" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--s-amber) 55%, var(--bg-3) 0)"></div><div class="hole"><div style="text-align:center"><div class="num" style="color:var(--s-amber)">55</div><div class="den">/ 100</div></div></div></div>
+          <span class="chip" style="background:var(--s-amber);color:#0a0a0b"><span class="cdot"></span>Needs focus</span>
+        </div>
+      </div>
+
+      <div class="dist">
+        <div class="dist-bar">
+          <i style="background:var(--t-poor);width:29%"></i>
+          <i style="background:var(--t-cautious);width:14%"></i>
+          <i style="background:var(--t-normal);width:29%"></i>
+          <i style="background:var(--t-great);width:14%"></i>
+          <i style="background:var(--t-elite);width:14%"></i>
+        </div>
+        <span class="dist-leg"><b>7</b> markers scored</span>
+      </div>
+
+      <div class="groups">
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-poor)"></span><span class="gl">Attention</span><span class="gc">· 2</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-poor)"></span><div class="rname">Visceral Fat<div class="rcat">Body Composition</div></div><div class="rval">14<span> level</span></div><span class="rpill" style="background:rgba(239,68,68,.16);color:#fca5a5">Attention</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-poor)"></span><div class="rname">Waist-to-Hip Ratio<div class="rcat">Body Composition</div></div><div class="rval">0.98<span></span></div><span class="rpill" style="background:rgba(239,68,68,.16);color:#fca5a5">Attention</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-cautious)"></span><span class="gl">Cautious</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-cautious)"></span><div class="rname">Body Fat<div class="rcat">Body Composition</div></div><div class="rval">26<span> %</span></div><span class="rpill" style="background:rgba(245,158,11,.16);color:#fcd34d">Cautious</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-normal)"></span><span class="gl">Normal</span><span class="gc">· 2</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-normal)"></span><div class="rname">Body Mass Index<div class="rcat">Body Composition</div></div><div class="rval">27.4<span> kg/m²</span></div><span class="rpill" style="background:rgba(148,163,184,.16);color:#cbd5e1">Normal</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-normal)"></span><div class="rname">Skeletal Muscle Mass<div class="rcat">Body Composition</div></div><div class="rval">34<span> kg</span></div><span class="rpill" style="background:rgba(148,163,184,.16);color:#cbd5e1">Normal</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-great)"></span><span class="gl">Optimal</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-great)"></span><div class="rname">Lean Body Mass<div class="rcat">Body Composition</div></div><div class="rval">62<span> kg</span></div><span class="rpill" style="background:rgba(59,130,246,.16);color:#93c5fd">Optimal</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-elite)"></span><span class="gl">Peak</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-elite)"></span><div class="rname">Basal Metabolic Rate<div class="rcat">Body Composition</div></div><div class="rval">1780<span> kcal</span></div><span class="rpill" style="background:rgba(16,185,129,.16);color:#6ee7b7">Peak</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach">
+        <div class="coach-in">
+          <div class="coach-h"><span class="coach-t"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.4L12 16.8 5.7 21l2.3-7.4-6-4.4h7.6z"/></svg>Coach focus</span><span class="coach-by">Shared root with Cardiometabolic</span></div>
+          <p>Your lean mass is genuinely good - that's an asset. The lever is visceral fat and waist-to-hip, which also drag on your cardiometabolic pillar. Reduce them and two pillars improve at once.</p>
+          <ul>
+            <li>Hold a modest calorie deficit while keeping protein high (≈1.6 g/kg) to protect the muscle you've built.</li>
+            <li>Pair the zone-2 work from your aerobic plan with resistance training - best combination for visceral fat.</li>
+            <li>Re-scan on the Evolt 360 quarterly to track visceral fat trend, not just scale weight.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand"><b>Peak360</b> · Body Composition</span><span class="pageno">04 / 08</span></div>
+  </section>
+
+  <!-- ════════════════════ PAGE 5 · STRENGTH ════════════════════ -->
+  <div class="deck-cap">Page 5 · Pillar - Strength</div>
+  <section class="page">
+    <div class="pad">
+      <div class="p-head">
+        <div>
+          <div class="eyebrow"><span class="n">Pillar 04 / 05</span><span class="rule"></span></div>
+          <h2 class="p-name">Strength</h2>
+          <p class="p-mean">Force, power and muscular endurance - grip, lower-body drive and pushing capacity. Strength in mid-life is one of the clearest predictors of independence and longevity later.</p>
+        </div>
+        <div class="p-score">
+          <div class="ring-lg"><div class="bg" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--s-green) 78%, var(--bg-3) 0)"></div><div class="hole"><div style="text-align:center"><div class="num" style="color:var(--s-green)">78</div><div class="den">/ 100</div></div></div></div>
+          <span class="chip" style="background:var(--s-green);color:#fff"><span class="cdot" style="background:rgba(255,255,255,.7)"></span>Strong</span>
+        </div>
+      </div>
+
+      <div class="dist">
+        <div class="dist-bar">
+          <i style="background:var(--t-cautious);width:14%"></i>
+          <i style="background:var(--t-normal);width:14%"></i>
+          <i style="background:var(--t-great);width:29%"></i>
+          <i style="background:var(--t-elite);width:43%"></i>
+        </div>
+        <span class="dist-leg"><b>7</b> markers scored</span>
+      </div>
+
+      <div class="groups">
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-cautious)"></span><span class="gl">Cautious</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-cautious)"></span><div class="rname">Push-ups<div class="rcat">Strength · Endurance</div></div><div class="rval">18<span> reps</span></div><span class="rpill" style="background:rgba(245,158,11,.16);color:#fcd34d">Cautious</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-normal)"></span><span class="gl">Normal</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-normal)"></span><div class="rname">Plank Hold<div class="rcat">Strength · Core</div></div><div class="rval">75<span> s</span></div><span class="rpill" style="background:rgba(148,163,184,.16);color:#cbd5e1">Normal</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-great)"></span><span class="gl">Optimal</span><span class="gc">· 2</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-great)"></span><div class="rname">Grip Strength (Left)<div class="rcat">Strength · Grip</div></div><div class="rval">44<span> kg</span></div><span class="rpill" style="background:rgba(59,130,246,.16);color:#93c5fd">Optimal</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-great)"></span><div class="rname">Sit-to-Stand<div class="rcat">Strength · Lower body</div></div><div class="rval">14<span> reps</span></div><span class="rpill" style="background:rgba(59,130,246,.16);color:#93c5fd">Optimal</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-elite)"></span><span class="gl">Peak</span><span class="gc">· 3</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-elite)"></span><div class="rname">Grip Strength (Right)<div class="rcat">Strength · Grip</div></div><div class="rval">52<span> kg</span></div><span class="rpill" style="background:rgba(16,185,129,.16);color:#6ee7b7">Peak</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-elite)"></span><div class="rname">Single-Leg Hop (Right)<div class="rcat">Strength · Power</div></div><div class="rval">142<span> cm</span></div><span class="rpill" style="background:rgba(16,185,129,.16);color:#6ee7b7">Peak</span></div>
+            <div class="row"><span class="rail" style="background:var(--t-elite)"></span><div class="rname">Single-Leg Hop (Left)<div class="rcat">Strength · Power</div></div><div class="rval">138<span> cm</span></div><span class="rpill" style="background:rgba(16,185,129,.16);color:#6ee7b7">Peak</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach">
+        <div class="coach-in">
+          <div class="coach-h"><span class="coach-t"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.4L12 16.8 5.7 21l2.3-7.4-6-4.4h7.6z"/></svg>Coach focus</span><span class="coach-by">A genuine strength</span></div>
+          <p>This is a strong pillar - grip and lower-body power are excellent for your age. The one gap is upper-body pushing endurance. Keep this pillar as an anchor while we work the priority areas.</p>
+          <ul>
+            <li>Add a dedicated push progression (incline → full → weighted) twice a week to lift push-ups.</li>
+            <li>Maintain heavy compound lifts - they're protecting grip, power and bone density.</li>
+            <li>A small right/left grip asymmetry is normal; no action needed unless it widens.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand"><b>Peak360</b> · Strength</span><span class="pageno">05 / 08</span></div>
+  </section>
+
+  <!-- ════════════════════ PAGE 6 · BALANCE ════════════════════ -->
+  <div class="deck-cap">Page 6 · Pillar - Balance</div>
+  <section class="page">
+    <div class="pad">
+      <div class="p-head">
+        <div>
+          <div class="eyebrow"><span class="n">Pillar 05 / 05</span><span class="rule"></span></div>
+          <h2 class="p-name">Balance</h2>
+          <p class="p-mean">Single-leg stability - your neuromuscular control and fall resilience. An underrated longevity marker: balance at mid-life strongly predicts injury-free, independent later years.</p>
+        </div>
+        <div class="p-score">
+          <div class="ring-lg"><div class="bg" style="position:absolute;inset:0;border-radius:50%;background:conic-gradient(var(--s-green) 88%, var(--bg-3) 0)"></div><div class="hole"><div style="text-align:center"><div class="num" style="color:var(--s-green)">88</div><div class="den">/ 100</div></div></div></div>
+          <span class="chip" style="background:var(--s-green);color:#fff"><span class="cdot" style="background:rgba(255,255,255,.7)"></span>Strong</span>
+        </div>
+      </div>
+
+      <div class="dist">
+        <div class="dist-bar">
+          <i style="background:var(--t-great);width:50%"></i>
+          <i style="background:var(--t-elite);width:50%"></i>
+        </div>
+        <span class="dist-leg"><b>2</b> markers scored</span>
+      </div>
+
+      <div class="groups">
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-great)"></span><span class="gl">Optimal</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-great)"></span><div class="rname">Single-Leg Balance (Left)<div class="rcat">Balance · Stability</div></div><div class="rval">38<span> s</span></div><span class="rpill" style="background:rgba(59,130,246,.16);color:#93c5fd">Optimal</span></div>
+          </div>
+        </div>
+        <div class="group">
+          <div class="group-head"><span class="gd" style="background:var(--t-elite)"></span><span class="gl">Peak</span><span class="gc">· 1</span><span class="gline"></span></div>
+          <div class="rows">
+            <div class="row"><span class="rail" style="background:var(--t-elite)"></span><div class="rname">Single-Leg Balance (Right)<div class="rcat">Balance · Stability</div></div><div class="rval">45<span> s</span></div><span class="rpill" style="background:rgba(16,185,129,.16);color:#6ee7b7">Peak</span></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="coach">
+        <div class="coach-in">
+          <div class="coach-h"><span class="coach-t"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6 4.4 2.3 7.4L12 16.8 5.7 21l2.3-7.4-6-4.4h7.6z"/></svg>Coach focus</span><span class="coach-by">Maintain</span></div>
+          <p>Excellent balance - well above expectations for your age, and a real protective factor. Nothing to fix here; the goal is simply to keep it as you load the other pillars.</p>
+          <ul>
+            <li>Keep a little single-leg work in your warm-ups (balance, step-downs) to maintain the neuromuscular edge.</li>
+            <li>Re-test annually - balance tends to be the first thing to quietly slip, so it's worth tracking.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="foot"><span class="brand"><b>Peak360</b> · Balance</span><span class="pageno">06 / 08</span></div>
+  </section>
+
+  <!-- ════════════════════ PAGE 7 · FULL BLOOD PANEL ════════════════════ -->
+  <div class="deck-cap">Page 7 · Full Blood Panel</div>
+  <section class="page">
+    <div class="pad">
+      <div class="eyebrow"><span class="n">Reference</span><span class="rule"></span></div>
+      <h2 class="ap-title">Full blood panel</h2>
+      <p class="bp-sub">Every biomarker from your blood draw, grouped by panel and rated for your age and sex. Markers shown here inform the pillars above; the lipid, glucose and inflammation panels also drive your Cardiometabolic score.</p>
+
+      <div class="panel">
+        <div class="panel-head"><span class="pname">Lipid Panel</span><span class="pcount">· 7</span><span class="pline"></span></div>
+        <div class="bp-grid">
+          <div class="bp-row"><span class="bdot" style="background:var(--t-poor)"></span><span class="bn">ApoB</span><span class="bv">1.18<span> g/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-poor)"></span><span class="bn">Lp(a)</span><span class="bv">320<span> mg/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-cautious)"></span><span class="bn">LDL Cholesterol</span><span class="bv">3.7<span> mmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-cautious)"></span><span class="bn">Triglycerides</span><span class="bv">1.9<span> mmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-cautious)"></span><span class="bn">Non-HDL Cholesterol</span><span class="bv">2.9<span> mmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-great)"></span><span class="bn">Total Cholesterol</span><span class="bv">4.6<span> mmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-elite)"></span><span class="bn">HDL Cholesterol</span><span class="bv">1.7<span> mmol/L</span></span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="pname">Glucose &amp; Metabolic</span><span class="pcount">· 4</span><span class="pline"></span></div>
+        <div class="bp-grid">
+          <div class="bp-row"><span class="bdot" style="background:var(--t-cautious)"></span><span class="bn">Fasting Insulin</span><span class="bv">11<span> mIU/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-cautious)"></span><span class="bn">HOMA-IR</span><span class="bv">2.6<span></span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">HbA1c</span><span class="bv">5.4<span> %</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Fasting Glucose</span><span class="bv">5.3<span> mmol/L</span></span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="pname">Inflammation</span><span class="pcount">· 2</span><span class="pline"></span></div>
+        <div class="bp-grid">
+          <div class="bp-row"><span class="bdot" style="background:var(--t-poor)"></span><span class="bn">hs-CRP</span><span class="bv">3.4<span> mg/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Homocysteine</span><span class="bv">9.8<span> umol/L</span></span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="pname">Hormones</span><span class="pcount">· 5</span><span class="pline"></span></div>
+        <div class="bp-grid">
+          <div class="bp-row"><span class="bdot" style="background:var(--t-poor)"></span><span class="bn">Total Testosterone</span><span class="bv">9.1<span> nmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-cautious)"></span><span class="bn">Free Testosterone</span><span class="bv">180<span> pmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">SHBG</span><span class="bv">38<span> nmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Cortisol (AM)</span><span class="bv">380<span> nmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">DHEA-S</span><span class="bv">5.1<span> umol/L</span></span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="pname">Thyroid</span><span class="pcount">· 3</span><span class="pline"></span></div>
+        <div class="bp-grid">
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">TSH</span><span class="bv">2.1<span> mIU/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Free T4</span><span class="bv">14<span> pmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-great)"></span><span class="bn">Free T3</span><span class="bv">4.6<span> pmol/L</span></span></div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-head"><span class="pname">Vitamins &amp; Minerals · Iron Studies</span><span class="pcount">· 9</span><span class="pline"></span></div>
+        <div class="bp-grid">
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Vitamin D</span><span class="bv">62<span> nmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-great)"></span><span class="bn">Ferritin</span><span class="bv">95<span> ug/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Vitamin B12</span><span class="bv">410<span> pmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Iron</span><span class="bv">18<span> umol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-great)"></span><span class="bn">Folate</span><span class="bv">18<span> nmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Transferrin Sat.</span><span class="bv">32<span> %</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Magnesium</span><span class="bv">0.85<span> mmol/L</span></span></div>
+          <div class="bp-row"><span class="bdot" style="background:var(--t-normal)"></span><span class="bn">Zinc</span><span class="bv">13<span> umol/L</span></span></div>
+        </div>
+      </div>
+
+      <div class="bp-legend">
+        <span><i style="background:var(--t-poor)"></i>Attention</span>
+        <span><i style="background:var(--t-cautious)"></i>Cautious</span>
+        <span><i style="background:var(--t-normal)"></i>Normal</span>
+        <span><i style="background:var(--t-great)"></i>Optimal</span>
+        <span><i style="background:var(--t-elite)"></i>Peak</span>
+      </div>
+    </div>
+    <div class="foot"><span class="brand"><b>Peak360</b> · Full blood panel</span><span class="pageno">07 / 08</span></div>
+  </section>
+
+  <!-- ════════════════════ PAGE 8 · APPENDIX ════════════════════ -->
+  <div class="deck-cap">Page 8 · Appendix</div>
+  <section class="page">
+    <div class="pad">
+      <div class="eyebrow"><span class="n">Appendix</span><span class="rule"></span></div>
+      <h2 class="ap-title">Assessment record</h2>
+      <p class="ap-sub">Context captured on the day of testing - readiness, medical screening and consent. Held for your record and your coach's reference.</p>
+
+      <div class="ap-block">
+        <div class="ap-h"><span class="bar"></span><span class="t">Assessment-day readiness</span></div>
+        <div class="readi">
+          <div class="cell"><div class="k">Sleep</div><div class="v">7 <small>/ 10</small></div></div>
+          <div class="cell"><div class="k">Stress</div><div class="v">4 <small>/ 10</small></div></div>
+          <div class="cell"><div class="k">Energy</div><div class="v">6 <small>/ 10</small></div></div>
+          <div class="cell"><div class="k">Soreness</div><div class="v">3 <small>/ 10</small></div></div>
+          <div class="cell"><div class="k">Caffeine</div><div class="v">Yes <small>· 1 coffee</small></div></div>
+          <div class="cell"><div class="k">Alcohol (24h)</div><div class="v">None</div></div>
+        </div>
+      </div>
+
+      <div class="ap-block">
+        <div class="ap-h"><span class="bar"></span><span class="t">Medical screening</span></div>
+        <div class="flags">
+          <div class="flag"><span class="ft">Known cardiovascular condition</span><span class="fy no">No</span></div>
+          <div class="flag"><span class="ft">Currently taking prescription medication</span><span class="fy yes">Yes · 1</span></div>
+          <div class="flag"><span class="ft">Recent surgery or injury (12 mo)</span><span class="fy no">No</span></div>
+          <div class="flag"><span class="ft">Chest pain or dizziness on exertion</span><span class="fy no">No</span></div>
+        </div>
+      </div>
+
+      <div class="ap-block">
+        <div class="ap-h"><span class="bar"></span><span class="t">Consent</span></div>
+        <div class="consent">
+          <div class="cc"><span class="sig"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="who">Client - Marcus Reid</div><div class="st">Signed · 12 May 2026</div></div></div>
+          <div class="cc"><span class="sig"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></span><div><div class="who">Coach - J. Walker</div><div class="st">Signed · 12 May 2026</div></div></div>
+        </div>
+      </div>
+
+      <div class="disc">
+        <div class="dh">Important - not medical advice</div>
+        <p>This report is an educational longevity assessment, not a diagnosis. Normative ranges are reference values adjusted for age and biological sex and may not account for your individual medical history. Always consult a qualified healthcare professional before making changes to medication, training or diet. Peak360 is operated by Strong Bodies Geelong.</p>
+      </div>
+    </div>
+    <div class="foot"><span class="brand"><b>Peak360</b> · Assessment record</span><span class="pageno">08 / 08</span></div>
+  </section>
+
+</div>
+</body>
+</html>
