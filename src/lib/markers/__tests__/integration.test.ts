@@ -193,7 +193,7 @@ describe.skipIf(!dbAvailable)(
 describe('Phase 12 integration: DB availability check', () => {
   it('reports whether the DB layer is reachable in this test process', () => {
     if (!dbAvailable) {
-      // Not a failure — documented in the file header.
+      // Not a failure - documented in the file header.
       console.warn(
         `[integration.test] skipping live-DB suite: ${skipReason}\n` +
         `  - Vitest cannot resolve src/lib/db/index.ts's lazy require('./schema').\n` +
