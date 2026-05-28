@@ -10,6 +10,16 @@
 // computeAllPillarScores) so PDF and portal scores stay identical. Nothing
 // here throws: every entry-point is defensive so PDF generation never hard
 // fails on malformed data.
+//
+// Phase 12 D-11 audit: This file consumes the merged registry indirectly via
+// the `reportMarkers` array built by `src/lib/report/load-report-data.ts` and
+// passed in through ReportData props. It imports REPORT_CATEGORIES (the
+// category-name list, intentionally seed-only - no admin-added categories
+// per CONTEXT assumption #4) but NOT REPORT_MARKERS at runtime. DB markers
+// reach pillar pages via the upstream merge in load-report-data.ts.
+// Do not add a direct REPORT_MARKERS import here - it would silently drop
+// admin-added markers from the PDF. See 12-04-PLAN Task 4 for the audit
+// rationale and 12-04-SUMMARY for the grep baseline.
 
 import type { ReportMarker, ReportData } from '@/lib/pdf/types';
 import type {
