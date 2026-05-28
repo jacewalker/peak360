@@ -1,6 +1,6 @@
 import { View, Text } from '@react-pdf/renderer';
 import { COLORS } from '@/lib/pdf/colors';
-import { FONT } from '@/lib/pdf/fonts';
+import { FONT, WEIGHT } from '@/lib/pdf/fonts';
 import { styles } from '@/lib/pdf/styles';
 
 interface ReadinessSectionProps {
@@ -28,11 +28,11 @@ function ReadinessCell({ label, value }: { label: string; value: string | null }
         {label}
       </Text>
       {value ? (
-        <Text style={{ fontSize: 9, fontFamily: FONT.bold, color: COLORS.textPrimary, marginTop: 2 }}>
+        <Text style={{ fontSize: 9, fontFamily: FONT.sans, fontWeight: WEIGHT.semibold, color: COLORS.textPrimary, marginTop: 2 }}>
           {value}
         </Text>
       ) : (
-        <Text style={{ fontSize: 9, fontFamily: FONT.italic, color: COLORS.textMuted, marginTop: 2 }}>
+        <Text style={{ fontSize: 9, fontFamily: FONT.sans, fontWeight: WEIGHT.regular, color: COLORS.textMuted, marginTop: 2 }}>
           N/A
         </Text>
       )}

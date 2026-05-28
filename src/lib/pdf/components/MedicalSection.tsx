@@ -1,6 +1,6 @@
 import { View, Text } from '@react-pdf/renderer';
 import { COLORS } from '@/lib/pdf/colors';
-import { FONT } from '@/lib/pdf/fonts';
+import { FONT, WEIGHT } from '@/lib/pdf/fonts';
 import { styles } from '@/lib/pdf/styles';
 
 interface MedicalSectionProps {
@@ -62,7 +62,7 @@ export function MedicalSection({ medical }: MedicalSectionProps) {
               borderRadius: 3,
             }}
           >
-            <Text style={{ fontSize: 7, fontFamily: FONT.bold, textTransform: 'uppercase', letterSpacing: 0.5, color: '#fcd34d' }}>
+            <Text style={{ fontSize: 7, fontFamily: FONT.sans, fontWeight: WEIGHT.semibold, textTransform: 'uppercase', letterSpacing: 0.5, color: '#fcd34d' }}>
               Flag(s) Detected
             </Text>
           </View>

@@ -1,12 +1,14 @@
 import { StyleSheet } from '@react-pdf/renderer';
 import { COLORS } from './colors';
+import { FONT, WEIGHT } from './fonts';
 
 export const styles = StyleSheet.create({
   page: {
     paddingTop: 30,
     paddingBottom: 40,
     paddingHorizontal: 25,
-    fontFamily: 'Helvetica',
+    fontFamily: FONT.sans,
+    fontWeight: WEIGHT.regular,
     fontSize: 10,
     color: COLORS.textPrimary,
     backgroundColor: COLORS.page,
@@ -26,7 +28,8 @@ export const styles = StyleSheet.create({
   },
   sectionHeadingText: {
     fontSize: 13,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: FONT.sans,
+    fontWeight: WEIGHT.semibold,
     color: COLORS.textPrimary,
   },
   card: {
@@ -37,14 +40,15 @@ export const styles = StyleSheet.create({
   },
   label: {
     fontSize: 7,
-    fontFamily: 'Helvetica',
+    fontFamily: FONT.mono,
     textTransform: 'uppercase',
     letterSpacing: 0.5,
     color: COLORS.textSecondary,
   },
   value: {
     fontSize: 9,
-    fontFamily: 'Helvetica-Bold',
+    fontFamily: FONT.sans,
+    fontWeight: WEIGHT.semibold,
     color: COLORS.textPrimary,
   },
   footer: {

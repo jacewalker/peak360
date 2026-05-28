@@ -1,6 +1,6 @@
 import { View, Text } from '@react-pdf/renderer';
 import { COLORS } from '@/lib/pdf/colors';
-import { FONT } from '@/lib/pdf/fonts';
+import { FONT, WEIGHT } from '@/lib/pdf/fonts';
 
 interface ConsentStatusProps {
   consent: Record<string, unknown>;
@@ -35,7 +35,7 @@ export function ConsentStatus({ consent }: ConsentStatusProps) {
             backgroundColor: consentSigned ? '#10b981' : COLORS.textMuted,
           }}
         />
-        <Text style={{ fontSize: 8, fontFamily: FONT.bold, color: COLORS.textPrimary }}>
+        <Text style={{ fontSize: 8, fontFamily: FONT.sans, fontWeight: WEIGHT.semibold, color: COLORS.textPrimary }}>
           {consentSigned ? 'Consent Provided' : 'Consent Not Recorded'}
         </Text>
       </View>
