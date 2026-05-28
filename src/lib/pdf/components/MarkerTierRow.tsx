@@ -18,19 +18,23 @@ import type { ReportMarker } from '@/lib/pdf/types';
 export function MarkerTierRow({ marker }: { marker: ReportMarker }) {
   const tier: RatingTier = marker.tier ?? 'normal';
   const railColor = TIER_COLORS_PDF[tier];
-  const subcat = buildSubcategoryLine(marker);
+  const subcat = buildInlineSubcat(marker);
   const value = formatMarkerValue(marker);
   const showUnit = !isPassFailKey(marker.key);
 
+  // Single-line compact row: rail | name (with optional inline muted subcat) |
+  // value+unit | tier pill. Inlining the subcat halves the row height vs the
+  // previous two-line layout so a pillar page comfortably fits ~15 markers
+  // when the rows-gap and group spacing are also tightened.
   return (
     <View
       style={{
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        paddingVertical: 5,
-        paddingHorizontal: 11,
-        borderRadius: 7,
+        paddingVertical: 3.5,
+        paddingHorizontal: 10,
+        borderRadius: 6,
         backgroundColor: COLORS.bgLight,
         borderWidth: 0.5,
         borderColor: COLORS.border,
@@ -47,33 +51,31 @@ export function MarkerTierRow({ marker }: { marker: ReportMarker }) {
         }}
       />
 
-      {/* name + sub-category */}
-      <View style={{ flex: 1 }}>
-        <Text
-          style={{
-            fontFamily: FONT.sans,
-            fontWeight: WEIGHT.medium,
-            fontSize: 10.5,
-            color: COLORS.textPrimary,
-          }}
-        >
-          {marker.label}
-        </Text>
+      {/* name + inline subcategory */}
+      <Text
+        style={{
+          flex: 1,
+          fontFamily: FONT.sans,
+          fontWeight: WEIGHT.medium,
+          fontSize: 10.5,
+          color: COLORS.textPrimary,
+        }}
+      >
+        {marker.label}
         {subcat ? (
           <Text
             style={{
               fontFamily: FONT.mono,
-              fontSize: 6.5,
+              fontWeight: WEIGHT.regular,
+              fontSize: 7,
               letterSpacing: 0.8,
-              textTransform: 'uppercase',
               color: COLORS.textMuted,
-              marginTop: 2,
             }}
           >
-            {subcat}
+            {`   ${subcat.toUpperCase()}`}
           </Text>
         ) : null}
-      </View>
+      </Text>
 
       {/* value + unit */}
       <Text
@@ -96,8 +98,8 @@ export function MarkerTierRow({ marker }: { marker: ReportMarker }) {
       {/* tier pill */}
       <View
         style={{
-          width: 58,
-          paddingVertical: 3,
+          width: 56,
+          paddingVertical: 2.5,
           borderRadius: 999,
           backgroundColor: TIER_ROW_BG_PDF[tier],
           alignItems: 'center',
@@ -121,24 +123,19 @@ export function MarkerTierRow({ marker }: { marker: ReportMarker }) {
 }
 
 /**
- * "Blood - Lipid Panel" / "Body Composition" style sub-category line. Maps the
- * verbose category to a short prefix and appends the subcategory when present.
+ * Short, informative inline subcategory tag. Returns the marker's subcategory
+ * (eg "Lipid Panel", "Hormones") when present and distinct from the category,
+ * else returns an empty string so we don't add a noisy "STRENGTH" tag to every
+ * row on the strength pillar page where the pillar header already conveys it.
+ * Blood subcategories add real value (lipids vs hormones vs thyroid) so they
+ * are surfaced; single-category pillars don't need the redundant prefix.
  */
-function buildSubcategoryLine(m: ReportMarker): string {
-  const prefix = CATEGORY_PREFIX[m.category] ?? m.category;
+function buildInlineSubcat(m: ReportMarker): string {
   if (m.subcategory && m.subcategory.trim() && m.subcategory !== m.category) {
-    return `${prefix} - ${m.subcategory}`;
+    return m.subcategory;
   }
-  return prefix;
+  return '';
 }
-
-const CATEGORY_PREFIX: Record<string, string> = {
-  'Blood Tests & Biomarkers': 'Blood',
-  'Body Composition': 'Body Composition',
-  'Cardiovascular Fitness': 'Cardiovascular',
-  'Strength Testing': 'Strength',
-  'Mobility & Flexibility': 'Mobility',
-};
 
 /** Render a numeric value compactly: drop trailing ".0" but keep precision. */
 export function formatValue(value: number | null): string {
