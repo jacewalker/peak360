@@ -144,12 +144,26 @@ export interface ResultsCategoryGroup {
 }
 
 /**
- * The set of categories the FullResultsPage iterates. Source-of-truth for the
- * marker-coverage guard test - if a marker's category isn't here, the guard
- * will catch it. This is just REPORT_CATEGORIES re-exported as a set for
- * convenience; FullResultsPage iterates the array in declaration order.
+ * The HARD-CODED set of categories the FullResultsPage knows how to render.
+ *
+ * This is INTENTIONALLY enumerated (not derived from REPORT_CATEGORIES) so the
+ * marker-coverage guard test catches the bug class where a new marker with a
+ * brand-new category is added to REPORT_MARKERS but no page is updated to
+ * render that category. When you add a new category to REPORT_MARKERS:
+ *   1. Add it here.
+ *   2. The guard test will pass again.
+ *   3. The FullResultsPage will iterate it automatically.
+ *
+ * Iteration order in the PDF still follows REPORT_CATEGORIES (declaration
+ * order in REPORT_MARKERS) - this set just controls reachability.
  */
-export const REFERENCE_PAGE_CATEGORIES: ReadonlySet<string> = new Set(REPORT_CATEGORIES);
+export const REFERENCE_PAGE_CATEGORIES: ReadonlySet<string> = new Set<string>([
+  'Blood Tests & Biomarkers',
+  'Body Composition',
+  'Cardiovascular Fitness',
+  'Strength Testing',
+  'Mobility & Flexibility',
+]);
 
 /**
  * Full results grouping: every marker with a non-null value, grouped by
@@ -170,6 +184,11 @@ export function buildFullResultsGroups(markers: ReportMarker[]): ResultsCategory
   for (const m of markers) {
     if (m.value == null) continue;
     const cat = m.category;
+    // Only render categories the reference page knows how to handle. New
+    // categories must be enumerated in REFERENCE_PAGE_CATEGORIES; the
+    // marker-coverage guard test enforces this so additions can't silently
+    // disappear.
+    if (!REFERENCE_PAGE_CATEGORIES.has(cat)) continue;
     if (!byCategory.has(cat)) {
       byCategory.set(cat, { panelOrder: [], panels: new Map() });
     }
@@ -182,15 +201,11 @@ export function buildFullResultsGroups(markers: ReportMarker[]): ResultsCategory
     bucket.panels.get(panelKey)!.push(m);
   }
 
-  // Emit categories in REPORT_CATEGORIES order, falling back to first-seen
-  // order for any category we somehow received that wasn't in the canonical
-  // list (defensive - this should never happen).
+  // Emit categories in REPORT_CATEGORIES order; we've already filtered to
+  // categories that exist in REFERENCE_PAGE_CATEGORIES above.
   const categoryOrder: string[] = [];
   for (const cat of REPORT_CATEGORIES) {
     if (byCategory.has(cat)) categoryOrder.push(cat);
-  }
-  for (const cat of byCategory.keys()) {
-    if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
   }
 
   return categoryOrder.map((category) => {
