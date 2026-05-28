@@ -41,18 +41,35 @@ export interface TierGroup {
 
 export interface PillarPageModel {
   definition: PillarDefinition;
+  /**
+   * Pillar score from the canonical scorer. The score number itself is still
+   * computed from PRIMARY markers only (D-09) - changing that would shift every
+   * client's cardio score. The display below shows all non-normal markers
+   * (primary + supporting), so the score and the marker list intentionally have
+   * different bases; `displayedTierCounts` is what the on-page distribution bar
+   * uses so it matches the rows the reader actually sees.
+   */
   score: PillarScoreResult;
-  /** Scored markers for this pillar, sorted poor -> elite. */
+  /** Displayed markers (all tiers except 'normal'), sorted poor -> elite. */
   markers: ReportMarker[];
-  /** The same markers bucketed by tier, in Attention -> Peak order. */
+  /** The same markers bucketed by tier, in Attention -> Peak order (no normal). */
   groups: TierGroup[];
+  /** Tier counts of the DISPLAYED markers - drives the on-page distribution bar. */
+  displayedTierCounts: Record<RatingTier, number>;
+  /** Count of normal-tier markers omitted from this page (shown in the reference). */
+  normalOmittedCount: number;
   prescription: PillarPrescription | null;
 }
 
 /**
- * The set of score-driving markers for a single pillar:
- *   markerToPillar(m).pillar === key && !supporting && m.value != null
- * sorted by tier rank (poor first).
+ * Markers shown on a pillar page: every marker classified to this pillar
+ * (primary OR supporting per `markerToPillar`) that has a recorded value and a
+ * non-null tier, EXCLUDING tier === 'normal'. Per user-confirmed rule
+ * (2026-05-28): pillar pages show only actionable markers (Attention, Cautious,
+ * Optimal, Peak); Normal-tier markers move to the Full Results Reference page
+ * only. Untested markers are filtered everywhere.
+ *
+ * Sorted poor -> elite, then alphabetical for stable ordering within a tier.
  */
 export function selectPillarMarkers(
   pillarKey: PillarKey,
@@ -61,8 +78,9 @@ export function selectPillarMarkers(
   return markers
     .filter((m) => {
       if (m.value == null || m.tier == null) return false;
+      if (m.tier === 'normal') return false;
       const cls = markerToPillar(m);
-      return cls.pillar === pillarKey && !cls.supporting;
+      return cls.pillar === pillarKey;
     })
     .slice()
     .sort((a, b) => {
@@ -71,6 +89,19 @@ export function selectPillarMarkers(
       if (ra !== rb) return ra - rb;
       return a.label.localeCompare(b.label);
     });
+}
+
+/** Count how many normal-tier markers this pillar has (for the "+N in normal" hint). */
+export function countNormalForPillar(
+  pillarKey: PillarKey,
+  markers: ReportMarker[],
+): number {
+  let n = 0;
+  for (const m of markers) {
+    if (m.value == null || m.tier !== 'normal') continue;
+    if (markerToPillar(m).pillar === pillarKey) n += 1;
+  }
+  return n;
 }
 
 /** Bucket already-sorted markers into tier groups, Attention -> Peak. */
@@ -118,11 +149,19 @@ export function buildPillarPageModels(data: ReportData): PillarPageModel[] {
 
   return sorted.map((definition) => {
     const markers = selectPillarMarkers(definition.pillarKey, data.markers);
+    const displayedTierCounts: Record<RatingTier, number> = {
+      poor: 0, cautious: 0, normal: 0, great: 0, elite: 0,
+    };
+    for (const m of markers) {
+      if (m.tier) displayedTierCounts[m.tier] += 1;
+    }
     return {
       definition,
       score: scores[definition.pillarKey],
       markers,
       groups: groupByTier(markers),
+      displayedTierCounts,
+      normalOmittedCount: countNormalForPillar(definition.pillarKey, data.markers),
       prescription: prescriptionByKey.get(definition.pillarKey) ?? null,
     };
   });

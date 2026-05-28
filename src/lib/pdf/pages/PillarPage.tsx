@@ -252,11 +252,17 @@ function CoachNote({
 }
 
 export function PillarPage({ model }: { model: PillarPageModel }) {
-  const { definition, score, groups, prescription } = model;
+  const { definition, score, groups, prescription, displayedTierCounts, normalOmittedCount, markers } = model;
   const plainMeaning =
     definition.plainMeaning?.trim() || PLAIN_MEANING_FALLBACK[definition.pillarKey] || '';
   const isPending = score.status === 'pending' || score.score === null;
-  const totalScored = score.contributingCount;
+  // Per user rule (2026-05-28): only Attention/Cautious/Optimal/Peak markers
+  // render on the pillar page. Normal-tier markers live exclusively on the Full
+  // Results Reference. The distribution bar reflects what is actually shown
+  // (displayedTierCounts), so the bar visually matches the rows beneath it.
+  // The score ring stays primary-only (D-09) - it is a different basis.
+  const totalShown = markers.length;
+  const allInNormal = !isPending && totalShown === 0 && normalOmittedCount > 0;
 
   return (
     <Page size="A4" style={{ backgroundColor: COLORS.page, paddingTop: 42, paddingBottom: 48, paddingHorizontal: 56 }}>
@@ -339,9 +345,18 @@ export function PillarPage({ model }: { model: PillarPageModel }) {
             No scored markers were recorded for {definition.label.toLowerCase()} in this assessment. Complete the relevant section to populate this pillar.
           </Text>
         </View>
+      ) : allInNormal ? (
+        <View style={{ marginTop: 32, alignItems: 'center' }}>
+          <Text style={{ fontFamily: FONT.sans, fontWeight: WEIGHT.regular, fontSize: 11, color: COLORS.textSecondary }}>
+            All scored markers in the normal range.
+          </Text>
+          <Text style={{ marginTop: 6, fontFamily: FONT.sans, fontSize: 9.5, color: COLORS.textMuted, maxWidth: 340, textAlign: 'center', lineHeight: 1.5 }}>
+            {normalOmittedCount} {normalOmittedCount === 1 ? 'marker is' : 'markers are'} listed under {definition.label} on the Full Results Reference page.
+          </Text>
+        </View>
       ) : (
         <>
-          <DistributionBar tierCounts={score.tierCounts} total={totalScored} />
+          <DistributionBar tierCounts={displayedTierCounts} total={totalShown} />
 
           <View style={{ marginTop: 9, gap: 8 }}>
             {groups.map((g) => (
@@ -355,6 +370,21 @@ export function PillarPage({ model }: { model: PillarPageModel }) {
               </View>
             ))}
           </View>
+
+          {normalOmittedCount > 0 ? (
+            <Text
+              style={{
+                marginTop: 10,
+                fontFamily: FONT.mono,
+                fontSize: 8,
+                letterSpacing: 0.6,
+                textTransform: 'uppercase',
+                color: COLORS.textMuted,
+              }}
+            >
+              {`+ ${normalOmittedCount} ${normalOmittedCount === 1 ? 'marker' : 'markers'} in normal range - see Full Results Reference`}
+            </Text>
+          ) : null}
         </>
       )}
 
