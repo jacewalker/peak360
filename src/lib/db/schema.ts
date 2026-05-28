@@ -102,6 +102,29 @@ export const pillarPrescriptions = pgTable(
   })
 );
 
+// Phase 12 — Admin-managed marker registry (D-01, D-02). DB-driven markers
+// that augment the hardcoded REPORT_MARKERS seed. Merge happens at read time
+// via getReportMarkers() in src/lib/markers/registry.ts. DB rows win on
+// testKey conflict with the seed. Timestamps are epoch ms (matches Phase 11
+// markerContent / Phase 8 pillarDefinitions, not the older ISO-string style).
+export const markers = pgTable('markers', {
+  testKey: text('test_key').primaryKey(),
+  label: text('label').notNull(),
+  section: integer('section').notNull(),         // 1..10
+  dataKey: text('data_key').notNull(),
+  pillar: text('pillar').notNull(),              // one of PILLAR_KEYS
+  category: text('category').notNull(),
+  subcategory: text('subcategory'),              // nullable
+  fallbackUnit: text('fallback_unit'),           // nullable
+  hasNorms: boolean('has_norms').notNull(),
+  aiAliases: jsonb('ai_aliases').$type<string[] | null>(),
+  severityWeight: integer('severity_weight'),
+  createdBy: text('created_by').notNull(),
+  createdAt: integer('created_at').notNull(),    // epoch ms
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at').notNull(),    // epoch ms
+});
+
 // Phase 11 — Admin-authored marker content (D-08). One row per REPORT_MARKERS
 // testKey. Definition + impact are gender-neutral (D-04); coachInsights is a
 // 5-tier x {male,female} matrix (D-05). Mirrors pillarDefinitions ownership.

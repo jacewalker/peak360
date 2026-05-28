@@ -100,6 +100,27 @@ export const pillarPrescriptions = sqliteTable(
   })
 );
 
+// Phase 12 — Admin-managed marker registry (D-01, D-02). Mirror of the PG
+// markers pgTable. JSONB columns become JSON-mode text; PG boolean becomes
+// integer with mode:'boolean'; epoch-ms timestamps are integers.
+export const markers = sqliteTable('markers', {
+  testKey: text('test_key').primaryKey(),
+  label: text('label').notNull(),
+  section: integer('section').notNull(),
+  dataKey: text('data_key').notNull(),
+  pillar: text('pillar').notNull(),
+  category: text('category').notNull(),
+  subcategory: text('subcategory'),
+  fallbackUnit: text('fallback_unit'),
+  hasNorms: integer('has_norms', { mode: 'boolean' }).notNull(),
+  aiAliases: text('ai_aliases', { mode: 'json' }).$type<string[] | null>(),
+  severityWeight: integer('severity_weight'),
+  createdBy: text('created_by').notNull(),
+  createdAt: integer('created_at').notNull(),
+  updatedBy: text('updated_by').notNull(),
+  updatedAt: integer('updated_at').notNull(),
+});
+
 // Phase 11 — Admin-authored marker content (D-08). SQLite stores the
 // coach_insights JSON matrix as a JSON-mode text column.
 export const markerContent = sqliteTable('marker_content', {
