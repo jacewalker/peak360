@@ -26,11 +26,11 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 ## Current Position
 
 Phase: 12
-Plan: 12-02 (next)
+Plan: 12-03 (next)
 Status: Phase 12 in progress
-Last activity: 2026-05-28 - Completed 12-01 (markers registry foundation: schema + queries + merge helpers + audit)
+Last activity: 2026-05-28 - Completed 12-02 (admin + client marker APIs + AI extract migration)
 
-Progress: [█████████░] 93%
+Progress: [█████████░] 94%
 
 ## Performance Metrics
 
@@ -64,6 +64,7 @@ Progress: [█████████░] 93%
 | Phase 09 P01 | 6m 12s | 9 tasks | 13 files |
 | Phase 9 P02 | 70 | - tasks | - files |
 | Phase 12 P01 | 6m 14s | 3 tasks | 11 files |
+| Phase 12 P02 | 3m 48s | 3 tasks | 4 files |
 
 ## Accumulated Context
 
