@@ -94,6 +94,7 @@ Recent decisions affecting current work:
 - 2026-05-07: Phase 8 added — Client report design refresh. User-driven design change for the final report (Section 11) as it appears in the /portal client area. Context to be captured via discuss-phase.
 - 2026-05-10: Phase 9 added — Brand-language alignment across portal, dashboard, assessment, and client surfaces. Promote landing-page design system (dark atmosphere, gold-dark #c9a24a, Inter Tight + JetBrains Mono, mono eyebrows, radial-gradient sections) to globals + Tailwind config; redesign login/reset-password/sidebar/dashboard/assessment-form/clients/admin pages to match. Locked: dark across all surfaces; 2 fat plans (09-01 foundations+auth, 09-02 working surfaces).
 - 2026-05-12: Phase 10 added — Section 11 + PDF brand language alignment. Phase 9 missed Section 11's report-specific rendering (the longevity analysis dashboard) and never scoped the PDF renderer under src/lib/pdf/. Phase 10 closes both: retokenize Section 11 to dark portal palette in-app, and align the exported PDF with the Phase 8/9 brand system.
+- 2026-05-28: Phase 12 added — Admin-managed marker registry. Today an admin can only edit content/thresholds for existing markers; adding a new marker requires editing 4 code files (REPORT_MARKERS, normative/data.ts, ai/field-mappings.ts, normative/insights.ts) and redeploy. Phase 12 introduces a DB-backed marker registry + admin UI so non-developers can add markers to any section with tier ranges and coach insights, surfaced in Section 11 portal and PDF.
 
 ### Pending Todos
 

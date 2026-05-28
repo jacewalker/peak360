@@ -184,3 +184,13 @@ Plans:
 - [x] 11-02-PLAN.md — APIs: admin GET/PUT + list (409 + audit, D-11) + client-readable any-role GET (D-07, D-12)
 - [x] 11-03-PLAN.md — Admin UI: marker-content list + per-marker editor (definition/impact + 5-tier × male/female matrix, optimistic concurrency, dirty guard, tone guidance) + admin nav card (D-07, D-10, D-14)
 - [x] 11-04-PLAN.md — Report UI: PillarsDisplayModal master/detail (desktop two-pane, mobile drill-in) + thread marker content + gender from Section11; (tier,gender) insight with generatePeak360Insights fallback; dark-portal brand; no PDF (D-01..D-06, D-12, D-13, D-14)
+
+### Phase 12: Admin-managed marker registry
+
+**Goal:** Admins can add new biomarker or fitness-test markers to any of the 11 assessment sections through the admin UI. Markers are persisted in the database (not hardcoded in `REPORT_MARKERS`), assigned to a pillar so they appear in Section 11 interactive reports, included in the exported PDF report, and ship with their own coach insights (per-tier × per-gender, like Phase 11) and 5-tier ranges (poor/cautious/normal/great/elite), supporting gender-specific and age-bucketed ranges (like Phase 3's normative ranges editor).
+**Requirements**: TBD (will be locked in 12-CONTEXT.md)
+**Depends on:** Phase 11 (marker_content store + admin authoring patterns), Phase 8 (pillar mapping), Phase 3 (admin normative ranges editor)
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 12 to break down)
