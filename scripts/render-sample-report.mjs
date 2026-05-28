@@ -165,12 +165,12 @@ function buildFixture() {
 
   return {
     assessmentId: 'sample-fixture',
-    clientName: 'Marcus Reid',
-    clientAge: 48,
+    clientName: 'John Smith',
+    clientAge: 52,
     clientGender: 'male',
-    clientEmail: 'marcus@example.com',
-    clientDob: '1978-02-14',
-    assessmentDate: '2026-05-12',
+    clientEmail: 'john.smith@example.com',
+    clientDob: '1974-05-28',
+    assessmentDate: '2026-05-28',
     readiness: {
       sleepHours: 7,
       stressLevel: 4,
@@ -187,11 +187,11 @@ function buildFixture() {
       recentSurgery: 'no',
     },
     consent: {
-      clientSignatureName: 'Marcus Reid',
-      clientSignatureDate: '12 May 2026',
+      clientSignatureName: 'John Smith',
+      clientSignatureDate: '28 May 2026',
       clientSignature: 'data:image/png;base64,xxx',
       coachSignatureName: 'J. Walker',
-      coachSignatureDate: '12 May 2026',
+      coachSignatureDate: '28 May 2026',
       coachSignature: 'data:image/png;base64,xxx',
     },
     markers,
