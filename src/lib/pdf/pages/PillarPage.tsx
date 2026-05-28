@@ -103,7 +103,7 @@ function DistributionBar({
   total: number;
 }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 14, marginBottom: 4 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 12, marginTop: 12, marginBottom: 2 }}>
       <View
         style={{
           flex: 1,
@@ -140,7 +140,7 @@ function DistributionBar({
 
 function GroupHead({ tier, count }: { tier: RatingTier; count: number }) {
   return (
-    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 5 }}>
+    <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
       <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: TIER_COLORS_PDF[tier] }} />
       <Text
         style={{
@@ -331,11 +331,11 @@ export function PillarPage({ model }: { model: PillarPageModel }) {
         <>
           <DistributionBar tierCounts={score.tierCounts} total={totalScored} />
 
-          <View style={{ marginTop: 10, gap: 10 }}>
+          <View style={{ marginTop: 9, gap: 8 }}>
             {groups.map((g) => (
               <View key={g.tier} wrap={false}>
                 <GroupHead tier={g.tier} count={g.markers.length} />
-                <View style={{ gap: 4 }}>
+                <View style={{ gap: 3 }}>
                   {g.markers.map((m) => (
                     <MarkerTierRow key={m.key} marker={m} />
                   ))}

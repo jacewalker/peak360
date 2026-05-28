@@ -27,7 +27,7 @@ export function MarkerTierRow({ marker }: { marker: ReportMarker }) {
         flexDirection: 'row',
         alignItems: 'center',
         gap: 10,
-        paddingVertical: 6,
+        paddingVertical: 5,
         paddingHorizontal: 11,
         borderRadius: 7,
         backgroundColor: COLORS.bgLight,
