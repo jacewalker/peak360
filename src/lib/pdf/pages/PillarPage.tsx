@@ -318,6 +318,18 @@ export function PillarPage({ model }: { model: PillarPageModel }) {
         </View>
       </View>
 
+      {/* Coach focus note - placed above the markers (and the distribution bar),
+          beneath the pillar header. Keeps the prescription visible at the top of
+          every pillar page and lets the marker list flow naturally across a
+          continuation page for very dense pillars instead of orphaning the note. */}
+      {prescription && (prescription.summary || (prescription.bullets && prescription.bullets.length > 0)) ? (
+        <CoachNote
+          summary={prescription.summary}
+          bullets={prescription.bullets}
+          status={score.status}
+        />
+      ) : null}
+
       {isPending ? (
         <View style={{ marginTop: 40, alignItems: 'center' }}>
           <Text style={{ fontFamily: FONT.sans, fontWeight: WEIGHT.regular, fontSize: 11, color: COLORS.textSecondary }}>
@@ -345,15 +357,6 @@ export function PillarPage({ model }: { model: PillarPageModel }) {
           </View>
         </>
       )}
-
-      {/* Coach focus note */}
-      {prescription && (prescription.summary || (prescription.bullets && prescription.bullets.length > 0)) ? (
-        <CoachNote
-          summary={prescription.summary}
-          bullets={prescription.bullets}
-          status={score.status}
-        />
-      ) : null}
 
       <ReportFooter context={definition.label} />
     </Page>
