@@ -4,13 +4,14 @@ import { FONT, WEIGHT } from '@/lib/pdf/fonts';
 import { TIER_COLORS_PDF } from '@/lib/pdf/colors';
 import { SectionEyebrow } from '@/lib/pdf/components/SectionEyebrow';
 import { ReportFooter } from '@/lib/pdf/components/ReportFooter';
-import { formatValue } from '@/lib/pdf/components/MarkerTierRow';
+import { formatMarkerValue, isPassFailKey } from '@/lib/pdf/components/MarkerTierRow';
 import { TIER_LABELS, type RatingTier } from '@/types/normative';
 import type { ReportData, ReportMarker } from '@/lib/pdf/types';
-import { buildBloodPanelGroups, TIER_ORDER } from '@/lib/pdf/pillar-page-data';
+import { buildFullResultsGroups, TIER_ORDER } from '@/lib/pdf/pillar-page-data';
 
-function BloodRow({ marker }: { marker: ReportMarker }) {
+function ResultRow({ marker }: { marker: ReportMarker }) {
   const tier: RatingTier = marker.tier ?? 'normal';
+  const showUnit = !isPassFailKey(marker.key);
   return (
     <View
       style={{
@@ -53,8 +54,8 @@ function BloodRow({ marker }: { marker: ReportMarker }) {
             color: COLORS.textPrimary,
           }}
         >
-          {formatValue(marker.value)}
-          {marker.unit ? (
+          {formatMarkerValue(marker)}
+          {showUnit && marker.unit ? (
             <Text style={{ fontSize: 7, fontWeight: WEIGHT.regular, color: COLORS.textSecondary }}>
               {` ${marker.unit}`}
             </Text>
@@ -65,8 +66,15 @@ function BloodRow({ marker }: { marker: ReportMarker }) {
   );
 }
 
-export function FullBloodPanelPage({ data }: { data: ReportData }) {
-  const panels = buildBloodPanelGroups(data.markers);
+/**
+ * Exhaustive results-reference page: every REPORT_MARKERS entry with a recorded
+ * value, grouped by category (REPORT_CATEGORIES order) and then by subcategory
+ * within each category when present. Replaces the old blood-only reference page
+ * so newly added markers (FABER, eyes-closed CoP, mobility metrics) never get
+ * silently dropped from the PDF.
+ */
+export function FullResultsPage({ data }: { data: ReportData }) {
+  const groups = buildFullResultsGroups(data.markers);
 
   return (
     <Page size="A4" style={{ backgroundColor: COLORS.page, paddingTop: 42, paddingBottom: 48, paddingHorizontal: 56 }}>
@@ -81,7 +89,7 @@ export function FullBloodPanelPage({ data }: { data: ReportData }) {
           marginTop: 12,
         }}
       >
-        Full blood panel
+        Full results reference
       </Text>
       <Text
         style={{
@@ -91,42 +99,59 @@ export function FullBloodPanelPage({ data }: { data: ReportData }) {
           lineHeight: 1.5,
           color: COLORS.textSecondary,
           marginTop: 8,
-          maxWidth: 400,
+          maxWidth: 420,
         }}
       >
-        Every biomarker from your blood draw, grouped by panel and rated for your age and sex. Markers shown here inform the pillars above; the lipid, glucose and inflammation panels also drive your Cardiometabolic score.
+        Every recorded marker from this assessment - blood, body composition, cardiovascular, strength, mobility - rated for your age and sex where norms exist. Markers shown here inform the pillars above; the lipid, glucose and inflammation panels also drive your Cardiometabolic score.
       </Text>
 
-      {panels.length === 0 ? (
+      {groups.length === 0 ? (
         <Text style={{ marginTop: 28, fontFamily: FONT.sans, fontSize: 10, color: COLORS.textMuted }}>
-          No blood markers with recorded values for this assessment.
+          No markers with recorded values for this assessment.
         </Text>
       ) : (
-        panels.map((panel) => (
-          <View key={panel.name} style={{ marginTop: 16 }} wrap={false}>
-            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 8 }}>
-              <Text
-                style={{
-                  fontFamily: FONT.mono,
-                  fontWeight: WEIGHT.semibold,
-                  fontSize: 8.5,
-                  letterSpacing: 1.2,
-                  textTransform: 'uppercase',
-                  color: COLORS.textPrimary,
-                }}
-              >
-                {panel.name}
-              </Text>
-              <Text style={{ fontFamily: FONT.mono, fontSize: 7.5, letterSpacing: 0.6, color: COLORS.textMuted }}>
-                {`- ${panel.markers.length}`}
-              </Text>
-              <View style={{ flex: 1, height: 0.6, backgroundColor: COLORS.border }} />
-            </View>
-            <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -7 }}>
-              {panel.markers.map((m) => (
-                <BloodRow key={m.key} marker={m} />
-              ))}
-            </View>
+        groups.map((cat) => (
+          <View key={cat.category} style={{ marginTop: 18 }}>
+            <Text
+              style={{
+                fontFamily: FONT.sans,
+                fontWeight: WEIGHT.semibold,
+                fontSize: 13,
+                color: COLORS.textPrimary,
+                marginBottom: 8,
+              }}
+            >
+              {cat.category}
+            </Text>
+            {cat.panels.map((panel) => (
+              <View key={panel.name ?? '_'} style={{ marginTop: panel.name ? 10 : 4 }} wrap={false}>
+                {panel.name ? (
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 8 }}>
+                    <Text
+                      style={{
+                        fontFamily: FONT.mono,
+                        fontWeight: WEIGHT.semibold,
+                        fontSize: 8.5,
+                        letterSpacing: 1.2,
+                        textTransform: 'uppercase',
+                        color: COLORS.textPrimary,
+                      }}
+                    >
+                      {panel.name}
+                    </Text>
+                    <Text style={{ fontFamily: FONT.mono, fontSize: 7.5, letterSpacing: 0.6, color: COLORS.textMuted }}>
+                      {`- ${panel.markers.length}`}
+                    </Text>
+                    <View style={{ flex: 1, height: 0.6, backgroundColor: COLORS.border }} />
+                  </View>
+                ) : null}
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -7 }}>
+                  {panel.markers.map((m) => (
+                    <ResultRow key={m.key} marker={m} />
+                  ))}
+                </View>
+              </View>
+            ))}
           </View>
         ))
       )}
@@ -162,7 +187,7 @@ export function FullBloodPanelPage({ data }: { data: ReportData }) {
         ))}
       </View>
 
-      <ReportFooter context="Full blood panel" />
+      <ReportFooter context="Full results reference" />
     </Page>
   );
 }

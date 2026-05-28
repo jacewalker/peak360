@@ -4,7 +4,7 @@ import type { ReportData } from '@/lib/pdf/types';
 import '@/lib/pdf/fonts';
 import { CoverPage } from '@/lib/pdf/pages/CoverPage';
 import { PillarPage } from '@/lib/pdf/pages/PillarPage';
-import { FullBloodPanelPage } from '@/lib/pdf/pages/FullBloodPanelPage';
+import { FullResultsPage } from '@/lib/pdf/pages/FullResultsPage';
 import { AppendixPage } from '@/lib/pdf/pages/AppendixPage';
 import { buildPillarPageModels } from '@/lib/pdf/pillar-page-data';
 
@@ -19,7 +19,8 @@ interface Peak360ReportProps {
  *   1.   Cover (wordmark, hero, client band, pillar scoreboard, tagline)
  *   2-6. One page per Peak Living pillar in definition.sortOrder, markers
  *        ranked Attention -> Peak with a gold Coach focus note
- *   7.   Full blood panel (every blood marker with a value, by subcategory)
+ *   7.   Full results reference (every recorded marker across all categories,
+ *        grouped by category then subcategory)
  *   8.   Appendix (readiness, medical screening, consent, disclaimer)
  *
  * The number of pillar pages tracks data.definitions (5 in v1), so the page
@@ -36,7 +37,7 @@ export function Peak360Report({ data }: Peak360ReportProps) {
         <PillarPage key={model.definition.pillarKey} model={model} />
       ))}
 
-      <FullBloodPanelPage data={data} />
+      <FullResultsPage data={data} />
 
       <AppendixPage data={data} />
     </Document>

@@ -3,7 +3,8 @@
 // Given the flat ReportData.markers array, these pure functions produce the
 // per-page view models the page components render:
 //   - per-pillar scored markers grouped + sorted Attention -> Peak
-//   - the full-blood-panel grouping (by subcategory) for the reference page
+//   - the full-results grouping (by category, then subcategory) for the
+//     reference page that backs every recorded marker
 //
 // They wrap the existing pillar classifier / scorer (markerToPillar,
 // computeAllPillarScores) so PDF and portal scores stay identical. Nothing
@@ -19,6 +20,7 @@ import type {
 } from '@/lib/pillars/types';
 import { markerToPillar, computeAllPillarScores } from '@/lib/pillars/mapping';
 import type { RatingTier } from '@/types/normative';
+import { REPORT_CATEGORIES } from '@/lib/report-markers';
 
 /** Worst-to-best tier rank (poor -> elite). Drives row ordering. */
 export const TIER_RANK: Record<RatingTier, number> = {
@@ -126,42 +128,84 @@ export function buildPillarPageModels(data: ReportData): PillarPageModel[] {
   });
 }
 
-export interface BloodPanelGroup {
-  /** Subcategory panel name, e.g. "Lipid Panel". */
-  name: string;
+export interface ResultsPanelGroup {
+  /** Subcategory panel name, e.g. "Lipid Panel". Null when the parent
+   *  category has no subcategory split (markers render flat). */
+  name: string | null;
   markers: ReportMarker[];
 }
 
+export interface ResultsCategoryGroup {
+  /** Category name, e.g. "Blood Tests & Biomarkers" or "Mobility & Flexibility". */
+  category: string;
+  /** One or more panels under this category. Categories with no subcategory
+   *  split produce a single panel with name === null. */
+  panels: ResultsPanelGroup[];
+}
+
 /**
- * Full blood panel grouping: every marker with category
- * 'Blood Tests & Biomarkers' AND a non-null value, grouped by subcategory and
- * sorted within each panel poor -> elite. Panels are ordered by first
- * appearance in the marker list so the canonical REPORT_MARKERS order wins.
+ * The set of categories the FullResultsPage iterates. Source-of-truth for the
+ * marker-coverage guard test - if a marker's category isn't here, the guard
+ * will catch it. This is just REPORT_CATEGORIES re-exported as a set for
+ * convenience; FullResultsPage iterates the array in declaration order.
  */
-export function buildBloodPanelGroups(markers: ReportMarker[]): BloodPanelGroup[] {
-  const order: string[] = [];
-  const byPanel = new Map<string, ReportMarker[]>();
+export const REFERENCE_PAGE_CATEGORIES: ReadonlySet<string> = new Set(REPORT_CATEGORIES);
+
+/**
+ * Full results grouping: every marker with a non-null value, grouped by
+ * category (REPORT_CATEGORIES order) and then by subcategory within each
+ * category. Categories without a subcategory split produce a single
+ * unlabelled panel. Markers within each panel are sorted poor -> elite.
+ *
+ * Drives the exhaustive reference page so newly added markers (FABER,
+ * eyes-closed CoP, mobility metrics) never get silently dropped from the PDF.
+ */
+export function buildFullResultsGroups(markers: ReportMarker[]): ResultsCategoryGroup[] {
+  // Walk markers once, bucketing by category then by subcategory key.
+  // We preserve REPORT_CATEGORIES order for categories; within a category we
+  // preserve first-appearance order for subcategories so the canonical
+  // REPORT_MARKERS order wins.
+  const byCategory = new Map<string, { panelOrder: (string | null)[]; panels: Map<string | null, ReportMarker[]> }>();
 
   for (const m of markers) {
-    if (m.category !== 'Blood Tests & Biomarkers') continue;
     if (m.value == null) continue;
-    const panel = m.subcategory && m.subcategory.trim() ? m.subcategory : 'Other';
-    if (!byPanel.has(panel)) {
-      byPanel.set(panel, []);
-      order.push(panel);
+    const cat = m.category;
+    if (!byCategory.has(cat)) {
+      byCategory.set(cat, { panelOrder: [], panels: new Map() });
     }
-    byPanel.get(panel)!.push(m);
+    const bucket = byCategory.get(cat)!;
+    const panelKey: string | null = m.subcategory && m.subcategory.trim() ? m.subcategory : null;
+    if (!bucket.panels.has(panelKey)) {
+      bucket.panels.set(panelKey, []);
+      bucket.panelOrder.push(panelKey);
+    }
+    bucket.panels.get(panelKey)!.push(m);
   }
 
-  return order.map((name) => ({
-    name,
-    markers: byPanel.get(name)!.slice().sort((a, b) => {
-      const ra = a.tier ? TIER_RANK[a.tier] : 99;
-      const rb = b.tier ? TIER_RANK[b.tier] : 99;
-      if (ra !== rb) return ra - rb;
-      return a.label.localeCompare(b.label);
-    }),
-  }));
+  // Emit categories in REPORT_CATEGORIES order, falling back to first-seen
+  // order for any category we somehow received that wasn't in the canonical
+  // list (defensive - this should never happen).
+  const categoryOrder: string[] = [];
+  for (const cat of REPORT_CATEGORIES) {
+    if (byCategory.has(cat)) categoryOrder.push(cat);
+  }
+  for (const cat of byCategory.keys()) {
+    if (!categoryOrder.includes(cat)) categoryOrder.push(cat);
+  }
+
+  return categoryOrder.map((category) => {
+    const bucket = byCategory.get(category)!;
+    const panels: ResultsPanelGroup[] = bucket.panelOrder.map((name) => ({
+      name,
+      markers: bucket.panels.get(name)!.slice().sort((a, b) => {
+        const ra = a.tier ? TIER_RANK[a.tier] : 99;
+        const rb = b.tier ? TIER_RANK[b.tier] : 99;
+        if (ra !== rb) return ra - rb;
+        return a.label.localeCompare(b.label);
+      }),
+    }));
+    return { category, panels };
+  });
 }
 
 /**
