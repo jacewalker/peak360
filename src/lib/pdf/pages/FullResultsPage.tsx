@@ -12,35 +12,35 @@ import { buildFullResultsGroups, TIER_ORDER } from '@/lib/pdf/pillar-page-data';
 function ResultRow({ marker }: { marker: ReportMarker }) {
   const tier: RatingTier = marker.tier ?? 'normal';
   const showUnit = !isPassFailKey(marker.key);
+  // Compact row: no per-row border, tight padding, dense baseline. Tier dot
+  // alone provides the visual rating cue; subtle bg-2 fill keeps it readable.
   return (
     <View
       style={{
         width: '50%',
-        paddingHorizontal: 7,
-        marginBottom: 5,
+        paddingHorizontal: 4,
+        marginBottom: 2,
       }}
     >
       <View
         style={{
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 8,
-          paddingVertical: 6,
-          paddingHorizontal: 11,
-          borderRadius: 7,
+          gap: 6,
+          paddingVertical: 3,
+          paddingHorizontal: 8,
+          borderRadius: 5,
           backgroundColor: COLORS.bgLight,
-          borderWidth: 0.5,
-          borderColor: COLORS.border,
         }}
         wrap={false}
       >
-        <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: TIER_COLORS_PDF[tier] }} />
+        <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: TIER_COLORS_PDF[tier], flexShrink: 0 }} />
         <Text
           style={{
             flex: 1,
             fontFamily: FONT.sans,
             fontWeight: WEIGHT.medium,
-            fontSize: 9.5,
+            fontSize: 8.5,
             color: COLORS.textPrimary,
           }}
         >
@@ -50,13 +50,13 @@ function ResultRow({ marker }: { marker: ReportMarker }) {
           style={{
             fontFamily: FONT.mono,
             fontWeight: WEIGHT.semibold,
-            fontSize: 9,
+            fontSize: 8.5,
             color: COLORS.textPrimary,
           }}
         >
           {formatMarkerValue(marker)}
           {showUnit && marker.unit ? (
-            <Text style={{ fontSize: 7, fontWeight: WEIGHT.regular, color: COLORS.textSecondary }}>
+            <Text style={{ fontSize: 6.5, fontWeight: WEIGHT.regular, color: COLORS.textSecondary }}>
               {` ${marker.unit}`}
             </Text>
           ) : null}
@@ -77,16 +77,16 @@ export function FullResultsPage({ data }: { data: ReportData }) {
   const groups = buildFullResultsGroups(data.markers);
 
   return (
-    <Page size="A4" style={{ backgroundColor: COLORS.page, paddingTop: 42, paddingBottom: 48, paddingHorizontal: 56 }}>
+    <Page size="A4" style={{ backgroundColor: COLORS.page, paddingTop: 36, paddingBottom: 44, paddingHorizontal: 44 }}>
       <SectionEyebrow prefix="Reference" />
       <Text
         style={{
           fontFamily: FONT.sans,
           fontWeight: WEIGHT.semibold,
-          fontSize: 28,
-          letterSpacing: -0.6,
+          fontSize: 22,
+          letterSpacing: -0.4,
           color: COLORS.textPrimary,
-          marginTop: 12,
+          marginTop: 8,
         }}
       >
         Full results reference
@@ -95,14 +95,14 @@ export function FullResultsPage({ data }: { data: ReportData }) {
         style={{
           fontFamily: FONT.sans,
           fontWeight: WEIGHT.regular,
-          fontSize: 10,
-          lineHeight: 1.5,
+          fontSize: 9,
+          lineHeight: 1.4,
           color: COLORS.textSecondary,
-          marginTop: 8,
-          maxWidth: 420,
+          marginTop: 5,
+          maxWidth: 480,
         }}
       >
-        Every recorded marker from this assessment - blood, body composition, cardiovascular, strength, mobility - rated for your age and sex where norms exist. Markers shown here inform the pillars above; the lipid, glucose and inflammation panels also drive your Cardiometabolic score.
+        Every recorded marker from this assessment, rated for your age and sex where norms exist. Lipid, glucose and inflammation panels also drive your Cardiometabolic score.
       </Text>
 
       {groups.length === 0 ? (
@@ -111,41 +111,41 @@ export function FullResultsPage({ data }: { data: ReportData }) {
         </Text>
       ) : (
         groups.map((cat) => (
-          <View key={cat.category} style={{ marginTop: 18 }}>
+          <View key={cat.category} style={{ marginTop: 11 }}>
             <Text
               style={{
                 fontFamily: FONT.sans,
                 fontWeight: WEIGHT.semibold,
-                fontSize: 13,
+                fontSize: 11,
                 color: COLORS.textPrimary,
-                marginBottom: 8,
+                marginBottom: 4,
               }}
             >
               {cat.category}
             </Text>
             {cat.panels.map((panel) => (
-              <View key={panel.name ?? '_'} style={{ marginTop: panel.name ? 10 : 4 }} wrap={false}>
+              <View key={panel.name ?? '_'} style={{ marginTop: panel.name ? 5 : 2 }} wrap={false}>
                 {panel.name ? (
-                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 9, marginBottom: 8 }}>
+                  <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8, marginBottom: 4 }}>
                     <Text
                       style={{
                         fontFamily: FONT.mono,
                         fontWeight: WEIGHT.semibold,
-                        fontSize: 8.5,
-                        letterSpacing: 1.2,
+                        fontSize: 7.5,
+                        letterSpacing: 1.1,
                         textTransform: 'uppercase',
                         color: COLORS.textPrimary,
                       }}
                     >
                       {panel.name}
                     </Text>
-                    <Text style={{ fontFamily: FONT.mono, fontSize: 7.5, letterSpacing: 0.6, color: COLORS.textMuted }}>
+                    <Text style={{ fontFamily: FONT.mono, fontSize: 7, letterSpacing: 0.5, color: COLORS.textMuted }}>
                       {`- ${panel.markers.length}`}
                     </Text>
-                    <View style={{ flex: 1, height: 0.6, backgroundColor: COLORS.border }} />
+                    <View style={{ flex: 1, height: 0.4, backgroundColor: COLORS.border }} />
                   </View>
                 ) : null}
-                <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -7 }}>
+                <View style={{ flexDirection: 'row', flexWrap: 'wrap', marginHorizontal: -4 }}>
                   {panel.markers.map((m) => (
                     <ResultRow key={m.key} marker={m} />
                   ))}
@@ -162,21 +162,21 @@ export function FullResultsPage({ data }: { data: ReportData }) {
           flexDirection: 'row',
           flexWrap: 'wrap',
           justifyContent: 'center',
-          gap: 18,
-          marginTop: 22,
-          paddingTop: 14,
+          gap: 14,
+          marginTop: 12,
+          paddingTop: 9,
           borderTopWidth: 0.5,
           borderTopColor: COLORS.border,
         }}
       >
         {TIER_ORDER.map((tier) => (
-          <View key={tier} style={{ flexDirection: 'row', alignItems: 'center', gap: 6 }}>
-            <View style={{ width: 7, height: 7, borderRadius: 4, backgroundColor: TIER_COLORS_PDF[tier] }} />
+          <View key={tier} style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}>
+            <View style={{ width: 6, height: 6, borderRadius: 3, backgroundColor: TIER_COLORS_PDF[tier] }} />
             <Text
               style={{
                 fontFamily: FONT.mono,
-                fontSize: 7.5,
-                letterSpacing: 0.8,
+                fontSize: 7,
+                letterSpacing: 0.7,
                 textTransform: 'uppercase',
                 color: COLORS.textSecondary,
               }}
