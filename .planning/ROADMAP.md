@@ -190,11 +190,11 @@ Plans:
 **Goal:** Admins can add new biomarker or fitness-test markers to any of the 11 assessment sections through the admin UI. Markers are persisted in the database (not hardcoded in `REPORT_MARKERS`), assigned to a pillar so they appear in Section 11 interactive reports, included in the exported PDF report, and ship with their own coach insights (per-tier x per-gender, like Phase 11) and 5-tier ranges (poor/cautious/normal/great/elite), supporting gender-specific and age-bucketed ranges (like Phase 3's normative ranges editor).
 **Requirements**: D-01..D-16 (locked in 12-CONTEXT.md)
 **Depends on:** Phase 11 (marker_content store + admin authoring patterns), Phase 8 (pillar mapping), Phase 3 (admin normative ranges editor)
-**Plans:** 3/5 plans executed
+**Plans:** 4/5 plans executed
 
 Plans:
 - [x] 12-01-PLAN.md - Foundation: markers table (PG + SQLite + raw migration), query layer, getReportMarkers/getFieldMappings merge helpers, markerToPillar DB short-circuit, new AuditAction members, BLOCKING db:push (D-01..D-04, D-07, D-13)
 - [x] 12-02-PLAN.md - Admin + client APIs: /api/admin/markers + /[testKey] (validation, optimistic concurrency, cascade delete, audit), client-readable /api/markers, AI extract route migrated to getFieldMappings (D-05, D-13, D-14)
 - [x] 12-03-PLAN.md - Admin UI: section-grouped list page, create form (auto-derived test_key/data_key, inline 5-tier ranges, AI aliases, severity slider), edit page (dataKey lock, optimistic concurrency, two-click cascade delete), admin nav card (D-05, D-12, D-15, D-16)
-- [ ] 12-04-PLAN.md - Coach input + report integration: CustomMarkersBlock component (TDD), mechanical insert into Section1-10, Section11 + load-report-data + admin marker-content/normative + red-flags route migrated to /api/markers / getReportMarkers, PDF pillar-page-data audited (D-06, D-08, D-09, D-10, D-11). Dashboard/clients/TrendsTab migrations deferred to 12-04b.
+- [x] 12-04-PLAN.md - Coach input + report integration: CustomMarkersBlock component (TDD), mechanical insert into Section1-10, Section11 + load-report-data + admin marker-content/normative + red-flags route migrated to /api/markers / getReportMarkers, PDF pillar-page-data audited (D-06, D-08, D-09, D-10, D-11). Dashboard/clients/TrendsTab migrations deferred to 12-04b.
 - [ ] 12-05-PLAN.md - Verification: integration test (createMarker -> getReportMarkers -> markerToPillar), HUMAN-UAT.md happy-path + negative tests (Apolipoprotein B end-to-end add -> Section 11 modal -> PDF)
