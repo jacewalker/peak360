@@ -1,7 +1,7 @@
 import { db } from '@/lib/db';
 import { assessments, assessmentSections } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
-import { REPORT_MARKERS } from '@/lib/report-markers';
+import { getReportMarkers } from '@/lib/markers/registry';
 import { getPeak360Rating, getStandards } from '@/lib/normative/ratings';
 import { generatePeak360Insights } from '@/lib/normative/insights';
 import { decrypt } from '@/lib/crypto';
@@ -54,13 +54,16 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
   const age = (clientInfo.clientAge as number) || null;
   const gender = (clientInfo.clientGender as string) || assessment.clientGender || null;
 
-  // Evaluate all markers (mirrors Section11 useEffect logic)
+  // Evaluate all markers (mirrors Section11 useEffect logic). Phase 12 D-11:
+  // pull from the merged registry (seed + DB) so admin-added markers flow into
+  // the PDF report identically to seeded markers.
+  const reportMarkers = await getReportMarkers();
   const evaluated: ReportMarker[] = [];
   const counts: Record<RatingTier, number> = {
     elite: 0, great: 0, normal: 0, cautious: 0, poor: 0,
   };
 
-  for (const m of REPORT_MARKERS) {
+  for (const m of reportMarkers) {
     const sectionData = sections[m.section] || {};
     const rawValue = sectionData[m.dataKey];
     const value = rawValue != null ? Number(rawValue) : null;

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { getPeak360Rating } from '@/lib/normative/ratings';
 import { generatePeak360Insights } from '@/lib/normative/insights';
 import type { RatingTier } from '@/types/normative';
@@ -63,7 +63,7 @@ const TIER_TEXT: Record<RatingTier, string> = {
   poor: 'text-red-300',
 };
 
-import { REPORT_MARKERS, type MarkerDef } from '@/lib/report-markers';
+import type { MarkerDef } from '@/lib/report-markers';
 import { computeAllPillarScoresLegacy, type PillarScore } from '@/lib/pillars/mapping';
 import PillarsDisplay from '@/components/report/PillarsDisplay';
 
@@ -134,6 +134,7 @@ export default function Section11({ assessmentId }: Section11Props) {
   const [medical, setMedical] = useState<Record<string, unknown>>({});
   const [consent, setConsent] = useState<Record<string, unknown>>({});
   const [markers, setMarkers] = useState<ReportMarker[]>([]);
+  const [allMarkers, setAllMarkers] = useState<MarkerDef[]>([]);
   const [insights, setInsights] = useState<Insight[]>([]);
   const [tierCounts, setTierCounts] = useState<Record<RatingTier, number>>({
     elite: 0, great: 0, normal: 0, cautious: 0, poor: 0,
@@ -178,7 +179,7 @@ export default function Section11({ assessmentId }: Section11Props) {
 
       // Fetch admin-authored marker content in parallel with the section
       // fetches (D-12). Build a Map keyed by testKey for O(1) lookup in the
-      // pillar modal. A failed fetch leaves the map empty — the modal then
+      // pillar modal. A failed fetch leaves the map empty - the modal then
       // falls back to generatePeak360Insights output (D-06).
       const markerContentFetch = (async () => {
         try {
@@ -196,7 +197,25 @@ export default function Section11({ assessmentId }: Section11Props) {
         }
       })();
 
-      await Promise.all([...fetches, markerContentFetch]);
+      // Phase 12 D-10 - fetch the merged registry (seed + admin DB markers)
+      // in parallel with the section/content fetches. Falls back to an empty
+      // array on failure so the report degrades gracefully (no DB markers
+      // surface) instead of crashing.
+      let mergedMarkers: MarkerDef[] = [];
+      const markersFetch = (async () => {
+        try {
+          const res = await fetch('/api/markers');
+          const json = await res.json();
+          if (json.success && json.data && Array.isArray(json.data.markers)) {
+            mergedMarkers = json.data.markers as MarkerDef[];
+          }
+        } catch {
+          mergedMarkers = [];
+        }
+      })();
+
+      await Promise.all([...fetches, markerContentFetch, markersFetch]);
+      setAllMarkers(mergedMarkers);
 
       const info = sections[1] || {};
       setClientInfo(info);
@@ -211,7 +230,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       const evaluated: ReportMarker[] = [];
       const counts: Record<RatingTier, number> = { elite: 0, great: 0, normal: 0, cautious: 0, poor: 0 };
 
-      for (const m of REPORT_MARKERS) {
+      for (const m of mergedMarkers) {
         const sectionData = sections[m.section] || {};
         const rawValue = sectionData[m.dataKey];
         const value = rawValue != null ? Number(rawValue) : null;
@@ -240,7 +259,7 @@ export default function Section11({ assessmentId }: Section11Props) {
       setMarkers(evaluated);
       setTierCounts(counts);
 
-      const pillarMarkers = REPORT_MARKERS.map((m) => {
+      const pillarMarkers = mergedMarkers.map((m) => {
         const ev = evaluated.find((e) => e.key === m.testKey);
         return {
           testKey: m.testKey,
@@ -282,7 +301,15 @@ export default function Section11({ assessmentId }: Section11Props) {
   // ── Derived Values ──────────────────────────────────────────────────────────
 
   const totalRated = Object.values(tierCounts).reduce((a, b) => a + b, 0);
-  const categories = [...new Set(REPORT_MARKERS.map((m) => m.category))];
+  // Phase 12 W12 - derive from the merged registry once it has hydrated; wrap
+  // in useMemo so the derivation re-runs when allMarkers arrives. The outer
+  // `loading` short-circuit (return spinner until setLoading(false)) already
+  // prevents an empty-pillar flash, but useMemo also avoids re-computing on
+  // every unrelated state change.
+  const categories = useMemo(
+    () => [...new Set(allMarkers.map((m) => m.category))],
+    [allMarkers],
+  );
   const reportDate = clientInfo.assessmentDate
     ? new Date(clientInfo.assessmentDate as string).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
     : new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
