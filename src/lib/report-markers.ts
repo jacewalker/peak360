@@ -112,6 +112,11 @@ export const REPORT_MARKERS: MarkerDef[] = [
   { testKey: 'single_leg_hop_right', label: 'Single Leg Hop (Right)', section: 8, dataKey: 'singleLegHopRight', category: 'Strength Testing', hasNorms: true },
   { testKey: 'single_leg_balance_left', label: 'SL Balance (Left)', section: 8, dataKey: 'singleLegBalanceLeft', category: 'Strength Testing', hasNorms: true },
   { testKey: 'single_leg_balance_right', label: 'SL Balance (Right)', section: 8, dataKey: 'singleLegBalanceRight', category: 'Strength Testing', hasNorms: true },
+  // Strength Testing - Single Leg Balance Eyes Closed (Vald force plates, CoP movement)
+  { testKey: 'single_leg_balance_ec_left_ml', label: 'SL Balance EC - ML (Left)', section: 8, dataKey: 'singleLegBalanceEyesClosedLeftMl', category: 'Strength Testing', fallbackUnit: 'mm', hasNorms: false },
+  { testKey: 'single_leg_balance_ec_left_ap', label: 'SL Balance EC - AP (Left)', section: 8, dataKey: 'singleLegBalanceEyesClosedLeftAp', category: 'Strength Testing', fallbackUnit: 'mm', hasNorms: false },
+  { testKey: 'single_leg_balance_ec_right_ml', label: 'SL Balance EC - ML (Right)', section: 8, dataKey: 'singleLegBalanceEyesClosedRightMl', category: 'Strength Testing', fallbackUnit: 'mm', hasNorms: false },
+  { testKey: 'single_leg_balance_ec_right_ap', label: 'SL Balance EC - AP (Right)', section: 8, dataKey: 'singleLegBalanceEyesClosedRightAp', category: 'Strength Testing', fallbackUnit: 'mm', hasNorms: false },
   { testKey: 'shoulder_iso_y_left', label: 'Shoulder Iso-Y (Left)', section: 8, dataKey: 'shoulderIsoYLeft', category: 'Strength Testing', hasNorms: true },
   { testKey: 'shoulder_iso_y_right', label: 'Shoulder Iso-Y (Right)', section: 8, dataKey: 'shoulderIsoYRight', category: 'Strength Testing', hasNorms: true },
   { testKey: 'pushups_max', label: 'Push-Up Max', section: 8, dataKey: 'pushupsMax', category: 'Strength Testing', hasNorms: true },
@@ -127,6 +132,11 @@ export const REPORT_MARKERS: MarkerDef[] = [
   { testKey: 'shoulder_mobility_right', label: 'Shoulder Mobility (Right)', section: 9, dataKey: 'shoulderMobilityRight', category: 'Mobility & Flexibility', fallbackUnit: 'cm', hasNorms: false },
   { testKey: 'ankle_dorsiflexion_left', label: 'Ankle Dorsiflexion (Left)', section: 9, dataKey: 'ankleDorsiflexionLeft', category: 'Mobility & Flexibility', fallbackUnit: 'cm', hasNorms: false },
   { testKey: 'ankle_dorsiflexion_right', label: 'Ankle Dorsiflexion (Right)', section: 9, dataKey: 'ankleDorsiflexionRight', category: 'Mobility & Flexibility', fallbackUnit: 'cm', hasNorms: false },
+  // Mobility & Flexibility - FABER Test (pass/fail outcome + distance to table)
+  { testKey: 'faber_outcome_left', label: 'FABER Outcome (Left)', section: 9, dataKey: 'faberOutcomeLeft', category: 'Mobility & Flexibility', hasNorms: false },
+  { testKey: 'faber_distance_left', label: 'FABER Distance (Left)', section: 9, dataKey: 'faberDistanceLeft', category: 'Mobility & Flexibility', fallbackUnit: 'cm', hasNorms: false },
+  { testKey: 'faber_outcome_right', label: 'FABER Outcome (Right)', section: 9, dataKey: 'faberOutcomeRight', category: 'Mobility & Flexibility', hasNorms: false },
+  { testKey: 'faber_distance_right', label: 'FABER Distance (Right)', section: 9, dataKey: 'faberDistanceRight', category: 'Mobility & Flexibility', fallbackUnit: 'cm', hasNorms: false },
 ];
 
 export const REPORT_CATEGORIES = [...new Set(REPORT_MARKERS.map((m) => m.category))];

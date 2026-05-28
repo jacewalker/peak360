@@ -100,6 +100,27 @@ export default function Section8({ data, onChange }: SectionProps) {
           left={data.singleLegBalanceLeft as number} right={data.singleLegBalanceRight as number} date={assessmentDate} />
       } />
 
+      {/* 5b. Single Leg Balance - Eyes Closed (Vald force plates, CoP) */}
+      <TestRow num={5} title="Single Leg Balance - Eyes Closed (Vald force plates, CoP)" inputs={
+        <>
+          <p className="text-[11px] text-text-faint leading-snug">
+            CoP movement in mm. ML = medial/lateral (side to side). AP = anterior/posterior (front to back). Lower is better.
+          </p>
+          <FormRow>
+            <FormField id="singleLegBalanceEyesClosedLeftMl" label="Left - ML (mm)" type="number" value={data.singleLegBalanceEyesClosedLeftMl as number} onChange={n('singleLegBalanceEyesClosedLeftMl')} step={1} />
+            <FormField id="singleLegBalanceEyesClosedLeftAp" label="Left - AP (mm)" type="number" value={data.singleLegBalanceEyesClosedLeftAp as number} onChange={n('singleLegBalanceEyesClosedLeftAp')} step={1} />
+          </FormRow>
+          <FormRow>
+            <FormField id="singleLegBalanceEyesClosedRightMl" label="Right - ML (mm)" type="number" value={data.singleLegBalanceEyesClosedRightMl as number} onChange={n('singleLegBalanceEyesClosedRightMl')} step={1} />
+            <FormField id="singleLegBalanceEyesClosedRightAp" label="Right - AP (mm)" type="number" value={data.singleLegBalanceEyesClosedRightAp as number} onChange={n('singleLegBalanceEyesClosedRightAp')} step={1} />
+          </FormRow>
+        </>
+      } result={
+        <ValdResultCard title="Single Leg Balance EC" category="Balance" metric="CoP - ML" subtitle="Eyes closed" unit="mm" isForceDecks lowerIsBetter
+          left={data.singleLegBalanceEyesClosedLeftMl as number} right={data.singleLegBalanceEyesClosedRightMl as number}
+          secondaryLeft={data.singleLegBalanceEyesClosedLeftAp as number} secondaryRight={data.singleLegBalanceEyesClosedRightAp as number} secondaryMetric="CoP - AP" date={assessmentDate} />
+      } />
+
       {/* 6. Shoulder Iso-Y (Vald) */}
       <TestRow num={6} title="Shoulder Iso-Y" inputs={
         <FormRow>

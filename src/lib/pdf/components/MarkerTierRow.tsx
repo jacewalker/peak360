@@ -19,7 +19,8 @@ export function MarkerTierRow({ marker }: { marker: ReportMarker }) {
   const tier: RatingTier = marker.tier ?? 'normal';
   const railColor = TIER_COLORS_PDF[tier];
   const subcat = buildSubcategoryLine(marker);
-  const value = formatValue(marker.value);
+  const value = formatMarkerValue(marker);
+  const showUnit = !isPassFailKey(marker.key);
 
   return (
     <View
@@ -85,7 +86,7 @@ export function MarkerTierRow({ marker }: { marker: ReportMarker }) {
         }}
       >
         {value}
-        {marker.unit ? (
+        {showUnit && marker.unit ? (
           <Text style={{ fontSize: 8, fontWeight: WEIGHT.regular, color: COLORS.textSecondary }}>
             {` ${marker.unit}`}
           </Text>
@@ -145,4 +146,24 @@ export function formatValue(value: number | null): string {
   if (Number.isInteger(value)) return String(value);
   // up to 2 dp, trimmed
   return String(Number(value.toFixed(2)));
+}
+
+/**
+ * Some markers are encoded as 1/0 (e.g. FABER outcome) but should render as
+ * Pass / Fail in the PDF. Detected purely by testKey prefix so we don't need
+ * to thread a separate "display kind" through the marker pipeline.
+ */
+export function isPassFailKey(key: string | undefined): boolean {
+  if (!key) return false;
+  return key.startsWith('faber_outcome_');
+}
+
+/** Marker-aware value formatter: routes pass/fail keys to Pass/Fail labels. */
+export function formatMarkerValue(marker: { key?: string; value: number | null }): string {
+  if (isPassFailKey(marker.key)) {
+    if (marker.value === 1) return 'Pass';
+    if (marker.value === 0) return 'Fail';
+    return '-';
+  }
+  return formatValue(marker.value);
 }

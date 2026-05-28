@@ -109,6 +109,20 @@ function buildFixture() {
     // Balance (regex-classified)
     m('single_leg_balance_left', 'Single-Leg Balance (Left)', 38, 'great', 's', 'Strength Testing', 'Stability'),
     m('single_leg_balance_right', 'Single-Leg Balance (Right)', 45, 'elite', 's', 'Strength Testing', 'Stability'),
+
+    // Single-Leg Balance Eyes Closed (Vald CoP, no norms yet so tier null - render only on reference page)
+    m('single_leg_balance_ec_left_ml', 'SL Balance EC - ML (Left)', 12, null, 'mm', 'Strength Testing', 'Stability'),
+    m('single_leg_balance_ec_left_ap', 'SL Balance EC - AP (Left)', 18, null, 'mm', 'Strength Testing', 'Stability'),
+    m('single_leg_balance_ec_right_ml', 'SL Balance EC - ML (Right)', 10, null, 'mm', 'Strength Testing', 'Stability'),
+    m('single_leg_balance_ec_right_ap', 'SL Balance EC - AP (Right)', 15, null, 'mm', 'Strength Testing', 'Stability'),
+
+    // Mobility & Flexibility (hip flex norm-rated; FABER pass/fail and distance)
+    m('hip_mobility_left', 'Hip Mobility (Left)', 115, 'normal', 'deg', 'Mobility & Flexibility', undefined),
+    m('hip_mobility_right', 'Hip Mobility (Right)', 118, 'great', 'deg', 'Mobility & Flexibility', undefined),
+    m('faber_outcome_left', 'FABER Outcome (Left)', 1, null, '', 'Mobility & Flexibility', undefined),
+    m('faber_distance_left', 'FABER Distance (Left)', 4.2, null, 'cm', 'Mobility & Flexibility', undefined),
+    m('faber_outcome_right', 'FABER Outcome (Right)', 0, null, '', 'Mobility & Flexibility', undefined),
+    m('faber_distance_right', 'FABER Distance (Right)', 9.8, null, 'cm', 'Mobility & Flexibility', undefined),
   ];
 
   const definitions = [

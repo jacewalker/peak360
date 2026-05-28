@@ -130,6 +130,11 @@ export interface StrengthTesting {
   deadlift: number | null;
   squat: number | null;
   pushUps: number | null;
+  // Single Leg Balance - Eyes Closed (Vald force plates, CoP movement)
+  singleLegBalanceEyesClosedLeftMl: number | null;
+  singleLegBalanceEyesClosedLeftAp: number | null;
+  singleLegBalanceEyesClosedRightMl: number | null;
+  singleLegBalanceEyesClosedRightAp: number | null;
 }
 
 // Section 9: Mobility & Flexibility
@@ -142,6 +147,11 @@ export interface MobilityFlexibility {
   ankleDorsiflexionLeft: number | null;
   ankleDorsiflexionRight: number | null;
   thoracicRotation: number | null;
+  // FABER Test (outcome: 1 = pass, 0 = fail; distance in cm)
+  faberOutcomeLeft: number | null;
+  faberDistanceLeft: number | null;
+  faberOutcomeRight: number | null;
+  faberDistanceRight: number | null;
 }
 
 // Section 10: Balance & Power
