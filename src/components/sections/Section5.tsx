@@ -8,6 +8,7 @@ import FormRow from '@/components/forms/FormRow';
 import TestCategory from '@/components/ui/TestCategory';
 import FileUploadZone from '@/components/forms/FileUploadZone';
 import type { ProcessingStage } from '@/components/forms/FileUploadZone';
+import CustomMarkersBlock from '@/components/forms/CustomMarkersBlock';
 import ExtractedValuesPanel from '@/components/forms/ExtractedValuesPanel';
 
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
@@ -292,6 +293,7 @@ export default function Section5({ data, onChange, assessmentId }: SectionProps)
           </FormRow>
         </TestCategory>
       </div>
+      <CustomMarkersBlock section={5} data={data} onChange={onChange} />
     </div>
   );
 }

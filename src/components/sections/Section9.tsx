@@ -5,6 +5,7 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import FormField from '@/components/forms/FormField';
 import FormRow from '@/components/forms/FormRow';
 import SelectField from '@/components/forms/SelectField';
+import CustomMarkersBlock from '@/components/forms/CustomMarkersBlock';
 
 const FABER_OPTIONS = [
   { value: '1', label: 'Pass' },
@@ -72,6 +73,7 @@ export default function Section9({ data, onChange }: SectionProps) {
           <FormField id="faberDistanceRight" label="FABER - Right Distance to Table (cm)" type="number" value={data.faberDistanceRight as number} onChange={n('faberDistanceRight')} step={0.1} />
         </FormRow>
       </div>
+      <CustomMarkersBlock section={9} data={data} onChange={onChange} />
     </div>
   );
 }

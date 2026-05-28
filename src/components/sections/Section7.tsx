@@ -4,6 +4,7 @@ import type { SectionProps } from '@/app/portal/assessment/[id]/section/[num]/pa
 import SectionHeader from '@/components/ui/SectionHeader';
 import FormField from '@/components/forms/FormField';
 import FormRow from '@/components/forms/FormRow';
+import CustomMarkersBlock from '@/components/forms/CustomMarkersBlock';
 
 export default function Section7({ data, onChange }: SectionProps) {
   const n = (field: string) => (v: string) => onChange(field, v === '' ? null : Number(v));
@@ -35,6 +36,7 @@ export default function Section7({ data, onChange }: SectionProps) {
           <FormField id="bpDiastolic" label="Blood Pressure - Diastolic (mmHg)" type="number" value={data.bpDiastolic as number} onChange={n('bpDiastolic')} />
         </FormRow>
       </div>
+      <CustomMarkersBlock section={7} data={data} onChange={onChange} />
     </div>
   );
 }

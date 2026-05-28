@@ -5,6 +5,7 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import RadioGroup from '@/components/forms/RadioGroup';
 import TextareaField from '@/components/forms/TextareaField';
 import WarningBox from '@/components/ui/WarningBox';
+import CustomMarkersBlock from '@/components/forms/CustomMarkersBlock';
 
 const yesNo = [
   { value: 'yes', label: 'Yes' },
@@ -108,6 +109,7 @@ export default function Section3({ data, onChange }: SectionProps) {
           placeholder="Any other relevant information..."
         />
       </div>
+      <CustomMarkersBlock section={3} data={data} onChange={onChange} />
     </div>
   );
 }

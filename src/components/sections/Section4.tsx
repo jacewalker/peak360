@@ -5,6 +5,7 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import FormField from '@/components/forms/FormField';
 import FormRow from '@/components/forms/FormRow';
 import SignaturePad from '@/components/forms/SignaturePad';
+import CustomMarkersBlock from '@/components/forms/CustomMarkersBlock';
 
 export default function Section4({ data, onChange }: SectionProps) {
   return (
@@ -111,6 +112,7 @@ export default function Section4({ data, onChange }: SectionProps) {
           nameValue={data.coachSignatureName as string}
         />
       </div>
+      <CustomMarkersBlock section={4} data={data} onChange={onChange} />
     </div>
   );
 }
