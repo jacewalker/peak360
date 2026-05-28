@@ -282,6 +282,18 @@ export default function Section11({ assessmentId }: Section11Props) {
     loadReport();
   }, [assessmentId]);
 
+  // Phase 12 W12 - derive from the merged registry once it has hydrated. MUST
+  // be declared BEFORE any conditional early-return (Rules of Hooks): if it
+  // lives after `if (loading) return <spinner>`, React throws "Rendered more
+  // hooks than during the previous render" because the hook count differs
+  // between loading and loaded renders. Empty-pillar flash is prevented by
+  // the `loading` short-circuit below; useMemo here also avoids re-computing
+  // on every unrelated state change.
+  const categories = useMemo(
+    () => [...new Set(allMarkers.map((m) => m.category))],
+    [allMarkers],
+  );
+
   // ── Loading State ───────────────────────────────────────────────────────────
 
   if (loading) {
@@ -301,15 +313,6 @@ export default function Section11({ assessmentId }: Section11Props) {
   // ── Derived Values ──────────────────────────────────────────────────────────
 
   const totalRated = Object.values(tierCounts).reduce((a, b) => a + b, 0);
-  // Phase 12 W12 - derive from the merged registry once it has hydrated; wrap
-  // in useMemo so the derivation re-runs when allMarkers arrives. The outer
-  // `loading` short-circuit (return spinner until setLoading(false)) already
-  // prevents an empty-pillar flash, but useMemo also avoids re-computing on
-  // every unrelated state change.
-  const categories = useMemo(
-    () => [...new Set(allMarkers.map((m) => m.category))],
-    [allMarkers],
-  );
   const reportDate = clientInfo.assessmentDate
     ? new Date(clientInfo.assessmentDate as string).toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' })
     : new Date().toLocaleDateString('en-AU', { day: 'numeric', month: 'long', year: 'numeric' });
