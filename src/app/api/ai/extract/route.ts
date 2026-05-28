@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { EXTRACTION_SYSTEM_PROMPT, EVOLT_EXTRACTION_PROMPT } from '@/lib/ai/prompts';
-import { fieldMappings } from '@/lib/ai/field-mappings';
+import { getFieldMappings } from '@/lib/markers/field-mappings';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/db';
 import { uploadedFiles } from '@/lib/db/schema';
@@ -97,8 +97,11 @@ export async function POST(request: Request) {
       extracted = { fields: {}, unmapped: [] };
     }
 
-    // Normalize field keys using field mappings
+    // Normalize field keys using field mappings (seed + DB aliases merged
+    // at request time so admin-added markers participate in extractions
+    // without a redeploy - Phase 12 D-04).
     if (extracted.fields) {
+      const fieldMappings = await getFieldMappings();
       const normalized: Record<string, unknown> = {};
       for (const [key, value] of Object.entries(extracted.fields)) {
         const lowerKey = key.toLowerCase().trim();
