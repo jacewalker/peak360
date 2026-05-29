@@ -10,6 +10,7 @@ import {
   type MarkerStats,
 } from '@/lib/markers/stats';
 import MarkersStatsBar from './MarkersStatsBar';
+import RangesEditModal from '@/components/admin/RangesEditModal';
 
 const EMPTY_STATS: MarkerStats = {
   total: 0,
@@ -96,10 +97,8 @@ export default function MarkersList() {
 
   const reload = () => setReloadTick((n) => n + 1);
 
-  // Avoid an unused-variable lint until Tasks 3 + 4 consume reload() for the
-  // modal onSaved refresh. The stub buttons below reference setters only.
-  void reload;
-  void rangesModalKey;
+  // Task 4 still stubs the content modal; keep its selection state referenced
+  // until that modal is wired so the unused-variable lint stays quiet.
   void contentModalKey;
 
   // Auto-clear pending confirm after 5s so a stray click doesn't linger.
@@ -353,12 +352,7 @@ export default function MarkersList() {
                             <>
                               <button
                                 type="button"
-                                onClick={() => {
-                                  // Stub: real modal arrives in Task 3.
-                                  console.log('Ranges modal stub for', m.testKey);
-                                  setRangesModalKey({ key: m.testKey, label: m.label });
-                                  alert('Modal coming in Task 3/4');
-                                }}
+                                onClick={() => setRangesModalKey({ key: m.testKey, label: m.label })}
                                 className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-faint hover:text-gold-brand transition-colors px-2 py-1"
                               >
                                 Ranges
@@ -416,6 +410,17 @@ export default function MarkersList() {
             );
           })}
         </div>
+      )}
+
+      {/* Inline ranges editor - opens centered, refreshes stats on save. The
+          legacy full-page editor at /portal/admin/normative/[marker] stays live. */}
+      {rangesModalKey && (
+        <RangesEditModal
+          markerKey={rangesModalKey.key}
+          markerLabel={rangesModalKey.label}
+          onClose={() => setRangesModalKey(null)}
+          onSaved={reload}
+        />
       )}
     </>
   );
