@@ -4,11 +4,15 @@ import Link from 'next/link';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
 
 const ADMIN_SECTIONS = [
+  // Markers consolidates Normative Ranges + Marker Content editing via in-page
+  // modals. The two legacy cards are hidden but their routes remain live
+  // (/portal/admin/normative, /portal/admin/marker-content) for deep links.
+  /* HIDDEN 2026-05-29: consolidated into /portal/admin/markers - restore to bring card back
   {
     label: 'Normative Ranges',
     href: '/portal/admin/normative',
     description:
-      'Manage rating thresholds for all biomarkers and fitness tests across all 5 tiers — poor, cautious, normal, great, and elite.',
+      'Manage rating thresholds for all biomarkers and fitness tests across all 5 tiers - poor, cautious, normal, great, and elite.',
     stat: '63 markers',
     icon: (
       <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
@@ -20,6 +24,8 @@ const ADMIN_SECTIONS = [
       </svg>
     ),
   },
+  */
+  /* HIDDEN 2026-05-29: consolidated into /portal/admin/markers - restore to bring card back
   {
     label: 'Marker Content',
     href: '/portal/admin/marker-content',
@@ -36,11 +42,12 @@ const ADMIN_SECTIONS = [
       </svg>
     ),
   },
+  */
   {
     label: 'Markers',
     href: '/portal/admin/markers',
     description:
-      'Add or remove markers from any assessment section. Configure pillar, normative ranges, and AI extraction aliases.',
+      'Add markers, author ranges, and write coach insights - all in one place.',
     stat: 'Registry',
     icon: (
       <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
