@@ -9,7 +9,7 @@ import { requireAdmin } from '@/lib/auth-helpers';
  * cell. A saved-but-empty matrix (all-empty strings) is NOT authored, so the
  * status pill stays meaningful (WR-04). Mirrors the modal's trim-based test.
  */
-function hasAuthoredContent(row: Record<string, unknown>): boolean {
+export function hasAuthoredContent(row: Record<string, unknown>): boolean {
   const definition = typeof row.definition === 'string' ? row.definition.trim() : '';
   const impact = typeof row.impact === 'string' ? row.impact.trim() : '';
   if (definition || impact) return true;
