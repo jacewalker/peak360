@@ -6,6 +6,7 @@ import SliderField from '@/components/forms/SliderField';
 import SelectField from '@/components/forms/SelectField';
 import FormField from '@/components/forms/FormField';
 import FormRow from '@/components/forms/FormRow';
+import CustomMarkersBlock from '@/components/forms/CustomMarkersBlock';
 
 export default function Section2({ data, onChange }: SectionProps) {
   return (
@@ -83,6 +84,7 @@ export default function Section2({ data, onChange }: SectionProps) {
           />
         </FormRow>
       </div>
+      <CustomMarkersBlock section={2} data={data} onChange={onChange} />
     </div>
   );
 }

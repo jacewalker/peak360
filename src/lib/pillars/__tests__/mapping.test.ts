@@ -564,3 +564,55 @@ describe('groupMarkersByPillar', () => {
     }
   });
 });
+
+describe('markerToPillar - Phase 12 DB short-circuit (D-07)', () => {
+  it('when marker carries a non-null pillar, returns it directly (bypasses regex/category heuristic)', () => {
+    // Construct a marker whose category would normally route to 'bodyComposition'
+    // (Body Composition) but whose .pillar field explicitly says 'strength'.
+    // The DB short-circuit must win.
+    const dbMarker = {
+      testKey: 'custom_metric',
+      label: 'Custom Metric',
+      category: 'Body Composition', // heuristic would say bodyComposition
+      pillar: 'strength' as const,
+    };
+    const { pillar, supporting } = markerToPillar(dbMarker);
+    expect(pillar).toBe('strength');
+    expect(supporting).toBe(false);
+  });
+
+  it('when marker.pillar is "balance", returns balance even if regex would not match', () => {
+    const dbMarker = {
+      testKey: 'no_balance_word_in_key',
+      label: 'Custom Tracker',
+      category: 'Blood Tests & Biomarkers',
+      pillar: 'balance' as const,
+    };
+    const { pillar } = markerToPillar(dbMarker);
+    expect(pillar).toBe('balance');
+  });
+
+  it('when marker.pillar is null, falls through to heuristic (seeded HDL still maps to cardiometabolic)', () => {
+    const seededHdl = {
+      testKey: 'hdl_cholesterol',
+      label: 'HDL Cholesterol',
+      category: 'Blood Tests & Biomarkers',
+      subcategory: 'Lipid Panel',
+      pillar: null,
+    };
+    const { pillar } = markerToPillar(seededHdl);
+    expect(pillar).toBe('cardiometabolic');
+  });
+
+  it('when marker has no pillar field at all, falls through to heuristic (regression: seeded markers unchanged)', () => {
+    // No `pillar` key — same as legacy MarkerDef / ReportMarker calls.
+    const seedLikeHdl = {
+      testKey: 'hdl_cholesterol',
+      label: 'HDL Cholesterol',
+      category: 'Blood Tests & Biomarkers',
+      subcategory: 'Lipid Panel',
+    };
+    const { pillar } = markerToPillar(seedLikeHdl);
+    expect(pillar).toBe('cardiometabolic');
+  });
+});

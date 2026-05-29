@@ -37,6 +37,23 @@ const ADMIN_SECTIONS = [
     ),
   },
   {
+    label: 'Markers',
+    href: '/portal/admin/markers',
+    description:
+      'Add or remove markers from any assessment section. Configure pillar, normative ranges, and AI extraction aliases.',
+    stat: 'Registry',
+    icon: (
+      <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+        <path
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          d="M12 4.5v15m7.5-7.5h-15"
+        />
+        <circle cx="12" cy="12" r="9" strokeLinecap="round" strokeLinejoin="round" />
+      </svg>
+    ),
+  },
+  {
     label: 'Audit Logs',
     href: '/portal/admin/audit-logs',
     description:

@@ -26,7 +26,11 @@ export type AuditAction =
   | 'pillar_prescription.upsert'
   | 'pillar_prescription.delete'
   // Phase 11 — Marker content authoring (D-11)
-  | 'marker_content.update';
+  | 'marker_content.update'
+  // Phase 12 — Admin-managed marker registry (D-13)
+  | 'marker.create'
+  | 'marker.update'
+  | 'marker.delete';
 
 export async function logAuditEvent(params: {
   userId: string;

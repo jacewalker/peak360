@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, use } from 'react';
-import { REPORT_MARKERS } from '@/lib/report-markers';
 import type { MarkerDef } from '@/lib/report-markers';
 import { TIER_LABELS } from '@/types/normative';
 import type { RatingTier } from '@/types/normative';
@@ -65,10 +64,23 @@ export default function MarkerContentEditorPage({
   const [loading, setLoading] = useState(true);
   const [activeGender, setActiveGender] = useState<'male' | 'female'>('male');
 
-  // Fetch existing content on mount
+  // Fetch existing content on mount. Phase 12 D-06: resolve the marker
+  // definition against the merged registry (seed + DB) via /api/markers so
+  // DB-marker testKeys reach this editor without 404ing - the Plan 03
+  // post-create flow redirects here for a freshly added marker.
   useEffect(() => {
-    const def = REPORT_MARKERS.find((m) => m.testKey === marker);
-    setMarkerDef(def || null);
+    fetch('/api/markers')
+      .then((res) => res.json())
+      .then((json) => {
+        if (json && json.success && json.data && Array.isArray(json.data.markers)) {
+          const def = (json.data.markers as MarkerDef[]).find((m) => m.testKey === marker);
+          setMarkerDef(def || null);
+        }
+      })
+      .catch(() => {
+        // non-fatal - markerDef stays null, the form still renders with the
+        // testKey heading and the content fetch decides whether to show an error
+      });
 
     fetch(`/api/admin/marker-content/${marker}`)
       .then((res) => res.json())

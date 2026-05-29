@@ -2,16 +2,16 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: milestone_complete
-stopped_at: Milestone complete (Phase 11 was final phase)
-last_updated: 2026-05-26T07:12:58.459Z
-last_activity: 2026-05-26 -- Phase 11 execution started
+status: executing
+stopped_at: Completed 12-05-PLAN.md (Phase 12 complete)
+last_updated: "2026-05-28T08:59:29Z"
+last_activity: 2026-05-28 - Phase 12 complete (Plan 12-05 verification + UAT: integration test for marker registry seams + HUMAN-UAT.md for Apolipoprotein B end-to-end add)
 progress:
-  total_phases: 10
-  completed_phases: 9
-  total_plans: 42
-  completed_plans: 43
-  percent: 90
+  total_phases: 11
+  completed_phases: 11
+  total_plans: 47
+  completed_plans: 47
+  percent: 100
 ---
 
 # Project State
@@ -25,10 +25,10 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 
 ## Current Position
 
-Phase: 11
-Plan: Not started
-Status: Milestone complete
-Last activity: 2026-05-27 - Completed quick task 260527-ine: client-login welcome-vs-magic-link choice + Bob Smith dev seed script
+Phase: 12
+Plan: 12-05 (complete)
+Status: Phase 12 Complete
+Last activity: 2026-05-28 - Phase 12 complete (Plan 12-05 verification + UAT: integration test for marker registry seams + HUMAN-UAT.md for Apolipoprotein B end-to-end add); user will run manual UAT pass separately
 
 Progress: [██████████] 100%
 
@@ -63,6 +63,11 @@ Progress: [██████████] 100%
 | Phase 04 P03 | 3m 24s | 3 tasks | 9 files |
 | Phase 09 P01 | 6m 12s | 9 tasks | 13 files |
 | Phase 9 P02 | 70 | - tasks | - files |
+| Phase 12 P01 | 6m 14s | 3 tasks | 11 files |
+| Phase 12 P02 | 3m 48s | 3 tasks | 4 files |
+| Phase 12 P03 | 9m 53s | 3 tasks | 7 files |
+| Phase 12 P04 | 13m | 4 tasks | 17 files |
+| Phase 12 P05 | 6m 7s | 2 tasks + 1 auto-approved checkpoint | 3 files |
 
 ## Accumulated Context
 
@@ -94,11 +99,13 @@ Recent decisions affecting current work:
 - 2026-05-07: Phase 8 added — Client report design refresh. User-driven design change for the final report (Section 11) as it appears in the /portal client area. Context to be captured via discuss-phase.
 - 2026-05-10: Phase 9 added — Brand-language alignment across portal, dashboard, assessment, and client surfaces. Promote landing-page design system (dark atmosphere, gold-dark #c9a24a, Inter Tight + JetBrains Mono, mono eyebrows, radial-gradient sections) to globals + Tailwind config; redesign login/reset-password/sidebar/dashboard/assessment-form/clients/admin pages to match. Locked: dark across all surfaces; 2 fat plans (09-01 foundations+auth, 09-02 working surfaces).
 - 2026-05-12: Phase 10 added — Section 11 + PDF brand language alignment. Phase 9 missed Section 11's report-specific rendering (the longevity analysis dashboard) and never scoped the PDF renderer under src/lib/pdf/. Phase 10 closes both: retokenize Section 11 to dark portal palette in-app, and align the exported PDF with the Phase 8/9 brand system.
+- 2026-05-28: Phase 12 added — Admin-managed marker registry. Today an admin can only edit content/thresholds for existing markers; adding a new marker requires editing 4 code files (REPORT_MARKERS, normative/data.ts, ai/field-mappings.ts, normative/insights.ts) and redeploy. Phase 12 introduces a DB-backed marker registry + admin UI so non-developers can add markers to any section with tier ranges and coach insights, surfaced in Section 11 portal and PDF.
 
 ### Pending Todos
 
-- [auth] Add password reset, account management, and admin invitations (2026-05-07) — likely Phase 7 scope
-- [auth] Admin reassign clients/assessments between coaches (2026-05-07) — pairs with above, same Phase 7 batch
+- [auth] Add password reset, account management, and admin invitations (2026-05-07) - likely Phase 7 scope
+- [auth] Admin reassign clients/assessments between coaches (2026-05-07) - pairs with above, same Phase 7 batch
+- [markers] Soft-delete admin markers instead of hard cascade (2026-05-29) - Phase 12 ships hard delete with two-click confirm + audit, but recovery requires re-typing the definition/impact/10 insights/5 ranges from memory. Add `deleted_at` column to `markers`/`marker_content`/`normative_ranges`, swap DELETE handler to UPDATE, filter reads, add admin "restore" UI. Audit log already records deleter+timestamp - the data side is the gap.
 
 ### Blockers/Concerns
 
@@ -134,6 +141,6 @@ Recent decisions affecting current work:
 
 ## Session Continuity
 
-Last session: 2026-05-12T07:37:47.074Z
-Stopped at: Phase 9 context gathered
+Last session: 2026-05-28T08:59:29Z
+Stopped at: Completed 12-05-PLAN.md (Phase 12 complete)
 Resume file: None

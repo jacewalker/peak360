@@ -6,6 +6,7 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import FormField from '@/components/forms/FormField';
 import FormRow from '@/components/forms/FormRow';
 import SelectField from '@/components/forms/SelectField';
+import CustomMarkersBlock from '@/components/forms/CustomMarkersBlock';
 
 export default function Section1({ data, onChange }: SectionProps) {
   const calculateAge = useCallback(
@@ -143,6 +144,7 @@ export default function Section1({ data, onChange }: SectionProps) {
           />
         </FormRow>
       </div>
+      <CustomMarkersBlock section={1} data={data} onChange={onChange} />
     </div>
   );
 }

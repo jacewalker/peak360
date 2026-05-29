@@ -326,6 +326,29 @@ export async function runMigrations() {
       }
     }
 
+    // Phase 12 — Admin-managed marker registry (D-02). Idempotent CREATE so
+    // forward-deploy environments converge without a migration step. No seed
+    // (D-03 - seeded markers stay in REPORT_MARKERS source).
+    await d.execute(sql`
+      CREATE TABLE IF NOT EXISTS "markers" (
+        "test_key" text PRIMARY KEY NOT NULL,
+        "label" text NOT NULL,
+        "section" integer NOT NULL,
+        "data_key" text NOT NULL,
+        "pillar" text NOT NULL,
+        "category" text NOT NULL,
+        "subcategory" text,
+        "fallback_unit" text,
+        "has_norms" boolean NOT NULL,
+        "ai_aliases" jsonb,
+        "severity_weight" integer,
+        "created_by" text NOT NULL,
+        "created_at" bigint NOT NULL,
+        "updated_by" text NOT NULL,
+        "updated_at" bigint NOT NULL
+      )
+    `);
+
     // Append-only client notes log (keyed by client name)
     await d.execute(sql`
       CREATE TABLE IF NOT EXISTS "client_notes" (
@@ -590,6 +613,28 @@ export async function runMigrations() {
         `);
       }
     }
+
+    // Phase 12 — Admin-managed marker registry (D-02). SQLite mirror; booleans
+    // are integer (0/1), JSON is text.
+    d.run(sql`
+      CREATE TABLE IF NOT EXISTS "markers" (
+        "test_key" text PRIMARY KEY NOT NULL,
+        "label" text NOT NULL,
+        "section" integer NOT NULL,
+        "data_key" text NOT NULL,
+        "pillar" text NOT NULL,
+        "category" text NOT NULL,
+        "subcategory" text,
+        "fallback_unit" text,
+        "has_norms" integer NOT NULL,
+        "ai_aliases" text,
+        "severity_weight" integer,
+        "created_by" text NOT NULL,
+        "created_at" integer NOT NULL,
+        "updated_by" text NOT NULL,
+        "updated_at" integer NOT NULL
+      )
+    `);
 
     // Append-only client notes log (keyed by client name)
     d.run(sql`

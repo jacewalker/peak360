@@ -58,7 +58,9 @@ const BALANCE_REGEX = /balance|sway|stability/i;
 
 /**
  * Minimal marker shape this classifier needs. Both REPORT_MARKERS entries
- * (MarkerDef) and ReportMarker rows satisfy it.
+ * (MarkerDef) and ReportMarker rows satisfy it. Phase 12 (D-07) also adds
+ * an optional `pillar` for DB-driven markers which short-circuits the
+ * category/regex heuristic below.
  */
 type ClassifiableMarker = {
   category: string;
@@ -66,6 +68,7 @@ type ClassifiableMarker = {
   testKey?: string;
   key?: string;
   label: string;
+  pillar?: PillarKey | null;   // Phase 12 D-07 - DB-driven short-circuit
 };
 
 export function markerToPillar(m: ClassifiableMarker): {
@@ -74,6 +77,15 @@ export function markerToPillar(m: ClassifiableMarker): {
 } {
   const testKey = m.testKey ?? m.key ?? '';
   const label = m.label ?? '';
+
+  // Phase 12 D-07 - DB-driven markers carry their pillar directly, so we
+  // bypass the regex/category heuristic and trust the admin's assignment.
+  // A null or absent .pillar falls through to the legacy heuristic so
+  // existing seeded markers (which never carry this field) are unaffected.
+  if ('pillar' in m && m.pillar) {
+    return { pillar: m.pillar as PillarKey, supporting: false };
+  }
+
   const haystack = `${testKey} ${label}`;
 
   // D-05 Option A — Balance markers go to Balance regardless of category

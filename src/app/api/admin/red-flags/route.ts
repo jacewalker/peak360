@@ -1,15 +1,18 @@
 import { NextResponse } from 'next/server';
 import { getAllDbRanges } from '@/lib/normative/db-ranges';
-import { REPORT_MARKERS } from '@/lib/report-markers';
+import { getReportMarkers } from '@/lib/markers/registry';
 
 export async function GET() {
   try {
     const allRows = await getAllDbRanges();
+    // Phase 12 D-13 - use the merged registry so DB-marker testKeys resolve
+    // their label (seeded-only lookup would leave admin-added markers nameless).
+    const reportMarkers = await getReportMarkers();
 
     const redFlags = allRows
       .filter((row) => row.severityWeight !== null && Number(row.severityWeight) > 0)
       .map((row) => {
-        const markerDef = REPORT_MARKERS.find((m) => m.testKey === row.testKey);
+        const markerDef = reportMarkers.find((m) => m.testKey === row.testKey);
         return {
           testKey: row.testKey,
           severityWeight: row.severityWeight,

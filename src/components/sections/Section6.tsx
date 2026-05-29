@@ -8,6 +8,7 @@ import FormRow from '@/components/forms/FormRow';
 import FileUploadZone from '@/components/forms/FileUploadZone';
 import type { ProcessingStage } from '@/components/forms/FileUploadZone';
 import ExtractedValuesPanel from '@/components/forms/ExtractedValuesPanel';
+import CustomMarkersBlock from '@/components/forms/CustomMarkersBlock';
 
 const delay = (ms: number) => new Promise(r => setTimeout(r, ms));
 
@@ -166,6 +167,7 @@ export default function Section6({ data, onChange, assessmentId }: SectionProps)
           <FormField id="bmr" label="BMR - Basal Metabolic Rate (kcal/day)" type="number" value={data.bmr as number} onChange={n('bmr')} min={800} max={4000} />
         </FormRow>
       </div>
+      <CustomMarkersBlock section={6} data={data} onChange={onChange} />
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { REPORT_MARKERS } from '@/lib/report-markers';
+import { getReportMarkers } from '@/lib/markers/registry';
 import { getDbRangesByTestKey, upsertDbRange, deleteDbRange } from '@/lib/normative/db-ranges';
 import { getStandards } from '@/lib/normative/ratings';
 import type { RatingTier, TierRanges } from '@/types/normative';
@@ -46,7 +46,10 @@ export async function GET(
   try {
     const { marker } = await params;
 
-    const markerDef = REPORT_MARKERS.find((m) => m.testKey === marker);
+    // Phase 12 D-05 - resolve against the merged registry so DB-marker
+    // testKeys reach the normative editor for gender/age variant authoring.
+    const reportMarkers = await getReportMarkers();
+    const markerDef = reportMarkers.find((m) => m.testKey === marker);
     if (!markerDef) {
       return NextResponse.json(
         { success: false, error: 'Marker not found' },
@@ -98,7 +101,10 @@ export async function PUT(
   try {
     const { marker } = await params;
 
-    const markerDef = REPORT_MARKERS.find((m) => m.testKey === marker);
+    // Phase 12 D-05 - resolve against the merged registry so DB-marker
+    // testKeys reach the normative editor for gender/age variant authoring.
+    const reportMarkers = await getReportMarkers();
+    const markerDef = reportMarkers.find((m) => m.testKey === marker);
     if (!markerDef) {
       return NextResponse.json(
         { success: false, error: 'Marker not found' },
@@ -193,7 +199,10 @@ export async function DELETE(
   try {
     const { marker } = await params;
 
-    const markerDef = REPORT_MARKERS.find((m) => m.testKey === marker);
+    // Phase 12 D-05 - resolve against the merged registry so DB-marker
+    // testKeys reach the normative editor for gender/age variant authoring.
+    const reportMarkers = await getReportMarkers();
+    const markerDef = reportMarkers.find((m) => m.testKey === marker);
     if (!markerDef) {
       return NextResponse.json(
         { success: false, error: 'Marker not found' },

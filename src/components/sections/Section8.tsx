@@ -5,6 +5,7 @@ import SectionHeader from '@/components/ui/SectionHeader';
 import FormField from '@/components/forms/FormField';
 import FormRow from '@/components/forms/FormRow';
 import ValdResultCard from '@/components/ui/ValdResultCard';
+import CustomMarkersBlock from '@/components/forms/CustomMarkersBlock';
 import type { ReactNode } from 'react';
 
 function TestRow({ num, title, inputs, result }: { num: number; title: string; inputs: ReactNode; result: ReactNode }) {
@@ -164,6 +165,8 @@ export default function Section8({ data, onChange }: SectionProps) {
         <ValdResultCard title="Farmers Carry" category="Strength" metric="Distance" subtitle="Bodyweight" unit="m"
           singleValue={data.farmersCarryDistance as number} secondaryLabel="Load" secondaryValue={data.farmersCarryWeight as number} secondaryUnit="kg" date={assessmentDate} />
       } />
+
+      <CustomMarkersBlock section={8} data={data} onChange={onChange} />
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { eq } from 'drizzle-orm';
-import { REPORT_MARKERS } from '@/lib/report-markers';
+import { getReportMarkers } from '@/lib/markers/registry';
 import { db, runMigrations } from '@/lib/db';
 import { markerContent } from '@/lib/db/schema';
 import { requireAdmin } from '@/lib/auth-helpers';
@@ -62,7 +62,10 @@ export async function GET(
     await runMigrations();
     const { marker } = await params;
 
-    const markerDef = REPORT_MARKERS.find((m) => m.testKey === marker);
+    // Phase 12 D-06 - validate against the merged registry (seed + DB) so the
+    // post-create redirect from Plan 03 lands here instead of 404ing.
+    const reportMarkers = await getReportMarkers();
+    const markerDef = reportMarkers.find((m) => m.testKey === marker);
     if (!markerDef) {
       return NextResponse.json(
         { success: false, error: 'Marker not found' },
@@ -120,7 +123,10 @@ export async function PUT(
     await runMigrations();
     const { marker } = await params;
 
-    const markerDef = REPORT_MARKERS.find((m) => m.testKey === marker);
+    // Phase 12 D-06 - validate against the merged registry on PUT as well so
+    // admins can author content for admin-added markers.
+    const reportMarkers = await getReportMarkers();
+    const markerDef = reportMarkers.find((m) => m.testKey === marker);
     if (!markerDef) {
       return NextResponse.json(
         { success: false, error: 'Marker not found' },
