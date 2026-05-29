@@ -103,8 +103,9 @@ Recent decisions affecting current work:
 
 ### Pending Todos
 
-- [auth] Add password reset, account management, and admin invitations (2026-05-07) — likely Phase 7 scope
-- [auth] Admin reassign clients/assessments between coaches (2026-05-07) — pairs with above, same Phase 7 batch
+- [auth] Add password reset, account management, and admin invitations (2026-05-07) - likely Phase 7 scope
+- [auth] Admin reassign clients/assessments between coaches (2026-05-07) - pairs with above, same Phase 7 batch
+- [markers] Soft-delete admin markers instead of hard cascade (2026-05-29) - Phase 12 ships hard delete with two-click confirm + audit, but recovery requires re-typing the definition/impact/10 insights/5 ranges from memory. Add `deleted_at` column to `markers`/`marker_content`/`normative_ranges`, swap DELETE handler to UPDATE, filter reads, add admin "restore" UI. Audit log already records deleter+timestamp - the data side is the gap.
 
 ### Blockers/Concerns
 
