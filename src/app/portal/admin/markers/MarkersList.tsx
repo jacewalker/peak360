@@ -11,6 +11,7 @@ import {
 } from '@/lib/markers/stats';
 import MarkersStatsBar from './MarkersStatsBar';
 import RangesEditModal from '@/components/admin/RangesEditModal';
+import ContentEditModal from '@/components/admin/ContentEditModal';
 
 const EMPTY_STATS: MarkerStats = {
   total: 0,
@@ -39,9 +40,9 @@ const EMPTY_STATS: MarkerStats = {
  * section that has a match while preserving the admin's manual collapse state
  * once the query is cleared.
  *
- * Seeded markers expose inline Ranges/Content edit buttons (modals wired in
- * Tasks 3 + 4; stubbed here). DB markers keep their full-page Edit affordance
- * and the two-click inline delete confirm.
+ * Seeded markers expose inline Ranges/Content edit buttons that open centered
+ * Dialog modals (save without leaving the page). DB markers keep their
+ * full-page Edit affordance and the two-click inline delete confirm.
  */
 export default function MarkersList() {
   const [markers, setMarkers] = useState<RegistryMarker[]>([]);
@@ -58,7 +59,7 @@ export default function MarkersList() {
   // Manual accordion state. Empty set => every section collapsed on first paint.
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
 
-  // Stub modal selection (real modals arrive in Tasks 3 + 4).
+  // Inline edit modal selection (centered Dialogs that save without leaving the page).
   const [rangesModalKey, setRangesModalKey] = useState<{ key: string; label: string } | null>(null);
   const [contentModalKey, setContentModalKey] = useState<{
     key: string;
@@ -96,10 +97,6 @@ export default function MarkersList() {
   }, [reloadTick]);
 
   const reload = () => setReloadTick((n) => n + 1);
-
-  // Task 4 still stubs the content modal; keep its selection state referenced
-  // until that modal is wired so the unused-variable lint stays quiet.
-  void contentModalKey;
 
   // Auto-clear pending confirm after 5s so a stray click doesn't linger.
   useEffect(() => {
@@ -359,17 +356,14 @@ export default function MarkersList() {
                               </button>
                               <button
                                 type="button"
-                                onClick={() => {
-                                  // Stub: real modal arrives in Task 4.
-                                  console.log('Content modal stub for', m.testKey);
+                                onClick={() =>
                                   setContentModalKey({
                                     key: m.testKey,
                                     label: m.label,
                                     category: m.category,
                                     subcategory: m.subcategory,
-                                  });
-                                  alert('Modal coming in Task 3/4');
-                                }}
+                                  })
+                                }
                                 className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-faint hover:text-gold-brand transition-colors px-2 py-1"
                               >
                                 Content
@@ -419,6 +413,19 @@ export default function MarkersList() {
           markerKey={rangesModalKey.key}
           markerLabel={rangesModalKey.label}
           onClose={() => setRangesModalKey(null)}
+          onSaved={reload}
+        />
+      )}
+
+      {/* Inline content editor - opens centered, refreshes stats on save. The
+          legacy full-page editor at /portal/admin/marker-content/[marker] stays live. */}
+      {contentModalKey && (
+        <ContentEditModal
+          markerKey={contentModalKey.key}
+          markerLabel={contentModalKey.label}
+          markerCategory={contentModalKey.category}
+          markerSubcategory={contentModalKey.subcategory}
+          onClose={() => setContentModalKey(null)}
           onSaved={reload}
         />
       )}
