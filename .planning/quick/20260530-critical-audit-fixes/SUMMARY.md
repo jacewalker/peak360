@@ -24,10 +24,17 @@ Branch: `fix/critical-audit-bugs` (off `main`). 7 atomic commits + 2 planning co
 - `npx tsc --noEmit`: no new errors. The 19 reported errors are all pre-existing
   test-file issues (`vi` not defined in setup.tsx, test type-casts) - none in app
   source, none in the edited files.
-- `npx vitest run`: 246 tests, 245 pass, **1 pre-existing failure**:
-  `insights.test.ts > deduplicates insights with the same title`. This is NOT
-  caused by these changes - the "no global dedup" behavior it contradicts is
-  present at the base commit (93203b0, insights.ts lines 426-432, intentional).
+- `npx vitest run`: **identical pass/fail set before and after these changes.**
+  Base commit 93203b0: 66 failed | 280 passed | 4 skipped (350).
+  This branch: 66 failed | 280 passed | 4 skipped (350). **Zero new failures.**
+- The 66 pre-existing failures are environmental: `src/__tests__/setup.tsx`
+  references `vi` which is not configured as a vitest global, so most component /
+  page / section test files fail to run (Badge, Header, ProgressBar,
+  NavigationButtons, HomePage, Section5, etc.). Plus one stale logic test:
+  `insights.test.ts > deduplicates insights with the same title`, which contradicts
+  the intentional "no global dedup" behavior at base (insights.ts:426-432).
+- The targeted tests for the changed code pass: normative ratings suite green, and
+  the testosterone insight test (updated to the production key) passes.
 
 ## Notes / follow-ups
 - Pre-existing failing test `deduplicates insights with the same title` should be
