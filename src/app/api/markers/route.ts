@@ -46,9 +46,29 @@ export async function GET(request: Request) {
         .filter(hasAuthoredContent)
         .map((r) => r.testKey as string);
 
+      // Per-marker "last updated" = the most recent edit across its DB
+      // normative ranges (updatedAt is an ISO string) and its authored content
+      // (updatedAt is epoch-ms). Markers never edited in the DB are absent from
+      // the map; the list renders "Not edited yet" for them.
+      const updatedAt: Record<string, string> = {};
+      const bump = (key: string, iso: string) => {
+        if (!updatedAt[key] || iso > updatedAt[key]) updatedAt[key] = iso;
+      };
+      for (const r of ranges) {
+        if (r.testKey && r.updatedAt) bump(r.testKey, String(r.updatedAt));
+      }
+      for (const row of contentRows as Record<string, unknown>[]) {
+        const key = row.testKey as string | undefined;
+        const ts = row.updatedAt as number | string | undefined;
+        if (!key || ts == null) continue;
+        const iso =
+          typeof ts === 'number' ? new Date(ts).toISOString() : String(ts);
+        bump(key, iso);
+      }
+
       return NextResponse.json({
         success: true,
-        data: { markers, normsKeys, contentKeys },
+        data: { markers, normsKeys, contentKeys, updatedAt },
       });
     }
 
