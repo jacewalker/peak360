@@ -93,7 +93,7 @@ export default function MarkersList() {
   // callbacks, never synchronously (avoids react-hooks/set-state-in-effect).
   useEffect(() => {
     let cancelled = false;
-    fetch('/api/markers?include=stats')
+    fetch('/api/markers?include=stats', { cache: 'no-store' })
       .then((r) => r.json())
       .then((j) => {
         if (cancelled) return;

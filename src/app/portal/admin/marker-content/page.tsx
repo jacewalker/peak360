@@ -5,19 +5,35 @@ import { redirect } from 'next/navigation';
 import type { AuthSession } from '@/lib/auth-helpers';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
 import MarkerContentList from './MarkerContentList';
+import { getReportMarkers } from '@/lib/markers/registry';
 
 /**
- * Phase 11 — Admin SSR-gated marker-content list (D-07, D-10).
+ * Phase 11 + Quick 260529 - Admin SSR-gated marker-content list (D-07, D-10).
  *
- * Lists every REPORT_MARKERS marker grouped by category; each marker links to
- * its per-marker editor at /portal/admin/marker-content/[testKey]. RBAC gate
- * cloned from /portal/admin/pillars/page.tsx: non-admin sessions redirect away.
+ * Lists every registry marker (seed + admin-added DB markers) grouped by
+ * category; each marker links to its per-marker editor at
+ * /portal/admin/marker-content/[testKey]. RBAC gate cloned from
+ * /portal/admin/pillars/page.tsx: non-admin sessions redirect away.
+ *
+ * Sourced from the merged registry (getReportMarkers) rather than the static
+ * REPORT_MARKERS seed so DB-added markers appear immediately. force-dynamic
+ * prevents the page from being statically cached with a stale marker set.
  */
+export const dynamic = 'force-dynamic';
+
 export default async function AdminMarkerContentPage() {
   const rawSession = await auth.api.getSession({ headers: await headers() });
   if (!rawSession?.user) redirect('/login');
   const session = rawSession as unknown as AuthSession;
   if (session.user.role !== 'admin') redirect('/portal');
+
+  const all = await getReportMarkers();
+  const markers = all.map((m) => ({
+    testKey: m.testKey,
+    label: m.label,
+    category: m.category,
+    subcategory: m.subcategory,
+  }));
 
   return (
     <div className="min-h-screen">
@@ -47,7 +63,7 @@ export default async function AdminMarkerContentPage() {
       </header>
 
       <main className="max-w-5xl mx-auto px-4 sm:px-6 pb-16">
-        <MarkerContentList />
+        <MarkerContentList markers={markers} />
       </main>
     </div>
   );
