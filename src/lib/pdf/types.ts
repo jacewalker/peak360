@@ -1,5 +1,5 @@
 import type { RatingTier, TierRanges } from '@/types/normative';
-import type { PillarDefinition, PillarPageCopy, PillarPrescription } from '@/lib/pillars/types';
+import type { PillarDefinition, PillarPageCopy, PillarPrescription, PillarKey } from '@/lib/pillars/types';
 
 export interface ReportMarker {
   key: string;
@@ -11,6 +11,10 @@ export interface ReportMarker {
   subcategory?: string;
   hasNorms: boolean;
   resolvedStandards?: TierRanges | null;
+  // Phase 12 D-07 - stored pillar for admin-added DB markers. When present,
+  // markerToPillar() trusts it directly and bypasses the category/regex
+  // heuristic. Absent/null on seed markers (heuristic still applies).
+  pillar?: PillarKey | null;
 }
 
 export interface Insight {

@@ -6,6 +6,7 @@ import { generatePeak360Insights } from '@/lib/normative/insights';
 import type { RatingTier } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
 import type { MarkerContent } from '@/lib/marker-content/queries';
+import type { PillarKey } from '@/lib/pillars/types';
 
 interface ReportMarker {
   key: string;
@@ -16,6 +17,8 @@ interface ReportMarker {
   category: string;
   subcategory?: string;
   hasNorms: boolean;
+  // Phase 12 D-07 - stored pillar for admin-added DB markers (null on seed).
+  pillar?: PillarKey | null;
 }
 
 interface Insight {
@@ -64,6 +67,7 @@ const TIER_TEXT: Record<RatingTier, string> = {
 };
 
 import type { MarkerDef } from '@/lib/report-markers';
+import type { RegistryMarker } from '@/lib/markers/registry';
 import { computeAllPillarScoresLegacy, type PillarScore } from '@/lib/pillars/mapping';
 import PillarsDisplay from '@/components/report/PillarsDisplay';
 
@@ -201,13 +205,13 @@ export default function Section11({ assessmentId }: Section11Props) {
       // in parallel with the section/content fetches. Falls back to an empty
       // array on failure so the report degrades gracefully (no DB markers
       // surface) instead of crashing.
-      let mergedMarkers: MarkerDef[] = [];
+      let mergedMarkers: RegistryMarker[] = [];
       const markersFetch = (async () => {
         try {
           const res = await fetch('/api/markers');
           const json = await res.json();
           if (json.success && json.data && Array.isArray(json.data.markers)) {
-            mergedMarkers = json.data.markers as MarkerDef[];
+            mergedMarkers = json.data.markers as RegistryMarker[];
           }
         } catch {
           mergedMarkers = [];
@@ -236,7 +240,7 @@ export default function Section11({ assessmentId }: Section11Props) {
         const value = rawValue != null ? Number(rawValue) : null;
 
         if (value === null || isNaN(value)) {
-          evaluated.push({ key: m.testKey, label: m.label, value: null, tier: null, unit: m.fallbackUnit || '', category: m.category, subcategory: m.subcategory, hasNorms: m.hasNorms });
+          evaluated.push({ key: m.testKey, label: m.label, value: null, tier: null, unit: m.fallbackUnit || '', category: m.category, subcategory: m.subcategory, hasNorms: m.hasNorms, pillar: m.pillar ?? null });
           continue;
         }
 
@@ -253,6 +257,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           category: m.category,
           subcategory: m.subcategory,
           hasNorms: m.hasNorms,
+          pillar: m.pillar ?? null,
         });
       }
 
@@ -267,6 +272,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           category: m.category,
           subcategory: m.subcategory,
           tier: ev?.tier ?? null,
+          pillar: m.pillar ?? null,
         };
       });
       setPillars(computeAllPillarScoresLegacy(pillarMarkers));
