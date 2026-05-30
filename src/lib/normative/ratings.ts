@@ -48,8 +48,8 @@ export function normalizeRating(raw: string): { tier: RatingTier; raw: string } 
   return { tier: 'normal', raw };
 }
 
-function resolveRawLabel(standards: TierRanges | null, value: number): string {
-  if (!standards || isNaN(value)) return 'normal';
+function resolveRawLabel(standards: TierRanges | null, value: number): string | null {
+  if (!standards || isNaN(value)) return null;
   const tiers: RatingTier[] = ['poor', 'cautious', 'normal', 'great', 'elite'];
   for (const tier of tiers) {
     const range = standards[tier];
@@ -57,7 +57,10 @@ function resolveRawLabel(standards: TierRanges | null, value: number): string {
       return tier;
     }
   }
-  return 'normal';
+  // No tier matched: the value is outside every defined range (e.g. a
+  // dangerously extreme result). Return null so the caller renders "no rating"
+  // rather than a misleading "normal".
+  return null;
 }
 
 interface Standards {
@@ -169,6 +172,7 @@ export function getPeak360Rating(
   if (!standards) return null;
 
   const rawLabel = resolveRawLabel(standards, num);
+  if (rawLabel === null) return null;
   const { tier } = normalizeRating(rawLabel);
 
   return { tier, value: num, unit: unit || '', note: note || undefined };
