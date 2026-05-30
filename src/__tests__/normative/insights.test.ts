@@ -108,7 +108,7 @@ describe('generatePeak360Insights', () => {
           { testKey: 'crp_hs', label: 'hs-CRP', value: 10 },
           { testKey: 'ferritin', label: 'Ferritin', value: 5 },
           { testKey: 'tsh', label: 'TSH', value: 0.1 },
-          { testKey: 'totalTestosterone', label: 'Total Testosterone', value: 3 },
+          { testKey: 'total_testosterone', label: 'Total Testosterone', value: 3 },
           { testKey: 'alt', label: 'ALT', value: 100 },
           { testKey: 'creatinine', label: 'Creatinine', value: 200 },
           { testKey: 'hdl_cholesterol', label: 'HDL Cholesterol', value: 0.7 },
@@ -222,7 +222,7 @@ describe('generatePeak360Insights', () => {
       const insights = generatePeak360Insights({
         age: 40,
         gender: 'male',
-        markers: [{ testKey: 'totalTestosterone', label: 'Total Testosterone', value: 3 }],
+        markers: [{ testKey: 'total_testosterone', label: 'Total Testosterone', value: 3 }],
       });
       const hormone = insights.find(i => i.title === 'Sex hormone markers flagged');
       expect(hormone).toBeDefined();
