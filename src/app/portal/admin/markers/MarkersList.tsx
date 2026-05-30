@@ -13,16 +13,22 @@ import MarkersStatsBar from './MarkersStatsBar';
 import RangesEditModal from '@/components/admin/RangesEditModal';
 import ContentEditModal from '@/components/admin/ContentEditModal';
 
-// Compact "last updated" label, e.g. "3 Jun 2026, 2:14 pm". Returns null for
-// markers that have never been edited in the DB.
+// Relative "last updated" label, e.g. "just now", "5 minutes ago", "1 day ago".
+// Returns null for markers that have never been edited in the DB.
 function formatUpdated(iso: string | undefined): string | null {
   if (!iso) return null;
   const d = new Date(iso);
   if (isNaN(d.getTime())) return null;
-  return d.toLocaleString('en-AU', {
-    day: 'numeric', month: 'short', year: 'numeric',
-    hour: 'numeric', minute: '2-digit', hour12: true,
-  });
+  const secs = Math.round((Date.now() - d.getTime()) / 1000);
+  const MIN = 60, HOUR = 3600, DAY = 86400, WEEK = 604800, MONTH = 2592000, YEAR = 31536000;
+  const ago = (value: number, unit: string) => `${value} ${unit}${value === 1 ? '' : 's'} ago`;
+  if (secs < 45) return 'just now';
+  if (secs < HOUR) return ago(Math.round(secs / MIN), 'minute');
+  if (secs < DAY) return ago(Math.round(secs / HOUR), 'hour');
+  if (secs < WEEK) return ago(Math.round(secs / DAY), 'day');
+  if (secs < MONTH) return ago(Math.round(secs / WEEK), 'week');
+  if (secs < YEAR) return ago(Math.round(secs / MONTH), 'month');
+  return ago(Math.round(secs / YEAR), 'year');
 }
 
 const EMPTY_STATS: MarkerStats = {
