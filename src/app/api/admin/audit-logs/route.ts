@@ -2,8 +2,12 @@ import { NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { auditLogs, user } from '@/lib/db/schema';
 import { desc, eq, and, gte, lte, sql } from 'drizzle-orm';
+import { requireAdmin } from '@/lib/auth-helpers';
 
 export async function GET(request: Request) {
+  const [, errorRes] = await requireAdmin();
+  if (errorRes) return errorRes;
+
   const url = new URL(request.url);
   const page = parseInt(url.searchParams.get('page') ?? '1');
   const limit = Math.min(parseInt(url.searchParams.get('limit') ?? '50'), 100);
