@@ -3,7 +3,8 @@
 import { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import FormField from '@/components/forms/FormField';
-import { PILLAR_KEYS, type PillarKey } from '@/lib/pillars/types';
+import { PILLAR_KEYS, PILLAR_LABELS, type PillarKey } from '@/lib/pillars/types';
+import { SECTION_LABELS } from '@/lib/markers/stats';
 import type { RatingTier, TierRanges } from '@/types/normative';
 
 const TIER_ORDER: RatingTier[] = ['poor', 'cautious', 'normal', 'great', 'elite'];
@@ -22,14 +23,6 @@ const TIER_HEX: Record<RatingTier, string> = {
   normal: '#94a3b8',
   cautious: '#f59e0b',
   poor: '#ef4444',
-};
-
-const PILLAR_LABELS: Record<PillarKey, string> = {
-  cardiometabolic: 'Cardiometabolic',
-  bodyComposition: 'Body Composition',
-  strength: 'Strength',
-  balance: 'Balance',
-  vo2: 'VO2',
 };
 
 const SECTION_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
@@ -310,7 +303,7 @@ export default function NewMarkerForm() {
             >
               {SECTION_OPTIONS.map((s) => (
                 <option key={s} value={s}>
-                  Section {s}
+                  {SECTION_LABELS[s] || `Section ${s}`}
                 </option>
               ))}
             </select>

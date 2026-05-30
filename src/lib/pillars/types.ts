@@ -24,6 +24,19 @@ export const PILLAR_KEYS: readonly PillarKey[] = [
   'vo2',
 ] as const;
 
+/**
+ * Human-friendly pillar labels for admin form dropdowns (create + edit marker).
+ * The canonical display labels live in the pillar_definitions DB table (Phase 8);
+ * these are a static mirror so the admin forms do not need an async fetch.
+ */
+export const PILLAR_LABELS: Record<PillarKey, string> = {
+  cardiometabolic: 'Cardiometabolic',
+  bodyComposition: 'Body Composition',
+  strength: 'Strength',
+  balance: 'Balance',
+  vo2: 'Aerobic Fitness (VO2)',
+};
+
 export type PillarStatus = 'red' | 'amber' | 'green' | 'pending';
 
 export interface PillarDefinition {
