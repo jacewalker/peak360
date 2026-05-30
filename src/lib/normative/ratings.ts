@@ -151,14 +151,21 @@ export function getPeak360Rating(
   testKey: string,
   value: number | string | null | undefined,
   age?: number | null,
-  gender?: string | null
+  gender?: string | null,
+  // Phase 12 - when provided, DB-backed normative overrides are consulted
+  // first (admin-added markers + admin-edited seed ranges). Without it the
+  // function falls back to hardcoded defaults only, so DB-only markers like
+  // admin-created ones would never resolve a tier (showed "Recorded").
+  dbRangesMap?: DbRangesMap
 ): RatingResult | null {
   if (value === null || value === undefined || value === '') return null;
 
   const num = typeof value === 'string' ? parseFloat(value) : value;
   if (isNaN(num)) return null;
 
-  const { unit, note, standards } = getStandards(testKey, age, gender);
+  const { unit, note, standards } = dbRangesMap
+    ? getStandardsWithOverrides(testKey, age, gender, dbRangesMap)
+    : getStandards(testKey, age, gender);
   if (!standards) return null;
 
   const rawLabel = resolveRawLabel(standards, num);

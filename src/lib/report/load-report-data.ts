@@ -2,7 +2,8 @@ import { db } from '@/lib/db';
 import { assessments, assessmentSections } from '@/lib/db/schema';
 import { eq } from 'drizzle-orm';
 import { getReportMarkers } from '@/lib/markers/registry';
-import { getPeak360Rating, getStandards } from '@/lib/normative/ratings';
+import { getPeak360Rating, getStandardsWithOverrides } from '@/lib/normative/ratings';
+import { preloadDbRanges } from '@/lib/normative/db-ranges';
 import { generatePeak360Insights } from '@/lib/normative/insights';
 import { decrypt } from '@/lib/crypto';
 import type { RatingTier } from '@/types/normative';
@@ -58,6 +59,10 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
   // pull from the merged registry (seed + DB) so admin-added markers flow into
   // the PDF report identically to seeded markers.
   const reportMarkers = await getReportMarkers();
+  // Phase 12 - DB normative overrides (admin-added markers + edited seed
+  // ranges). Without this, admin-created markers never resolve a tier and
+  // show as "Recorded" instead of their actual rating in the report/pillars.
+  const dbRangesMap = await preloadDbRanges();
   const evaluated: ReportMarker[] = [];
   const counts: Record<RatingTier, number> = {
     elite: 0, great: 0, normal: 0, cautious: 0, poor: 0,
@@ -68,7 +73,9 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
     const rawValue = sectionData[m.dataKey];
     const value = rawValue != null ? Number(rawValue) : null;
 
-    const standards = m.hasNorms ? getStandards(m.testKey, age, gender) : null;
+    const standards = m.hasNorms
+      ? getStandardsWithOverrides(m.testKey, age, gender, dbRangesMap)
+      : null;
 
     if (value === null || isNaN(value)) {
       evaluated.push({
@@ -85,7 +92,7 @@ export async function loadReportData(assessmentId: string): Promise<ReportData> 
       continue;
     }
 
-    const rating = getPeak360Rating(m.testKey, value, age, gender);
+    const rating = getPeak360Rating(m.testKey, value, age, gender, dbRangesMap);
     const tier = rating?.tier || null;
     if (tier) counts[tier]++;
 

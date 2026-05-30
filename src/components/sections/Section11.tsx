@@ -7,6 +7,8 @@ import type { RatingTier } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
 import type { MarkerContent } from '@/lib/marker-content/queries';
 import type { PillarKey } from '@/lib/pillars/types';
+import type { NormativeRangeRow } from '@/types/normative';
+import type { DbRangesMap } from '@/lib/normative/db-ranges';
 
 interface ReportMarker {
   key: string;
@@ -206,6 +208,10 @@ export default function Section11({ assessmentId }: Section11Props) {
       // array on failure so the report degrades gracefully (no DB markers
       // surface) instead of crashing.
       let mergedMarkers: RegistryMarker[] = [];
+      // Phase 12 - DB normative ranges, used to resolve tiers for admin-added /
+      // admin-edited markers (without them, getPeak360Rating only sees the
+      // hardcoded defaults and DB-only markers never get a tier).
+      let dbRangeRows: NormativeRangeRow[] = [];
       const markersFetch = (async () => {
         try {
           const res = await fetch('/api/markers');
@@ -213,8 +219,12 @@ export default function Section11({ assessmentId }: Section11Props) {
           if (json.success && json.data && Array.isArray(json.data.markers)) {
             mergedMarkers = json.data.markers as RegistryMarker[];
           }
+          if (json.success && json.data && Array.isArray(json.data.dbRanges)) {
+            dbRangeRows = json.data.dbRanges as NormativeRangeRow[];
+          }
         } catch {
           mergedMarkers = [];
+          dbRangeRows = [];
         }
       })();
 
@@ -231,6 +241,15 @@ export default function Section11({ assessmentId }: Section11Props) {
       const gender = info.clientGender as string || null;
       setGender(gender);
 
+      // Build the DB-ranges lookup map (testKey -> rows) the rating engine
+      // consults before falling back to hardcoded defaults.
+      const dbRangesMap: DbRangesMap = new Map();
+      for (const r of dbRangeRows) {
+        const list = dbRangesMap.get(r.testKey) || [];
+        list.push(r);
+        dbRangesMap.set(r.testKey, list);
+      }
+
       const evaluated: ReportMarker[] = [];
       const counts: Record<RatingTier, number> = { elite: 0, great: 0, normal: 0, cautious: 0, poor: 0 };
 
@@ -244,7 +263,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           continue;
         }
 
-        const rating = getPeak360Rating(m.testKey, value, age, gender);
+        const rating = getPeak360Rating(m.testKey, value, age, gender, dbRangesMap);
         const tier = rating?.tier || null;
         if (tier) counts[tier]++;
 

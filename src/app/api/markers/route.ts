@@ -72,7 +72,13 @@ export async function GET(request: Request) {
       });
     }
 
-    return NextResponse.json({ success: true, data: { markers } });
+    // Base payload (any authenticated role). Include DB normative ranges so the
+    // client report (Section11) can resolve tiers for admin-added / admin-edited
+    // markers - without these it can only rate against hardcoded defaults and
+    // DB-only markers fall through to "Recorded" (Phase 12). Thresholds are not
+    // client-sensitive; the viewer already sees their resulting tier.
+    const dbRanges = await getAllDbRanges();
+    return NextResponse.json({ success: true, data: { markers, dbRanges } });
   } catch (err) {
     console.error('[api/markers GET] Failed to load markers:', err);
     return NextResponse.json(
