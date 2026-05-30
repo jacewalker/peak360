@@ -5,6 +5,7 @@ import Dialog from '@/components/ui/Dialog';
 import { REPORT_MARKERS } from '@/lib/report-markers';
 import type { MarkerDef } from '@/lib/report-markers';
 import type { RatingTier, TierRanges, NormativeRangeRow } from '@/types/normative';
+import { TIER_LABELS } from '@/types/normative';
 
 /**
  * Quick 260529-mwp Task 3 - Inline ranges editor as a centered modal.
@@ -22,12 +23,14 @@ import type { RatingTier, TierRanges, NormativeRangeRow } from '@/types/normativ
 
 const TIER_ORDER: RatingTier[] = ['poor', 'cautious', 'normal', 'great', 'elite'];
 
-const TIER_CONFIG: Record<RatingTier, { color: string; label: string; bg: string; ring: string }> = {
-  poor:     { color: '#ef4444', label: 'Attention', bg: 'rgba(239,68,68,0.05)',    ring: '#ef444440' },
-  cautious: { color: '#f59e0b', label: 'Cautious',  bg: 'rgba(245,158,11,0.05)',   ring: '#f59e0b40' },
-  normal:   { color: '#6b7280', label: 'Normal',    bg: 'rgba(107,114,128,0.05)',  ring: '#6b728040' },
-  great:    { color: '#3b82f6', label: 'Optimal',   bg: 'rgba(59,130,246,0.05)',   ring: '#3b82f640' },
-  elite:    { color: '#10b981', label: 'Peak',      bg: 'rgba(16,185,129,0.05)',   ring: '#10b98140' },
+// Labels come from the canonical TIER_LABELS (single source of truth) so the
+// admin editor never drifts from the client report + PDF.
+const TIER_CONFIG: Record<RatingTier, { color: string; bg: string; ring: string }> = {
+  poor:     { color: '#ef4444', bg: 'rgba(239,68,68,0.05)',    ring: '#ef444440' },
+  cautious: { color: '#f59e0b', bg: 'rgba(245,158,11,0.05)',   ring: '#f59e0b40' },
+  normal:   { color: '#6b7280', bg: 'rgba(107,114,128,0.05)',  ring: '#6b728040' },
+  great:    { color: '#3b82f6', bg: 'rgba(59,130,246,0.05)',   ring: '#3b82f640' },
+  elite:    { color: '#10b981', bg: 'rgba(16,185,129,0.05)',   ring: '#10b98140' },
 };
 
 interface HardcodedDefaults {
@@ -48,18 +51,17 @@ function getVariantKey(gender: string | null, ageGroup: string | null): string {
   return 'unisex';
 }
 
+// Per-tier sanity only. We deliberately do NOT enforce cross-tier contiguity
+// (prev.max === next.min): the real normative dataset uses descending ranges
+// for "lower is better" markers (e.g. cholesterol poor 6.2-99, elite 0-3.49)
+// and deliberate boundary gaps (6.19 / 6.20), so a strict touch-boundary check
+// false-fails on essentially every existing marker. The rating engine resolves
+// a value to its tier by range membership, which tolerates gaps by design.
 function validateTiers(tiers: TierRanges): string[] {
   const errors: string[] = [];
   for (const tier of TIER_ORDER) {
     const r = tiers[tier];
-    if (r && r.min >= r.max) errors.push(`${tier}: min must be less than max`);
-  }
-  for (let i = 0; i < TIER_ORDER.length - 1; i++) {
-    const prev = tiers[TIER_ORDER[i]];
-    const next = tiers[TIER_ORDER[i + 1]];
-    if (prev && next && prev.max !== next.min) {
-      errors.push(`Tiers must be contiguous: ${TIER_ORDER[i]} max != ${TIER_ORDER[i + 1]} min`);
-    }
+    if (r && r.min >= r.max) errors.push(`${TIER_LABELS[tier]}: min must be less than max`);
   }
   return errors;
 }
@@ -90,6 +92,10 @@ export default function RangesEditModal({ markerKey, markerLabel, onClose, onSav
   const [unit, setUnit] = useState<string | null>(null);
   // Bumping this re-runs the load effect (Reload affordance after a 409).
   const [loadTick, setLoadTick] = useState(0);
+  // Raw text the user is typing, keyed by `${variantKey}|${tier}|${field}`.
+  // Lets a field be genuinely empty while editing (no "0" coercion / leading
+  // zero) - the numeric model in editTiers is updated in parallel.
+  const [rawInputs, setRawInputs] = useState<Record<string, string>>({});
 
   const hasGenderVariants = Object.keys(hardcodedDefaults).some(k => k === 'male' || k === 'female');
   const hasAgeVariants = Object.keys(editTiers).some(k => k.includes('_'));
@@ -116,6 +122,7 @@ export default function RangesEditModal({ markerKey, markerLabel, onClose, onSav
         setConflict(false);
         setSaveSuccess(false);
         setValidationErrors({});
+        setRawInputs({});
         setActiveGender('all');
         setActiveAgeGroup(null);
         setMarkerDef(def || null);
@@ -182,9 +189,20 @@ export default function RangesEditModal({ markerKey, markerLabel, onClose, onSav
   const currentVariantTiers = editTiers[getCurrentVariantKey()] || emptyTiers();
   const currentValidationErrors = validationErrors[getCurrentVariantKey()] || [];
 
+  // What to render in a tier input: the raw string while the user is typing
+  // it (so an empty field stays empty and there is no leading-zero prepend),
+  // otherwise the numeric model value.
+  const tierInputValue = (variantKey: string, tier: RatingTier, field: 'min' | 'max'): string => {
+    const rk = `${variantKey}|${tier}|${field}`;
+    if (rk in rawInputs) return rawInputs[rk];
+    const n = (editTiers[variantKey] || emptyTiers())[tier]?.[field];
+    return n === undefined || n === null ? '' : String(n);
+  };
+
   const handleTierChange = (tier: RatingTier, field: 'min' | 'max', value: string) => {
     const numVal = value === '' ? 0 : parseFloat(value);
     const key = getCurrentVariantKey();
+    setRawInputs(prev => ({ ...prev, [`${key}|${tier}|${field}`]: value }));
     const updated: TierRanges = {
       ...(editTiers[key] || emptyTiers()),
       [tier]: { ...(editTiers[key]?.[tier] || { min: 0, max: 0 }), [field]: isNaN(numVal) ? 0 : numVal },
@@ -251,6 +269,7 @@ export default function RangesEditModal({ markerKey, markerLabel, onClose, onSav
         setSeverityWeight(0);
         setServerUpdatedAt(null);
         setValidationErrors({});
+        setRawInputs({});
         onSaved?.();
       } else setError(json.error || 'Failed to reset.');
     } catch { setError('Failed to reset.'); }
@@ -372,10 +391,12 @@ export default function RangesEditModal({ markerKey, markerLabel, onClose, onSav
             <div className="space-y-2">
               {TIER_ORDER.map((tier, ti) => {
                 const cfg = TIER_CONFIG[tier];
-                const hasMinErr = currentValidationErrors.some(e => e.includes(tier) && e.includes('min'));
-                const hasMaxErr = currentValidationErrors.some(e => e.includes(tier) && e.includes('max'));
+                const label = TIER_LABELS[tier];
+                const hasMinErr = currentValidationErrors.some(e => e.startsWith(`${label}:`) && e.includes('min'));
+                const hasMaxErr = currentValidationErrors.some(e => e.startsWith(`${label}:`) && e.includes('max'));
                 // First min input gets autofocus only when there are no gender tabs.
                 const firstInput = ti === 0 && !hasGenderVariants;
+                const curKey = getCurrentVariantKey();
 
                 return (
                   <div
@@ -386,7 +407,7 @@ export default function RangesEditModal({ markerKey, markerLabel, onClose, onSav
                     <div className="flex-shrink-0 w-3 self-stretch" style={{ backgroundColor: cfg.color }} />
                     <div className="flex-shrink-0 w-[72px] px-3 py-3">
                       <span className="text-[11px] font-black uppercase tracking-wider block" style={{ color: cfg.color }}>
-                        {cfg.label}
+                        {label}
                       </span>
                     </div>
 
@@ -397,7 +418,7 @@ export default function RangesEditModal({ markerKey, markerLabel, onClose, onSav
                           type="number"
                           step="any"
                           {...(firstInput ? { 'data-autofocus': '' } : {})}
-                          value={currentVariantTiers[tier]?.min ?? ''}
+                          value={tierInputValue(curKey, tier, 'min')}
                           onChange={e => handleTierChange(tier, 'min', e.target.value)}
                           className={`w-full px-2 py-1.5 border rounded-lg text-sm text-center tabular-nums bg-bg-2 text-text font-mono ${
                             hasMinErr ? 'border-danger/40 ring-1 ring-danger/20' : 'border-line'
@@ -410,7 +431,7 @@ export default function RangesEditModal({ markerKey, markerLabel, onClose, onSav
                         <input
                           type="number"
                           step="any"
-                          value={currentVariantTiers[tier]?.max ?? ''}
+                          value={tierInputValue(curKey, tier, 'max')}
                           onChange={e => handleTierChange(tier, 'max', e.target.value)}
                           className={`w-full px-2 py-1.5 border rounded-lg text-sm text-center tabular-nums bg-bg-2 text-text font-mono ${
                             hasMaxErr ? 'border-danger/40 ring-1 ring-danger/20' : 'border-line'

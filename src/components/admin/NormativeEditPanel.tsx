@@ -33,18 +33,15 @@ function getVariantKey(gender: string | null, ageGroup: string | null): string {
   return 'unisex';
 }
 
+// Per-tier sanity only - no cross-tier contiguity check. The normative dataset
+// uses descending ranges for "lower is better" markers and deliberate boundary
+// gaps (e.g. cholesterol cautious max 6.19 / poor min 6.20), so requiring
+// prev.max === next.min false-rejects valid, already-shipped data.
 function validateTiers(tiers: TierRanges): string[] {
   const errors: string[] = [];
   for (const tier of TIER_ORDER) {
     const r = tiers[tier];
     if (r && r.min >= r.max) errors.push(`${tier}: min must be less than max`);
-  }
-  for (let i = 0; i < TIER_ORDER.length - 1; i++) {
-    const prev = tiers[TIER_ORDER[i]];
-    const next = tiers[TIER_ORDER[i + 1]];
-    if (prev && next && prev.max !== next.min) {
-      errors.push(`Tiers must be contiguous: ${TIER_ORDER[i]} max ≠ ${TIER_ORDER[i + 1]} min`);
-    }
   }
   return errors;
 }

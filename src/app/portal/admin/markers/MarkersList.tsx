@@ -13,6 +13,18 @@ import MarkersStatsBar from './MarkersStatsBar';
 import RangesEditModal from '@/components/admin/RangesEditModal';
 import ContentEditModal from '@/components/admin/ContentEditModal';
 
+// Compact "last updated" label, e.g. "3 Jun 2026, 2:14 pm". Returns null for
+// markers that have never been edited in the DB.
+function formatUpdated(iso: string | undefined): string | null {
+  if (!iso) return null;
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return null;
+  return d.toLocaleString('en-AU', {
+    day: 'numeric', month: 'short', year: 'numeric',
+    hour: 'numeric', minute: '2-digit', hour12: true,
+  });
+}
+
 const EMPTY_STATS: MarkerStats = {
   total: 0,
   seedCount: 0,
@@ -48,6 +60,8 @@ export default function MarkersList() {
   const [markers, setMarkers] = useState<RegistryMarker[]>([]);
   const [normsKeys, setNormsKeys] = useState<string[]>([]);
   const [contentKeys, setContentKeys] = useState<string[]>([]);
+  // testKey -> ISO timestamp of the most recent DB edit (ranges or content).
+  const [updatedMap, setUpdatedMap] = useState<Record<string, string>>({});
   const [query, setQuery] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -81,6 +95,7 @@ export default function MarkersList() {
           setMarkers(j.data.markers as RegistryMarker[]);
           setNormsKeys((j.data.normsKeys as string[]) ?? []);
           setContentKeys((j.data.contentKeys as string[]) ?? []);
+          setUpdatedMap((j.data.updatedAt as Record<string, string>) ?? {});
         } else {
           setError(j.error || 'Could not load markers.');
         }
@@ -312,6 +327,7 @@ export default function MarkersList() {
                     const isSeed = m.source === 'seed';
                     const isConfirming = confirmDeleteKey === m.testKey;
                     const isDeleting = deletingKey === m.testKey;
+                    const updated = formatUpdated(updatedMap[m.testKey]);
                     return (
                       <div
                         key={m.testKey}
@@ -320,17 +336,13 @@ export default function MarkersList() {
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2 flex-wrap">
                             <span className="text-sm font-medium text-text truncate">{m.label}</span>
-                            {isSeed ? (
-                              <span className="font-mono text-[10px] font-medium px-1.5 py-0.5 rounded bg-bg-2 text-text-faint border border-line uppercase tracking-[0.16em]">
-                                SEEDED
-                              </span>
-                            ) : (
+                            {!isSeed && (
                               <span className="font-mono text-[10px] font-medium px-1.5 py-0.5 rounded bg-gold-brand/10 text-gold-brand border border-gold-brand/30 uppercase tracking-[0.16em]">
-                                DB
+                                Custom
                               </span>
                             )}
                           </div>
-                          <div className="mt-0.5 flex items-center gap-2 text-[11px] text-text-faint">
+                          <div className="mt-0.5 flex items-center gap-2 text-[11px] text-text-faint flex-wrap">
                             <span className="font-mono">{m.testKey}</span>
                             <span>&middot;</span>
                             <span>{m.category}</span>
@@ -340,40 +352,42 @@ export default function MarkersList() {
                                 <span>{m.subcategory}</span>
                               </>
                             )}
+                            <span>&middot;</span>
+                            <span className={updated ? 'text-text-dim' : 'text-text-faint/60 italic'}>
+                              {updated ? `Updated ${updated}` : 'Not edited yet'}
+                            </span>
                           </div>
                         </div>
 
-                        {/* Actions */}
+                        {/* Actions - Ranges + Content open in-page modals for every
+                            marker; DB-only markers additionally get registry Edit + Delete. */}
                         <div className="flex items-center gap-2 flex-shrink-0">
-                          {isSeed ? (
-                            <>
-                              <button
-                                type="button"
-                                onClick={() => setRangesModalKey({ key: m.testKey, label: m.label })}
-                                className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-faint hover:text-gold-brand transition-colors px-2 py-1"
-                              >
-                                Ranges
-                              </button>
-                              <button
-                                type="button"
-                                onClick={() =>
-                                  setContentModalKey({
-                                    key: m.testKey,
-                                    label: m.label,
-                                    category: m.category,
-                                    subcategory: m.subcategory,
-                                  })
-                                }
-                                className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-faint hover:text-gold-brand transition-colors px-2 py-1"
-                              >
-                                Content
-                              </button>
-                            </>
-                          ) : (
+                          <button
+                            type="button"
+                            onClick={() => setRangesModalKey({ key: m.testKey, label: m.label })}
+                            className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-dim hover:text-gold-brand px-2.5 py-1.5 border border-line rounded-lg hover:border-gold-brand/50 hover:bg-gold-brand/5 transition-colors"
+                          >
+                            Ranges
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() =>
+                              setContentModalKey({
+                                key: m.testKey,
+                                label: m.label,
+                                category: m.category,
+                                subcategory: m.subcategory,
+                              })
+                            }
+                            className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-dim hover:text-gold-brand px-2.5 py-1.5 border border-line rounded-lg hover:border-gold-brand/50 hover:bg-gold-brand/5 transition-colors"
+                          >
+                            Content
+                          </button>
+                          {!isSeed && (
                             <>
                               <Link
                                 href={`/portal/admin/markers/${m.testKey}`}
-                                className="font-mono text-[11px] uppercase tracking-[0.14em] text-text-dim hover:text-gold-brand transition-colors px-2 py-1 border border-line rounded hover:border-gold-brand/40"
+                                className="font-mono text-[11px] font-medium uppercase tracking-[0.14em] text-text-dim hover:text-gold-brand px-2.5 py-1.5 border border-line rounded-lg hover:border-gold-brand/50 transition-colors"
                               >
                                 Edit
                               </Link>
@@ -381,7 +395,7 @@ export default function MarkersList() {
                                 type="button"
                                 onClick={() => handleDeleteClick(m.testKey)}
                                 disabled={isDeleting}
-                                className={`font-mono text-[11px] uppercase tracking-[0.14em] px-2 py-1 border rounded transition-colors ${
+                                className={`font-mono text-[11px] font-medium uppercase tracking-[0.14em] px-2.5 py-1.5 border rounded-lg transition-colors ${
                                   isConfirming
                                     ? 'text-danger border-danger/50 bg-danger/10 hover:bg-danger/20'
                                     : 'text-text-faint border-line hover:text-danger hover:border-danger/40'
