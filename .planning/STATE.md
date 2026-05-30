@@ -5,7 +5,7 @@ milestone_name: milestone
 status: executing
 stopped_at: Completed 12-05-PLAN.md (Phase 12 complete)
 last_updated: "2026-05-28T08:59:29Z"
-last_activity: 2026-05-28 - Phase 12 complete (Plan 12-05 verification + UAT: integration test for marker registry seams + HUMAN-UAT.md for Apolipoprotein B end-to-end add)
+last_activity: 2026-05-29 - Quick task 260529-mwp-admin-markers-redesign-stats-modals complete (admin markers redesign: stats bar + collapsed accordions + in-page ranges/content modals + consolidated nav; build clean, 5/5 stats tests green)
 progress:
   total_phases: 11
   completed_phases: 11
@@ -28,7 +28,7 @@ See: .planning/PROJECT.md (updated 2026-04-12)
 Phase: 12
 Plan: 12-05 (complete)
 Status: Phase 12 Complete
-Last activity: 2026-05-28 - Phase 12 complete (Plan 12-05 verification + UAT: integration test for marker registry seams + HUMAN-UAT.md for Apolipoprotein B end-to-end add); user will run manual UAT pass separately
+Last activity: 2026-05-29 - Quick task 260529-mwp-admin-markers-redesign-stats-modals complete on quick/260529-mwp-admin-markers-redesign (admin markers redesign: stats bar + collapsed accordions + in-page ranges/content modals + consolidated nav; HEAD 8daa055)
 
 Progress: [██████████] 100%
 
@@ -138,6 +138,7 @@ Recent decisions affecting current work:
 | 260527-i23 | Client read-only assessment experience: Assessments sidebar link for clients + read-only list (coach actions hidden); clients open into Section 11 report (interactive pillars + marker modal), browse all sections read-only with zero writes (canWrite gating + disabled fieldset); SSR ownership gate replaces the /report redirect; /report+PDF kept. Verified PASSED (code); live UAT pending. | 2026-05-27 | 1657ba1 | [260527-i23-client-readonly-assessment](./quick/260527-i23-client-readonly-assessment/) |
 | 260527-ine | client-login welcome-vs-magic-link choice (default welcome email, no auto sign-on link; two-button dialog; mode in API) + scripts/seed-bob-smith.ts (idempotent Postgres dev seed: Bob Smith client + full completed assessment, encrypts §3/4/5). Verified PASSED (code); live UAT + dev seed run pending. Stacked on feat/client-readonly-assessment. | 2026-05-27 | a608ba9 | [260527-ine-client-login-and-seed](./quick/260527-ine-client-login-and-seed/) |
 | 260528-pdf | Section 11 downloadable PDF redesigned as 8-page pillar report (Cover + 5 pillar pages w/ Coach-Focus card + Full Results Reference + Appendix), branded with bundled Inter Tight + JetBrains Mono TTFs; 8 new markers wired (FABER + SL Balance EC) into Section 8/9 + REPORT_MARKERS; exhaustive results page so Mobility + future categories can't be silently dropped; vitest guard fails CI on registry/coverage drift; em-dashes purged. Zero schema/migration changes. | 2026-05-28 | 2dba154 | [260528-pdf-pillar-report-redesign](./quick/260528-pdf-pillar-report-redesign/) |
+| 260529-mwp-admin-markers-redesign-stats-modals | Admin markers redesign: stats bar (Total/Sources/With-norms/With-content + per-section breakdown), collapsed-by-default section accordions, in-page ranges + content edit modals (no navigation, 409 path preserved), consolidated Normative + Marker Content under the Markers nav card (legacy routes stay live). Build clean, 5/5 stats tests green. | 2026-05-29 | 8daa055 | [260529-mwp-admin-markers-redesign-stats-modals](./quick/260529-mwp-admin-markers-redesign-stats-modals/) |
 
 ## Session Continuity
 

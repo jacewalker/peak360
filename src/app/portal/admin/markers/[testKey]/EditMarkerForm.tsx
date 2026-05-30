@@ -5,7 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import MonoEyebrow from '@/components/ui/MonoEyebrow';
 import FormField from '@/components/forms/FormField';
-import { PILLAR_KEYS, type PillarKey } from '@/lib/pillars/types';
+import { PILLAR_KEYS, PILLAR_LABELS, type PillarKey } from '@/lib/pillars/types';
+import { SECTION_LABELS } from '@/lib/markers/stats';
 import type { MarkerRow } from '@/lib/markers/queries';
 
 /**
@@ -23,14 +24,6 @@ import type { MarkerRow } from '@/lib/markers/queries';
  * points the admin at the existing /portal/admin/normative/[testKey] and
  * /portal/admin/marker-content/[testKey] editors instead.
  */
-
-const PILLAR_LABELS: Record<PillarKey, string> = {
-  cardiometabolic: 'Cardiometabolic',
-  bodyComposition: 'Body Composition',
-  strength: 'Strength',
-  balance: 'Balance',
-  vo2: 'VO2',
-};
 
 const SECTION_OPTIONS = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
 
@@ -400,7 +393,7 @@ export default function EditMarkerForm({ testKey }: { testKey: string }) {
                 >
                   {SECTION_OPTIONS.map((s) => (
                     <option key={s} value={s}>
-                      Section {s}
+                      {SECTION_LABELS[s] || `Section ${s}`}
                     </option>
                   ))}
                 </select>
@@ -577,13 +570,13 @@ export default function EditMarkerForm({ testKey }: { testKey: string }) {
                 href={`/portal/admin/normative/${marker.testKey}`}
                 className="font-mono text-[12px] uppercase tracking-[0.14em] text-gold-brand hover:text-champagne"
               >
-                Edit ranges (gender / age) -&gt; /portal/admin/normative/{marker.testKey}
+                Normative ranges editor (gender / age)
               </Link>
               <Link
                 href={`/portal/admin/marker-content/${marker.testKey}`}
                 className="font-mono text-[12px] uppercase tracking-[0.14em] text-gold-brand hover:text-champagne"
               >
-                Edit content (definition / impact / coach insights) -&gt; /portal/admin/marker-content/{marker.testKey}
+                Marker content editor (definition / impact / coach insights)
               </Link>
             </div>
           </section>

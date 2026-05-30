@@ -263,6 +263,10 @@ interface MarkerInput {
   category: string;
   subcategory?: string;
   tier: RatingTier | null;
+  // Phase 12 D-07 - stored pillar for admin-added DB markers. Threaded into
+  // the projected ReportMarker so markerToPillar() trusts it over the
+  // category/regex heuristic (null/absent on seed markers).
+  pillar?: PillarKey | null;
 }
 
 /**
@@ -283,6 +287,7 @@ export function computeAllPillarScoresLegacy(markers: MarkerInput[]): PillarScor
     subcategory: m.subcategory,
     hasNorms: true,
     resolvedStandards: null,
+    pillar: m.pillar ?? null,
   }));
 
   // Per-bucket totals (rated + unrated) — used for the legacy `total` count

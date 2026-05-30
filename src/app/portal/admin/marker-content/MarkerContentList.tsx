@@ -2,35 +2,60 @@
 
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
-import { REPORT_MARKERS, REPORT_CATEGORIES } from '@/lib/report-markers';
+import { REPORT_CATEGORIES } from '@/lib/report-markers';
+
+interface MarkerContentListItem {
+  testKey: string;
+  label: string;
+  category: string;
+  subcategory?: string;
+}
+
+interface MarkerContentListProps {
+  markers: MarkerContentListItem[];
+}
 
 /**
- * Phase 11 — client-side search + category-grouped marker list.
+ * Phase 11 + Quick 260529 - client-side search + category-grouped marker list.
  *
  * Split out of the SSR page so the admin can filter markers by name, category,
- * or subcategory before opening an editor. Filtering is purely presentational
- * over the static REPORT_MARKERS set; the SSR admin gate stays in page.tsx.
+ * or subcategory before opening an editor. Markers are passed in from the SSR
+ * page, which sources them from the merged registry (getReportMarkers) so
+ * DB-added markers appear here immediately; the SSR admin gate stays in
+ * page.tsx.
  */
-export default function MarkerContentList() {
+export default function MarkerContentList({ markers }: MarkerContentListProps) {
   const [query, setQuery] = useState('');
 
   const q = query.trim().toLowerCase();
 
   const grouped = useMemo(() => {
-    return REPORT_CATEGORIES.map((cat) => {
-      const markers = REPORT_MARKERS.filter((m) => {
-        if (m.category !== cat) return false;
-        if (!q) return true;
-        return (
-          m.label.toLowerCase().includes(q) ||
-          m.testKey.toLowerCase().includes(q) ||
-          (m.subcategory?.toLowerCase().includes(q) ?? false) ||
-          m.category.toLowerCase().includes(q)
-        );
-      });
-      return { cat, markers };
-    }).filter((g) => g.markers.length > 0);
-  }, [q]);
+    // Preserve the canonical REPORT_CATEGORIES order, then append any extra
+    // categories that only exist on DB-added markers (in first-seen order).
+    const seen = new Set<string>(REPORT_CATEGORIES);
+    const orderedCategories: string[] = [...REPORT_CATEGORIES];
+    for (const m of markers) {
+      if (!seen.has(m.category)) {
+        seen.add(m.category);
+        orderedCategories.push(m.category);
+      }
+    }
+    return orderedCategories
+      .map((cat) => {
+        const catMarkers = markers.filter((m) => {
+          if (m.category !== cat) return false;
+          if (!q) return true;
+          return (
+            m.label.toLowerCase().includes(q) ||
+            m.testKey.toLowerCase().includes(q) ||
+            (m.subcategory?.toLowerCase().includes(q) ?? false) ||
+            m.category.toLowerCase().includes(q)
+          );
+        });
+        return { cat, markers: catMarkers };
+      })
+      .filter((g) => g.markers.length > 0);
+  }, [q, markers]);
 
   const total = grouped.reduce((n, g) => n + g.markers.length, 0);
 

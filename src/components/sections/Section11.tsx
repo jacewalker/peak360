@@ -6,6 +6,9 @@ import { generatePeak360Insights } from '@/lib/normative/insights';
 import type { RatingTier } from '@/types/normative';
 import { TIER_LABELS } from '@/types/normative';
 import type { MarkerContent } from '@/lib/marker-content/queries';
+import type { PillarKey } from '@/lib/pillars/types';
+import type { NormativeRangeRow } from '@/types/normative';
+import type { DbRangesMap } from '@/lib/normative/db-ranges';
 
 interface ReportMarker {
   key: string;
@@ -16,6 +19,8 @@ interface ReportMarker {
   category: string;
   subcategory?: string;
   hasNorms: boolean;
+  // Phase 12 D-07 - stored pillar for admin-added DB markers (null on seed).
+  pillar?: PillarKey | null;
 }
 
 interface Insight {
@@ -64,6 +69,7 @@ const TIER_TEXT: Record<RatingTier, string> = {
 };
 
 import type { MarkerDef } from '@/lib/report-markers';
+import type { RegistryMarker } from '@/lib/markers/registry';
 import { computeAllPillarScoresLegacy, type PillarScore } from '@/lib/pillars/mapping';
 import PillarsDisplay from '@/components/report/PillarsDisplay';
 
@@ -201,16 +207,24 @@ export default function Section11({ assessmentId }: Section11Props) {
       // in parallel with the section/content fetches. Falls back to an empty
       // array on failure so the report degrades gracefully (no DB markers
       // surface) instead of crashing.
-      let mergedMarkers: MarkerDef[] = [];
+      let mergedMarkers: RegistryMarker[] = [];
+      // Phase 12 - DB normative ranges, used to resolve tiers for admin-added /
+      // admin-edited markers (without them, getPeak360Rating only sees the
+      // hardcoded defaults and DB-only markers never get a tier).
+      let dbRangeRows: NormativeRangeRow[] = [];
       const markersFetch = (async () => {
         try {
           const res = await fetch('/api/markers');
           const json = await res.json();
           if (json.success && json.data && Array.isArray(json.data.markers)) {
-            mergedMarkers = json.data.markers as MarkerDef[];
+            mergedMarkers = json.data.markers as RegistryMarker[];
+          }
+          if (json.success && json.data && Array.isArray(json.data.dbRanges)) {
+            dbRangeRows = json.data.dbRanges as NormativeRangeRow[];
           }
         } catch {
           mergedMarkers = [];
+          dbRangeRows = [];
         }
       })();
 
@@ -227,6 +241,15 @@ export default function Section11({ assessmentId }: Section11Props) {
       const gender = info.clientGender as string || null;
       setGender(gender);
 
+      // Build the DB-ranges lookup map (testKey -> rows) the rating engine
+      // consults before falling back to hardcoded defaults.
+      const dbRangesMap: DbRangesMap = new Map();
+      for (const r of dbRangeRows) {
+        const list = dbRangesMap.get(r.testKey) || [];
+        list.push(r);
+        dbRangesMap.set(r.testKey, list);
+      }
+
       const evaluated: ReportMarker[] = [];
       const counts: Record<RatingTier, number> = { elite: 0, great: 0, normal: 0, cautious: 0, poor: 0 };
 
@@ -236,11 +259,11 @@ export default function Section11({ assessmentId }: Section11Props) {
         const value = rawValue != null ? Number(rawValue) : null;
 
         if (value === null || isNaN(value)) {
-          evaluated.push({ key: m.testKey, label: m.label, value: null, tier: null, unit: m.fallbackUnit || '', category: m.category, subcategory: m.subcategory, hasNorms: m.hasNorms });
+          evaluated.push({ key: m.testKey, label: m.label, value: null, tier: null, unit: m.fallbackUnit || '', category: m.category, subcategory: m.subcategory, hasNorms: m.hasNorms, pillar: m.pillar ?? null });
           continue;
         }
 
-        const rating = getPeak360Rating(m.testKey, value, age, gender);
+        const rating = getPeak360Rating(m.testKey, value, age, gender, dbRangesMap);
         const tier = rating?.tier || null;
         if (tier) counts[tier]++;
 
@@ -253,6 +276,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           category: m.category,
           subcategory: m.subcategory,
           hasNorms: m.hasNorms,
+          pillar: m.pillar ?? null,
         });
       }
 
@@ -267,6 +291,7 @@ export default function Section11({ assessmentId }: Section11Props) {
           category: m.category,
           subcategory: m.subcategory,
           tier: ev?.tier ?? null,
+          pillar: m.pillar ?? null,
         };
       });
       setPillars(computeAllPillarScoresLegacy(pillarMarkers));
