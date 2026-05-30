@@ -201,8 +201,8 @@ export function generatePeak360Insights({
         );
         break;
 
-      case 'totalTestosterone':
-      case 'freeTestosterone':
+      case 'total_testosterone':
+      case 'free_testosterone':
       case 'oestradiol':
       case 'shbg':
         action(
