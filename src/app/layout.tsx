@@ -10,8 +10,8 @@ const OG_DESCRIPTION =
   'World-class longevity testing in Geelong. 60+ biomarkers, on-site VO₂ Max, and a 5-tier rating system to reveal your true biological age.';
 const OG_IMAGE = {
   url: '/landing/peak360-logo.png',
-  width: 1024,
-  height: 1024,
+  width: 1230,
+  height: 367,
   alt: 'Peak360',
 };
 
