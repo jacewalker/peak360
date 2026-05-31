@@ -535,7 +535,7 @@ function FinalCTA() {
           the team, and the protocol to back it up.
         </p>
         <div className="final-ctas">
-          <a href="#schedule" className="btn btn-gold btn-lg">Schedule Your Baseline Assessment</a>
+          <a href="/contact" className="btn btn-gold btn-lg">Schedule Your Baseline Assessment</a>
           <a href="#call" className="btn btn-ghost btn-lg">Book a Discovery Call</a>
         </div>
       </div>
