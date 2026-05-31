@@ -26,7 +26,7 @@ function Nav() {
       <div className="nav-inner">
         <a href="#top" className="brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={LOGO_SRC} alt="Peak360" />
+          <img src={LOGO_SRC} alt="Peak360" width={1230} height={367} />
         </a>
         <ul className="nav-links">
           <li><a href="#why">Why</a></li>
@@ -550,7 +550,7 @@ function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={LOGO_SRC} alt="Peak360" />
+            <img src={LOGO_SRC} alt="Peak360" width={1230} height={367} />
             <p>World-class longevity testing in Geelong. Operated by Strong Bodies Geelong.</p>
           </div>
           <div className="footer-col">
