@@ -64,6 +64,11 @@
 }
 .v2-root .eyebrow-num { color: var(--text-dim); font-weight: 400; }
 .v2-root .eyebrow-line { width: 28px; height: 1px; background: var(--gold); opacity: 0.5; }
+/* Desktop only: enlarge eyebrow text (e.g. hero "Geelong" line) for legibility */
+@media (min-width: 1101px) {
+  .v2-root .eyebrow { font-size: 13px; }
+  .v2-root .eyebrow-line { width: 32px; }
+}
 
 .v2-root .gold-text { color: var(--gold); }
 
@@ -120,7 +125,7 @@
   gap: 40px;
 }
 .v2-root .brand { display: flex; align-items: center; gap: 12px; }
-.v2-root .brand img { height: 64px; width: auto; transition: height 300ms ease; margin-left: -12px; }
+.v2-root .brand img { height: 64px; width: auto; aspect-ratio: 1230 / 367; transition: height 300ms ease; margin-left: -12px; }
 .v2-root .nav-scrolled .brand img { height: 52px; }
 .v2-root .nav-links {
   list-style: none; padding: 0; margin: 0;
@@ -208,8 +213,13 @@
 /* ============ Health-Age Teaser ============ */
 .v2-root .teaser {
   position: relative;
-  background: linear-gradient(180deg, rgba(232,214,168,0.04) 0%, rgba(232,214,168,0.01) 100%);
+  background:
+    linear-gradient(180deg, rgba(232,214,168,0.05) 0%, transparent 40%),
+    var(--bg-2);
   border: 1px solid var(--line-2);
+  box-shadow:
+    0 40px 90px -30px rgba(0,0,0,0.85),
+    0 0 0 1px rgba(201,162,74,0.08);
   padding: 32px;
   display: flex; flex-direction: column; gap: 24px;
 }
@@ -341,10 +351,11 @@
       transparent 2px, transparent 8px),
     linear-gradient(180deg, #1a1a1d 0%, #0a0a0c 100%);
   border: 1px solid var(--line-2);
-  overflow: hidden; display: flex; align-items: flex-end; padding: 32px;
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  padding: 56px 40px 40px;
 }
 .v2-root .test-portrait::before {
-  content: "VO₂ MAX SESSION · IN PROGRESS";
+  content: "SAMPLE REPORT · TIER II";
   position: absolute; top: 24px; left: 24px;
   font-family: var(--font-mono-v2);
   font-size: 10px; letter-spacing: 0.18em; color: var(--gold);
@@ -356,10 +367,10 @@
   font-family: var(--font-mono-v2);
   font-size: 10px; letter-spacing: 0.18em; color: var(--text-faint);
 }
-.v2-root .portrait-tag {
-  font-family: var(--font-mono-v2);
-  font-size: 10px; letter-spacing: 0.18em; color: var(--text-faint);
-  border-left: 1px solid var(--gold); padding-left: 12px;
+.v2-root .report-sample {
+  width: auto; height: 100%; max-width: 100%;
+  border-radius: 6px;
+  box-shadow: 0 30px 70px -20px rgba(0,0,0,0.85);
 }
 .v2-root .test-list { display: flex; flex-direction: column; }
 .v2-root .test-item {
@@ -393,6 +404,13 @@
   line-height: 0.9; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
 }
 .v2-root .process-title { font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin: 0; color: var(--cream); }
+.v2-root .process-flag {
+  display: inline-block; vertical-align: middle; margin-left: 14px;
+  background: var(--gold); color: var(--ink);
+  font-family: var(--font-mono-v2);
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500;
+  padding: 5px 10px;
+}
 .v2-root .process-desc { font-size: 15px; color: var(--text-dim); margin: 0; max-width: 460px; line-height: 1.6; }
 .v2-root .process-time {
   font-family: var(--font-mono-v2);
@@ -579,7 +597,7 @@
   gap: 48px; padding-bottom: 48px; border-bottom: 1px solid var(--line);
 }
 .v2-root .footer-brand { display: flex; flex-direction: column; gap: 20px; max-width: 420px; }
-.v2-root .footer-brand img { width: 100%; height: auto; max-width: 380px; }
+.v2-root .footer-brand img { width: 100%; height: auto; max-width: 380px; aspect-ratio: 1230 / 367; }
 .v2-root .footer-brand p { font-size: 13px; color: var(--text-dim); margin: 0; line-height: 1.6; }
 .v2-root .footer-col h4 {
   font-family: var(--font-mono-v2);
@@ -597,6 +615,45 @@
 }
 .v2-root .footer-tag { display: flex; gap: 16px; color: var(--gold); }
 .v2-root .footer-tag .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold-deep); align-self: center; }
+
+/* ============ Contact page ============ */
+.v2-root .contact-page {
+  min-height: 100vh;
+  padding: 120px 0 96px;
+  display: flex; align-items: center;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 0%, rgba(201,162,74,0.10), transparent 60%),
+    var(--bg);
+}
+.v2-root .contact-inner { max-width: 640px; display: flex; flex-direction: column; gap: 20px; }
+.v2-root .contact-back { align-self: flex-start; margin-bottom: 12px; }
+.v2-root .contact-title {
+  font-family: var(--font-sans-v2);
+  font-weight: 500; font-size: clamp(40px, 6vw, 72px);
+  line-height: 1.0; letter-spacing: -0.035em; margin: 8px 0 0; color: var(--cream);
+  text-wrap: balance;
+}
+.v2-root .contact-sub { font-size: 16px; color: var(--text-dim); margin: 0 0 16px; line-height: 1.65; text-wrap: pretty; }
+.v2-root .contact-form { display: flex; flex-direction: column; gap: 20px; }
+.v2-root .contact-field { display: flex; flex-direction: column; gap: 8px; }
+.v2-root .contact-field > span {
+  font-family: var(--font-mono-v2);
+  font-size: 10px; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-faint);
+}
+.v2-root .contact-field input,
+.v2-root .contact-field textarea {
+  font-family: var(--font-sans-v2); font-size: 15px; color: var(--text);
+  background: var(--bg-2); border: 1px solid var(--line-2); border-radius: 0;
+  padding: 14px 16px; outline: none; transition: border-color 200ms; resize: vertical;
+}
+.v2-root .contact-field input:focus,
+.v2-root .contact-field textarea:focus { border-color: var(--gold); }
+.v2-root .contact-form .btn { align-self: flex-start; margin-top: 4px; }
+.v2-root .contact-form .btn:disabled { opacity: 0.6; cursor: default; }
+.v2-root .contact-error { color: #d97557; font-size: 14px; margin: 0; }
+.v2-root .contact-success { display: flex; flex-direction: column; gap: 16px; align-items: flex-start; }
+.v2-root .contact-success h2 { font-size: 28px; font-weight: 500; letter-spacing: -0.02em; color: var(--cream); margin: 0; }
+.v2-root .contact-success p { font-size: 16px; color: var(--text-dim); margin: 0; }
 
 /* ============ Responsive ============ */
 @media (max-width: 1100px) {

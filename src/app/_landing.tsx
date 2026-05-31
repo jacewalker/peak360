@@ -26,7 +26,7 @@ function Nav() {
       <div className="nav-inner">
         <a href="#top" className="brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={LOGO_SRC} alt="Peak360" />
+          <img src={LOGO_SRC} alt="Peak360" width={1230} height={367} />
         </a>
         <ul className="nav-links">
           <li><a href="#why">Why</a></li>
@@ -221,7 +221,14 @@ function WhatWeTest() {
         </div>
         <div className="test-layout">
           <div className="test-portrait">
-            <span className="portrait-tag">Editorial portrait — member, mid-test</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/landing/sample-report.svg"
+              alt="Sample Peak360 longevity assessment report"
+              className="report-sample"
+              width={600}
+              height={800}
+            />
           </div>
           <div className="test-list">
             {items.map(([t, d, m], i) => (
@@ -241,12 +248,36 @@ function WhatWeTest() {
   );
 }
 
+type ProcessStep = {
+  title: string;
+  desc: string;
+  time: string;
+  recommended?: boolean;
+};
+
 function Process() {
-  const steps: [string, string, string][] = [
-    ['Discovery Call', '30 minutes. Your goals, history, what to test. Complimentary.', 'Free'],
-    ['Baseline Assessment', 'Morning visit. Bloods, Evolt 360 scan, VO₂ max, strength.', '≈ 90 min'],
-    ['Results Deep-Dive', 'Your numbers, your health age, your personalised protocol.', '3–5 days'],
-    ['Quarterly Review', 'Re-test what matters. Adjust protocol. Track trajectory.', 'Ongoing'],
+  const steps: ProcessStep[] = [
+    {
+      title: 'Initial Consultation & Pre Medical Screening',
+      desc: 'Your goals, history, and medical screening to make sure baseline testing is safe and tailored to you.',
+      time: 'Complimentary',
+    },
+    {
+      title: 'Baseline Assessment',
+      desc: 'On-site visit. Bloods, Evolt 360 scan, VO₂ max, and strength — your full longevity baseline.',
+      time: '90 mins – 2 hrs',
+    },
+    {
+      title: 'Results Deep Dive and Action Plan',
+      desc: 'Your numbers, your health age, and a personalised protocol you can act on.',
+      time: '7 days',
+    },
+    {
+      title: 'Quarterly Review',
+      desc: 'Re-test what matters. Adjust protocol. Track trajectory.',
+      time: 'Ongoing',
+      recommended: true,
+    },
   ];
   return (
     <section className="section section-2" id="process">
@@ -258,12 +289,15 @@ function Process() {
           </h2>
         </div>
         <ol className="process-list">
-          {steps.map(([t, d, m], i) => (
-            <li key={t} className="process-step">
+          {steps.map((s, i) => (
+            <li key={s.title} className="process-step">
               <span className="process-num">{String(i + 1).padStart(2, '0')}</span>
-              <h3 className="process-title">{t}</h3>
-              <p className="process-desc">{d}</p>
-              <span className="process-time">{m}</span>
+              <h3 className="process-title">
+                {s.title}
+                {s.recommended && <span className="process-flag">Recommended</span>}
+              </h3>
+              <p className="process-desc">{s.desc}</p>
+              <span className="process-time">{s.time}</span>
             </li>
           ))}
         </ol>
@@ -501,7 +535,7 @@ function FinalCTA() {
           the team, and the protocol to back it up.
         </p>
         <div className="final-ctas">
-          <a href="#schedule" className="btn btn-gold btn-lg">Schedule Your Baseline Assessment</a>
+          <a href="/contact" className="btn btn-gold btn-lg">Schedule Your Baseline Assessment</a>
           <a href="#call" className="btn btn-ghost btn-lg">Book a Discovery Call</a>
         </div>
       </div>
@@ -516,7 +550,7 @@ function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={LOGO_SRC} alt="Peak360" />
+            <img src={LOGO_SRC} alt="Peak360" width={1230} height={367} />
             <p>World-class longevity testing in Geelong. Operated by Strong Bodies Geelong.</p>
           </div>
           <div className="footer-col">
