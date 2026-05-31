@@ -33,7 +33,10 @@ export const metadata: Metadata = {
     description: OG_DESCRIPTION,
     images: [OG_IMAGE.url],
   },
-  icons: { icon: '/landing/peak360-logo.png' },
+  icons: {
+    icon: '/landing/peak360-logo.png',
+    apple: { url: '/landing/apple-touch-icon.png', sizes: '180x180' },
+  },
 };
 
 export default function RootLayout({
