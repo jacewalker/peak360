@@ -1,0 +1,96 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 800" role="img" aria-label="Sample Peak360 longevity assessment report">
+  <defs>
+    <linearGradient id="paper" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#fbf7ec"/>
+      <stop offset="1" stop-color="#f1e9d4"/>
+    </linearGradient>
+  </defs>
+
+  <!-- page -->
+  <rect x="0" y="0" width="600" height="800" rx="6" fill="url(#paper)"/>
+  <rect x="0.5" y="0.5" width="599" height="799" rx="6" fill="none" stroke="#1a365d" stroke-opacity="0.12"/>
+
+  <!-- header -->
+  <text x="48" y="74" font-family="Georgia, serif" font-size="30" font-weight="700" letter-spacing="2" fill="#1a365d">PEAK<tspan fill="#c9a24a">360</tspan></text>
+  <text x="48" y="98" font-family="monospace" font-size="11" letter-spacing="3" fill="#1a365d" fill-opacity="0.55">LONGEVITY ASSESSMENT REPORT</text>
+  <text x="552" y="74" text-anchor="end" font-family="monospace" font-size="11" letter-spacing="2" fill="#1a365d" fill-opacity="0.55">SAMPLE · TIER II</text>
+  <text x="552" y="98" text-anchor="end" font-family="monospace" font-size="11" letter-spacing="2" fill="#1a365d" fill-opacity="0.4">GEELONG, VIC</text>
+  <rect x="48" y="116" width="504" height="2" fill="#c9a24a"/>
+
+  <!-- client + health age -->
+  <text x="48" y="156" font-family="monospace" font-size="11" letter-spacing="2" fill="#1a365d" fill-opacity="0.5">CLIENT</text>
+  <text x="48" y="182" font-family="Georgia, serif" font-size="20" fill="#1a365d">Sample Client</text>
+
+  <g>
+    <text x="48" y="232" font-family="monospace" font-size="11" letter-spacing="2" fill="#1a365d" fill-opacity="0.5">CHRONOLOGICAL</text>
+    <text x="48" y="296" font-family="Georgia, serif" font-size="64" font-weight="700" fill="#1a365d">48</text>
+    <text x="552" y="232" text-anchor="end" font-family="monospace" font-size="11" letter-spacing="2" fill="#c9a24a">BIOLOGICAL AGE</text>
+    <text x="552" y="296" text-anchor="end" font-family="Georgia, serif" font-size="64" font-weight="700" fill="#c9a24a">42</text>
+    <text x="300" y="280" text-anchor="middle" font-family="monospace" font-size="22" fill="#1a365d" fill-opacity="0.45">→</text>
+  </g>
+
+  <rect x="48" y="328" width="504" height="1" fill="#1a365d" fill-opacity="0.12"/>
+
+  <!-- biomarker rows -->
+  <text x="48" y="368" font-family="monospace" font-size="11" letter-spacing="2" fill="#1a365d" fill-opacity="0.5">KEY BIOMARKERS</text>
+
+  <!-- row template: label, value, 5-tier bar with marker -->
+  <!-- VO2 Max (great) -->
+  <text x="48" y="408" font-family="Georgia, serif" font-size="16" fill="#1a365d">VO₂ Max</text>
+  <text x="552" y="408" text-anchor="end" font-family="monospace" font-size="14" fill="#1a365d">46 ml/kg</text>
+  <g transform="translate(48,420)">
+    <rect x="0" y="0" width="98" height="7" fill="#d97557"/>
+    <rect x="101.5" y="0" width="98" height="7" fill="#e0a23c"/>
+    <rect x="203" y="0" width="98" height="7" fill="#e8d06a"/>
+    <rect x="304.5" y="0" width="98" height="7" fill="#9cbf6e"/>
+    <rect x="406" y="0" width="98" height="7" fill="#5b9e5b"/>
+    <circle cx="350" cy="3.5" r="7" fill="#1a365d"/>
+  </g>
+
+  <!-- ApoB (normal) -->
+  <text x="48" y="476" font-family="Georgia, serif" font-size="16" fill="#1a365d">ApoB</text>
+  <text x="552" y="476" text-anchor="end" font-family="monospace" font-size="14" fill="#1a365d">0.92 g/L</text>
+  <g transform="translate(48,488)">
+    <rect x="0" y="0" width="98" height="7" fill="#d97557"/>
+    <rect x="101.5" y="0" width="98" height="7" fill="#e0a23c"/>
+    <rect x="203" y="0" width="98" height="7" fill="#e8d06a"/>
+    <rect x="304.5" y="0" width="98" height="7" fill="#9cbf6e"/>
+    <rect x="406" y="0" width="98" height="7" fill="#5b9e5b"/>
+    <circle cx="250" cy="3.5" r="7" fill="#1a365d"/>
+  </g>
+
+  <!-- hs-CRP (elite) -->
+  <text x="48" y="544" font-family="Georgia, serif" font-size="16" fill="#1a365d">hs-CRP</text>
+  <text x="552" y="544" text-anchor="end" font-family="monospace" font-size="14" fill="#1a365d">0.4 mg/L</text>
+  <g transform="translate(48,556)">
+    <rect x="0" y="0" width="98" height="7" fill="#d97557"/>
+    <rect x="101.5" y="0" width="98" height="7" fill="#e0a23c"/>
+    <rect x="203" y="0" width="98" height="7" fill="#e8d06a"/>
+    <rect x="304.5" y="0" width="98" height="7" fill="#9cbf6e"/>
+    <rect x="406" y="0" width="98" height="7" fill="#5b9e5b"/>
+    <circle cx="455" cy="3.5" r="7" fill="#1a365d"/>
+  </g>
+
+  <!-- Grip Strength (great) -->
+  <text x="48" y="612" font-family="Georgia, serif" font-size="16" fill="#1a365d">Grip Strength</text>
+  <text x="552" y="612" text-anchor="end" font-family="monospace" font-size="14" fill="#1a365d">48 kg</text>
+  <g transform="translate(48,624)">
+    <rect x="0" y="0" width="98" height="7" fill="#d97557"/>
+    <rect x="101.5" y="0" width="98" height="7" fill="#e0a23c"/>
+    <rect x="203" y="0" width="98" height="7" fill="#e8d06a"/>
+    <rect x="304.5" y="0" width="98" height="7" fill="#9cbf6e"/>
+    <rect x="406" y="0" width="98" height="7" fill="#5b9e5b"/>
+    <circle cx="360" cy="3.5" r="7" fill="#1a365d"/>
+  </g>
+
+  <!-- legend / footer -->
+  <rect x="48" y="688" width="504" height="1" fill="#1a365d" fill-opacity="0.12"/>
+  <g font-family="monospace" font-size="9" letter-spacing="1" fill="#1a365d" fill-opacity="0.55">
+    <text x="48" y="716">POOR</text>
+    <text x="150" y="716">CAUTIOUS</text>
+    <text x="270" y="716">NORMAL</text>
+    <text x="378" y="716">GREAT</text>
+    <text x="486" y="716">ELITE</text>
+  </g>
+  <text x="48" y="756" font-family="monospace" font-size="10" letter-spacing="1" fill="#1a365d" fill-opacity="0.4">PEAK360 · STRONG BODIES GEELONG · CONFIDENTIAL</text>
+</svg>

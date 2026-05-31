@@ -351,10 +351,11 @@
       transparent 2px, transparent 8px),
     linear-gradient(180deg, #1a1a1d 0%, #0a0a0c 100%);
   border: 1px solid var(--line-2);
-  overflow: hidden; display: flex; align-items: flex-end; padding: 32px;
+  overflow: hidden; display: flex; align-items: center; justify-content: center;
+  padding: 56px 40px 40px;
 }
 .v2-root .test-portrait::before {
-  content: "VO₂ MAX SESSION · IN PROGRESS";
+  content: "SAMPLE REPORT · TIER II";
   position: absolute; top: 24px; left: 24px;
   font-family: var(--font-mono-v2);
   font-size: 10px; letter-spacing: 0.18em; color: var(--gold);
@@ -366,10 +367,10 @@
   font-family: var(--font-mono-v2);
   font-size: 10px; letter-spacing: 0.18em; color: var(--text-faint);
 }
-.v2-root .portrait-tag {
-  font-family: var(--font-mono-v2);
-  font-size: 10px; letter-spacing: 0.18em; color: var(--text-faint);
-  border-left: 1px solid var(--gold); padding-left: 12px;
+.v2-root .report-sample {
+  width: auto; height: 100%; max-width: 100%;
+  border-radius: 6px;
+  box-shadow: 0 30px 70px -20px rgba(0,0,0,0.85);
 }
 .v2-root .test-list { display: flex; flex-direction: column; }
 .v2-root .test-item {

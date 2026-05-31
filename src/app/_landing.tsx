@@ -221,7 +221,14 @@ function WhatWeTest() {
         </div>
         <div className="test-layout">
           <div className="test-portrait">
-            <span className="portrait-tag">Editorial portrait — member, mid-test</span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src="/landing/sample-report.svg"
+              alt="Sample Peak360 longevity assessment report"
+              className="report-sample"
+              width={600}
+              height={800}
+            />
           </div>
           <div className="test-list">
             {items.map(([t, d, m], i) => (
