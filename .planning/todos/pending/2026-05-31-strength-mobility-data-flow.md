@@ -13,6 +13,7 @@ source: capture
 Captured assessment fields that are entered but don't propagate to the Strength
 Pillar (Section 10), the Section 11 report, or the exported PDF. Plus input
 changes. These are correctness bugs - values are captured but lost downstream.
+Refined against the 2026-05-31 meeting transcript (input-form changes added).
 
 ## Context
 - Section 8 = Strength testing; Section 9 = Mobility; Section 10 = Balance & Power / Strength Pillar; Section 11 = report.
@@ -22,14 +23,22 @@ changes. These are correctness bugs - values are captured but lost downstream.
 - Likely root cause class: fields exist in the section form/types but are missing from REPORT_MARKERS / pillar mapping / PDF marker tables.
 
 ## Acceptance
-### Section 8 (Strength)
+### Section 8 (Strength) - display/data-flow bugs
 - [ ] CMJ: Jump Height (cm) and Modified RSI display in the Section 10 Strength Pillar AND the exported PDF
 - [ ] IMTP: display Left kg, Right kg, and Max Force Asymmetry (not just Max Force) in Section 10 and the exported PDF
 - [ ] SL Jump (single leg): left / right / Modified RSI values display in Section 10 and the exported PDF
 - [ ] Replace the existing inputs for input #5 "SL Balance Test" with the eyes-closed inputs (leave values empty for now)
+- [ ] Eyes-closed SL balance currently shows **nothing at all** in Section 10 (not even "pending") - ensure it surfaces once the inputs exist (called out explicitly in the meeting; the cross-cutting audit must catch this)
+
+### Section 8 (Strength) - input form changes (from meeting transcript)
+- [ ] **CMJ -> single measurement:** change the Section 8 input from separate Left/Right CMJ to a single jump height + single Modified RSI (the test produces one value, not L/R). The Section 10/PDF display work above assumes this single-value model.
+- [ ] **"Single Leg Hop" vs "Single Leg Jump" are two different tests** - they are NOT the same:
+  - Single Leg **Jump** = 1 explosive jump (this is the test we want under "SL Jump")
+  - Single Leg **Hop** = 5 hops, a stability test (separate item)
+  - Rename the Section 8 input accordingly; do NOT display old "hop" data as "jump" data.
 
 ### Section 9 (Mobility)
 - [ ] FABER test: remove "Left Outcome" and "Right Outcome", keep distance-to-table; ensure distance-to-table shows in Section 11 and the exported PDF
 
 ### Cross-cutting
-- [ ] Review to ensure ALL Strength items are showing in the Strength Pillar (audit Section 8 fields -> pillar -> report -> PDF end to end)
+- [ ] Review to ensure ALL Strength items are showing in the Strength Pillar (audit Section 8 fields -> pillar -> report -> PDF end to end), explicitly including eyes-closed SL balance

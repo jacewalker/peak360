@@ -30,7 +30,7 @@ landing page (`src/app/_landing.tsx`, `src/app/layout.tsx`, `src/app/landing.css
   - [ ] 01 Initial Consultation & Pre Medical Screening
   - [ ] 02 Baseline Assessment (90 mins - 2 hrs)
   - [ ] 03 Results Deep Dive and Action Plan (7 days)
-  - [ ] 04 Quarterly Review - add a "Recommended/Optional" label
+  - [ ] 04 Quarterly Review - add a "Recommended" label (decided; was "Available/Optional/Recommended" in discussion)
 - [ ] Add pricing section to the website (from the WhatsApp pricing PDF)
 - [ ] Add 3 testimonials (BLOCKED on Kevin providing them)
 - [ ] Apple "Save to Home Screen" icon currently shows a white "P" on black - replace with the logo (apple-touch-icon)
