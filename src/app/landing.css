@@ -403,6 +403,13 @@
   line-height: 0.9; letter-spacing: -0.02em; font-variant-numeric: tabular-nums;
 }
 .v2-root .process-title { font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin: 0; color: var(--cream); }
+.v2-root .process-flag {
+  display: inline-block; vertical-align: middle; margin-left: 14px;
+  background: var(--gold); color: var(--ink);
+  font-family: var(--font-mono-v2);
+  font-size: 9px; letter-spacing: 0.18em; text-transform: uppercase; font-weight: 500;
+  padding: 5px 10px;
+}
 .v2-root .process-desc { font-size: 15px; color: var(--text-dim); margin: 0; max-width: 460px; line-height: 1.6; }
 .v2-root .process-time {
   font-family: var(--font-mono-v2);
