@@ -3,10 +3,37 @@ import './globals.css';
 import './landing.css';
 import { inter, jetbrainsMono } from '@/lib/fonts';
 
+const SITE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'https://peak360.com.au';
+const OG_TITLE = 'Peak360 — Discover Your Peak';
+const OG_DESCRIPTION =
+  'World-class longevity testing in Geelong. 60+ biomarkers, on-site VO₂ Max, and a 5-tier rating system to reveal your true biological age.';
+const OG_IMAGE = {
+  url: '/landing/peak360-logo.png',
+  width: 1024,
+  height: 1024,
+  alt: 'Peak360',
+};
+
 export const metadata: Metadata = {
-  title: 'Peak360 — Discover Your True Health Age',
-  description:
-    'World-class longevity testing in Geelong. 60+ biomarkers, on-site VO₂ Max, and a 5-tier rating system to reveal your true biological age.',
+  metadataBase: new URL(SITE_URL),
+  title: OG_TITLE,
+  description: OG_DESCRIPTION,
+  openGraph: {
+    type: 'website',
+    url: SITE_URL,
+    siteName: 'Peak360',
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary',
+    title: OG_TITLE,
+    description: OG_DESCRIPTION,
+    images: [OG_IMAGE.url],
+  },
+  icons: { icon: '/landing/peak360-logo.png' },
 };
 
 export default function RootLayout({
