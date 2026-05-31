@@ -64,6 +64,11 @@
 }
 .v2-root .eyebrow-num { color: var(--text-dim); font-weight: 400; }
 .v2-root .eyebrow-line { width: 28px; height: 1px; background: var(--gold); opacity: 0.5; }
+/* Desktop only: enlarge eyebrow text (e.g. hero "Geelong" line) for legibility */
+@media (min-width: 1101px) {
+  .v2-root .eyebrow { font-size: 13px; }
+  .v2-root .eyebrow-line { width: 32px; }
+}
 
 .v2-root .gold-text { color: var(--gold); }
 
