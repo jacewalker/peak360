@@ -1,7 +1,39 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 import Sidebar from '@/components/layout/Sidebar';
 import ImpersonationBanner from '@/components/portal/ImpersonationBanner';
 import { getValidSession } from '@/lib/auth-helpers';
+
+const SITE_URL =
+  process.env.NEXT_PUBLIC_BASE_URL?.replace(/\/$/, '') || 'https://portal.peak360.com.au';
+const TITLE = 'Peak360 Portal';
+const DESCRIPTION = 'Coach and client portal for Peak360 longevity assessments.';
+const OG_IMAGE = {
+  url: '/landing/peak360-logo.png',
+  width: 1230,
+  height: 367,
+  alt: 'Peak360',
+};
+
+export const metadata: Metadata = {
+  metadataBase: new URL(SITE_URL),
+  title: TITLE,
+  description: DESCRIPTION,
+  openGraph: {
+    type: 'website',
+    siteName: 'Peak360',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE],
+  },
+  twitter: {
+    card: 'summary',
+    title: TITLE,
+    description: DESCRIPTION,
+    images: [OG_IMAGE.url],
+  },
+  icons: { icon: '/landing/peak360-logo.png' },
+};
 
 // Server-side session validation. Middleware only checks for cookie presence
 // (optimistic), so an expired or otherwise-invalid cookie would let a request

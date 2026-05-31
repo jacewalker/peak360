@@ -494,7 +494,7 @@ function FinalCTA() {
       <div className="container final-inner">
         <Eyebrow num="08 ·">Begin</Eyebrow>
         <h2 className="final-title">
-          Ready to discover your true <span className="gold-text">Health Age?</span>
+          Ready to discover your <span className="gold-text">Peak?</span>
         </h2>
         <p className="final-sub">
           Your future self will thank you. Discover what your body is truly capable of — with the data,
