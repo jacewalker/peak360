@@ -19,8 +19,23 @@ landing page (`src/app/_landing.tsx`, `src/app/layout.tsx`, `src/app/landing.css
 - OG/metadata + icons live in `src/app/layout.tsx` (recently added; favicon currently `/landing/peak360-logo.png`).
 - Logo assets: `public/landing/peak360-logo.png` (dark bg, 1230x367) and `peak360-logo-light.png`.
 - Contact target email: **info@strongbodies.com.au**.
-- Pricing source: pricing PDF shared in WhatsApp (need the file).
+- Pricing source: "Peak360 Final Cut" deck (received 2026-05-31). Figures captured below.
 - Testimonials are an EXTERNAL dependency - Kevin to source 3.
+
+## Pricing (from the deck - use for the website pricing section)
+**Testing package**
+- **Baseline Package - $1,000** - all 5 pillars tested; 0-100 score benchmarked to age & gender; traffic-light dashboard + drill-down via personal web portal; personalised strategic action plan; exercise prescription; nutrition & supplement advice linked to biomarkers; allied-health referrals for flagged abnormalities.
+- **Retest - $750** (1st retest within 12 months of initial test; save $250 vs baseline).
+- **Retest - $500** (further retests within the same 12 months; save $500 vs baseline; best value).
+- Recommendation: minimum 3 tests per year.
+- **Core biomarker (blood) testing is booked & PAID SEPARATELY by the participant through iMedical** - from $138. Link: imedical.com.au/order/blood-tests/sport-hormone-private-blood-tests (not bundled into the $1,000).
+
+**Coaching & nutrition (optional add-ons, stack with testing)**
+- **Baseline Online - $100/month** - online training app, customised PT program, progressions/regressions every 8 weeks.
+- **Fitness Coaching** - $80 (30 min) / $100 (45 min), delivered by a qualified Strong Bodies coach. All sessions include same-day recovery facilities (Finnish sauna, ice plunges, compression boots) + priority allied-health access.
+- **Nutrition - $300** - customised 8-week nutrition plan tailored to biomarker data; supplements extra through Strong Bodies.
+
+Note: the deck's public-facing scoring tiers read **Attention / Caution / Good / Great / Elite** (internal enum is poor/cautious/normal/great/elite) - keep website/report tier labels consistent with the deck if surfaced publicly.
 
 ## Acceptance
 - [ ] Section 1: increase font size of the smaller text (e.g. "Geelong" eyebrow) on **desktop only**, not mobile
