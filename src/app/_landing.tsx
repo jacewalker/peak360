@@ -1,8 +1,45 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 const LOGO_SRC = '/landing/peak360-logo.png';
+
+// Cloudflare Turnstile. Falls back to Cloudflare's "always passes" test site key
+// when NEXT_PUBLIC_TURNSTILE_SITE_KEY is unset so the widget renders in dev; set a
+// real key in production (paired with TURNSTILE_SECRET_KEY on the server).
+const TURNSTILE_SITE_KEY =
+  process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || '1x00000000000000000000AA';
+
+type TurnstileApi = {
+  render: (el: HTMLElement, opts: Record<string, unknown>) => string;
+  reset: (id: string) => void;
+  remove: (id: string) => void;
+};
+
+function getTurnstile(): TurnstileApi | undefined {
+  return (window as unknown as { turnstile?: TurnstileApi }).turnstile;
+}
+
+// Inject the Turnstile script once and resolve with the global API when ready.
+function loadTurnstile(): Promise<TurnstileApi | undefined> {
+  return new Promise((resolve) => {
+    if (typeof window === 'undefined') return resolve(undefined);
+    const ready = getTurnstile();
+    if (ready) return resolve(ready);
+    const existing = document.getElementById('cf-turnstile-script');
+    if (existing) {
+      existing.addEventListener('load', () => resolve(getTurnstile()), { once: true });
+      return;
+    }
+    const s = document.createElement('script');
+    s.id = 'cf-turnstile-script';
+    s.src = 'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit';
+    s.async = true;
+    s.defer = true;
+    s.onload = () => resolve(getTurnstile());
+    document.head.appendChild(s);
+  });
+}
 
 function Eyebrow({ children, num }: { children: React.ReactNode; num?: string }) {
   return (
@@ -23,6 +60,9 @@ type ContactStatus = 'idle' | 'sending' | 'sent' | 'error';
 function ContactModal() {
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<ContactStatus>('idle');
+  const [token, setToken] = useState('');
+  const widgetRef = useRef<HTMLDivElement>(null);
+  const widgetIdRef = useRef<string | null>(null);
   const [form, setForm] = useState({
     name: '',
     email: '',
@@ -31,6 +71,18 @@ function ContactModal() {
     message: '',
     company: '', // honeypot — must stay empty
   });
+
+  function resetTurnstile() {
+    const turnstile = getTurnstile();
+    if (turnstile && widgetIdRef.current) {
+      try {
+        turnstile.reset(widgetIdRef.current);
+      } catch {
+        /* ignore */
+      }
+    }
+    setToken('');
+  }
 
   useEffect(() => {
     const onOpen = () => {
@@ -54,6 +106,36 @@ function ContactModal() {
     };
   }, [open]);
 
+  // Render the Turnstile widget while the form is visible.
+  useEffect(() => {
+    if (!open || status === 'sent') return;
+    let cancelled = false;
+    loadTurnstile().then((turnstile) => {
+      if (cancelled || !turnstile || !widgetRef.current) return;
+      widgetRef.current.replaceChildren();
+      widgetIdRef.current = turnstile.render(widgetRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        theme: 'dark',
+        callback: (t: string) => setToken(t),
+        'expired-callback': () => setToken(''),
+        'error-callback': () => setToken(''),
+      });
+    });
+    return () => {
+      cancelled = true;
+      const turnstile = getTurnstile();
+      if (turnstile && widgetIdRef.current) {
+        try {
+          turnstile.remove(widgetIdRef.current);
+        } catch {
+          /* ignore */
+        }
+      }
+      widgetIdRef.current = null;
+      setToken('');
+    };
+  }, [open, status]);
+
   if (!open) return null;
 
   const set =
@@ -63,18 +145,20 @@ function ContactModal() {
 
   async function submit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.name.trim() || !form.email.trim()) return;
+    if (!form.name.trim() || !form.email.trim() || !token) return;
     setStatus('sending');
     try {
       const res = await fetch('/api/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, turnstileToken: token }),
       });
       if (!res.ok) throw new Error('request failed');
       setStatus('sent');
     } catch {
       setStatus('error');
+      // Turnstile tokens are single-use — get a fresh one for the retry.
+      resetTurnstile();
     }
   }
 
@@ -168,6 +252,8 @@ function ContactModal() {
               aria-hidden="true"
             />
 
+            <div className="contact-turnstile" ref={widgetRef} />
+
             {status === 'error' && (
               <p className="contact-error">
                 Something went wrong sending your enquiry. Please email info@strongbodies.com.au
@@ -175,7 +261,11 @@ function ContactModal() {
               </p>
             )}
 
-            <button type="submit" className="btn btn-gold btn-lg" disabled={status === 'sending'}>
+            <button
+              type="submit"
+              className="btn btn-gold btn-lg"
+              disabled={status === 'sending' || !token}
+            >
               {status === 'sending' ? 'Sending…' : 'Send Enquiry'}
             </button>
           </form>

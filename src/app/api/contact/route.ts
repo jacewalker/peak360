@@ -29,6 +29,7 @@ export async function POST(request: NextRequest) {
   const phone = typeof body.phone === 'string' ? body.phone.trim() : '';
   const pkg = typeof body.pkg === 'string' ? body.pkg.trim() : '';
   const message = typeof body.message === 'string' ? body.message.trim() : '';
+  const turnstileToken = typeof body.turnstileToken === 'string' ? body.turnstileToken : '';
 
   if (!name || !email) {
     return NextResponse.json({ error: 'Name and email are required' }, { status: 400 });
@@ -39,6 +40,31 @@ export async function POST(request: NextRequest) {
   // Basic length guards against abuse.
   if (name.length > 200 || email.length > 200 || phone.length > 60 || message.length > 4000) {
     return NextResponse.json({ error: 'Field too long' }, { status: 400 });
+  }
+
+  // Cloudflare Turnstile: verify only when a secret is configured. Without it
+  // (local dev / unconfigured) the honeypot above is the sole bot defence.
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY;
+  if (turnstileSecret) {
+    if (!turnstileToken) {
+      return NextResponse.json({ error: 'Captcha required' }, { status: 400 });
+    }
+    const params = new URLSearchParams({ secret: turnstileSecret, response: turnstileToken });
+    const ip = request.headers.get('cf-connecting-ip') ?? request.headers.get('x-forwarded-for');
+    if (ip) params.set('remoteip', ip.split(',')[0].trim());
+    try {
+      const verifyRes = await fetch('https://challenges.cloudflare.com/turnstile/v0/siteverify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: params,
+      });
+      const outcome = (await verifyRes.json()) as { success?: boolean };
+      if (!outcome.success) {
+        return NextResponse.json({ error: 'Captcha verification failed' }, { status: 400 });
+      }
+    } catch {
+      return NextResponse.json({ error: 'Captcha verification unavailable' }, { status: 502 });
+    }
   }
 
   const rows: [string, string][] = [

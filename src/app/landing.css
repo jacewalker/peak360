@@ -708,6 +708,21 @@
 }
 .v2-root .contact-input:focus { outline: none; border-color: var(--gold); }
 .v2-root textarea.contact-input { resize: vertical; min-height: 72px; }
+/* Match the native <select> to the text inputs: strip OS chrome, add a gold caret */
+.v2-root select.contact-input {
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+  padding-right: 40px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23c9a24a' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 14px center;
+  background-size: 12px 8px;
+  color-scheme: dark;
+  cursor: pointer;
+}
+.v2-root select.contact-input option { background: #15141a; color: var(--text); }
+.v2-root .contact-turnstile { margin-top: 4px; min-height: 65px; }
 .v2-root .contact-honeypot {
   position: absolute; left: -9999px; width: 1px; height: 1px;
   opacity: 0; pointer-events: none;
