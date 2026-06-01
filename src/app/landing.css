@@ -35,7 +35,10 @@
   display: block;
 }
 .v2-root * { box-sizing: border-box; }
-.v2-root img { max-width: 100%; display: block; }
+.v2-root img { max-width: 100%; height: auto; display: block; }
+/* Lock logo aspect ratio so Safari/iOS flex never stretches it */
+.v2-root .brand img,
+.v2-root .footer-brand img { object-fit: contain; }
 .v2-root a { color: inherit; text-decoration: none; }
 .v2-root button { font: inherit; cursor: pointer; }
 .v2-root ::selection { background: var(--gold); color: var(--ink); }
@@ -208,10 +211,16 @@
 /* ============ Health-Age Teaser ============ */
 .v2-root .teaser {
   position: relative;
-  background: linear-gradient(180deg, rgba(232,214,168,0.04) 0%, rgba(232,214,168,0.01) 100%);
+  /* Solid, opaque panel so it lifts off the hero grid */
+  background: linear-gradient(180deg, #15141a 0%, #0d0d10 100%);
   border: 1px solid var(--line-2);
+  border-radius: 2px;
   padding: 32px;
   display: flex; flex-direction: column; gap: 24px;
+  box-shadow:
+    0 40px 90px -30px rgba(0, 0, 0, 0.85),
+    0 0 0 1px rgba(201, 162, 74, 0.06),
+    inset 0 1px 0 rgba(232, 214, 168, 0.06);
 }
 .v2-root .teaser-corner { position: absolute; width: 16px; height: 16px; border: 1px solid var(--gold); }
 .v2-root .teaser-corner.tl { top: -1px; left: -1px; border-right: 0; border-bottom: 0; }
@@ -361,6 +370,26 @@
   font-size: 10px; letter-spacing: 0.18em; color: var(--text-faint);
   border-left: 1px solid var(--gold); padding-left: 12px;
 }
+/* Sample report image variant of the portrait frame */
+.v2-root .test-portrait.has-report {
+  background: #0a0a0c;
+  padding: 0;
+  align-items: flex-end;
+}
+.v2-root .test-portrait.has-report::before,
+.v2-root .test-portrait.has-report::after { display: none; }
+.v2-root .test-portrait.has-report img {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  object-fit: contain;
+}
+.v2-root .test-portrait.has-report .portrait-tag {
+  position: relative; z-index: 1;
+  margin: 32px;
+  background: rgba(10, 10, 12, 0.7);
+  backdrop-filter: blur(2px);
+  padding: 6px 12px;
+}
 .v2-root .test-list { display: flex; flex-direction: column; }
 .v2-root .test-item {
   border-top: 1px solid var(--line);
@@ -398,6 +427,10 @@
   font-family: var(--font-mono-v2);
   font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase; color: var(--text-faint);
   border: 1px solid var(--line-2); padding: 6px 12px; white-space: nowrap;
+}
+.v2-root .process-time-rec {
+  background: var(--gold); color: var(--ink);
+  border-color: var(--gold); font-weight: 500;
 }
 
 /* ============ Pricing ============ */
@@ -477,6 +510,34 @@
 }
 .v2-root .ea-title { font-size: 24px; font-weight: 500; letter-spacing: -0.01em; margin: 0 0 4px; color: var(--cream); }
 .v2-root .ea-desc { font-size: 14px; color: var(--text-dim); margin: 0; }
+.v2-root .ea-num { font-variant-numeric: tabular-nums; }
+
+/* 3-up testing tier grid (deck pricing) */
+.v2-root .tier-grid-3 { grid-template-columns: repeat(3, 1fr); }
+
+/* ============ Add-ons ============ */
+.v2-root .addon-head {
+  display: flex; flex-direction: column; gap: 16px;
+  margin: 80px 0 32px;
+}
+.v2-root .addon-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px;
+  background: var(--line); border: 1px solid var(--line);
+}
+.v2-root .addon-card {
+  background: var(--bg); padding: 40px 32px;
+  display: flex; flex-direction: column; gap: 12px;
+  transition: background 300ms;
+}
+.v2-root .addon-card:hover { background: var(--bg-2); }
+.v2-root .addon-name { font-size: 22px; font-weight: 500; letter-spacing: -0.02em; margin: 0; color: var(--cream); }
+.v2-root .addon-price { display: flex; align-items: baseline; gap: 8px; }
+.v2-root .addon-amount { font-size: 28px; font-weight: 500; color: var(--gold); letter-spacing: -0.02em; }
+.v2-root .addon-unit {
+  font-family: var(--font-mono-v2);
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint);
+}
+.v2-root .addon-desc { font-size: 14px; line-height: 1.55; color: var(--text-dim); margin: 0; text-wrap: pretty; }
 
 /* ============ Testimonials ============ */
 .v2-root .testimonial-grid {
@@ -598,10 +659,73 @@
 .v2-root .footer-tag { display: flex; gap: 16px; color: var(--gold); }
 .v2-root .footer-tag .dot { width: 4px; height: 4px; border-radius: 50%; background: var(--gold-deep); align-self: center; }
 
+/* ============ Contact modal ============ */
+.v2-root .contact-overlay {
+  position: fixed; inset: 0; z-index: 300;
+  background: rgba(5, 5, 6, 0.78);
+  backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+  animation: v2fade 200ms ease;
+}
+@keyframes v2fade { from { opacity: 0; } to { opacity: 1; } }
+.v2-root .contact-modal {
+  position: relative;
+  width: 100%; max-width: 560px;
+  max-height: calc(100vh - 48px); overflow-y: auto;
+  background: linear-gradient(180deg, #15141a 0%, #0c0c0f 100%);
+  border: 1px solid var(--line-2);
+  box-shadow: 0 50px 120px -30px rgba(0, 0, 0, 0.9);
+  padding: 40px;
+}
+.v2-root .contact-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 36px; height: 36px;
+  background: transparent; border: 1px solid var(--line-2); color: var(--text-dim);
+  font-size: 22px; line-height: 1; display: flex; align-items: center; justify-content: center;
+  transition: all 200ms;
+}
+.v2-root .contact-close:hover { color: var(--gold); border-color: var(--gold); }
+.v2-root .contact-form, .v2-root .contact-success {
+  display: flex; flex-direction: column; gap: 16px;
+}
+.v2-root .contact-title { font-size: 28px; font-weight: 500; letter-spacing: -0.02em; margin: 4px 0 0; color: var(--cream); }
+.v2-root .contact-sub { font-size: 14px; color: var(--text-dim); margin: 0 0 8px; line-height: 1.55; }
+.v2-root .contact-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.v2-root .contact-field { display: flex; flex-direction: column; gap: 6px; }
+.v2-root .contact-field > span {
+  font-family: var(--font-mono-v2);
+  font-size: 10px; letter-spacing: 0.14em; text-transform: uppercase; color: var(--text-faint);
+}
+.v2-root .contact-input {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid var(--line-2);
+  color: var(--text);
+  font-family: var(--font-sans-v2); font-size: 14px;
+  padding: 12px 14px; border-radius: 0;
+  transition: border-color 200ms;
+}
+.v2-root .contact-input:focus { outline: none; border-color: var(--gold); }
+.v2-root textarea.contact-input { resize: vertical; min-height: 72px; }
+.v2-root .contact-honeypot {
+  position: absolute; left: -9999px; width: 1px; height: 1px;
+  opacity: 0; pointer-events: none;
+}
+.v2-root .contact-error { font-size: 13px; color: #d97557; margin: 0; }
+.v2-root .contact-form .btn, .v2-root .contact-success .btn { align-self: flex-start; margin-top: 8px; }
+.v2-root .contact-form .btn:disabled { opacity: 0.5; cursor: default; }
+
 /* ============ Responsive ============ */
+/* Desktop-only: bump the smaller eyebrow text (e.g. hero "Geelong") */
+@media (min-width: 1101px) {
+  .v2-root .hero .eyebrow { font-size: 13px; }
+}
+
 @media (max-width: 1100px) {
   .v2-root .hero-inner { grid-template-columns: 1fr; gap: 48px; }
   .v2-root .why-grid { grid-template-columns: 1fr; }
+  .v2-root .addon-grid { grid-template-columns: 1fr; }
   .v2-root .test-layout { grid-template-columns: 1fr; gap: 48px; }
   .v2-root .test-portrait { position: static; aspect-ratio: 4/3; }
   .v2-root .tier-grid { grid-template-columns: repeat(2, 1fr); }
@@ -618,6 +742,8 @@
 @media (max-width: 720px) {
   .v2-root .nav-cta .link-mono { display: none; }
   .v2-root .hero { padding-top: 120px; }
+  .v2-root .contact-grid { grid-template-columns: 1fr; }
+  .v2-root .contact-modal { padding: 28px; }
   .v2-root .hero-meta { flex-wrap: wrap; gap: 24px; }
   .v2-root .age-value { font-size: 64px; }
   .v2-root .tier-grid { grid-template-columns: 1fr; }

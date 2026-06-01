@@ -14,6 +14,177 @@ function Eyebrow({ children, num }: { children: React.ReactNode; num?: string })
   );
 }
 
+function openContactForm() {
+  window.dispatchEvent(new CustomEvent('peak360:open-contact'));
+}
+
+type ContactStatus = 'idle' | 'sending' | 'sent' | 'error';
+
+function ContactModal() {
+  const [open, setOpen] = useState(false);
+  const [status, setStatus] = useState<ContactStatus>('idle');
+  const [form, setForm] = useState({
+    name: '',
+    email: '',
+    phone: '',
+    pkg: '',
+    message: '',
+    company: '', // honeypot — must stay empty
+  });
+
+  useEffect(() => {
+    const onOpen = () => {
+      setStatus('idle');
+      setOpen(true);
+    };
+    window.addEventListener('peak360:open-contact', onOpen);
+    return () => window.removeEventListener('peak360:open-contact', onOpen);
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
+    document.body.style.overflow = 'hidden';
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = '';
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  if (!open) return null;
+
+  const set =
+    (k: keyof typeof form) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
+      setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  async function submit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!form.name.trim() || !form.email.trim()) return;
+    setStatus('sending');
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(form),
+      });
+      if (!res.ok) throw new Error('request failed');
+      setStatus('sent');
+    } catch {
+      setStatus('error');
+    }
+  }
+
+  return (
+    <div className="contact-overlay" onMouseDown={() => setOpen(false)}>
+      <div
+        className="contact-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Schedule your baseline assessment"
+        onMouseDown={(e) => e.stopPropagation()}
+      >
+        <button className="contact-close" aria-label="Close" onClick={() => setOpen(false)}>
+          ×
+        </button>
+        {status === 'sent' ? (
+          <div className="contact-success">
+            <Eyebrow>Enquiry Sent</Eyebrow>
+            <h3 className="contact-title">Thank you — we&apos;ll be in touch.</h3>
+            <p className="contact-sub">
+              Your enquiry is on its way to the Peak360 team. We&apos;ll reach out shortly to book your
+              baseline assessment.
+            </p>
+            <button className="btn btn-gold btn-lg" onClick={() => setOpen(false)}>
+              Done
+            </button>
+          </div>
+        ) : (
+          <form className="contact-form" onSubmit={submit}>
+            <Eyebrow num="→">Book Your Baseline</Eyebrow>
+            <h3 className="contact-title">Schedule your baseline assessment</h3>
+            <p className="contact-sub">
+              Leave your details and the Peak360 team will be in touch to book you in.
+            </p>
+
+            <div className="contact-grid">
+              <label className="contact-field">
+                <span>Name *</span>
+                <input className="contact-input" value={form.name} onChange={set('name')} required />
+              </label>
+              <label className="contact-field">
+                <span>Email *</span>
+                <input
+                  type="email"
+                  className="contact-input"
+                  value={form.email}
+                  onChange={set('email')}
+                  required
+                />
+              </label>
+              <label className="contact-field">
+                <span>Phone</span>
+                <input
+                  type="tel"
+                  className="contact-input"
+                  value={form.phone}
+                  onChange={set('phone')}
+                />
+              </label>
+              <label className="contact-field">
+                <span>Interested in</span>
+                <select className="contact-input" value={form.pkg} onChange={set('pkg')}>
+                  <option value="">Not sure yet</option>
+                  <option value="Baseline Package">Baseline Package — $1,000</option>
+                  <option value="Retest">Retest</option>
+                  <option value="Coaching / Nutrition add-on">Coaching / Nutrition add-on</option>
+                </select>
+              </label>
+            </div>
+
+            <label className="contact-field">
+              <span>Message</span>
+              <textarea
+                className="contact-input"
+                rows={3}
+                value={form.message}
+                onChange={set('message')}
+                placeholder="Anything we should know?"
+              />
+            </label>
+
+            {/* Honeypot: hidden from users, catches bots */}
+            <input
+              type="text"
+              name="company"
+              tabIndex={-1}
+              autoComplete="off"
+              value={form.company}
+              onChange={set('company')}
+              className="contact-honeypot"
+              aria-hidden="true"
+            />
+
+            {status === 'error' && (
+              <p className="contact-error">
+                Something went wrong sending your enquiry. Please email info@strongbodies.com.au
+                directly.
+              </p>
+            )}
+
+            <button type="submit" className="btn btn-gold btn-lg" disabled={status === 'sending'}>
+              {status === 'sending' ? 'Sending…' : 'Send Enquiry'}
+            </button>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Nav() {
   const [scrolled, setScrolled] = useState(false);
   useEffect(() => {
@@ -26,7 +197,7 @@ function Nav() {
       <div className="nav-inner">
         <a href="#top" className="brand">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={LOGO_SRC} alt="Peak360" />
+          <img src={LOGO_SRC} alt="Peak360" width={1230} height={367} />
         </a>
         <ul className="nav-links">
           <li><a href="#why">Why</a></li>
@@ -220,8 +391,10 @@ function WhatWeTest() {
           </h2>
         </div>
         <div className="test-layout">
-          <div className="test-portrait">
-            <span className="portrait-tag">Editorial portrait — member, mid-test</span>
+          <div className="test-portrait has-report">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/landing/sample-report.png" alt="Sample Peak360 longevity report" />
+            <span className="portrait-tag">Sample report — illustrative only</span>
           </div>
           <div className="test-list">
             {items.map(([t, d, m], i) => (
@@ -242,11 +415,28 @@ function WhatWeTest() {
 }
 
 function Process() {
-  const steps: [string, string, string][] = [
-    ['Discovery Call', '30 minutes. Your goals, history, what to test. Complimentary.', 'Free'],
-    ['Baseline Assessment', 'Morning visit. Bloods, Evolt 360 scan, VO₂ max, strength.', '≈ 90 min'],
-    ['Results Deep-Dive', 'Your numbers, your health age, your personalised protocol.', '3–5 days'],
-    ['Quarterly Review', 'Re-test what matters. Adjust protocol. Track trajectory.', 'Ongoing'],
+  const steps: { title: string; desc: string; meta: string; recommended?: boolean }[] = [
+    {
+      title: 'Initial Consultation & Pre Medical Screening',
+      desc: 'Your goals, history and a pre-medical screen to confirm you’re ready to test. Complimentary.',
+      meta: 'Free',
+    },
+    {
+      title: 'Baseline Assessment',
+      desc: 'On-site visit. Bloods, Evolt 360 scan, VO₂ max and strength — all five pillars.',
+      meta: '90 mins – 2 hrs',
+    },
+    {
+      title: 'Results Deep Dive and Action Plan',
+      desc: 'Your numbers, your health age and a personalised strategic action plan.',
+      meta: '7 days',
+    },
+    {
+      title: 'Quarterly Review',
+      desc: 'Re-test what matters, adjust the protocol and track your trajectory over time.',
+      meta: 'Recommended',
+      recommended: true,
+    },
   ];
   return (
     <section className="section section-2" id="process">
@@ -258,12 +448,12 @@ function Process() {
           </h2>
         </div>
         <ol className="process-list">
-          {steps.map(([t, d, m], i) => (
-            <li key={t} className="process-step">
+          {steps.map((s, i) => (
+            <li key={s.title} className="process-step">
               <span className="process-num">{String(i + 1).padStart(2, '0')}</span>
-              <h3 className="process-title">{t}</h3>
-              <p className="process-desc">{d}</p>
-              <span className="process-time">{m}</span>
+              <h3 className="process-title">{s.title}</h3>
+              <p className="process-desc">{s.desc}</p>
+              <span className={'process-time' + (s.recommended ? ' process-time-rec' : '')}>{s.meta}</span>
             </li>
           ))}
         </ol>
@@ -282,63 +472,66 @@ type Tier = {
   items: string[];
 };
 
+type Addon = { name: string; price: string; unit?: string; desc: string };
+
 function Pricing() {
   const tiers: Tier[] = [
     {
-      tag: 'Tier I',
-      name: 'Essential',
-      price: '$1,295',
-      items: [
-        '30 Core Blood Biomarkers',
-        'Evolt 360 Body Scan',
-        'VO₂ Max Testing',
-        'Strength & Flexibility',
-        '60-min Results Consultation',
-        'Personalised Action Plan',
-      ],
-    },
-    {
-      tag: 'Tier II',
-      name: 'Complete',
-      price: '$2,995',
+      tag: 'Testing',
+      name: 'Baseline Package',
+      price: '$1,000',
       popular: true,
       items: [
-        '60+ Advanced Biomarkers',
-        'Everything in Tier I',
-        'CT Calcium Score',
-        'Carotid IMT Ultrasound',
-        '90-min Deep-Dive Consult',
+        'All 5 pillars tested',
+        '0–100 score, benchmarked to your age & sex',
+        'Traffic-light dashboard + drill-down via your web portal',
+        'Personalised strategic action plan',
+        'Exercise prescription',
+        'Nutrition & supplement advice linked to your biomarkers',
+        'Allied-health referrals for flagged abnormalities',
       ],
     },
     {
-      tag: 'Tier III',
-      name: 'Elite Annual',
-      price: '$8,995',
-      unit: '/ year',
+      tag: 'Retest',
+      name: '1st Retest',
+      price: '$750',
+      unit: 'within 12 months',
       items: [
-        'Quarterly 60+ Biomarker Testing',
-        'Quarterly Evolt 360 Scans',
-        'Annual VO₂ Max Re-testing',
-        'APOE Genetics',
-        'Biological Age Testing',
-        'Gut Microbiome',
-        'Quarterly Consultations',
+        'Full 5-pillar re-test',
+        'Save $250 vs baseline',
+        'Track your trajectory over time',
       ],
     },
     {
-      tag: 'Tier IV',
-      name: 'Platinum',
-      price: '$19,995',
-      unit: '/ year',
+      tag: 'Retest',
+      name: 'Further Retests',
+      price: '$500',
+      unit: 'same 12 months',
       featured: true,
       items: [
-        'Everything in Tier III',
-        'Monthly Biomarker Monitoring',
-        'Monthly Consultations',
-        'Whole Genome Sequencing',
-        'Galleri Cancer Screening',
-        'Personal Training (2× / week)',
+        'Full 5-pillar re-test',
+        'Save $500 vs baseline — best value',
+        'Recommended: minimum 3 tests per year',
       ],
+    },
+  ];
+  const addons: Addon[] = [
+    {
+      name: 'Baseline Online',
+      price: '$100',
+      unit: '/ month',
+      desc: 'Online training app, a customised PT program, with progressions and regressions every 8 weeks.',
+    },
+    {
+      name: 'Fitness Coaching',
+      price: '$80 / $100',
+      unit: '30 / 45 min',
+      desc: 'Sessions with a qualified Strong Bodies coach. Includes same-day recovery facilities (Finnish sauna, ice plunge, compression boots) and priority allied-health access.',
+    },
+    {
+      name: 'Nutrition',
+      price: '$300',
+      desc: 'A customised 8-week nutrition plan tailored to your biomarker data. Supplements available separately through Strong Bodies.',
     },
   ];
   return (
@@ -348,10 +541,11 @@ function Pricing() {
           <Eyebrow num="05 ·">Investment</Eyebrow>
           <h2 className="section-title">Pricing &amp; Packages</h2>
           <p className="section-sub">
-            33–85% less than equivalent US longevity clinics. No hidden fees, no upsells.
+            All five pillars tested and benchmarked to your age and sex, with a personalised action
+            plan. No hidden fees, no upsells.
           </p>
         </div>
-        <div className="tier-grid">
+        <div className="tier-grid tier-grid-3">
           {tiers.map((t) => (
             <article
               key={t.name}
@@ -361,7 +555,8 @@ function Pricing() {
                 (t.featured ? 'tier-featured ' : '')
               }
             >
-              {t.popular && <div className="tier-flag">Most Popular</div>}
+              {t.popular && <div className="tier-flag">Start Here</div>}
+              {t.featured && <div className="tier-flag">Best Value</div>}
               <div className="tier-tag">{t.tag}</div>
               <h3 className="tier-name">{t.name}</h3>
               <div className="tier-price">
@@ -377,26 +572,53 @@ function Pricing() {
                 ))}
               </ul>
               <a href="#book" className="tier-cta">
-                Begin {t.name} →
+                Book {t.name} →
               </a>
             </article>
           ))}
         </div>
+
         <aside className="early-adopter">
           <div className="ea-mark">
-            <span className="ea-num">20</span>
+            <span className="ea-num">$138</span>
           </div>
           <div>
-            <div className="ea-eyebrow">Limited — First 20 Founders Only</div>
-            <h3 className="ea-title">The Founders&apos; Circle</h3>
+            <div className="ea-eyebrow">Core Blood Biomarkers — Booked Separately</div>
+            <h3 className="ea-title">Bloods via iMedical, from $138</h3>
             <p className="ea-desc">
-              10% off any tier · complimentary 30-min consultation · bespoke longevity guidebook.
+              Core biomarker (blood) testing is booked and paid directly through iMedical — it is not
+              bundled into the Baseline Package.
             </p>
           </div>
-          <a href="#book" className="link-mono" style={{ color: 'var(--gold)' }}>
-            Claim Place →
+          <a
+            href="https://imedical.com.au/order/blood-tests/sport-hormone-private-blood-tests"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="link-mono"
+            style={{ color: 'var(--gold)' }}
+          >
+            Order Bloods →
           </a>
         </aside>
+
+        <div className="addon-head">
+          <Eyebrow>Optional Add-Ons</Eyebrow>
+          <p className="section-sub">
+            Coaching and nutrition that stack with any testing package.
+          </p>
+        </div>
+        <div className="addon-grid">
+          {addons.map((a) => (
+            <article key={a.name} className="addon-card">
+              <h3 className="addon-name">{a.name}</h3>
+              <div className="addon-price">
+                <span className="addon-amount">{a.price}</span>
+                {a.unit && <span className="addon-unit">{a.unit}</span>}
+              </div>
+              <p className="addon-desc">{a.desc}</p>
+            </article>
+          ))}
+        </div>
       </div>
     </section>
   );
@@ -501,8 +723,12 @@ function FinalCTA() {
           the team, and the protocol to back it up.
         </p>
         <div className="final-ctas">
-          <a href="#schedule" className="btn btn-gold btn-lg">Schedule Your Baseline Assessment</a>
-          <a href="#call" className="btn btn-ghost btn-lg">Book a Discovery Call</a>
+          <button type="button" className="btn btn-gold btn-lg" onClick={openContactForm}>
+            Schedule Your Baseline Assessment
+          </button>
+          <button type="button" className="btn btn-ghost btn-lg" onClick={openContactForm}>
+            Book a Discovery Call
+          </button>
         </div>
       </div>
     </section>
@@ -516,7 +742,7 @@ function Footer() {
         <div className="footer-grid">
           <div className="footer-brand">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={LOGO_SRC} alt="Peak360" />
+            <img src={LOGO_SRC} alt="Peak360" width={1230} height={367} />
             <p>World-class longevity testing in Geelong. Operated by Strong Bodies Geelong.</p>
           </div>
           <div className="footer-col">
@@ -578,6 +804,7 @@ export default function LandingPage() {
         <FinalCTA />
       </main>
       <Footer />
+      <ContactModal />
     </div>
   );
 }

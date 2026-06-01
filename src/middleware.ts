@@ -2,7 +2,12 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getSessionCookie } from 'better-auth/cookies';
 import { GATE_COOKIE_NAME, verifyGateToken } from '@/lib/landing-gate';
 
-const PUBLIC_PATHS = new Set(['/login', '/api/health', '/api/landing-gate']);
+const PUBLIC_PATHS = new Set([
+  '/login',
+  '/api/health',
+  '/api/landing-gate',
+  '/api/contact', // public landing-page enquiry form
+]);
 
 const PORTAL_SUBDOMAIN_HOSTNAMES = new Set(
   (process.env.PORTAL_HOSTNAMES ?? 'portal.peak360.com.au').split(',')

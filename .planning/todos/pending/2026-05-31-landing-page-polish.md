@@ -38,17 +38,21 @@ landing page (`src/app/_landing.tsx`, `src/app/layout.tsx`, `src/app/landing.css
 Note: the deck's public-facing scoring tiers read **Attention / Caution / Good / Great / Elite** (internal enum is poor/cautious/normal/great/elite) - keep website/report tier labels consistent with the deck if surfaced publicly.
 
 ## Acceptance
-- [ ] Section 1: increase font size of the smaller text (e.g. "Geelong" eyebrow) on **desktop only**, not mobile
-- [ ] "Live Sample" teaser: make the background solid and pop more
-- [ ] Section 3: add an image of a dummy/sample PDF report
-- [ ] Process page steps reworded:
-  - [ ] 01 Initial Consultation & Pre Medical Screening
-  - [ ] 02 Baseline Assessment (90 mins - 2 hrs)
-  - [ ] 03 Results Deep Dive and Action Plan (7 days)
-  - [ ] 04 Quarterly Review - add a "Recommended" label (decided; was "Available/Optional/Recommended" in discussion)
-- [ ] Add pricing section to the website (from the WhatsApp pricing PDF)
+- [x] Section 1: increase font size of the smaller text (e.g. "Geelong" eyebrow) on **desktop only**, not mobile
+- [x] "Live Sample" teaser: make the background solid and pop more
+- [x] Section 3: add an image of a dummy/sample PDF report
+- [x] Process page steps reworded:
+  - [x] 01 Initial Consultation & Pre Medical Screening
+  - [x] 02 Baseline Assessment (90 mins - 2 hrs)
+  - [x] 03 Results Deep Dive and Action Plan (7 days)
+  - [x] 04 Quarterly Review - add a "Recommended" label (decided; was "Available/Optional/Recommended" in discussion)
+- [x] Add pricing section to the website (from the WhatsApp pricing PDF) — replaced placeholder Tier I-IV with deck pricing (Baseline $1,000 / 1st Retest $750 / Further Retest $500), iMedical bloods note (from $138, separate), and optional add-ons (Baseline Online $100/mo, Fitness Coaching $80/$100, Nutrition $300)
 - [ ] Add 3 testimonials (BLOCKED on Kevin providing them)
-- [ ] Apple "Save to Home Screen" icon currently shows a white "P" on black - replace with the logo (apple-touch-icon)
-- [ ] iMessage share-link preview image set to the black-background logo
-- [ ] Fix logo stretching on iPhone when viewing the landing page (aspect ratio)
-- [ ] "Schedule your baseline assessment" button links to a contact form that emails info@strongbodies.com.au
+- [x] Apple "Save to Home Screen" icon currently shows a white "P" on black - replace with the logo (apple-touch-icon) — generated 180x180 `public/landing/apple-touch-icon.png` (logo on brand-dark), wired via metadata.icons.apple
+- [x] iMessage share-link preview image set to the black-background logo — OG image points to `/landing/peak360-logo.png` (dark-bg logo)
+- [x] Fix logo stretching on iPhone when viewing the landing page (aspect ratio) — global `img { height:auto }` + `object-fit:contain` on logos + explicit intrinsic width/height attrs
+- [x] "Schedule your baseline assessment" button links to a contact form that emails info@strongbodies.com.au — added ContactModal on the landing + `POST /api/contact` (honeypot + validation) routed through SMTP2Go via `sendEmailViaSMTP2Go`
+
+> Done 2026-06-01 via quick task `260601-r25` (commit on branch `chore/pricing-from-deck`).
+> Only the 3 testimonials remain — blocked on Kevin. Contact-form email transport
+> currently uses the SMTP2Go HTTP API (`SMTP2GO_API_KEY`); see SMTP user/password note.
