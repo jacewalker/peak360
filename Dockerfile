@@ -10,6 +10,14 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
+# NEXT_PUBLIC_* vars are inlined into the client bundle at build time, so they
+# must be present in the environment when `next build` runs. DO App Platform
+# passes BUILD_TIME / RUN_AND_BUILD_TIME env vars to Docker builds as build args,
+# but a Dockerfile must declare them as ARG (then promote to ENV) to consume them.
+ARG NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ENV NEXT_PUBLIC_TURNSTILE_SITE_KEY=$NEXT_PUBLIC_TURNSTILE_SITE_KEY
+ARG NEXT_PUBLIC_BASE_URL
+ENV NEXT_PUBLIC_BASE_URL=$NEXT_PUBLIC_BASE_URL
 RUN npm run build
 
 FROM base AS runner
